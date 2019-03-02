@@ -2,7 +2,7 @@
 
 Combining ProVerif and Automated Theorem Provers for Security Protocol Verification
 
-Authors : Di Long Li and Alwen Tiu, at The Australian National University
+Authors : Di Long Li and Alwen Tiu, at The Australian National University, Canberra ACT 2600, Australia
 
 This project is part of our submission to CADE-27
 
@@ -65,15 +65,17 @@ to build and install the software suite to `/usr/local/bin`
 
 #### Notes
 
-- The install files will appear as `/usr/local/bin/pvatp` (main executable) and `/usr/local/bin/pvatp_assets/` (files required by the main executable)
+- The installed files will appear as `/usr/local/bin/pvatp` (main executable) and `/usr/local/bin/pvatp_assets/` (files required by the main executable)
 
-- `pvatp` will only access the copies of ProVerif and Vampire in `/usr/local/bin/pvatp_assets/`, so there is no need to remove prior installation of ProVerif or Vampire in your system
+- `pvatp` only accesses the copies of ProVerif and Vampire in `/usr/local/bin/pvatp_assets/`, so there is no need to remove prior installation of ProVerif or Vampire in your system
+
+- More generally, `pvatp` accesses t he `pvatp_assets/` folder at where it is stored, so you can relocate the files as long as both `pvatp` and `pvatp_assets/` reside in the same directory
 
 ## Usage
 
-`pvatp file.pv`
+`pvatp protocol.pv`
 
-where `file.pv` is the protocol specification in typed pi-calculus used by ProVerif
+where `protocol.pv` is the protocol specification in typed pi-calculus used by ProVerif
 
 ## Index and licenses
 
@@ -90,6 +92,8 @@ where `file.pv` is the protocol specification in typed pi-calculus used by ProVe
 - `proverif2.00/`
 
   - This is a modified copy of ProVerif version 2.00. We intend to submit the modifications to the original authors for integrations later on. We license our modifications using the exact same license (GPL) used by ProVerif 2.00.
+- `examples/`
+  - This contains all the protocol specification and related files used in the benchmark
 
 ## Acknowledgement
 
