@@ -1,0 +1,89 @@
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free I : bitstring.
+
+fun cbc_enc_1(bitstring, bitstring) : bitstring.
+fun cbc_enc_2(bitstring, bitstring, bitstring) : bitstring.
+fun cbc_enc_3(bitstring, bitstring, bitstring, bitstring) : bitstring.
+fun cbc_enc_4(bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring.
+fun cbc_dec_1(bitstring, bitstring) : bitstring.
+fun cbc_dec_2(bitstring, bitstring) : bitstring.
+fun cbc_dec_3(bitstring, bitstring) : bitstring.
+fun cbc_dec_4(bitstring, bitstring) : bitstring.
+fun cbc_2_get_1_prefixes(bitstring) : bitstring.
+fun cbc_3_get_1_prefixes(bitstring) : bitstring.
+fun cbc_3_get_2_prefixes(bitstring) : bitstring.
+fun cbc_4_get_1_prefixes(bitstring) : bitstring.
+fun cbc_4_get_2_prefixes(bitstring) : bitstring.
+fun cbc_4_get_3_prefixes(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, k : bitstring; 
+    cbc_2_get_1_prefixes(cbc_enc_2(x0, x1, k)) = cbc_enc_1(x0, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, k : bitstring; 
+    cbc_3_get_1_prefixes(cbc_enc_3(x0, x1, x2, k)) = cbc_enc_1(x0, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, k : bitstring; 
+    cbc_3_get_2_prefixes(cbc_enc_3(x0, x1, x2, k)) = cbc_enc_2(x0, x1, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring, k : bitstring; 
+    cbc_4_get_1_prefixes(cbc_enc_4(x0, x1, x2, x3, k)) = cbc_enc_1(x0, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring, k : bitstring; 
+    cbc_4_get_2_prefixes(cbc_enc_4(x0, x1, x2, x3, k)) = cbc_enc_2(x0, x1, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring, k : bitstring; 
+    cbc_4_get_3_prefixes(cbc_enc_4(x0, x1, x2, x3, k)) = cbc_enc_3(x0, x1, x2, k).
+equation
+  forall x0 : bitstring, k : bitstring; 
+    cbc_dec_1(cbc_enc_1(x0, k), k) = x0.
+equation
+  forall x0 : bitstring, x1 : bitstring, k : bitstring; 
+    cbc_dec_2(cbc_enc_2(x0, x1, k), k) = (x0, x1).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, k : bitstring; 
+    cbc_dec_3(cbc_enc_3(x0, x1, x2, k), k) = (x0, x1, x2).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring, k : bitstring; 
+    cbc_dec_4(cbc_enc_4(x0, x1, x2, x3, k), k) = (x0, x1, x2, x3).
+
+free objective : bitstring [private].
+
+query 
+  attacker(objective).
+
+let client_B(Kbs : bitstring) =
+  new Nb : bitstring;
+  in(c, enc_A_Kab_T : bitstring);
+  let (=A, Kab : bitstring, T : bitstring) = cbc_dec_3(enc_A_Kab_T, Kbs) in
+  out(c, objective);
+  0.
+
+let server_S(Kas : bitstring, Kbs : bitstring) =
+  new Kab : bitstring;
+  new T : bitstring;
+  in(c, (src : bitstring, dst : bitstring));
+  
+  if src = A && dst = B then (
+    out(c, cbc_enc_4(B, Kab, T, cbc_enc_3(A, Kab, T, Kbs), Kas));
+    0
+  ) else (
+    
+    if src = B && dst = A then
+    out(c, cbc_enc_4(A, Kab, T, cbc_enc_3(B, Kab, T, Kas), Kbs));
+    0
+  ).
+
+process
+  new Kas : bitstring;
+  new Kbs : bitstring;
+  (
+    client_B(Kbs)
+  )
+  | (
+    ! (
+      server_S(Kas, Kbs)
+    )
+  )

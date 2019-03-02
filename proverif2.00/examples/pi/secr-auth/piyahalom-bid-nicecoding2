@@ -1,0 +1,176 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c.
+(* 
+
+A -> B : A, N_A
+B -> S : B, N_B, { A, N_A }_Kbs
+S -> A : N_B, { B, K_ab, N_A }_Kas, { A, K_ab, N_B }_Kbs
+A -> B : { A, K_ab, N_B }_Kbs, { N_B }_Kab
+
+Full agreement is wrong (the adversary can arrange so that A does not see
+{ A, K_ab, N_B }_Kbs).
+
+No agreement on N_A, but agreement on N_B and on the session key K_ab.
+
+Attack of Syverson for evinj:endAparam(x) ==> evinj:beginAparam(x).
+*)
+
+(* Shared key cryptography *)
+
+fun encrypt/2.
+reduc decrypt(encrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not Kas.
+not Kbs.
+
+(* 2 honest host names A and B *)
+
+free A, B.
+
+(* "eqor(x,A,B) = true" means "x = A or x = B" 
+   A more elegant syntax might be added in the future *)
+
+data true/0.
+reduc eqor(x,x,y) = true;
+      eqor(x,y,x) = true.
+
+(* map(x,A,Kas,B,Kbs) is Kas when x = A and Kbs when x = B
+   Otherwise it fails *)
+
+reduc map(x,x,y,z,t) = y;
+      map(x,z,t,x,y) = y.
+
+(* the table host names/keys is sent on private channel keytable
+   The key table consists of pairs 
+   (host, key shared between the host and the server) *)
+private free keytable.
+
+private free secretA, secretB.
+query attacker:secretA;
+      attacker:secretB.
+
+query evinj:endAparam(x) ==> evinj:beginAparam(x).
+query evinj:endBparam(x) ==> evinj:beginBparam(x).
+query evinj:endBkey(x,y,z,t) ==> evinj:beginBkey(x,y,z,t).
+
+(* Role of the initiator with identity xA and key kas shared with S *)
+
+let processInitiator =
+        (* The attacker starts the initiator by choosing identity xA.
+	   The destructor map checks that xA is honest (i.e. is A or B)
+	   and computes its corresponding key.
+
+	   There is room for choice here. One could also write:
+	   in(c, xA);
+	   if eqor(xA, A, B) = true then
+	   in(keytable, (=xA, kas));
+
+	   or if we had an extended syntax similar to the one of CryptoVerif:
+	   in(c, xA);
+	   if (xA = A) || (xB = B) then
+	   let kas = (if xA = A then Kas else Kbs) in
+	*)
+        in(c, xA);
+	let kas = map(xA,A,Kas,B,Kbs) in
+	(* Real start of the role *)
+	new Na; 
+	out(c, (xA, Na)); 
+	in(c, (nb, m1, m2));
+        let (b, kab, na2) = decrypt(m1, kas) in
+	event beginBparam(b);
+	event beginBkey(b, xA, nb, kab);
+        if na2 = Na then 
+        out(c, (m2, encrypt(nb, kab)));
+	(* OK protocol finished 
+	   If the interlocutor is honest, execute the events endAparam
+           and send a test message to check that the key kab is secret *)
+	if eqor(b, A, B) = true then
+	event endAparam(xA);
+	out(c, encrypt(secretA, kab)).
+
+(* Role of the responder with identity xB and key kbs shared with S *)
+                         
+let processResponder =
+        (* The attacker starts the responder by choosing identity xB.
+	   The destructor map checks that xB is honest (i.e. is A or B)
+	   and computes its corresponding key. *)
+        in(c, xB);
+	let kbs = map(xB,A,Kas,B,Kbs) in
+	(* Real start of the role *)
+	in(c, (a, na)); 
+	event beginAparam(a);
+        new Nb; 
+	out(c, (xB, Nb, encrypt((a, na), kbs)));
+	in(c, (m3, m4));
+        let (=a, kab, =Nb) = decrypt(m3, kbs) in
+        if Nb = decrypt(m4, kab) then
+	(* OK protocol finished 
+           If the interlocutor is honest, execute the events endBparam
+           and endBkey, and send a test message to check that the key kab 
+	   is secret *)
+	if eqor(a, A, B) = true then
+	event endBparam(xB);
+	event endBkey(xB, a, Nb, kab);
+	out(c, encrypt(secretB, kab)). 
+
+(* Server *)
+
+let processS = 
+	in(c, (b, nb, m5));
+	in(keytable, (=b, kbs2)); (* get the key of b from the key table *)
+        let (a, na) = decrypt(m5,kbs2) in
+	in(keytable, (=a, kas2)); (* get the key of a from the key table *)
+        new kab;
+	out(c, (nb, encrypt((b, kab, na), kas2), encrypt((a, kab, nb), kbs2))).
+
+(* Key registration *)
+
+let processK =
+        in(c, (h,k));
+        if h = A then (!out(keytable, (A, Kas))) else
+        if h = B then (!out(keytable, (B, Kbs))) else
+        (!out(keytable, (h,k))).
+ 
+
+(* Start process *)
+
+process
+	new Kas; new Kbs;
+	(
+          (* Launch an unbounded number of sessions of the initiator *)
+          (!processInitiator) | 
+          (* Launch an unbounded number of sessions of the responder *)
+          (!processResponder) |
+          (* Launch an unbounded number of sessions of the server *)
+          (!processS) |
+          (* Key registration process *)
+	  (!processK)
+        )

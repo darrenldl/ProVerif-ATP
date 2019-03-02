@@ -1,0 +1,244 @@
+% Refutation found. Thanks to Tanya!
+% SZS status Theorem for SM08-tag-auth
+% SZS output start Proof for SM08-tag-auth
+fof(f172,axiom,(
+  ! [X0] : constr_ZERO = constr_xor(X0,X0)),
+  file('SM08-tag-auth.p',unknown)).
+fof(f173,axiom,(
+  ! [X1] : constr_xor(X1,constr_ZERO) = X1),
+  file('SM08-tag-auth.p',unknown)).
+fof(f174,axiom,(
+  ! [X2,X3] : constr_xor(X2,X3) = constr_xor(X3,X2)),
+  file('SM08-tag-auth.p',unknown)).
+fof(f175,axiom,(
+  ! [X4,X5,X6] : constr_xor(X4,constr_xor(X5,X6)) = constr_xor(constr_xor(X4,X5),X6)),
+  file('SM08-tag-auth.p',unknown)).
+fof(f177,axiom,(
+  ! [X8,X9] : ((pred_attacker(X9) & pred_attacker(X8)) => pred_attacker(constr_xor(X8,X9)))),
+  file('SM08-tag-auth.p',unknown)).
+fof(f197,axiom,(
+  ! [X16,X17] : ((pred_attacker(X17) & pred_attacker(X16)) => pred_attacker(tuple_2(X16,X17)))),
+  file('SM08-tag-auth.p',unknown)).
+fof(f198,axiom,(
+  ! [X18,X19] : (pred_attacker(tuple_2(X18,X19)) => pred_attacker(X18))),
+  file('SM08-tag-auth.p',unknown)).
+fof(f199,axiom,(
+  ! [X20,X21] : (pred_attacker(tuple_2(X20,X21)) => pred_attacker(X21))),
+  file('SM08-tag-auth.p',unknown)).
+fof(f205,axiom,(
+  pred_attacker(tuple_2(name_r1_from_1st,constr_knowledge_from_1st_round_STEP_1))),
+  file('SM08-tag-auth.p',unknown)).
+fof(f206,axiom,(
+  pred_attacker(tuple_2(tuple_2(constr_xor(name_t,name_r2_from_1st),constr_f(constr_xor(name_r1_from_1st,name_r2_from_1st),name_t)),constr_knowledge_from_1st_round_STEP_2))),
+  file('SM08-tag-auth.p',unknown)).
+fof(f208,axiom,(
+  pred_attacker(tuple_2(name_r1,constr_R_STEP_1))),
+  file('SM08-tag-auth.p',unknown)).
+fof(f210,axiom,(
+  ! [X29] : (pred_attacker(tuple_2(X29,constr_f(constr_xor(name_r1,constr_xor(X29,name_t)),name_t))) => pred_attacker(tuple_2(name_objective,constr_R_STEP_3)))),
+  file('SM08-tag-auth.p',unknown)).
+fof(f211,conjecture,(
+  pred_attacker(name_objective)),
+  file('SM08-tag-auth.p',unknown)).
+fof(f212,negated_conjecture,(
+  ~pred_attacker(name_objective)),
+  inference(negated_conjecture,[],[f211])).
+fof(f213,plain,(
+  ! [X0] : constr_xor(X0,constr_ZERO) = X0),
+  inference(rectify,[],[f173])).
+fof(f214,plain,(
+  ! [X0,X1] : constr_xor(X0,X1) = constr_xor(X1,X0)),
+  inference(rectify,[],[f174])).
+fof(f215,plain,(
+  ! [X0,X1,X2] : constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2)),
+  inference(rectify,[],[f175])).
+fof(f217,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_xor(X0,X1)))),
+  inference(rectify,[],[f177])).
+fof(f223,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_2(X0,X1)))),
+  inference(rectify,[],[f197])).
+fof(f224,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
+  inference(rectify,[],[f198])).
+fof(f225,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X1))),
+  inference(rectify,[],[f199])).
+fof(f231,plain,(
+  ! [X0] : (pred_attacker(tuple_2(X0,constr_f(constr_xor(name_r1,constr_xor(X0,name_t)),name_t))) => pred_attacker(tuple_2(name_objective,constr_R_STEP_3)))),
+  inference(rectify,[],[f210])).
+fof(f232,plain,(
+  ~pred_attacker(name_objective)),
+  inference(flattening,[],[f212])).
+fof(f235,plain,(
+  ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f217])).
+fof(f236,plain,(
+  ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f235])).
+fof(f243,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f223])).
+fof(f244,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f243])).
+fof(f245,plain,(
+  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f224])).
+fof(f246,plain,(
+  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f225])).
+fof(f252,plain,(
+  ! [X0] : (pred_attacker(tuple_2(name_objective,constr_R_STEP_3)) | ~pred_attacker(tuple_2(X0,constr_f(constr_xor(name_r1,constr_xor(X0,name_t)),name_t))))),
+  inference(ennf_transformation,[],[f231])).
+fof(f424,plain,(
+  ( ! [X0] : (constr_ZERO = constr_xor(X0,X0)) )),
+  inference(cnf_transformation,[],[f172])).
+fof(f425,plain,(
+  ( ! [X0] : (constr_xor(X0,constr_ZERO) = X0) )),
+  inference(cnf_transformation,[],[f213])).
+fof(f426,plain,(
+  ( ! [X0,X1] : (constr_xor(X0,X1) = constr_xor(X1,X0)) )),
+  inference(cnf_transformation,[],[f214])).
+fof(f427,plain,(
+  ( ! [X2,X0,X1] : (constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2)) )),
+  inference(cnf_transformation,[],[f215])).
+fof(f428,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f236])).
+fof(f448,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f244])).
+fof(f449,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f245])).
+fof(f450,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X1)) )),
+  inference(cnf_transformation,[],[f246])).
+fof(f455,plain,(
+  pred_attacker(tuple_2(name_r1_from_1st,constr_knowledge_from_1st_round_STEP_1))),
+  inference(cnf_transformation,[],[f205])).
+fof(f456,plain,(
+  pred_attacker(tuple_2(tuple_2(constr_xor(name_t,name_r2_from_1st),constr_f(constr_xor(name_r1_from_1st,name_r2_from_1st),name_t)),constr_knowledge_from_1st_round_STEP_2))),
+  inference(cnf_transformation,[],[f206])).
+fof(f458,plain,(
+  pred_attacker(tuple_2(name_r1,constr_R_STEP_1))),
+  inference(cnf_transformation,[],[f208])).
+fof(f460,plain,(
+  ( ! [X0] : (pred_attacker(tuple_2(name_objective,constr_R_STEP_3)) | ~pred_attacker(tuple_2(X0,constr_f(constr_xor(name_r1,constr_xor(X0,name_t)),name_t)))) )),
+  inference(cnf_transformation,[],[f252])).
+fof(f461,plain,(
+  ~pred_attacker(name_objective)),
+  inference(cnf_transformation,[],[f232])).
+fof(f462,plain,(
+  pred_attacker(tuple_2(tuple_2(constr_xor(name_r2_from_1st,name_t),constr_f(constr_xor(name_r1_from_1st,name_r2_from_1st),name_t)),constr_knowledge_from_1st_round_STEP_2))),
+  inference(forward_demodulation,[],[f456,f426])).
+fof(f464,plain,(
+  spl0_0 <=> ! [X0] : ~pred_attacker(tuple_2(X0,constr_f(constr_xor(name_r1,constr_xor(X0,name_t)),name_t)))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
+fof(f465,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_2(X0,constr_f(constr_xor(name_r1,constr_xor(X0,name_t)),name_t)))) ) | ~spl0_0),
+  inference(avatar_component_clause,[],[f464])).
+fof(f470,plain,(
+  spl0_2 <=> pred_attacker(tuple_2(name_objective,constr_R_STEP_3))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
+fof(f471,plain,(
+  pred_attacker(tuple_2(name_objective,constr_R_STEP_3)) | ~spl0_2),
+  inference(avatar_component_clause,[],[f470])).
+fof(f472,plain,(
+  spl0_0 | spl0_2),
+  inference(avatar_split_clause,[],[f460,f470,f464])).
+fof(f473,plain,(
+  pred_attacker(name_r1_from_1st)),
+  inference(resolution,[],[f449,f455])).
+fof(f474,plain,(
+  pred_attacker(name_r1)),
+  inference(resolution,[],[f449,f458])).
+fof(f475,plain,(
+  pred_attacker(name_objective) | ~spl0_2),
+  inference(resolution,[],[f449,f471])).
+fof(f476,plain,(
+  $false | ~spl0_2),
+  inference(subsumption_resolution,[],[f475,f461])).
+fof(f477,plain,(
+  ~spl0_2),
+  inference(avatar_contradiction_clause,[],[f476])).
+fof(f480,plain,(
+  ( ! [X1] : (constr_xor(constr_ZERO,X1) = X1) )),
+  inference(superposition,[],[f426,f425])).
+fof(f501,plain,(
+  ( ! [X0] : (~pred_attacker(constr_f(constr_xor(name_r1,constr_xor(X0,name_t)),name_t)) | ~pred_attacker(X0)) ) | ~spl0_0),
+  inference(resolution,[],[f465,f448])).
+fof(f521,plain,(
+  ( ! [X0,X1] : (constr_xor(constr_ZERO,X1) = constr_xor(X0,constr_xor(X0,X1))) )),
+  inference(superposition,[],[f427,f424])).
+fof(f529,plain,(
+  ( ! [X8,X7,X9] : (constr_xor(X7,constr_xor(X8,X9)) = constr_xor(X9,constr_xor(X7,X8))) )),
+  inference(superposition,[],[f427,f426])).
+fof(f532,plain,(
+  ( ! [X4,X2,X3] : (pred_attacker(constr_xor(X2,constr_xor(X3,X4))) | ~pred_attacker(X4) | ~pred_attacker(constr_xor(X2,X3))) )),
+  inference(superposition,[],[f428,f427])).
+fof(f537,plain,(
+  ( ! [X0,X1] : (constr_xor(X0,constr_xor(X0,X1)) = X1) )),
+  inference(forward_demodulation,[],[f521,f480])).
+fof(f541,plain,(
+  pred_attacker(tuple_2(constr_xor(name_r2_from_1st,name_t),constr_f(constr_xor(name_r1_from_1st,name_r2_from_1st),name_t)))),
+  inference(resolution,[],[f462,f449])).
+fof(f543,plain,(
+  ( ! [X2,X1] : (constr_xor(X1,constr_xor(X2,X1)) = X2) )),
+  inference(superposition,[],[f537,f426])).
+fof(f587,plain,(
+  pred_attacker(constr_f(constr_xor(name_r1_from_1st,name_r2_from_1st),name_t))),
+  inference(resolution,[],[f541,f450])).
+fof(f588,plain,(
+  pred_attacker(constr_xor(name_r2_from_1st,name_t))),
+  inference(resolution,[],[f541,f449])).
+fof(f688,plain,(
+  ( ! [X26] : (~pred_attacker(constr_f(constr_xor(X26,constr_xor(name_t,name_r1)),name_t)) | ~pred_attacker(X26)) ) | ~spl0_0),
+  inference(superposition,[],[f501,f529])).
+fof(f724,plain,(
+  ( ! [X26] : (~pred_attacker(constr_f(constr_xor(X26,constr_xor(name_r1,name_t)),name_t)) | ~pred_attacker(X26)) ) | ~spl0_0),
+  inference(forward_demodulation,[],[f688,f426])).
+fof(f731,plain,(
+  ( ! [X6,X7] : (constr_xor(constr_xor(X6,X7),X7) = X6) )),
+  inference(superposition,[],[f543,f537])).
+fof(f765,plain,(
+  ( ! [X4,X2,X3] : (pred_attacker(constr_xor(X4,constr_xor(X3,X2))) | ~pred_attacker(X3) | ~pred_attacker(constr_xor(X4,X2))) )),
+  inference(superposition,[],[f532,f426])).
+fof(f1152,plain,(
+  ( ! [X8] : (~pred_attacker(constr_xor(X8,constr_xor(name_r1,name_t))) | ~pred_attacker(constr_f(X8,name_t))) ) | ~spl0_0),
+  inference(superposition,[],[f724,f731])).
+fof(f30864,plain,(
+  ( ! [X0] : (~pred_attacker(constr_f(X0,name_t)) | ~pred_attacker(name_r1) | ~pred_attacker(constr_xor(X0,name_t))) ) | ~spl0_0),
+  inference(resolution,[],[f1152,f765])).
+fof(f30904,plain,(
+  ( ! [X0] : (~pred_attacker(constr_f(X0,name_t)) | ~pred_attacker(constr_xor(X0,name_t))) ) | ~spl0_0),
+  inference(subsumption_resolution,[],[f30864,f474])).
+fof(f33827,plain,(
+  ~pred_attacker(constr_xor(constr_xor(name_r1_from_1st,name_r2_from_1st),name_t)) | ~spl0_0),
+  inference(resolution,[],[f30904,f587])).
+fof(f33828,plain,(
+  ~pred_attacker(constr_xor(name_t,constr_xor(name_r1_from_1st,name_r2_from_1st))) | ~spl0_0),
+  inference(forward_demodulation,[],[f33827,f426])).
+fof(f33829,plain,(
+  ~pred_attacker(constr_xor(name_r2_from_1st,constr_xor(name_t,name_r1_from_1st))) | ~spl0_0),
+  inference(forward_demodulation,[],[f33828,f529])).
+fof(f33830,plain,(
+  ~pred_attacker(constr_xor(name_r1_from_1st,constr_xor(name_r2_from_1st,name_t))) | ~spl0_0),
+  inference(forward_demodulation,[],[f33829,f529])).
+fof(f33960,plain,(
+  ~pred_attacker(constr_xor(name_r2_from_1st,name_t)) | ~pred_attacker(name_r1_from_1st) | ~spl0_0),
+  inference(resolution,[],[f33830,f428])).
+fof(f33963,plain,(
+  ~pred_attacker(name_r1_from_1st) | ~spl0_0),
+  inference(subsumption_resolution,[],[f33960,f588])).
+fof(f33964,plain,(
+  $false | ~spl0_0),
+  inference(subsumption_resolution,[],[f33963,f473])).
+fof(f33965,plain,(
+  ~spl0_0),
+  inference(avatar_contradiction_clause,[],[f33964])).
+fof(f33966,plain,(
+  $false),
+  inference(avatar_sat_refutation,[],[f472,f477,f33965])).
+% SZS output end Proof for SM08-tag-auth

@@ -1,0 +1,63 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Handshake protocol.
+   Simplified from Delaune, Jacquemard, LSV-04-1 
+
+Termination problem:
+
+Rule 12: attacker_guess:encrypt(x_42,y_43),v_44 & attacker_guess:y_43,v_45 -> attacker_guess:x_42,decrypt(v_44,v_45)
+
+v_93 <> encrypt(v_90,v_92) & attacker_guess:v_89,v_90 & attacker_guess:v_91,v_92 & attacker_guess:encrypt(v_89,v_91),v_93 -> bad:
+
+v_167 <> encrypt(encrypt(v_163,v_165),v_168) & attacker_guess:v_162,v_163 & attacker_guess:v_164,v_165 & attacker_guess:encrypt(encrypt(v_162,v_164),y_166),v_167 & attacker_guess:y_166,v_168 -> bad:
+
+etc leads to a loop...
+
+Or with another selection function
+
+attacker_guess:x_115,v_116 & attacker_guess:y_117,v_118 & attacker_guess:y_117,v_119 -> attacker_guess:x_115,decrypt(encrypt(v_116,v_118),v_119)
+a
+
+leads to a similar loop...
+
+*)
+
+(* shared-key encryption as equation *)
+
+fun encrypt/2.
+fun decrypt/2.
+equation decrypt(encrypt(x,y),y) = x.
+
+free c.
+private free pw.
+weaksecret pw.
+
+process
+	new pw;
+	new N;
+	out(c, encrypt(N, pw))

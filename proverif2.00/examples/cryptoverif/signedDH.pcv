@@ -1,0 +1,145 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Signed Diffie-Hellman protocol *)
+
+(* Example updated from CV 1.28 by Benjamin Beurdouche *)
+
+param N, N2.
+
+type host [bounded].
+type keyseed [large,fixed].
+type seed [fixed].
+type pkey [bounded].
+type skey [bounded].
+type blocksize [bounded].
+type signature [bounded].
+
+type Z [large,bounded].
+type G [large,bounded].
+type D [fixed].
+
+(* CDH assumption *)
+proba pCDH.
+expand CDH(G, Z, g, exp, mult, pCDH).
+
+(* Hash in the random oracle model *)
+type hashkey [fixed].
+expand ROM_hash(hashkey, G, D, h, hashoracle, qH).
+
+(* Concatenation helper functions *)
+fun concatA(host, host, G, G):blocksize [data].
+fun concatB(host, host, G, G):blocksize [data].
+
+equation forall x:host, y:host, z:G, t:G, x2:host, y2:host, z2:G, t2:G;
+   concatA(x,y,z,t) <> concatB(x2,y2,z2,t2).
+
+(* Signatures *)
+proba Psign.
+proba Psigncoll.
+expand UF_CMA_proba_signature(keyseed, pkey, skey, blocksize, signature, skgen, pkgen, sign, check, Psign, Psigncoll).
+
+table keys(host, pkey).
+
+(* Peers *)
+const A,B:host.
+
+(* Queries and Events *)
+query secret keyA.
+query secret keyB.
+
+event endA(host, host, G, G).
+event beginB(host, host, G, G).
+event endB(host, host, G, G).
+
+query y: G, x: G; inj-event(endA(A, B, x, y)) ==> inj-event(beginB(A, B, x, y)) public_vars keyA, keyB.
+query y: G, x: G; inj-event(endB(A, B, x, y)) ==> inj-event(endA(A, B, x, y)) public_vars keyA, keyB.
+
+(* Channels and Processes *)
+channel start, cstart, cA1, cA2, cA3, cA4, cA5, cA6, cB1, cB2, cB3, cB4, cB5, cH, cHret, cK.
+
+let processA(hk:hashkey, skA:skey) =
+  in(cA1, (hostB: host));
+  new a:Z;
+  let ga = exp(g,a) in
+  out(cA2, (A, hostB, ga));
+  in(cA3, (=A, =hostB, gb:G, s:signature));
+  get keys(=hostB, pkhostB) in
+  if check(concatB(A, hostB, ga, gb), pkhostB, s) then
+  let gab = exp(gb, a) in
+  let kA = h(hk, gab) in
+  event endA(A, hostB, ga, gb);
+  out(cA4, sign(concatA(A, hostB, ga, gb), skA));
+  (* OK *)
+  in(cA5, ());
+  if hostB = B then
+  (let keyA:D = kA)
+  else
+   out(cA6, kA).
+
+let processB(hk:hashkey, skB:skey) =
+  in(cB1, (hostA:host, =B, ga:G));
+  new b:Z;
+  let gb = exp(g,b) in
+  event beginB(hostA, B, ga, gb);
+  out(cB2, (hostA, B, gb, sign(concatB(hostA, B, ga, gb), skB)));
+  in(cB3, s:signature);
+  get keys(=hostA, pkhostA) in
+  if check(concatA(hostA, B, ga, gb), pkhostA, s) then
+  let gab = exp(ga, b) in
+  let kB = h(hk, gab) in
+  event endB(hostA, B, ga, gb);
+  (* OK *)
+  if hostA = A then
+  (let keyB:D = kB)
+  else
+   out(cB4, kB).
+
+let processK(pkA:pkey, pkB:pkey) =
+  !iK <= N2
+  in(cK, (Khost: host, Kkey: pkey));
+  if Khost = B then insert keys(B, pkB) else
+  if Khost = A then insert keys(A, pkA) else
+  insert keys(Khost, Kkey).
+
+process
+	in(start, ());
+	new hk: hashkey;
+	new rkA : keyseed;
+	let skA = skgen(rkA) in
+	let pkA = pkgen(rkA) in
+	new rkB : keyseed;
+	let skB = skgen(rkB) in
+	let pkB = pkgen(rkB) in
+	out(cstart, (pkA, pkB));
+   ((!iA <= N processA(hk,skA)) | (!iA <= N processB(hk,skB)) | hashoracle(hk) | processK(pkA,pkB))
+
+
+(* EXPECTED
+All queries proved.
+0.970s (user 0.970s + system 0.000s), max rss 68352K
+END *)

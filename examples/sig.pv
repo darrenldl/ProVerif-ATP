@@ -1,0 +1,22 @@
+type pkey.
+type skey.
+
+free c : channel.
+
+free s : bitstring [ private ].
+query attacker (s).
+
+let clientA (pkA : pkey, skA : skey, pkB : spkey) =
+  out(c, pkA);
+  in(c, x:bitstring);
+  let y = adec(x, skA) in
+  let (=pkB, k:key) = checksign(y, pkgB) in
+  out(c, senc(s, k)).
+
+let serverB(pkB:spkey, skB:sskey) =
+  in(c, pkX:pkey);
+  new k:key;
+  out(c, aenc(sign((pkB,k), skB), pkX));
+  in(c, x:bitstring);
+  let z = sdec(x,k) in
+  0.

@@ -1,0 +1,72 @@
+free c : channel.
+
+type pkey.
+type skey.
+type G.
+type exponent.
+
+fun sign(G, skey) : bitstring.
+fun pk(skey) : pkey.
+
+reduc
+  forall m : G, k : skey; getmess(sign(m, k)) = m.
+reduc
+  forall m : G, k : skey; checksign(sign(m, k), pk(k)) = m.
+
+fun enc(bitstring, G) : bitstring.
+
+reduc
+  forall x : bitstring, y : G; dec(enc(x, y), y) = x.
+
+const g : G.
+
+fun exp(G, exponent) : G.
+
+equation
+  forall x : exponent, y : exponent; 
+    exp(exp(g, x), y) = exp(exp(g, y), x).
+
+free s : bitstring [private].
+
+query 
+  attacker(s).
+
+let p0(skA : skey, pkA : pkey, pkB : pkey) =
+  in(c, pkX : pkey);
+  new n0 : exponent;
+  out(c, (sign(exp(g, n0), skA), pkA));
+  in(c, m1 : bitstring);
+  let x1 = checksign(m1, pkX) in
+  let k = exp(x1, n0) in
+  
+  if pkX = pkB then
+  out(c, enc(s, k));
+  0.
+
+let p1(skB : skey, pkB : pkey, pkA : pkey) =
+  in(c, (m0 : bitstring, pkY : pkey));
+  let x0 = checksign(m0, pkY) in
+  new n1 : exponent;
+  let k = exp(x0, n1) in
+  out(c, sign(exp(g, n1), skB));
+  in(c, m : bitstring);
+  let s2 = dec(m, k) in
+  0.
+
+process
+  new skA : skey;
+  let pkA = pk(skA) in
+  out(c, pkA);
+  new skB : skey;
+  let pkB = pk(skB) in
+  out(c, pkB);
+  (
+    ! (
+      p0(skA, pkA, pkB)
+    )
+  )
+  | (
+    ! (
+      p1(skB, pkB, pkA)
+    )
+  )

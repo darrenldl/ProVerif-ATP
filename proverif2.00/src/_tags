@@ -1,0 +1,2 @@
+"main.byte" or "main.native" or "reduction_helper.ml" or "reduction_helper.mli": package(str)
+"display_interact.ml" or "display_interact.mli" or "reduction_interact.ml" or "reduction_interact.mli" or "main_interact.native" or "main_interact.ml" or "main_interact.mli" or "menu_helper.ml" or "menu_helper.mli" or "menu_interact.ml" or "menu_interact.mli": package(unix), package(lablgtk2), package(str)

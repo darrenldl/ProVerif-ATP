@@ -1,0 +1,224 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* JFKr *)
+
+param redundantHypElim = true.
+
+(* Exponential and Diffie-Hellman *)
+
+data g/0.
+fun exp/2.
+equation exp(exp(g,y),z) = exp(exp(g,z),y).
+
+(* Signature *)
+
+fun S/2.
+fun Pk/1.
+data true/0.
+fun V/3.
+fun RecoverKey/1.
+fun RecoverText/1.
+equation V(S(k,v), Pk(k),v) = true.
+equation RecoverKey(S(k,v)) = Pk(k). (* For the attacker *)
+equation RecoverText(S(k,v)) = v.    (* For the attacker *)
+
+(* Shared-key encryption *)
+
+fun E/2.
+fun D/2.
+equation D(k,E(k,v)) = v.
+
+(* Keyed hash function *)
+
+fun H/2.
+
+(* Sets *)
+
+data consset/2.
+data emptyset/0.
+pred member/2.
+clauses
+  member:x,consset(x,y);
+  member:x,y -> member:x,consset(z,y).
+
+(* Tags *)
+
+data tagE/0. data tagA/0. data tagV/0.
+
+(* Constructors for JFK's formatted messages
+   Selectors are implicit when using "data" *)
+
+data cons1/2. data cons2/5. data cons3/7. data cons4/2.
+
+(* More constants *)
+
+data constI/0. data constR/0. data saR/0.
+
+(* Free names *)
+
+free c. (* Public channel *)
+free pub, getprinc, getexponential, grpinfoR.
+
+(* Queries: properties to prove *)
+
+(* Correspondence assertions *)
+
+  query ev:princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA) ==>
+ 	  XkAminus = kAminus[!1 = sid] 
+	& XIDA = Pk(XkAminus)
+        & XinitA = init[!1 = sid].
+
+  query ev:princ(kAminus, Pk(kAminus), XinitA, XacceptA, XconnectA, XSIA).
+
+  query let XkAminus = kAminus;
+	ev:princ(XkAminus, Pk(XkAminus), XinitA, XacceptA, XconnectA, XSIA).
+
+not kAminus phase 0.
+not d.
+not f.
+
+(* Initiator 
+   The process processI corresponds to I^A in the figure. *)
+
+let processI =
+  !
+  in(exponent, (dI, xI));
+  !
+  in(init, (IDRp, saI));    (* Init message *)
+  event init(init, IDRp, saI); 
+  new NI; 
+  event mess1(IDA, NI, xI, init, IDRp, saI);
+  event begindosi(NI);
+  out(c, cons1(NI, xI));
+  in(c, cons2(=NI, NR, xR, grpinfoR, tR));
+  event enddosi(NI);
+  let h = exp(xR, dI) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  let sI = S(kAminus, (NI, NR, xI, xR, grpinfoR)) in
+  let eI = E(Ke, (IDA, IDRp, saI, sI)) in
+  let hI = H(Ka, (constI, eI)) in
+  event mess3(IDA, NI, NR, xI, xR, tR, eI, hI, grpinfoR, IDRp, saI, Kv);
+  out(c, cons3(NI, NR, xI, xR, tR, eI, hI));
+  in(c, cons4(eR, hR));
+  if H(Ka, (constR, eR)) = hR then
+  let (IDRl, saR, sR) = D(Ke, eR) in
+  if V(sR, IDRl, (NI, NR, xI, xR)) = true then 
+  event mess4rec(IDA, eR, hR);
+  (
+    (  
+      event connect(connect, IDRl, IDRp, saI, saR, Kv);
+      out(connect, (IDRl, IDRp, saI, saR, Kv));
+      0
+    )
+  ).
+
+(* Responder
+   The process processR corresponds to R^A in the figure. *)
+
+let processR =
+  new KR;
+  !
+  in(exponent, (dR, xR));
+  (
+    (
+    !
+    in(c, cons1(NI, xI));
+    new NR;
+    let tR = H(KR, (xR, NR, NI)) in
+    event begindosr(NI, NR);
+    event mess2(IDA, NI, xI, NR, xR, grpinfoR, tR);
+    out(c, cons2(NI, NR, xR, grpinfoR, tR))
+    )
+  |
+    new f;
+    (
+      out(f, emptyset)
+    |
+      (
+        !
+        in(c, cons3(NI,NR,xI,xR,tR,eI,hI));
+        if tR = H(KR, (xR, NR, NI)) then
+        in(f, cache);
+        (
+          out(f, consset(tR, cache))
+        |
+          if member:tR,cache then 0 else processR4
+        )
+      )
+    )
+  ).
+
+let processR4 = 
+  event enddosr(NI, NR);
+  let h = exp(xI,dR) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  if H(Ka, (constI, eI)) = hI then
+  let (IDIl, IDRp, saI, sI) = D(Ke,eI) in
+  if member:IDIl,SIA then
+  if V(sI, IDIl, (NI, NR, xI, xR, grpinfoR)) = true then
+  (
+    (
+      event accept(accept, IDIl, IDRp, saI, saR, Kv);
+      out(accept, (IDIl, IDRp, saI, saR, Kv));
+      let sR = S(kAminus, (NI, NR, xI, xR)) in
+      let eR = E(Ke, (IDA, saR, sR)) in
+      let hR = H(Ka, (constR, eR)) in
+      event mess4(IDA, IDIl, eR, hR, NI, NR, xI, xR, tR, eI, hI);
+      out(c, cons4(eR, hR));
+      0
+    )
+  ).
+
+
+(* Whole JFK system. *)
+
+(* Standard version of the process *)
+
+process
+
+  new exponent;
+  ( ! new d; let x = exp(g,d) in out(getexponential, x); ! out(exponent, (d,x)) )
+  |
+  new honestC;  (* private channel used to simulate the set C of honest principals *)
+  !
+  new kAminus;
+  let IDA = Pk(kAminus) in
+  new connect; new accept; new init; new channelSIA;
+  out(getprinc, (IDA, init, accept, connect, channelSIA));
+  in(channelSIA, SIA);
+  event princ(kAminus, IDA, init, accept, connect, SIA);
+  (
+    ( ! out(honestC, IDA) )   (* IDA is in C *)
+  | ( ! processI )
+  | ( ! processR )
+  )
+

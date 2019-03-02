@@ -1,0 +1,101 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c.
+(*
+
+WooLam shared-key auth protocol
+Corrections of Gordon, Jeffrey CSFW'01
+
+A -> B : A
+B -> A : N (fresh)
+A -> B : { m3, B, N }_kAS
+B -> S : A,B,{ m3, B, N }_kAS
+S -> B : { m5, A, N }_kBS
+B: verify { m5, A, N }_kBS = the message from S
+
+Correct.
+
+Full agreement is wrong because the adversary can make B see something
+different from { m3, B, N }_kAS (even though the server and A correctly see it)
+so this is no real attack.
+
+*)
+
+(* Tags *)
+
+data m3/0.
+data m5/0.
+
+(* Shared-key cryptography *)
+
+fun encrypt/2.
+reduc decrypt(encrypt(m,k),k) = m.
+
+(* Host name / key *)
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+(* Secrecy assumptions *)
+
+not kBS.
+not kAS.
+
+query evinj:endBparam(x) ==> evinj:beginBparam(x).
+query evinj:endBfull(x,y,z) ==> evinj:beginBfull(x,y,z).
+
+let processA = 
+	in(c, hostB2); (* Choose the B host *)
+	event beginBparam(hostB2);
+        out(c,hostA); in(c,n); 
+	event beginBfull(hostB2, hostA, n);
+        out(c, encrypt((m3, hostB2, n), kAS)).
+
+let processB = 
+	in(c, hostA2);
+	new N;
+	out(c, N);
+	in(c, m);
+        out(c, (hostA2, hostB, m));
+        in(c, m2);
+	let (=m5, =hostA2, =N) = decrypt(m2, kBS) in
+        (* OK *)
+        if hostA2 = hostA then 
+	event endBparam(hostB);
+	event endBfull(hostB, hostA2, N).
+
+let processS = 
+	in(c,(hostA1, hostB1, m2));
+        let (=m3, =hostB1, n) = decrypt(m2, getkey(hostA1)) in
+        out(c, encrypt((m5, hostA1, n), getkey(hostB1))).
+
+process new kAS; new kBS;
+        let hostA = host(kAS) in
+        let hostB = host(kBS) in
+	out(c, hostA); out(c, hostB);
+	((!processA) | (!processB) | (!processS))

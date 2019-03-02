@@ -1,0 +1,104 @@
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free C : bitstring.
+free D : bitstring.
+
+const ZERO : bitstring.
+
+fun add(bitstring, bitstring) : bitstring.
+fun neg(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    add(x, add(y, z)) = add(add(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    add(x, y) = add(y, x).
+equation
+  forall x : bitstring; 
+    add(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    add(x, neg(x)) = ZERO.
+
+free Sa : bitstring [private].
+free Sb : bitstring [private].
+free Sc : bitstring [private].
+free Sd : bitstring [private].
+
+fun aenc(bitstring, bitstring) : bitstring.
+fun adec(bitstring, bitstring) : bitstring.
+fun pkey(bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    adec(aenc(m, pkey(k)), k) = m.
+
+let client_A(skA : bitstring) =
+  new Na : bitstring;
+  in(c, pkNextT : bitstring);
+  in(c, lastT : bitstring);
+  out(c, (A, aenc(add(Na, Sa), pkNextT)));
+  in(c, (=lastT, aenc_add_Na_Sa_Sb_Sc_Sd : bitstring));
+  let add_Na_Sa_Sb_Sc_Sd = adec(aenc_add_Na_Sa_Sb_Sc_Sd, skA) in
+  let add_Sa_Sb_Sc_Sd = add(add_Na_Sa_Sb_Sc_Sd, neg(Na)) in
+  out(c, add_Sa_Sb_Sc_Sd);
+  0.
+
+let client_B(skB : bitstring) =
+  in(c, prevT : bitstring);
+  in(c, pkNextT : bitstring);
+  in(c, (=prevT, aenc_add_Na_Sa : bitstring));
+  let add_Na_Sa = adec(aenc_add_Na_Sa, skB) in
+  out(c, (B, aenc(add(add_Na_Sa, Sb), pkNextT)));
+  0.
+
+let client_C(skC : bitstring) =
+  in(c, prevT : bitstring);
+  in(c, pkNextT : bitstring);
+  in(c, (=prevT, aenc_add_Na_Sa_Sb : bitstring));
+  let add_Na_Sa_Sb = adec(aenc_add_Na_Sa_Sb, skC) in
+  out(c, (C, aenc(add(add_Na_Sa_Sb, Sc), pkNextT)));
+  0.
+
+let client_D(skD : bitstring) =
+  in(c, prevT : bitstring);
+  in(c, pkNextT : bitstring);
+  in(c, (=prevT, aenc_add_Na_Sa_Sb_Sc : bitstring));
+  let add_Na_Sa_Sb_Sc = adec(aenc_add_Na_Sa_Sb_Sc, skD) in
+  out(c, (D, aenc(add(add_Na_Sa_Sb_Sc, Sd), pkNextT)));
+  0.
+
+query 
+  attacker(Sa).
+
+process
+  new skA : bitstring;
+  new skB : bitstring;
+  new skC : bitstring;
+  new skD : bitstring;
+  let pkA = pkey(skA) in
+  let pkB = pkey(skB) in
+  let pkC = pkey(skC) in
+  let pkD = pkey(skD) in
+  out(c, pkA);
+  out(c, pkB);
+  out(c, pkC);
+  out(c, pkD);
+  (
+    client_A(skA)
+  )
+  | (
+    (
+      client_B(skB)
+    )
+    | (
+      (
+        client_C(skC)
+      )
+      | (
+        client_D(skD)
+      )
+    )
+  )

@@ -1,0 +1,101 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c.
+(*
+
+Woo and Lam public-key auth protocol (1992, computer)
+
+A -> B: A
+B -> A: N
+A -> B: { N }_skA
+B -> S: A
+S -> B: A, { A, pkA }_skS
+
+Terminates with attack
+
+Full agreement is true, but there is an attack !
+(Indeed, the messages never mention B.)
+
+If we include B as a pseudo first message sent to A, then full agreement
+is false.
+*)
+
+(* Signatures *)
+
+fun pk/1.
+fun sign/2.
+reduc getmess(sign(m,k)) = m.
+reduc checksign(sign(m,k), pk(k)) = m.
+
+(* Host name / key
+   The server has a table (host name, public key), which we
+   represent by the function getkey. *)
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+(* Secrecy assumptions *)
+
+not skA.
+not skB.
+not skS.
+
+query evinj:endBparam(x) ==> evinj:beginBparam(x).
+query evinj:endBfull(x,y,z) ==> evinj:beginBfull(x,y,z).
+
+let processA = in(c, hostB0); (* Choose B *)
+               event beginBparam(hostB0);
+               out(c, hostA);
+               in(c,n);
+	       event beginBfull(hostB0, hostA, n);
+	       out(c,sign(n,skA)).
+
+let processB = in(c, hostA0);
+               new n; out(c,n);
+               in(c,m); 
+               out(c, hostA0);
+               in(c, (=hostA0, m4)); 
+                  let (=hostA0, pkA2) = checksign(m4, pkS) in
+                     if n = checksign(m,pkA2) then
+			(* OK *)
+                        if hostA0 = hostA then
+			  event endBparam(hostB);
+			  event endBfull(hostB, hostA0, n).
+
+let processS = in(c, hostA);
+	       out(c, (hostA, sign((hostA, getkey(hostA)), skS))).
+
+process new skA; new skB; new skS;
+        let pkA = pk(skA) in
+        let pkB = pk(skB) in
+        let pkS = pk(skS) in
+	let hostA = host(pkA) in
+	let hostB = host(pkB) in
+	out(c, pkA); out(c, pkB); out(c, pkS);
+	out(c, hostA); out(c, hostB);
+	((!processA) | (!processB) | (!processS))

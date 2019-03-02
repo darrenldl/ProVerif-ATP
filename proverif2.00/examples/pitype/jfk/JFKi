@@ -1,0 +1,529 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* JFKi *)
+
+set redundantHypElim = beginOnly.
+
+type G.
+type texponent.
+type skey.
+type pkey.
+type key.
+type tag.
+type nonce.
+type grpinfo.
+type sainfo.
+
+fun G_to_key(G):key [data, typeConverter].
+
+(* Exponential and Diffie-Hellman *)
+
+const g: G.
+fun exp(G, texponent): G.
+equation forall y: texponent, z: texponent; exp(exp(g,y),z) = exp(exp(g,z),y).
+
+(* Signature *)
+
+fun S(skey, bitstring): bitstring.
+fun Pk(skey): pkey.
+fun V(bitstring, pkey, bitstring): bool.
+fun RecoverKey(bitstring): pkey.
+fun RecoverText(bitstring): bitstring.
+equation forall k: skey, v: bitstring; V(S(k,v), Pk(k),v) = true.
+equation forall k: skey, v: bitstring; RecoverKey(S(k,v)) = Pk(k). (* For the attacker *)
+equation forall k: skey, v: bitstring; RecoverText(S(k,v)) = v.    (* For the attacker *)
+
+(* Shared-key encryption *)
+
+fun E(key, bitstring): bitstring.
+fun D(key, bitstring): bitstring.
+equation forall k: key, v: bitstring; D(k,E(k,v)) = v.
+
+(* Keyed hash function *)
+
+fun H(key, bitstring): key.
+
+(* Sets *)
+
+type keyset.
+fun consset(key, keyset): keyset [data].
+const emptyset: keyset [data].
+pred member(key, keyset).
+clauses
+  forall x: key, y: keyset; member(x,consset(x,y));
+  forall x: key, y: keyset, z: key; member(x,y) -> member(x,consset(z,y)).
+
+type idset.
+fun considset(pkey, idset): idset [data].
+const emptyidset: idset [data].
+pred memberid(pkey, idset).
+clauses
+  forall x: pkey, y: idset; memberid(x,considset(x,y));
+  forall x: pkey, y: idset, z: pkey; memberid(x,y) -> memberid(x,considset(z,y)).
+
+(* Tags *)
+
+const tagE, tagA, tagV: tag [data].
+
+(* Constructors for JFK's formatted messages
+   Selectors are implicit when using "data" *)
+
+fun cons1(nonce, G, pkey): bitstring [data]. 
+fun cons2(nonce, nonce, G, grpinfo, pkey, bitstring, key): bitstring [data] . 
+fun cons3(nonce, nonce, G, G, key, bitstring, key): bitstring [data]. 
+fun cons4(bitstring, key): bitstring [data].
+
+(* More constants *)
+
+const constI, constR: tag [data].
+
+(* Free names *)
+
+free c: channel. (* Public channel *)
+free pub, getprinc, getexponential: channel.
+
+(* Queries: properties to prove *)
+
+(* Correspondence assertions *)
+
+event princ(skey, pkey, channel, channel, channel, idset).
+event enddosi(pkey, nonce).
+event enddosr(pkey, nonce, nonce).
+event initev(channel, idset, pkey, sainfo).
+event mess1(pkey, nonce, G, pkey, channel, idset, sainfo).
+event mess1rec(pkey, nonce, G, pkey).
+event mess2(pkey, nonce, nonce, G, G, grpinfo, bitstring, key, pkey).
+event mess2rec(pkey, nonce, nonce, G, grpinfo, pkey, bitstring, key, G, pkey, sainfo).
+event mess3(pkey, nonce, nonce, G, G, key, bitstring, key, grpinfo, pkey, sainfo, key).
+event mess3rec(pkey, nonce, nonce, G, G, key, bitstring, key).
+event mess4(pkey, pkey, bitstring, key, nonce, nonce, G, G, key, bitstring, key).
+event mess4rec(pkey, bitstring, key, channel, pkey, sainfo, sainfo, key).
+event acceptev(channel, pkey, sainfo, sainfo, key).
+event accepthonest(channel, pkey, sainfo, sainfo, key).
+event connectev(channel, pkey, sainfo, sainfo, key).
+event connecthonest(channel, pkey, sainfo, sainfo, key).
+
+ifdef(`EVCACHE',`
+  (* Denial of service for I. *)
+  query XkAminus: skey, XIDA: pkey, XinitA: channel, XacceptA: channel, XconnectA: channel, XSIA: idset, XNI: nonce, XNR: nonce, XxR: G, XgrpinfoR: grpinfo, XIDB: pkey, XsR2: bitstring, XtR: key, XxI: G, XIDRp: pkey, XsaI: sainfo, Xautorid: idset;
+    inj-event(enddosi(XIDA, XNI)) ==> 
+    (inj-event(mess2rec(XIDA, XNI, XNR, XxR, XgrpinfoR, XIDB, XsR2, XtR, XxI, XIDRp, XsaI)) ==>
+    (inj-event(mess1(XIDA, XNI, XxI, XIDRp, XinitA, Xautorid, XsaI)) ==>
+     inj-event(initev(XinitA, Xautorid, XIDRp, XsaI))))
+   && event(princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA)).
+
+  (* First part of Property 1 of Theorem 3.  *)
+  query XkBminus: skey, XIDB: pkey, XinitB: channel, XacceptB: channel, XconnectB: channel, XSIB: idset, XIDA: pkey, XsaI: sainfo, XsaR: sainfo, XKv: key;
+    event(acceptev(XacceptB, XIDA, XsaI, XsaR, XKv)) ==> 
+		  event(princ(XkBminus, XIDB, XinitB, XacceptB, XconnectB, XSIB))
+		&& memberid(XIDA,XSIB).
+
+  (* First part of Property 2 of Theorem 3.  *)
+  query XkAminus: skey, XIDA: pkey, XinitA: channel, XacceptA: channel, XconnectA: channel, XSIA: idset, XIDB: pkey, XIDRp: pkey, XsaI: sainfo, XsaR: sainfo, XKv: key, Xautorid: idset; 
+    inj-event(connectev(XconnectA, XIDB, XsaI, XsaR, XKv)) ==>
+		  inj-event(initev(XinitA, Xautorid, XIDRp, XsaI))
+		&& event(princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA))
+		&& memberid(XIDB, Xautorid).
+
+  (* Second part of Property 2 of Theorem 3. *)
+  query XkAminus: skey, XIDA: pkey, XinitA: channel, XacceptA: channel, XconnectA: channel, XSIA: idset, XkBminus: skey, XIDB: pkey, XinitB: channel, XacceptB: channel, XconnectB: channel, XSIB: idset, XsaI: sainfo, XsaR: sainfo, XKv: key; 
+    inj-event(connecthonest(XconnectA, XIDB, XsaI, XsaR, XKv)) ==> 
+		  inj-event(acceptev(XacceptB, XIDA, XsaI, XsaR, XKv) )
+		&& event(princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA))
+                && event(princ(XkBminus, XIDB, XinitB, XacceptB, XconnectB, XSIB)).
+
+  (* Certificates that the attacker can have *)
+  query x: bitstring; attacker(S(new kAminus, x)).
+
+  define(`HONESTEVENTS')
+')
+
+
+ifdef(`EVNOCACHE',`
+  (* To prove these injective correspondences, you need to replace the caching 
+     of message 3 with a version without caching *)
+
+  (* Denial of service for R. *)
+  query XkAminus: skey, XIDA: pkey, XinitA: channel, XacceptA: channel, XconnectA: channel, XSIA: idset, XNI: nonce, XNR: nonce, XxI: G, XxR: G, XtR: key, XeI: bitstring, XhI: key, XxIp: G, XgR: grpinfo, XS: bitstring, XIDRpp: pkey;
+    inj-event(enddosr(XIDA, XNI, XNR)) ==> 
+     event(princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA))
+   && (inj-event(mess3rec(XIDA, XNI, XNR, XxI, XxR, XtR, XeI, XhI)) ==>
+     (inj-event(mess2(XIDA, XNI, XNR, XxIp, XxR, XgR, XS, XtR, XIDRpp)) ==>
+      inj-event(mess1rec(XIDA, XNI, XxIp, XIDRpp)))).
+
+  (* Second part of Property 1 of Theorem 3. *)
+  query XkAminus: skey, XIDA: pkey, XinitA: channel, XacceptA: channel, XconnectA: channel, XSIA: idset, XkBminus: skey, XIDB: pkey, XinitB: channel, XacceptB: channel, XconnectB: channel, XSIB: idset, XsaI: sainfo, XsaR: sainfo, XKv: key, Xautorid: idset, XIDRp: pkey;
+    inj-event(accepthonest(XacceptB, XIDA, XsaI, XsaR, XKv)) ==> 
+		  inj-event(initev(XinitA, Xautorid, XIDRp, XsaI)) 
+		&& event(princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA))
+                && event(princ(XkBminus, XIDB, XinitB, XacceptB, XconnectB, XSIB)).
+
+  (* Reordering *)
+  query XkAminus: skey, XIDA: pkey, XinitA: channel, XacceptA: channel, XconnectA: channel, XSIA: idset, XkBminus: skey, XIDB: pkey, XinitB: channel, XacceptB: channel, XconnectB: channel, XSIB: idset, XIDRp: pkey, XsaI: sainfo, XsaR: sainfo, XKv: key, XeR: bitstring, XhR: key, XNI: nonce, XNR: nonce, XxI: G, XxR: G, XtR: key, XeI: bitstring, XhI: key, XtRp: key, XgR: grpinfo, XxIp: G, XIDRpp: pkey, Xautorid: idset;
+    inj-event(connecthonest(XconnectA, XIDB, XsaI, XsaR, XKv)) ==> 
+                  event(princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA))
+                && event(princ(XkBminus, XIDB, XinitB, XacceptB, XconnectB, XSIB))
+		&&(inj-event(mess4rec(XIDA, XeR, XhR, XconnectA, XIDB, XsaI, XsaR, XKv)) ==>
+                 (inj-event(mess4(XIDB, XIDA, XeR, XhR, XNI, XNR, XxI, XxR, XtR, XeI, XhI)) ==>
+                 (inj-event(acceptev(XacceptB, XIDA, XsaI, XsaR, XKv)) ==>
+		 (inj-event(mess3rec(XIDB, XNI, XNR, XxI, XxR, XtR, XeI, XhI)) ==>
+		 (inj-event(mess3(XIDA, XNI, XNR, XxI, XxR, XtRp, XeI, XhI, XgR, XIDRp, XsaI, XKv)) ==>
+		 (inj-event(mess2rec(XIDA, XNI, XNR, XxR, XgR, XIDB, S(XkBminus, (XxR, XgR)), XtRp, XxI, XIDRp, XsaI)) ==> 
+		  (inj-event(mess2(XIDB, XNI, XNR, XxIp, XxR, XgR, S(XkBminus, (XxR, XgR)), XtR, XIDRpp)) ==>
+	           inj-event(mess1rec(XIDB, XNI, XxIp, XIDRpp)))
+		&& (inj-event(mess1(XIDA, XNI, XxI, XIDRp, XinitA, Xautorid, XsaI)) ==>
+		   inj-event(initev(XinitA, Xautorid, XIDRp, XsaI))))))))).
+
+  (* Note the presence of XtRp in events mess3 and mess2rec and 
+     XxIp and XIDRpp in events mess2 and mess1rec, instead of 
+     XtR, XxI, and XIDRp respectively *)
+
+  define(`NOCACHE')
+  define(`HONESTEVENTS')
+')
+
+(* Secrecy *)
+
+ifdef(`SECRECY',`
+  (* Secrecy of the exchanged key Kv, from the point of view of I and R *)
+  free secretI, secretR: bitstring [private].
+  query attacker(secretI);
+        attacker(secretR).
+')
+
+(* Identity protection.
+   The predicate member must be removed, because it is not supported
+   for observational equivalence proofs. So we use a version without cache.
+   Only compliant principals are allowed to connect to R. *)
+
+(* What we would really like is:
+   - the hosts IDI0/IDI3 only talk to a subset of honest hosts, and the same subset
+   - the other initiators can talk to any responder (honest or dishonest)
+   - if a responder talks to IDI0 or IDI3, then it also talks to the other one
+   (result independent of whether it is hminus1 or hminus2)
+*)
+
+ifdef(`IDISECR',`
+  (* Identity protection for I against active adversaries *)
+  type harg.
+  fun honest(harg): skey [private].
+  reduc forall x: harg; ishonest(Pk(honest(x))) = true.
+
+  free hIminus0, hIminus3, hminus1, hminus2: harg [private].
+  noninterf hIminus0 among (hminus1, hminus2), 
+            hIminus3 among (hminus1, hminus2).
+  not attacker(hminus1).
+  not attacker(hminus2).
+  not attacker(new hAminus).
+  define(`NOCACHE')
+')
+
+
+(* Secrecy assumptions *)
+
+ifdef(`IDISECR',,
+not attacker(new kAminus) phase 0.
+)
+not attacker(new d).
+ifdef(`NOCACHE',,
+not attacker(new f).
+)
+
+(* Initiator 
+   The process processI corresponds to I^A in the figure. *)
+
+let processI(exponent: channel, init: channel, connect: channel, honestC: channel, IDA: pkey, kAminus: skey) =
+  !
+  in(exponent, (dI: texponent, xI: G));
+  !
+  in(init, (autorid: idset, IDRp: pkey, saI: sainfo));    (* Init message *)
+  event initev(init, autorid, IDRp, saI); 
+  new NI: nonce; 
+  event mess1(IDA, NI, xI, IDRp, init, autorid, saI);
+  out(c, cons1(NI, xI, IDRp));
+  in(c, cons2(=NI, NR, xR, grpinfoR, IDRl, sR2, tR));
+  event mess2rec(IDA, NI, NR, xR, grpinfoR, IDRl, sR2, tR, xI, IDRp, saI);
+ifdef(`IDISECR',
+  (* Only honest hosts are allowed to connect to I in this case *)
+  if ishonest(IDRl) then
+,`
+  if memberid(IDRl,autorid) then
+')
+  event enddosi(IDA, NI);
+  if V(sR2, IDRl, (xR, grpinfoR)) = true then 
+  let h = G_to_key(exp(xR, dI)) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  let sI = S(kAminus, (NI, NR, xI, xR, IDRl, saI)) in
+  let eI = E(Ke, (IDA, saI, sI)) in
+  let hI = H(Ka, (constI, eI)) in
+  event mess3(IDA, NI, NR, xI, xR, tR, eI, hI, grpinfoR, IDRp, saI, Kv);
+  out(c, cons3(NI, NR, xI, xR, tR, eI, hI));
+  in(c, cons4(eR, hR));
+  if H(Ka, (constR, eR)) = hR then
+  let (sR: bitstring, saR: sainfo) = D(Ke, eR) in
+  if V(sR, IDRl, (NI, NR, xI, xR, IDA, saI, saR)) = true then 
+  event mess4rec(IDA, eR, hR, connect, IDRl, saI, saR, Kv);
+ifdef(`HONESTEVENTS',
+  (
+    in(honestC, =IDRl);
+    event connecthonest(connect, IDRl, saI, saR, Kv)
+  )
+  |
+)
+  event connectev(connect, IDRl, saI, saR, Kv);
+  out(connect, (IDRl, saI, saR, Kv));
+ifdef(`SECRECY',
+  in(honestC, =IDRl);
+  out(c, E(Kv, secretI));
+)
+  0.
+
+(* Responder
+   The process processR corresponds to R^A in the figure. *)
+
+free grpinfoR: grpinfo.
+const saR: sainfo [data].
+
+let processR4(accept: channel, honestC: channel, IDA: pkey, kAminus: skey, NI: nonce, NR: nonce, xI: G, xR: G, dR: texponent, tR: key, eI: bitstring, hI: key, SIA: idset) =
+  event enddosr(IDA, NI, NR);
+  let h = G_to_key(exp(xI,dR)) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  if H(Ka, (constI, eI)) = hI then
+  let (IDIl: pkey, saI: sainfo, sI: bitstring) = D(Ke,eI) in
+ifdef(`IDISECR',
+  if ishonest(IDIl) then
+,`
+  if memberid(IDIl,SIA) then
+')
+  if V(sI, IDIl, (NI, NR, xI, xR, IDA, grpinfoR)) = true then
+ifdef(`HONESTEVENTS',
+  (
+    in(honestC, =IDIl);
+    event accepthonest(accept, IDIl, saI, saR, Kv)
+  )
+  |
+)
+  event acceptev(accept, IDIl, saI, saR, Kv);
+  out(accept, (IDIl, saI, saR, Kv));
+  (
+    (
+      let sR = S(kAminus, (NI, NR, xI, xR, IDIl, saI, saR)) in
+      let eR = E(Ke, (sR, saR)) in
+      let hR = H(Ka, (constR, eR)) in
+      event mess4(IDA, IDIl, eR, hR, NI, NR, xI, xR, tR, eI, hI);
+      out(c, cons4(eR, hR));
+ifdef(`SECRECY',
+      in(honestC, =IDIl);
+      out(c, E(Kv, secretR));
+)
+      0
+    )
+  ).
+
+
+ifdef(`NOCACHE',`
+
+let processR(exponent: channel, accept: channel, honestC: channel, IDA: pkey, kAminus: skey, SIA: idset) =
+  new KR: key;
+  !
+  in(exponent, (dR: texponent, xR: G));
+  !
+  in(c, cons1(NI, xI, IDRp));
+  event mess1rec(IDA, NI, xI, IDRp);
+  new NR: nonce;
+  new tR: key;
+  event mess2(IDA, NI, NR, xI, xR, grpinfoR, S(kAminus, (xR, grpinfoR)), tR, IDRp);
+  out(c, cons2(NI, NR, xR, grpinfoR, IDA, S(kAminus, (xR, grpinfoR)), tR));
+  new l: channel;
+  (
+    (
+    !
+    in(c, cons3(=NI,=NR,xI,=xR,=tR,eI,hI));
+    out(l, (xI,eI,hI))
+    )
+  |
+    (
+    in(l, (xI: G,eI: bitstring,hI: key));
+    event mess3rec(IDA, NI, NR, xI, xR, tR, eI, hI);
+    processR4(accept, honestC, IDA, kAminus, NI, NR, xI, xR, dR, tR, eI, hI, SIA)
+    )
+  ).
+
+',`
+
+let processR(exponent: channel, accept: channel, honestC: channel, IDA: pkey, kAminus: skey, SIA: idset) =
+  new KR: key;
+  (
+    (
+    !
+    in(exponent, (dR: texponent, xR: G));
+    !
+    in(c, cons1(NI, xI, IDRp));
+    new NR: nonce;
+    let tR = H(KR, (xR, NR, NI)) in
+    event mess2(IDA, NI, NR, xI, xR, grpinfoR, S(kAminus, (xR, grpinfoR)), tR, IDRp);
+    out(c, cons2(NI, NR, xR, grpinfoR, IDA, S(kAminus, (xR, grpinfoR)), tR))
+    )
+  |
+    new f: channel;
+    (
+      out(f, emptyset)
+    |
+      (
+        !
+        in(c, cons3(NI,NR,xI,xR,tR,eI,hI));
+        event mess3rec(IDA, NI, NR, xI, xR, tR, eI, hI);
+        if tR = H(KR, (xR, NR, NI)) then
+        in(f, cache: keyset);
+        (
+          out(f, consset(tR, cache))
+        |
+          if member(tR,cache) then 0 else 
+          new l: channel;
+          (
+	    (
+            !
+            in(exponent, (dR: texponent, =xR));
+            out(l, dR)
+            )
+          |
+            (
+            in(l, dR: texponent);
+            processR4(accept, honestC, IDA, kAminus, NI, NR, xI, xR, dR, tR, eI, hI, SIA)
+            )
+          )
+        )
+      )
+    )
+  ).
+
+')
+
+
+
+(* Whole JFK system. *)
+
+ifdef(`IDISECR',
+(* Version for identity protection with active adversaries *)
+
+process
+  new exponent: channel;
+  ( ! new d: texponent; let x = exp(g,d) in out(getexponential, x); ! out(exponent, (d,x)) )
+  |
+  new honestC: channel;
+  let kminus1 = honest(hminus1) in
+  let ID1 = Pk(kminus1) in
+  let kminus2 = honest(hminus2) in
+  let ID2 = Pk(kminus2) in
+  out(pub, ID1);
+  out(pub, ID2);
+  (
+    (
+      (* Create principal playing role I, with secret key kIminus0 *)
+      let kIminus0 = honest(hIminus0) in
+      let IDI0 = Pk(kIminus0) in
+      new connect0: channel; new init0: channel;
+      out(pub, init0);
+      (
+        (! in(connect0, x: bitstring))
+      | processI(exponent, init0, connect0, honestC, IDI0, kIminus0)
+      )
+    )
+  |
+    (
+      (* Create principal playing role I, with secret key kIminus3 *)
+      let kIminus3 = honest(hIminus3) in
+      let IDI3 = Pk(kIminus3) in
+      new connect3: channel; new init3: channel;
+      out(pub, init3);
+      (
+        (! in(connect3, x: bitstring))
+      | processI(exponent, init3, connect3, honestC, IDI3, kIminus3)
+      )
+    )
+  |
+    (
+      !
+      new hAminus: harg;
+      let kAminus = honest(hAminus) in
+      let IDA = Pk(kAminus) in
+      new connect: channel; new accept: channel; new init: channel; new channelSIA: channel;
+      out(getprinc, (IDA, init, channelSIA));
+      in(channelSIA, SIA: idset);
+      (
+        (! in(accept, x: bitstring))
+      | (! in(connect, x: bitstring))
+      | processI(exponent, init, connect, honestC, IDA, kAminus)
+      | processR(exponent, accept, honestC, IDA, kAminus, SIA) 
+      )
+    )
+  )
+
+,
+(* Standard version of the process *)
+
+process
+
+  new exponent: channel;
+  ( ! new d: texponent; let x = exp(g,d) in out(getexponential, x); ! out(exponent, (d,x)) )
+  |
+  new honestC: channel;  (* private channel used to simulate the set C of honest principals *)
+  !
+  new kAminus: skey;
+  let IDA = Pk(kAminus) in
+  new connect: channel; new accept: channel; new init: channel; new channelSIA: channel;
+ifdef(`SECRECY',
+  (* Do not give accept and connect to the adversary when proving secrecy of Kv:
+     These messages contain Kv! Instead, input on these channels here. *)
+  out(getprinc, (IDA, init,  channelSIA));
+  in(channelSIA, SIA: idset);
+  event princ(kAminus, IDA, init, accept, connect, SIA);
+  (
+    ( phase 1; out(pub, kAminus) )
+  | (! in(accept, x: bitstring))
+  | (! in(connect, x: bitstring))
+  | (! out(honestC, IDA) )   (* IDA is in C *)
+  | processI(exponent, init, connect, honestC, IDA, kAminus)
+  | processR(exponent, accept, honestC, IDA, kAminus, SIA)
+  )
+,
+  out(getprinc, (IDA, init, accept, connect, channelSIA));
+  in(channelSIA, SIA: idset);
+  event princ(kAminus, IDA, init, accept, connect, SIA);
+  (
+    (! out(honestC, IDA) )   (* IDA is in C *)
+  | processI(exponent, init, connect, honestC, IDA, kAminus)
+  | processR(exponent, accept, honestC, IDA, kAminus, SIA)
+  )
+)
+
+)

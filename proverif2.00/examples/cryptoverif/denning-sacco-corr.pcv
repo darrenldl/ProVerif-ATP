@@ -1,0 +1,218 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Denning-Sacco key distribution protocol. (corrected version) *)
+
+(*
+Secrecy of keyA is wrong here, because the adversary can register the
+public signature key of A with another identity C. Then
+A sends (A, pkA, certA, B, pkB, certB, { {k}skA }pkB)
+the adversary sends to B (C, pkA, certC, B, pkB, certB, { {k}skA}pkB)
+which is ok, because pkA is also the public key of C, so
+B publishes k since he thinks it is a key with C.
+
+query k:shkey, x:bitstring;
+	event fullB(A,k,x) ==> fullA(B,k,x).
+is wrong due to the standard attack against Denning-Sacco.
+
+query k:shkey, k':shkey, x:bitstring;
+	event fullB(A,k,x) && fullA(B,k',x) ==> k = k'.
+is true.
+*)
+
+(* In order to determine the proof, use interactive mode:
+   set interactiveMode = true.
+The proof is as follows: *)
+
+proof {
+  success; (* for fullB(A,k,x) && fullA(B,k',x) ==> k = k'. *)
+  crypto ind_cca2(enc) rkB;
+  crypto uf_cma(sign) rkS;
+  crypto uf_cma(sign) rkA;
+  success;
+  auto
+}
+
+(*
+
+Authentication in one direction only.
+There is no injectivity (replay attack possible).
+The certificates are not authenticated because our definition of
+signatures allows the adversary to forge a second signature for
+a message that has been signed.
+
+*)
+
+param N.
+param N2.
+param N3.
+param N4.
+
+type nonce [large,fixed].
+type host [bounded].
+type pkey [bounded].
+type skey [bounded].
+type keyseed [large,fixed].
+type spkey [bounded].
+type sskey [bounded].
+type skeyseed [large,fixed].
+type signature [bounded].
+type blocksize [fixed].
+type blocksizebot [bounded].
+type sblocksize [bounded].
+type shkey [fixed]. (* distributed key *)
+
+fun concat1(shkey, host, host, signature):blocksize [data].
+fun concat2(shkey, host, host):sblocksize [data].
+fun concat3(host, pkey):sblocksize [data].
+fun concat4(host, spkey):sblocksize [data].
+
+equation forall y:host,z:pkey,y2:shkey,z2:host,t2:host;
+        concat3(y,z) <> concat2(y2,z2,t2).
+equation forall y:host,z:pkey,y2:host,z2:spkey;
+	concat3(y,z) <> concat4(y2,z2).
+equation forall y:host,z:spkey,y2:shkey,z2:host,t2:host;
+        concat4(y,z) <> concat2(y2,z2,t2).
+
+(* Public-key encryption (CCA2) *)
+
+proba Penc.
+proba Penccoll.
+
+expand IND_CCA2_public_key_enc(keyseed, pkey, skey, blocksize, bitstring, skgen, pkgen, enc, dec, injbot, Z, Penc, Penccoll).
+
+const Zblocksize: blocksize.
+equation forall x: blocksize; Z(x) = Zblocksize.
+
+(* Signatures *)
+
+proba Psign.
+proba Psigncoll.
+
+expand UF_CMA_proba_signature(skeyseed, spkey, sskey, sblocksize, signature, sskgen, spkgen, sign, check, Psign, Psigncoll).
+
+(* Tables *)
+
+table enc_key_tbl(host, pkey).
+table sign_key_tbl(host, spkey).
+
+(* Queries *)
+
+channel c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12,
+	start, finish, cAK, cBK.
+
+const A : host.
+const B : host.
+fun acceptA(host):bitstring.
+fun acceptB(host):bitstring.
+
+event fullA(host, shkey, bitstring).
+event fullB(host, shkey, bitstring).
+
+query secret keyA.
+query x: bitstring, k: shkey;
+  inj-event(fullB(A, k, x)) ==> inj-event(fullA(B, k, x)) public_vars keyA. (* WRONG: replay attack *)
+query x: bitstring, k: shkey;
+  event(fullB(A, k, x)) ==> event(fullA(B, k, x)) public_vars keyA.
+query k': shkey, x: bitstring, k: shkey;
+  event(fullB(A, k, x)) && event(fullA(B, k', x)) ==> (k = k') public_vars keyA.
+
+let processA(pkA: spkey, skA: sskey, pkS: spkey) =
+	in(c1, (=A, =pkA, cert1:signature, hostX: host, pkX:pkey, cert2:signature));
+	if check(concat4(A, pkA), pkS, cert1) then
+	if check(concat3(hostX, pkX), pkS, cert2) then
+	new k:shkey;
+	let m1enc = enc(concat1(k, A, hostX, sign(concat2(k, A, hostX), skA)), pkX) in
+	let m1 = (A, pkA, cert1, hostX, pkX, cert2, m1enc) in
+	(* Last message and OK *)
+	event fullA(hostX, k, (A, pkA, hostX, pkX, m1enc));
+	if hostX = B then
+		(let keyA:shkey = k in out(c2, (m1, acceptA(hostX))))
+	else
+		(out(c2, (m1, acceptA(hostX))); in(cAK, ()); out(cAK, k)).
+
+let processB(pkB: pkey, skB: skey, pkS: spkey) =
+	in(c3, (hostY:host, pkY:spkey, cert1:signature, =B, =pkB, cert2:signature, m:bitstring));
+	if check(concat4(hostY, pkY), pkS, cert1) then
+	if check(concat3(B, pkB), pkS, cert2) then
+        let injbot(concat1(k, =hostY, =B, s)) = dec(m,skB) in
+	if check(concat2(k, hostY, B), pkY, s) then
+	(* OK *)
+	event fullB(hostY, k, (hostY, pkY, B, pkB, m));
+        if hostY = A then
+		(out(c9, acceptB(hostY)))
+	else
+		(out(c9, acceptB(hostY)); in(cBK, ()); out(cBK, k)).
+
+let processK(pkB: pkey) =
+	in(c4, (Khost: host, Kkey: pkey));
+	if Khost = B then
+	   insert enc_key_tbl(B, pkB)
+	else
+	   insert enc_key_tbl(Khost, Kkey).
+
+let processS(skS: sskey) =
+	in(c5, (h1: host, h2: host));
+	get enc_key_tbl(=h2, kh2) in
+	out(c6, (h2, kh2, sign(concat3(h2, kh2), skS))).
+
+let processSK(pkA: spkey) =
+	in(c10, (SKhost: host, SKkey: spkey));
+	if SKhost = A then
+	   insert sign_key_tbl(A, pkA)
+	else
+	   insert sign_key_tbl(SKhost, SKkey).
+
+let processSS(skS: sskey) =
+	in(c11, (h1: host, h2: host));
+	get sign_key_tbl(=h2, kh2) in
+	out(c12, (h2, kh2, sign(concat4(h2, kh2), skS))).
+
+process
+	in(start, ());
+	new rkA: skeyseed;
+	let pkA = spkgen(rkA) in
+	let skA = sskgen(rkA) in
+	new rkB: keyseed;
+	let pkB = pkgen(rkB) in
+	let skB = skgen(rkB) in
+	new rkS: skeyseed;
+	let pkS = spkgen(rkS) in
+	let skS = sskgen(rkS) in
+	out(c7, (pkA, pkB, pkS));
+	((! i <= N processA(pkA, skA, pkS)) |
+	 (! i <= N processB(pkB, skB, pkS)) |
+	 (! i <= N processS(skS)) |
+	 (! i <= N processSS(skS)) |
+	 (! i <= N2 processK(pkB)) |
+	 (! i <= N2 processSK(pkA)))
+
+
+(* EXPECTED
+RESULT Could not prove inj-event(fullB(A, k, x)) ==> inj-event(fullA(B, k, x)) with public variables keyA.
+1.240s (user 1.240s + system 0.000s), max rss 60416K
+END *)

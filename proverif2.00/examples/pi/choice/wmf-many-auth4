@@ -1,0 +1,143 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Wide Mouth Frog protocol.
+   Example taken from Abadi, Gordon, A Calculus for Cryptographic
+   Protocols. The Spi Calculus. SRC research report 149.
+   Pages 20--
+
+   Repaired version (with 2 handshakes)
+
+   The finally desired equivalence is probably too complex to be 
+   proved using choice on terms. Here, we aim at proving automatically
+   a lemma that we could then use in a partially manual proof.
+*)
+
+data star/0.
+data S/0.
+
+(* Shared-key encryption *)
+
+fun encrypt/2.
+reduc decrypt(encrypt(x,y),y) = x.
+
+(* Keys *)
+
+private fun Ksi/1.
+private fun Kis/1.
+reduc gethost(Ksi(x)) = x;
+      gethost(Kis(x)) = x.
+
+fun host/1.
+
+free c,e.
+
+let processA = 
+	new p;
+	(
+	  (
+	    out(c, i);
+	    in(c, xNonce);
+	    new K;
+	    out(c, (i, encrypt((i,i,j,K,xNonce), Kis(i))));
+	    out(c, (i, encrypt(choice[M,p], K)))
+	  )
+	|
+	  (
+             in(p,x);
+             out(e, (i,j,M))
+	  )
+	).
+
+let processS =
+	in(c, xA);
+	new Ns;
+	out(c, Ns);
+	in(c, (=xA, xCipher));
+	let (=xA, =xA, xB, xKey, =Ns) = decrypt(xCipher, Kis(xA)) in
+	out(c, star);
+	in(c, yNonce);
+	out(c, encrypt((S, xA, xB, xKey, yNonce), Ksi(xB))).
+
+let processB =
+	in(c, w);
+	new Nb;
+	out(c, Nb);
+	in(c, yCipher);
+	let (=S, xA, =xB, xKey, =Nb) = decrypt(yCipher, Ksi(j)) in
+	in(c, (=xA, zCipher));
+	let zPlain = decrypt(zCipher, xKey) in
+	new q;
+	in(q,x);
+	out(e, (xA, j, zPlain)).
+
+
+process
+	 (!in(c, x); out(princ, host(x)))
+	|(!in(princ, i); in(princ, j); in(c, M); processA)
+	| !processS 
+	|(!in(princ, j); processB)
+
+
+(* This is the process 
+
+let processA = 
+	out(c, i);
+	in(c, xNonce);
+	new K;
+	out(c, (i, encrypt((i,i,j,K,xNonce), Kis(i))));
+	out(c, (i, encrypt(choice[M,p], K))).
+
+
+let processS =
+	in(c, xA);
+	new Ns;
+	out(c, Ns);
+	in(c, (=xA, xCipher));
+	let (=xA, =xA, xB, xKey, =Ns) = decrypt(xCipher, Kis(xA)) in
+	out(c, star);
+	in(c, yNonce);
+	out(c, encrypt((S, xA, xB, xKey, yNonce), Ksi(xB))).
+
+let processB =
+	in(c, w);
+	new Nb;
+	out(c, Nb);
+	in(c, yCipher);
+	let (=S, xA, =xB, xKey, =Nb) = decrypt(yCipher, Ksi(j)) in
+	in(c, (=xA, zCipher));
+	let zPlain = decrypt(zCipher, xKey) in
+	out(e, (xA, j, zPlain)).
+
+
+process
+	 (!in(c, x); out(princ, host(x)))
+	|(!in(princ, i); in(princ, j); in(c, M); processA)
+	| !processS 
+	|(!in(princ, j); processB)
+
+*)

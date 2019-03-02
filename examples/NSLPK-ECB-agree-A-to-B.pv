@@ -1,0 +1,117 @@
+(* The code modeling key server interaction is copied from ProVerif's Needham-Schroeder examples *)
+free c : channel.
+
+free A : bitstring.
+free B : bitstring.
+free I : bitstring.
+
+fun pkey(bitstring) : bitstring.
+
+table keys(bitstring, bitstring).
+
+fun ecb_enc_1(bitstring, bitstring) : bitstring.
+fun ecb_enc_2(bitstring, bitstring, bitstring) : bitstring.
+fun ecb_enc_3(bitstring, bitstring, bitstring, bitstring) : bitstring.
+fun ecb_enc_4(bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring.
+
+fun ecb_dec_1(bitstring, bitstring) : bitstring.
+fun ecb_dec_2(bitstring, bitstring) : bitstring.
+fun ecb_dec_3(bitstring, bitstring) : bitstring.
+fun ecb_dec_4(bitstring, bitstring) : bitstring.
+
+(* homomorphism *)
+equation forall x1:bitstring, x2:bitstring, k:bitstring;
+  ecb_enc_2(x1, x2, k) = (ecb_enc_1(x1, k), ecb_enc_1(x2, k)).
+
+equation forall x1:bitstring, x2:bitstring, x3:bitstring, k:bitstring;
+  ecb_enc_3(x1, x2, x3, k) = (ecb_enc_1(x1, k), ecb_enc_1(x2, k), ecb_enc_1(x3,k)).
+
+equation forall x1:bitstring, x2:bitstring, x3:bitstring, x4:bitstring, k:bitstring;
+  ecb_enc_4(x1, x2, x3, x4, k) = (ecb_enc_1(x1, k), ecb_enc_1(x2, k), ecb_enc_1(x3, k), ecb_enc_1(x4, k)).
+
+equation forall x1:bitstring, k:bitstring;
+  ecb_dec_1(ecb_enc_1(x1, pkey(k)), k) = x1.
+equation forall x1:bitstring, x2:bitstring, k:bitstring;
+  ecb_dec_2(ecb_enc_2(x1, x2, pkey(k)), k) = (x1, x2).
+equation forall x1:bitstring, x2:bitstring, x3:bitstring, k:bitstring;
+  ecb_dec_3(ecb_enc_3(x1, x2, x3, pkey(k)), k) = (x1, x2, x3).
+equation forall x1:bitstring, x2:bitstring, x3:bitstring, x4:bitstring, k:bitstring;
+  ecb_dec_4(ecb_enc_4(x1, x2, x3, x4, pkey(k)), k) = (x1, x2, x3, x4).
+
+(* Crypto primitives for the trusted server *)
+fun sign(bitstring, bitstring) : bitstring.
+fun checksign(bitstring, bitstring) : bitstring.
+fun getmess(bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  checksign(sign(m,k), pkey(k)) = m.
+equation forall m:bitstring, k:bitstring;
+  getmess(sign(m,k)) = m.
+
+fun dec(bitstring, bitstring) : bitstring.
+fun enc(bitstring, bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  dec(enc(m, k), k) = m.
+
+free objective : bitstring [private].
+
+query attacker(objective).
+
+let client_A(skA : bitstring, pkS : bitstring) =
+  new Na : bitstring;
+
+  (* get pub key of I *)
+  out(c, (A, I));
+  in(c, sign_I_pkI : bitstring);
+  let (=I, pkI : bitstring) = checksign(sign_I_pkI, pkS) in
+
+  out(c, ecb_enc_2(Na, A, pkI));                                     (* 1. *)
+  in(c, ecb_enc_Na_Ni_I : bitstring);                                (* 2. *)
+  let (=Na, Ni : bitstring, =I) = ecb_dec_3(ecb_enc_Na_Ni_I, skA) in
+  out(c, ecb_enc_1(Ni, pkI)).                                        (* 3. *)
+  
+let client_B(skB : bitstring, pkS : bitstring) =
+  new Nb : bitstring;
+
+  (* get pub key of A *)
+  out(c, (B, A));
+  in(c, sign_A_pkA : bitstring);
+  let (=A, pkA : bitstring) = checksign(sign_A_pkA, pkS) in
+
+  in(c, ecb_enc_Na_A : bitstring);                           (* 1. *)
+  let (Na : bitstring, =A) = ecb_dec_2(ecb_enc_Na_A, skB) in
+  out(c, ecb_enc_3(Na, Nb, B, pkA));                         (* 2. *)
+  in(c, ecb_enc_Nb : bitstring);                             (* 3. *)
+  let (=Nb) = ecb_dec_1(ecb_enc_Nb, skB) in
+  out(c, objective).
+
+let key_retrieval_server(skS : bitstring) =
+  in(c, (src : bitstring, dst : bitstring));
+  get keys(=dst, pkDst) in
+  out(c, sign((dst, pkDst), skS)).
+
+let key_register_server =
+  in(c, (host : bitstring, pk : bitstring));
+  if host <> A && host <> B then (
+    insert keys(host, pk)
+  ).
+
+process
+  new skA : bitstring;
+  new skB : bitstring;
+  new skS : bitstring;
+
+  let pkA = pkey(skA) in
+  let pkB = pkey(skB) in
+  let pkS = pkey(skS) in
+
+  insert keys(A, pkA);
+  insert keys(B, pkB);
+
+  out(c, pkA);
+  out(c, pkB);
+  out(c, pkS);
+
+    (! client_A(skA, pkS))
+  | (! client_B(skB, pkS))
+  | (! key_retrieval_server(skS))
+  | (! key_register_server)

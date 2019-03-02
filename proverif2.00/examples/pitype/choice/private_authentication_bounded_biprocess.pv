@@ -1,0 +1,70 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Private Authentication
+   Taken from Delaune, Jacquemard, CSFW'04 *)
+
+(* set simplifyProcess = interactive. *)
+
+(* shared-key encryption as equation *)
+
+fun aenc(bitstring, bitstring): bitstring.
+fun pk(bitstring): bitstring.
+
+reduc forall x: bitstring, y: bitstring; adec(aenc(x,pk(y)),y) = x.
+
+(* declaration of public name*)
+
+free c: channel.
+
+(* declaration of biprocess *)
+
+let processA(sk_a:bitstring,sk_b:bitstring) =
+	new n_a: bitstring;
+	out(c, aenc((n_a,pk(sk_a)),pk(sk_b)));
+	in(c, x:bitstring);
+	0.
+
+let processB(sk_b:bitstring,sk_a:bitstring) =
+	in(c, x:bitstring);
+	new n_b:bitstring;
+
+	let (n_a:bitstring,pub_a:bitstring) = adec(x, sk_b) in
+	  if pub_a = pk(sk_a)
+	  then
+	    out(c,aenc((n_a,n_b,pk(sk_b)),pk(sk_a)))
+	  else
+	    out(c,aenc(n_b,pk(sk_b)))
+	else
+	  out(c,aenc(n_b,pk(sk_b))).
+	  
+let system(sk_a:bitstring,sk_b:bitstring) = !processA(sk_a,sk_b) | !processB(sk_b,sk_a).
+
+process
+	new sk_a:bitstring; new sk_b:bitstring; new sk_c:bitstring;
+	  !out(c,pk(sk_a));out(c,pk(sk_b));out(c,pk(sk_c));
+	  system(choice[sk_a,sk_c],sk_b)

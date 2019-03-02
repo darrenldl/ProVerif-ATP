@@ -1,0 +1,76 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Denning-Sacco *)
+
+free c.
+
+(* Probabilistic public key cryptography *)
+
+fun pk/1.
+fun encrypt/3.
+reduc decrypt(encrypt(x,pk(y),r),y) = x.
+
+(* Signatures *)
+
+fun sign/2.
+reduc getmess(sign(m,k)) = m.
+reduc checksign(sign(m,k), pk(k)) = m.
+
+(* Shared-key cryptography *)
+
+fun sencrypt/2.
+reduc sdecrypt(sencrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not skA.
+not skB.
+
+private free secretB.
+noninterf secretB.
+
+let processA =
+	in(c, pk2);
+	new k; new r;
+	out(c, (encrypt(sign((pkA, pk2, k), skA), pk2, r)));
+	in(c, m);
+        let s = sdecrypt(m,k) in 0.
+
+let processB =
+	in(c, km);
+	let ks = decrypt(km,skB) in
+	let (=pkA, =pkB, k) = checksign(ks, pkA) in
+	out(c, sencrypt(secretB, k)).
+
+process new skA; 
+	let pkA = pk(skA) in
+        out(c, pkA);
+        new skB; 
+	let pkB = pk(skB) in
+        out(c, pkB);
+	((!processA) | (!processB))

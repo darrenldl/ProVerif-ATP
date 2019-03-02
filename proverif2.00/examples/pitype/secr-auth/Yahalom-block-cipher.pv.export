@@ -1,0 +1,139 @@
+free c : channel.
+
+type key.
+type host.
+type nonce.
+
+fun nonce_to_bitstring(nonce) : bitstring[data, typeConverter].
+fun encrypt(bitstring, key) : bitstring.
+fun decrypt(bitstring, key) : bitstring.
+
+equation
+  forall x : bitstring, y : key; 
+    decrypt(encrypt(x, y), y) = x.
+equation
+  forall x : bitstring, y : key; 
+    encrypt(decrypt(x, y), y) = x.
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+free A : host.
+free B : host.
+
+table keys(host, key).
+
+free secretA : bitstring [private].
+free secretB : bitstring [private].
+
+query 
+  attacker(secretA);
+  attacker(secretB).
+
+event endAparam(host, host).
+event endBparam(host, host).
+event beginAparam(host, host).
+event beginBparam(host, host).
+event endAkey(host, host, key).
+event beginAkey(host, host, key).
+event endBkey(host, host, key).
+event beginBkey(host, host, key).
+
+query x : host, y : host;
+  inj-event(endAparam(x, y)) ==> inj-event(beginAparam(x, y)).
+query x : host, y : host, z : key;
+  inj-event(endAkey(x, y, z)) ==> inj-event(beginAkey(x, y, z)).
+query x : host, y : host;
+  inj-event(endBparam(x, y)) ==> inj-event(beginBparam(x, y)).
+query x : host, y : host, z : key;
+  inj-event(endBkey(x, y, z)) ==> inj-event(beginBkey(x, y, z)).
+
+let processInitiator =
+  in(c, xA : host);
+  
+  if xA = A || xA = B then
+  get keys(=xA, kas) in
+  new Na : nonce;
+  out(c, (xA, Na));
+  in(c, (cert1 : bitstring, cert2 : bitstring));
+  let (b : host, k : key, =Na, nb : nonce) = decrypt(cert1, kas) in
+  event beginBparam(xA, b);
+  event beginBkey(xA, b, k);
+  out(c, (cert2, encrypt(nonce_to_bitstring(nb), k)));
+  
+  if b = A || b = B then
+  event endAparam(xA, b);
+  event endAkey(xA, b, k);
+  out(c, encrypt(secretA, k));
+  0
+  .
+
+let processResponder =
+  in(c, xB : host);
+  
+  if xB = A || xB = B then
+  get keys(=xB, kbs) in
+  in(c, (a : host, na : nonce));
+  event beginAparam(a, xB);
+  new Nb : nonce;
+  out(c, (xB, encrypt((a, na, Nb), kbs)));
+  in(c, (cert2 : bitstring, m : bitstring));
+  let (=a, k : key) = decrypt(cert2, kbs) in
+  event beginAkey(a, xB, k);
+  
+  if nonce_to_bitstring(Nb) = decrypt(m, k) then
+  
+  if a = A || a = B then
+  event endBparam(a, xB);
+  event endBkey(a, xB, k);
+  out(c, encrypt(secretB, k));
+  0
+  .
+
+let processS =
+  in(c, (h2 : host, m : bitstring));
+  get keys(=h2, k2) in
+  let (h1 : host, n1 : nonce, n2 : nonce) = decrypt(m, k2) in
+  get keys(=h1, k1) in
+  new k : key;
+  out(c, (encrypt((h2, k, n1, n2), k1), encrypt((h1, k), k2)));
+  0
+  .
+
+let processK =
+  in(c, (h : host, k : key));
+  
+  if h <> A && h <> B then
+  insert keys(h, k);
+  0
+  .
+
+process
+  new Kas : key;
+  new Kbs : key;
+  insert keys(A, Kas);
+  insert keys(B, Kbs);
+  (
+    ! (
+      processInitiator
+    )
+  )
+  | (
+    (
+      ! (
+        processResponder
+      )
+    )
+    | (
+      (
+        ! (
+          processS
+        )
+      )
+      | (
+        ! (
+          processK
+        )
+      )
+    )
+  )

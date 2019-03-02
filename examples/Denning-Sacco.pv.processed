@@ -1,0 +1,129 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+fun tuple_3_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring; 
+    tuple_3_get_0((x0, x1, x2)) = x0.
+
+fun tuple_3_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring; 
+    tuple_3_get_1((x0, x1, x2)) = x1.
+
+fun tuple_3_get_2(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring; 
+    tuple_3_get_2((x0, x1, x2)) = x2.
+
+fun tuple_4_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
+    tuple_4_get_0((x0, x1, x2, x3)) = x0.
+
+fun tuple_4_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
+    tuple_4_get_1((x0, x1, x2, x3)) = x1.
+
+fun tuple_4_get_2(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
+    tuple_4_get_2((x0, x1, x2, x3)) = x2.
+
+fun tuple_4_get_3(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
+    tuple_4_get_3((x0, x1, x2, x3)) = x3.
+
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free I : bitstring.
+
+fun succ(bitstring) : bitstring[data].
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
+
+query 
+  attacker(new Kab).
+
+const client_A_STEP_1 : bitstring.
+const client_A_STEP_2 : bitstring.
+
+let client_A(Kas : bitstring) =
+  new Na : bitstring;
+  out(c, ((A, B), client_A_STEP_1));
+  in(c, enc_B_Kab_T_enc_A_Kab_T : bitstring);
+  
+  if eq(tuple_4_get_0(dec(enc_B_Kab_T_enc_A_Kab_T, Kas)), B) then
+  let Kab : bitstring = tuple_4_get_1(dec(enc_B_Kab_T_enc_A_Kab_T, Kas)) in
+  let T : bitstring = tuple_4_get_2(dec(enc_B_Kab_T_enc_A_Kab_T, Kas)) in
+  let enc_A_Kab_T : bitstring = tuple_4_get_3(dec(enc_B_Kab_T_enc_A_Kab_T, Kas)) in
+  out(c, (enc_A_Kab_T, client_A_STEP_2));
+  0.
+
+const client_B_STEP_1 : bitstring.
+
+let client_B(Kbs : bitstring) =
+  new Nb : bitstring;
+  in(c, enc_A_Kab_T : bitstring);
+  
+  if eq(tuple_3_get_0(dec(enc_A_Kab_T, Kbs)), A) then
+  let Kab : bitstring = tuple_3_get_1(dec(enc_A_Kab_T, Kbs)) in
+  let T : bitstring = tuple_3_get_2(dec(enc_A_Kab_T, Kbs)) in
+  out(c, (cbc_enc_1(Nb, Kab), client_B_STEP_1));
+  in(c, enc_succ_Nb : bitstring);
+  
+  if eq(cbc_dec_1(enc_succ_Nb, Kab), succ(Nb)) then
+  0.
+
+const server_S_STEP_1 : bitstring.
+
+let server_S(Kas : bitstring, Kbs : bitstring) =
+  new Kab : bitstring;
+  new T : bitstring;
+  in(c, (A : bitstring, B : bitstring));
+  out(c, (enc((B, Kab, T, enc((A, Kab, T), Kbs)), Kas), server_S_STEP_1));
+  0.
+
+process
+  new Kas : bitstring;
+  new Kbs : bitstring;
+  (
+    ! (
+      client_A(Kas)
+    )
+  )
+  | (
+    (
+      ! (
+        client_B(Kbs)
+      )
+    )
+    | (
+      ! (
+        server_S(Kas, Kbs)
+      )
+    )
+  )

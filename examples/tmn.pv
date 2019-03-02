@@ -1,0 +1,64 @@
+free c : channel.
+
+free A : bitstring.
+free B : bitstring.
+free S : bitstring.
+
+const ZERO : bitstring.
+
+(* associativity *)
+equation forall x:bitstring, y:bitstring, z:bitstring; xor(x, xor(y, z)) = xor(xor(x, y), z).
+
+(* commutativity *)
+equation forall x:bitstring, y:bitstring; xor(x, y) = xor(y, x).
+
+(* neutral element *)
+equation forall x:bitstring; xor(x, ZERO) = x.
+
+(* nilpotence *)
+equation forall x:bitstring; xor(x, x) = ZERO.
+
+fun pkey(bitstring) : bitstring.
+
+fun pk_enc(bitstring, bitstring) : bitstring.
+fun pk_dec(bitstring, bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  pk_dec(pk_enc(m, pkey(k)), k) = m.
+
+(* homomorphism *)
+fun mul(bitstring, bitstring) : bitstring.
+equation forall x:bitstring, y:bitstring, k:bitstring;
+  mul(pk_enc(x, k), pk_enc(y, k)) = pk_enc(mul(x, y), k).
+
+fun div1(bitstring, bitstring) : bitstring.
+fun div2(bitstring, bitstring) : bitstring.
+equation forall x:bitstring, y:bitstring;
+  div1(mul(x, y), y) = x.
+equation forall x:bitstring, y:bitstring;
+  div2(mul(x, y), x) = y.
+
+let client_A(pkS : bitstring) =
+  new Ka : bitstring;
+  out(c, (B, pk_enc(Ka, pkS))); (* 1. *)
+  in(c, (=B, msg1);
+
+
+let client_B(pkS : bitstring) =
+  new Kb : bitstring;
+  in(c, T : bitstring); (* 2. *)
+  out(c, (T, pk_enc(Kb, skS)); (* 3. *)
+
+let server_S(skS : bitstring, pkS : bitstring) =
+  in(c, (T1    : bitstring,
+         msg1 : bitstring));            (* 1. *)
+  let Kt = pk_dec(msg1, skS) in
+  out(c, T1);                         (* 2. *)
+  in(c, (T2 : bitstring,
+         msg2 : bitstring)); (* 3. *)
+
+process
+  new skS:bitstring;
+
+  let pkS = pkey(skS) in
+
+  client_A(pkS) | client_B(pkS) | server_S(skS, pkS)

@@ -1,0 +1,75 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+pred c/1 elimVar,decompData.
+nounif c:x.
+
+fun pk/1.
+fun encrypt/2.
+
+fun sign/2.
+
+fun host/1.
+
+fun sencrypt/2.
+
+query c:secret[].
+
+not c:sA[].
+not c:sS[].
+
+reduc
+(* Initialization *)
+
+c:c[];
+c:pk(sA[]);
+c:pk(sS[]);
+
+(* The attacker *)
+
+c:x & c:encrypt(m,pk(x)) -> c:m;
+c:x -> c:pk(x);
+c:x & c:y -> c:encrypt(x,y);
+c:sign(x,y) -> c:x;
+c:x & c:y -> c:sign(x,y);
+c:host(x);
+c:x & c:y -> c:sencrypt(x,y);
+c:x & c:sencrypt(m,x) -> c:m;
+
+(* The protocol *)
+(* A *)
+
+c:(sign((host(sA[]), pk(sA[])), sS[]), sign((host(x), pkx), sS[])) -> 
+c:(sign((host(sA[]), pk(sA[])), sS[]), sign((host(x), pkx), sS[]), encrypt(sign(k[pkx], sA[]), pkx));
+
+(* B *)
+
+c:(sign((host(sA[]), pk(s1)), sS[]), sign((host(sA[]), pk(sA[])), sS[]), encrypt(sign(k, s1), pk(sA[]))) -> c:sencrypt(secret[], k);
+
+(* server *)
+
+c:(host(s1), host(s2)) -> c:(sign((host(s1), pk(s1)), sS[]), sign((host(s2), pk(s2)), sS[])).

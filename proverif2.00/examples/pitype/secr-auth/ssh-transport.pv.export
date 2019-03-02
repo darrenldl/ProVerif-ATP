@@ -1,0 +1,141 @@
+free c : channel.
+
+type key.
+type tag.
+type ktag.
+type pkey.
+type skey.
+type G.
+type exponent.
+
+fun enc(key, bitstring) : bitstring.
+
+reduc
+  forall x : bitstring, y : key; dec(y, enc(y, x)) = x.
+
+fun H(bitstring) : key.
+fun pk(skey) : pkey.
+fun nmrsign(skey, key) : bitstring.
+
+reduc
+  forall x : key, y : skey; checknmrsign(pk(y), nmrsign(y, x), x) = true.
+
+const g : G.
+
+fun exp(G, exponent) : G.
+
+equation
+  forall x : exponent, y : exponent; 
+    exp(exp(g, x), y) = exp(exp(g, y), x).
+
+fun mac(key, bitstring) : bitstring.
+
+const KEXDHINIT : tag[data].
+const KEXDHREPLY : tag[data].
+const keyEncStoC : ktag[data].
+const keyEncCtoS : ktag[data].
+const keyMacStoC : ktag[data].
+const keyMacCtoS : ktag[data].
+
+not attacker(new dhsecretC).
+not attacker(new dhsecretS).
+not attacker(new SSigKey).
+
+free secretC : bitstring [private].
+
+query 
+  attacker(secretC).
+
+let processClient(SVerKey : pkey) =
+  new dhsecretC : exponent;
+  let dhpublicC = exp(g, dhsecretC) in
+  out(c, (KEXDHINIT, dhpublicC));
+  in(c, (=KEXDHREPLY, ServerVerKey : pkey, dhpublicS : G, sign : bitstring));
+  let K = exp(dhpublicS, dhsecretC) in
+  let h = H((ServerVerKey, dhpublicC, dhpublicS, K)) in
+  
+  if checknmrsign(ServerVerKey, sign, h) = true then
+  let enckeyCtoS = H((K, h, keyEncCtoS)) in
+  let enckeyStoC = H((K, h, keyEncStoC)) in
+  let mackeyCtoS = H((K, h, keyMacCtoS)) in
+  let mackeyStoC = H((K, h, keyMacStoC)) in
+  new CsecchannelToS : channel;
+  new CsecchannelFromS : channel;
+  (
+    ! (
+      in(CsecchannelToS, m2payload : bitstring);
+      out(c, (enc(enckeyCtoS, m2payload), mac(mackeyCtoS, m2payload)));
+      0
+    )
+  )
+  | (
+    (
+      ! (
+        in(c, (m4enc : bitstring, m4mac : bitstring));
+        let m4payload = dec(enckeyStoC, m4enc) in
+        
+        if m4mac = mac(mackeyStoC, m4payload) then
+        out(CsecchannelFromS, m4payload);
+        0
+      )
+    )
+    | (
+      
+      if ServerVerKey = SVerKey then
+      out(CsecchannelToS, secretC);
+      0
+    )
+  )
+  .
+
+let processServer(SSigKey : skey, SVerKey : pkey) =
+  in(c, (=KEXDHINIT, dhpublicC : G));
+  new dhsecretS : exponent;
+  let dhpublicS = exp(g, dhsecretS) in
+  let K = exp(dhpublicC, dhsecretS) in
+  let h = H((SVerKey, dhpublicC, dhpublicS, K)) in
+  out(c, (KEXDHREPLY, SVerKey, dhpublicS, nmrsign(SSigKey, h)));
+  let enckeyCtoS = H((K, h, keyEncCtoS)) in
+  let enckeyStoC = H((K, h, keyEncStoC)) in
+  let mackeyCtoS = H((K, h, keyMacCtoS)) in
+  let mackeyStoC = H((K, h, keyMacStoC)) in
+  new SsecchannelToC : channel;
+  new SsecchannelFromC : channel;
+  (
+    ! (
+      in(SsecchannelToC, m3payload : bitstring);
+      out(c, (enc(enckeyStoC, m3payload), mac(mackeyStoC, m3payload)));
+      0
+    )
+  )
+  | (
+    (
+      ! (
+        in(c, (m2enc : bitstring, m2mac : bitstring));
+        let m2payload = dec(enckeyCtoS, m2enc) in
+        
+        if m2mac = mac(mackeyCtoS, m2payload) then
+        out(SsecchannelFromC, m2payload);
+        0
+      )
+    )
+    | (
+      0
+    )
+  )
+  .
+
+process
+  new SSigKey : skey;
+  let SVerKey = pk(SSigKey) in
+  out(c, SVerKey);
+  (
+    ! (
+      processClient(SVerKey)
+    )
+  )
+  | (
+    ! (
+      processServer(SSigKey, SVerKey)
+    )
+  )

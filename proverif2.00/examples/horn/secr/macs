@@ -1,0 +1,72 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+
+The following code does not work because we cannot handle properly
+the associativity of the concatenation
+
+[* concatenation *]
+
+fun concat0/2.
+
+[* fst returns the first atomic component of a concatenation *]
+reduc fst(concat0(x,y)) = x.
+[* rest returns a concatenation without its first atomic component *]
+reduc rest(concat0(x,y)) = y.
+
+[** PB if y is itself a concatenation !!!!! **]
+reduc concat(concat0(x,y),z) = concat0(x, concat(y,z));
+      concat(x,y) = concat0(x,y).
+
+[* f = keyed hash function *]
+
+fun f/2.
+fun h0/2.
+reduc h(f(x,y),z) = f(x,concat(y,z));
+      h(x,y) = h0(x,y).
+
+
+Here is a version that works, but with pairs instead of concatenation
+
+*)
+
+pred c/1 elimVar,decompData.
+nounif c:x.
+
+(* f = keyed hash function *)
+
+fun f/2.
+fun h0/2.
+reduc h(f(x,y),z) = f(x,(y,z));
+      h(x,y) = h0(x,y).
+
+(* macs *)
+
+reduc badMac(x,y) = f(x,y).
+
+reduc goodMac(x,y) = f(x,f(x,y)).

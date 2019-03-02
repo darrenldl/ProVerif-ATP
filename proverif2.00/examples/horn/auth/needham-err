@@ -1,0 +1,47 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+pred begin/1 block.
+pred c/1 elimVar, decompData.
+nounif c:x.
+
+fun pk/1.
+fun encrypt/2.
+
+query end:x,y.
+
+reduc
+
+c:encrypt(Nb[encrypt((v9,pk(skA[])),pk(skB[])),v10],pk(skB[])) & c:encrypt((v9,pk(skA[])),pk(skB[])) -> end:(v10),(v9,pk(skA[]),pk(skB[]),Nb[encrypt((v9,pk(skA[])),pk(skB[])),v10]);
+c:encrypt((v6,v7),pk(skB[])) -> c:encrypt((v6,Nb[encrypt((v6,v7),pk(skB[])),v8]),v7);
+c:encrypt((Na[v3,v4],v5),pk(skA[])) & begin:(Na[v3,v4],pk(skA[]),v3,v5) & c:v3 -> c:encrypt(v5,v3);
+c:v1 -> c:encrypt((Na[v1,v2],pk(skA[])),v1);
+c:pk(skB[]);
+c:pk(skA[]);
+c:encrypt(x,pk(y)) & c:y -> c:x;
+c:any3 -> c:pk(any3);
+c:any2 & c:any1 -> c:encrypt(any2,any1).

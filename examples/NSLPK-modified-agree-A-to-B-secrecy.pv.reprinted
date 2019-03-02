@@ -1,0 +1,118 @@
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free I : bitstring.
+
+fun pkey(bitstring) : bitstring.
+
+table keys(bitstring, bitstring).
+
+fun assoc_pair(bitstring, bitstring) : bitstring[data].
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    assoc_pair(x, assoc_pair(y, z)) = assoc_pair(assoc_pair(x, y), z).
+
+fun sign(bitstring, bitstring) : bitstring.
+fun checksign(bitstring, bitstring) : bitstring.
+fun getmess(bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    checksign(sign(m, k), pkey(k)) = m.
+equation
+  forall m : bitstring, k : bitstring; 
+    getmess(sign(m, k)) = m.
+
+fun dec(bitstring, bitstring) : bitstring.
+fun enc(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
+
+fun aenc(bitstring, bitstring) : bitstring.
+fun adec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    adec(aenc(m, pkey(k)), k) = m.
+
+free objective : bitstring [private].
+
+query 
+  attacker((new Nb, objective)).
+
+let client_A(skA : bitstring, pkS : bitstring) =
+  new Na : bitstring;
+  out(c, (A, I));
+  in(c, sign_I_pkI : bitstring);
+  let (=I, pkI : bitstring) = checksign(sign_I_pkI, pkS) in
+  out(c, aenc(assoc_pair(Na, A), pkI));
+  in(c, aenc_Na_Ni_I : bitstring);
+  let assoc_pair(=Na, assoc_pair(Ni : bitstring, =I)) = adec(aenc_Na_Ni_I, skA) in
+  out(c, aenc(Ni, pkI));
+  0.
+
+let client_B(skB : bitstring, pkS : bitstring) =
+  new Nb : bitstring;
+  out(c, (B, A));
+  in(c, sign_A_pkA : bitstring);
+  let (=A, pkA : bitstring) = checksign(sign_A_pkA, pkS) in
+  in(c, aenc_Na_A : bitstring);
+  let assoc_pair(Na : bitstring, =A) = adec(aenc_Na_A, skB) in
+  out(c, aenc(assoc_pair(Na, assoc_pair(Nb, B)), pkA));
+  in(c, aenc_Nb : bitstring);
+  let (=Nb) = adec(aenc_Nb, skB) in
+  out(c, objective);
+  0.
+
+let key_retrieval_server(skS : bitstring) =
+  in(c, (src : bitstring, dst : bitstring));
+  get keys(=dst, pkDst) in
+  out(c, sign((dst, pkDst), skS));
+  0.
+
+let key_register_server =
+  in(c, (host : bitstring, pk : bitstring));
+  
+  if host <> A && host <> B then
+  insert keys(host, pk);
+  0.
+
+process
+  new skA : bitstring;
+  new skB : bitstring;
+  new skS : bitstring;
+  let pkA = pkey(skA) in
+  let pkB = pkey(skB) in
+  let pkS = pkey(skS) in
+  insert keys(A, pkA);
+  insert keys(B, pkB);
+  out(c, pkA);
+  out(c, pkB);
+  out(c, pkS);
+  (
+    ! (
+      client_A(skA, pkS)
+    )
+  )
+  | (
+    (
+      ! (
+        client_B(skB, pkS)
+      )
+    )
+    | (
+      (
+        ! (
+          key_retrieval_server(skS)
+        )
+      )
+      | (
+        ! (
+          key_register_server
+        )
+      )
+    )
+  )

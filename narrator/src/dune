@@ -1,0 +1,40 @@
+(executable
+ (name        narrator)
+ (public_name narrator)
+ (libraries   mparser
+              core_kernel
+              js_of_ocaml
+              lwt
+              js_of_ocaml-lwt)
+ (flags       (-w "+a-4-29-32-37-40-42-44-48-50"))
+ ; (js_of_ocaml (flags --source-map --debug-info))
+ (preprocess (pps js_of_ocaml-ppx lwt_ppx)))
+
+(rule
+  (targets index.html)
+  (deps    ../html/index.html)
+  (action
+   (copy %{deps} %{targets})))
+
+; (rule
+;   (targets examples.ml)
+;   (deps    ../generators/collect_examples.sh)
+;   (action  (run %{deps})))
+
+(rule
+  (targets file_strings.js)
+  (deps    ../html/file_strings.js)
+  (action
+   (copy %{deps} %{targets})))
+
+(alias
+  (name js)
+  (deps narrator.bc.js
+        index.html
+        file_strings.js
+        ; (source_tree ../node_modules)
+        ))
+
+(ocamllex tptp_lexer)
+
+(menhir (modules tptp_parser))

@@ -1,0 +1,71 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+Yahalom protocol. Version of Burrows, Abadi, Needham, SRC039
+
+Message 1 A -> B: A; Na 
+Message 2 B -> S: B; { A; Na; Nb }Kbs 
+Message 3 S -> A: { B; Kab; Na; Nb }Kas ; { A; Kab }Kbs 
+Message 4 A -> B: { A; Kab }Kbs ; { Nb }Kab
+
+*)
+
+pred c/1 decompData, elimVar.
+
+fun encrypt/2.
+fun host/1.
+
+query c:Nb[host(Kas[]), Na[]].
+query c:secretA[].
+query c:secretB[].
+
+not c:Kas[].
+
+reduc
+
+(* attacker *)
+
+c:c[];
+c:k -> c:host(k);
+c:k & c:m -> c:encrypt(m,k);
+c:k & c:encrypt(m,k) -> c:m;
+
+(* A *)
+
+c:(host(Kas[]), Na[]);
+c:(encrypt((b, k, Na[], nb), Kas[]), mb) -> c:(mb, encrypt(nb, k));
+c:(encrypt((host(Kas[]), k, Na[], nb), Kas[]), mb) -> c:encrypt(secretA[], k);
+
+(* B *)
+
+c:(a, na) -> c:(host(Kas[]), encrypt((a, na, Nb[a,na]), Kas[]));
+c:(encrypt((host(Kas[]), k), Kas[]), encrypt(Nb[host(Kas[]),na], k)) -> c:encrypt(secretB[], k);
+
+(* S *)
+
+c:(host(kbs), encrypt((host(kas), na, nb), kbs)) -> c:(encrypt((host(kbs), k[kas, kbs, na, nb], na, nb), kas), encrypt((host(kas),  k[kas, kbs, na, nb]), kbs)).

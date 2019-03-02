@@ -1,0 +1,97 @@
+% Refutation found. Thanks to Tanya!
+% SZS status Theorem for NSLPK-modified-agree-A-to-B
+% SZS output start Proof for NSLPK-modified-agree-A-to-B
+fof(f258,axiom,(
+  ! [X8,X9,X10] : tuple_assoc_pair(X8,tuple_assoc_pair(X9,X10)) = tuple_assoc_pair(tuple_assoc_pair(X8,X9),X10)),
+  file('NSLPK-modified-agree-A-to-B.p',unknown)).
+fof(f260,axiom,(
+  ! [X13,X14] : constr_assoc_pair_2_get_0x30(tuple_assoc_pair(X13,X14)) = X13),
+  file('NSLPK-modified-agree-A-to-B.p',unknown)).
+fof(f285,axiom,(
+  ! [X38,X39] : (pred_attacker(tuple_assoc_pair(X38,X39)) => pred_attacker(X39))),
+  file('NSLPK-modified-agree-A-to-B.p',unknown)).
+fof(f295,axiom,(
+  pred_attacker(constr_CONST_0x30)),
+  file('NSLPK-modified-agree-A-to-B.p',unknown)).
+fof(f320,conjecture,(
+  pred_attacker(name_objective)),
+  file('NSLPK-modified-agree-A-to-B.p',unknown)).
+fof(f321,negated_conjecture,(
+  ~pred_attacker(name_objective)),
+  inference(negated_conjecture,[],[f320])).
+fof(f325,plain,(
+  ! [X0,X1,X2] : tuple_assoc_pair(X0,tuple_assoc_pair(X1,X2)) = tuple_assoc_pair(tuple_assoc_pair(X0,X1),X2)),
+  inference(rectify,[],[f258])).
+fof(f327,plain,(
+  ! [X0,X1] : constr_assoc_pair_2_get_0x30(tuple_assoc_pair(X0,X1)) = X0),
+  inference(rectify,[],[f260])).
+fof(f343,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_assoc_pair(X0,X1)) => pred_attacker(X1))),
+  inference(rectify,[],[f285])).
+fof(f359,plain,(
+  ~pred_attacker(name_objective)),
+  inference(flattening,[],[f321])).
+fof(f378,plain,(
+  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_assoc_pair(X0,X1)))),
+  inference(ennf_transformation,[],[f343])).
+fof(f660,plain,(
+  ( ! [X2,X0,X1] : (tuple_assoc_pair(X0,tuple_assoc_pair(X1,X2)) = tuple_assoc_pair(tuple_assoc_pair(X0,X1),X2)) )),
+  inference(cnf_transformation,[],[f325])).
+fof(f662,plain,(
+  ( ! [X0,X1] : (constr_assoc_pair_2_get_0x30(tuple_assoc_pair(X0,X1)) = X0) )),
+  inference(cnf_transformation,[],[f327])).
+fof(f687,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_assoc_pair(X0,X1)) | pred_attacker(X1)) )),
+  inference(cnf_transformation,[],[f378])).
+fof(f697,plain,(
+  pred_attacker(constr_CONST_0x30)),
+  inference(cnf_transformation,[],[f295])).
+fof(f721,plain,(
+  ~pred_attacker(name_objective)),
+  inference(cnf_transformation,[],[f359])).
+fof(f770,plain,(
+  ( ! [X4,X5,X3] : (~pred_attacker(tuple_assoc_pair(X3,tuple_assoc_pair(X4,X5))) | pred_attacker(X5)) )),
+  inference(superposition,[],[f687,f660])).
+fof(f772,plain,(
+  ( ! [X10,X11,X9] : (tuple_assoc_pair(X9,X10) = constr_assoc_pair_2_get_0x30(tuple_assoc_pair(X9,tuple_assoc_pair(X10,X11)))) )),
+  inference(superposition,[],[f662,f660])).
+fof(f776,plain,(
+  ( ! [X10,X9] : (tuple_assoc_pair(X9,X10) = X9) )),
+  inference(forward_demodulation,[],[f772,f662])).
+fof(f784,plain,(
+  ( ! [X4,X5,X3] : (~pred_attacker(tuple_assoc_pair(X3,X4)) | pred_attacker(X5)) )),
+  inference(backward_demodulation,[],[f776,f770])).
+fof(f792,plain,(
+  spl0_8 <=> ! [X1] : pred_attacker(X1)),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_8])])).
+fof(f793,plain,(
+  ( ! [X1] : (pred_attacker(X1)) ) | ~spl0_8),
+  inference(avatar_component_clause,[],[f792])).
+fof(f795,plain,(
+  spl0_10 <=> ! [X0] : ~pred_attacker(X0)),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_10])])).
+fof(f796,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl0_10),
+  inference(avatar_component_clause,[],[f795])).
+fof(f798,plain,(
+  ( ! [X5,X3] : (~pred_attacker(X3) | pred_attacker(X5)) )),
+  inference(forward_demodulation,[],[f784,f776])).
+fof(f799,plain,(
+  spl0_8 | spl0_10),
+  inference(avatar_split_clause,[],[f798,f795,f792])).
+fof(f800,plain,(
+  $false | ~spl0_8),
+  inference(resolution,[],[f793,f721])).
+fof(f804,plain,(
+  ~spl0_8),
+  inference(avatar_contradiction_clause,[],[f800])).
+fof(f805,plain,(
+  $false | ~spl0_10),
+  inference(resolution,[],[f796,f697])).
+fof(f880,plain,(
+  ~spl0_10),
+  inference(avatar_contradiction_clause,[],[f805])).
+fof(f881,plain,(
+  $false),
+  inference(avatar_sat_refutation,[],[f799,f804,f880])).
+% SZS output end Proof for NSLPK-modified-agree-A-to-B

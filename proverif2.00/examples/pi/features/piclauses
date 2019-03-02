@@ -1,0 +1,121 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Denning-Sacco *)
+
+free c.
+
+(* Public key cryptography *)
+
+fun pk/1.
+fun encrypt/2.
+reduc decrypt(encrypt(x,pk(y)),y) = x.
+
+(* Signatures *)
+
+fun sign/2.
+reduc getmess(sign(m,k)) = m.
+reduc checksign(sign(m,k), pk(k)) = m.
+
+(* Host name / key 
+   The server has a table (host name, public key), which we
+   represent by the function getkey. *)
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+(* Shared-key cryptography *)
+
+fun sencrypt/2.
+reduc sdecrypt(sencrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not skA.
+not skB.
+not skS.
+
+authquery Bparam/2.
+authquery Bkey/3.
+
+private free secretA, secretB.
+query secretA.
+query secretB.
+
+
+(* Clauses *)
+
+data cons/2.
+
+clauses
+
+member:x,cons(x,l);
+member:x,l -> member:x,cons(y,l).
+
+let processA =
+	in(c, (cert1, cert2));
+	let (=hostA, =pkA) = checksign(cert1, pkS) in
+	let (h2, pk2) = checksign(cert2, pkS) in
+	let x suchthat member:x,h2 in
+	begin Bparam(hostA, h2);
+	new k;
+	begin Bkey(hostA, h2, k);
+	out(c, (cert1, cert2, encrypt(sign(k, skA), pk2)));
+	if h2 = hostB then
+	out(c, sencrypt(secretA, k)).
+
+let processB =
+	in(c, (cert1, cert2, km));
+	let (h1, pk1) = checksign(cert1, pkS) in
+	let (=hostB, =pkB) = checksign(cert2, pkS) in
+	let ks = decrypt(km,skB) in
+	let k = checksign(ks, pk1) in
+	if h1 = hostA then
+	end Bparam(h1, hostB);
+	end Bkey(h1, hostB, k);
+	out(c, sencrypt(secretB, k)).
+
+let processS =
+	in(c, (h1,h2));
+	let s1 = getkey(h1) in
+	let s2 = getkey(h2) in
+	out(c, (sign((h1, s1), skS), sign((h2, s2), skS))).
+
+process new skA; 
+	let pkA = pk(skA) in
+        out(c, pkA);
+        new skB; 
+	let pkB = pk(skB) in
+        out(c, pkB);
+	new skS; 
+	let pkS = pk(skS) in
+	out(c, pkS);
+	let hostA = host(pkA) in
+	out(c, hostA);
+	let hostB = host(pkB) in
+	out(c, hostB);
+	((!processA) | (!processB) | (!processS))

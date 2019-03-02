@@ -1,0 +1,104 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c.
+(* SKEME *)
+
+(* Public key cryptography *)
+
+fun pk/1.
+fun encrypt/2.
+reduc decrypt(encrypt(x,pk(y)),y) = x.
+
+(* Hash function *)
+
+fun hash/1.
+
+(* Diffie-Hellman *)
+
+fun f/2.
+fun g/1.
+equation f(x,g(y)) = f(y,g(x)).
+
+(* Keyed hash function *)
+
+fun keyhash/2.
+
+(* Shared-key cryptography *)
+
+fun sencrypt/2.
+reduc sdecrypt(sencrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not skA.
+not skB.
+not x.
+not y.
+
+private free secretA, secretB.
+noninterf secretA, secretB.
+noninterf secretA.
+noninterf secretB.
+
+(* A *)
+
+let processA = in(c, pkX);
+               new x; new Ka;
+                out(c, (encrypt((pkA, Ka), pkX), g(x)));
+                in(c, (m1, m2, m3));
+		let Kb = decrypt(m1, skA) in
+                let K0 = hash((Ka, Kb)) in
+		if m3 = keyhash((g(x), m2, pkX, pkA), K0) then
+                 let sh = hash(f(x, m2)) in 
+                 out(c, keyhash((m2, g(x), pkA, pkX), K0));
+		 (* OK *)
+                 if pkX = pkB then out(c, sencrypt(secretA, sh)).
+
+(* B *)
+
+let processB = in(c, (m1, m2));
+               let (pkAr, Ka) = decrypt(m1, skB) in
+               new Kb;
+               let K0 = hash((Ka, Kb)) in
+	       new y;
+               let sh = hash(f(y, m2)) in
+	       out(c, (encrypt(Kb, pkAr), g(y), keyhash((m2, g(y), pkB, pkAr), K0)));
+               in(c, m3);
+	       if m3 = keyhash((g(y), m2, pkAr, pkB), K0) then
+               (* OK *)
+		if pkAr = pkA then out(c, sencrypt(secretB, sh)).
+
+
+process 
+
+new skA; let pkA = pk(skA) in
+out(c, pkA);
+new skB; let pkB = pk(skB) in
+out(c, pkB);
+((!processA) | (!processB))
+

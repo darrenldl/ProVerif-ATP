@@ -1,0 +1,89 @@
+/* spacing between list items */
+
+li {
+margin-bottom: 20px;
+}
+
+/* occurrence class */
+
+.occ
+{
+  color:green;
+}
+
+/* keywords */
+
+.keyword
+{
+  color:blue;
+}
+
+/* connectives */
+
+.conn
+{
+  font-weight:bold;
+}
+
+/* explanations of clauses */
+
+.explain
+{
+  color:fuchsia;
+}
+
+/* Function symbols */
+
+.fun
+{
+}
+
+/* Predicates */
+
+.pred
+{
+}
+
+/* Variables */
+
+.var
+{
+  font-style:italic;
+}
+
+/* Names */
+
+.name
+{
+}
+
+/* Types */
+
+.type
+{
+}
+
+/* Processes */
+
+.process
+{
+    color:green
+}
+
+/* Results */
+
+.query
+{ font-weight: bold;
+  font-size: 120% }
+
+.result
+{ font-weight: bold }
+
+.trueresult
+{ color: green }
+
+.unknownresult
+{ color: darkorange }
+
+.falseresult
+{ color: red }

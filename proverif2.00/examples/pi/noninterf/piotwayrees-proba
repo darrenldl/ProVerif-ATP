@@ -1,0 +1,92 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Otway Rees protocol.
+   Version of Otway Rees, Operating Systems Review Vol 21 no 1, p 8-10, 1987 
+
+A -> B: (C, A, B, { Na, C, A, B }_kA)
+B -> S: (C, A, B, { Na, C, A, B }_kA, { Nb, C, A, B }_kB)
+S -> B: (C, { Na, k }_kA, { Nb, k }_kB)
+B -> A: (C, { Na, k }_kA)
+
+Correct
+*)
+
+(* Shared-key cryptography *)
+
+fun encrypt/3.
+reduc decrypt(encrypt(m,k,z),k) = m.
+
+(* Host name / key *)
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+free c.
+
+private free secretA, secretB.
+noninterf secretA, secretB.
+
+let processA = 
+        in(c, hostB0);
+	new C; new Na; new randomenc1;
+        out(c, (C, hostA, hostB0, encrypt((Na, C, hostA, hostB0), kA, randomenc1)));
+	in(c, (=C, m2));
+	let (=Na, k) = decrypt(m2, kA) in
+	(* OK *)
+	if hostB0 = hostB then 
+	new randomenc2;
+        out(c, encrypt(secretA, k, randomenc2)).
+
+
+let processB = 
+	in(c, (C1, hostA1, =hostB, m2));
+	new Nb; new randomenc3;
+	out(c, (C1, hostA1, hostB, m2, encrypt((Nb, C1, hostA1, hostB), kB, randomenc3)));
+	in(c, (=C1, m3, m4));
+	let (=Nb, k) = decrypt(m4, kB) in
+	out(c, (C1, m3));
+	(* OK *)
+	if hostA1 = hostA then
+	new randomenc4;
+	out(c, encrypt(secretB, k, randomenc4)).
+
+
+let processS = 
+	in(c, (C1, hostA1, hostB1, m2, m3));
+	let (Na1, =C1, =hostA1, =hostB1) = decrypt(m2, getkey(hostA1)) in
+	let (Nb1, =C1, =hostA1, =hostB1) = decrypt(m3, getkey(hostB1)) in
+	new k; new randomenc5; new randomenc6;
+        out(c, (C1, encrypt((Na1, k), getkey(hostA1), randomenc5), 
+                    encrypt((Nb1, k), getkey(hostB1), randomenc6))).
+
+
+process new kA; new kB;
+	let hostA = host(kA) in 
+	let hostB = host(kB) in
+	out(c, hostA); out(c, hostB);
+	((!processA) | (!processB) | (!processS))

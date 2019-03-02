@@ -1,0 +1,137 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Needham Shroeder shared key protocol
+Encoding using Christopher Olson's Security (CS223) Quarter Project.
+
+The weakness of this protocol is that if an attacker has
+a session key k[Kas[], Kbs[], Na[Kbs[],c0]]
+for one c0, he can have all secrets of B, since B cannot
+distinguish different sessions.
+
+Two predicates:
+comp:M iff M is a term containing only names of session0
+c:i,M iff the attacker can get M in session i
+
+Rules:
+1) rules for comp:
+2) comp:x1 & ... & comp:xn -> c:session0,a[session0,x1, ..., xn] for every 
+session name a
+3) the usual rules of the protocol with c:sessionvar,M
+4) c:session0,M -> c:session1,M
+
+ *)
+
+pred c/2.
+elimtrue c:x,b[i].
+pred comp/1 elimVar, decompData.
+
+fun encrypt/2.
+fun host/1.
+
+(* constants 0 and 1 *)
+
+data c0/0.
+data c1/0.
+
+data decr/1.
+
+data session0/0.
+data session1/0.
+
+not c:sessionvar,Kas[].
+not c:sessionvar,Kbs[].
+
+query c:session1,secretA[session1].
+query c:session1,secretB[session1].
+
+param verboseRules = yes.
+
+reduc
+
+(* Attacker *)
+
+c:sessionvar,k & c:sessionvar,encrypt(m,k) -> c:sessionvar,m;
+c:sessionvar,x & c:sessionvar,y -> c:sessionvar,encrypt(x,y);
+c:sessionvar,host(Kas[]);
+c:sessionvar,host(Kbs[]);
+c:sessionvar,host(Kcs[]);
+c:sessionvar,Kcs[];
+
+(* Attacker: decomposition of data constructors *)
+
+c:sessionvar,c0;
+c:sessionvar,c1;
+c:sessionvar,x <=> c:sessionvar,decr(x);
+c:sessionvar,session0;
+c:sessionvar,session1;
+c:sessionvar,x & c:sessionvar,y <=> c:sessionvar,(x,y);
+c:sessionvar,x & c:sessionvar,y & c:sessionvar,z <=> c:sessionvar,(x,y,z);
+c:sessionvar,x & c:sessionvar,y & c:sessionvar,z & c:sessionvar,t <=> c:sessionvar,(x,y,z,t);
+
+(* key compromise *)
+
+comp:Kas[];
+comp:Kbs[];
+comp:x -> comp:Na[x,session0];
+comp:x & comp:y -> comp:Nb[x,y,session0];
+comp:x & comp:y & comp:z -> comp:k[x,y,z,session0]; 
+comp:x -> comp:host(x);
+comp:x & comp:y -> comp:encrypt(x,y);
+comp:secretA[session0];
+comp:secretB[session0];
+
+comp:x -> c:session0,Na[x, session0];
+comp:x & comp:y -> c:session0,Nb[x,y,session0];
+comp:x & comp:y & comp:z -> c:session0,k[x,y,z,session0]; 
+c:session0,secretA[session0];
+c:session0,secretB[session0];
+
+
+(* A *)
+
+c:sessionvar,h -> c:sessionvar,(host(Kas[]), h, Na[h,sessionvar]);
+c:sessionvar,encrypt((Na[h,sessionvar], h, key, m), Kas[]) -> c:sessionvar,m;
+c:sessionvar,encrypt((Na[h,sessionvar], h, key, m), Kas[]) & c:sessionvar,encrypt(n, key) -> c:sessionvar,encrypt(decr(n), key);
+
+c:sessionvar,encrypt((Na[host(Kbs[]),sessionvar], host(Kbs[]), key, m), Kas[]) -> c:sessionvar,encrypt(secretA[sessionvar], key);
+
+
+(* B *)
+
+c:sessionvar,encrypt((key, h), Kbs[]) -> c:sessionvar,encrypt(Nb[key,h,sessionvar], key);
+
+c:sessionvar,encrypt((key, host(Kas[])), Kbs[]) & c:sessionvar,encrypt(decr(Nb[key,host(Kas[]),sessionvar]), key) -> c:sessionvar,encrypt(secretB[sessionvar], key);
+
+(* S *)
+
+c:sessionvar,(host(Ks1), host(Ks2), n) -> c:sessionvar,encrypt((n, host(Ks2), k[Ks1, Ks2, n, sessionvar], encrypt((k[Ks1, Ks2, n, sessionvar], host(Ks1)), Ks2)), Ks1);
+
+(* Implication *)
+
+c:session0,x -> c:session1,x.
+

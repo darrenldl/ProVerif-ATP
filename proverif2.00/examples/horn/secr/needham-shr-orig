@@ -1,0 +1,101 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Needham Shroeder shared key protocol
+
+The weakness of this protocol is that if an attacker has
+a session key k[Kas[], Kbs[], Na[Kbs[],c0]]
+for one c0, he can have all secrets of B, since B cannot
+distinguish different sessions.
+
+Notice that we have slightly changed the protocol such that
+the analyzer terminates. The
+	{ Nb }Kab -> { Nb-1 }Kab 
+is replaced by
+	{ Nb, 0 }Kab -> { Nb, 1 }Kab
+
+ *)
+
+
+pred c/1 elimVar, decompData.
+pred comp/1 elimVar, decompData.
+
+fun encrypt/2.
+fun host/1.
+
+(* constants 0 and 1 *)
+
+data c0/0.
+data c1/0.
+
+not c:Kas[].
+not c:Kbs[].
+
+query c:secretA[i].
+query c:secretB[i].
+query c:secretA[c1].
+query c:secretB[c1].
+
+reduc
+
+(* Attacker *)
+
+c:k & c:encrypt(m,k) -> c:m;
+c:host(x);
+c:x & c:y -> c:encrypt(x,y);
+
+(* key compromise *)
+
+comp:Kas[];
+comp:Kbs[];
+comp:x -> comp:Na[x,c0];
+comp:x & comp:y -> comp:Nb[x,y,c0];
+comp:x & comp:y & comp:z -> comp:k[x,y,z,c0]; 
+comp:x -> comp:host(x);
+comp:x & comp:y -> comp:encrypt(x,y);
+comp:x -> c:Na[x, c0];
+comp:x & comp:y -> c:Nb[x,y,c0];
+comp:x & comp:y & comp:z -> c:k[x,y,z,c0]; 
+
+(* A *)
+
+c:h -> c:(host(Kas[]), h, Na[h,i]);
+c:encrypt((Na[h,i], h, key, m), Kas[]) -> c:m;
+c:encrypt((Na[h,i], h, key, m), Kas[]) & c:encrypt((n, c0), key) -> c:encrypt((n, c1), key);
+
+c:encrypt((Na[host(Kbs[]),i], host(Kbs[]), key, m), Kas[]) -> c:encrypt(secretA[i], key);
+
+
+(* B *)
+
+c:encrypt((key, h), Kbs[]) -> c:encrypt((Nb[key,h,i], c0), key);
+
+c:encrypt((key, host(Kas[])), Kbs[]) & c:encrypt((Nb[key,host(Kas[]),i], c1), key) -> c:encrypt(secretB[i], key);
+
+(* S *)
+
+c:(host(Ks1), host(Ks2), n) -> c:encrypt((n, host(Ks2), k[Ks1, Ks2, n, i], encrypt((k[Ks1, Ks2, n, i], host(Ks1)), Ks2)), Ks1).

@@ -1,0 +1,171 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Simpler Yahalom protocol, as suggested in Burrows, Abadi, Needham, SRC039
+
+A -> B: A, N_A
+B -> S: B, N_B, { A, N_A }_Kbs
+S -> A: N_B, { B, K_ab, N_A }_Kas, { A, K_ab, N_B }_Kbs
+A -> B: { A, K_ab, N_B }_Kbs, { N_B }_Kab
+
+Full agreement is wrong (the adversary can arrange so that A does not see
+{ A, K_ab, N_B }_Kbs).
+
+No agreement on N_A, but agreement on N_B and on the session key K_ab.
+
+Attack of Syverson for evinj:endAparam(x) ==> evinj:beginAparam(x).
+*)
+
+free c: channel.
+
+type key.
+type host.
+type nonce.
+
+fun nonce_to_bitstring(nonce): bitstring [data,typeConverter].
+
+(* Shared key encryption *)
+
+fun encrypt(bitstring,key): bitstring.
+reduc forall x: bitstring, y: key; decrypt(encrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+(* 2 honest host names A and B *)
+
+free A, B: host.
+
+(* the table host names/keys 
+   The key table consists of pairs 
+   (host, key shared between the host and the server) *)
+table keys(host, key).
+
+(* Queries *)
+
+free secretA, secretB: bitstring [private].
+query attacker(secretA);
+      attacker(secretB).
+
+event endAparam(host, host).
+event endBparam(host, host).
+event beginAparam(host, host).
+event beginBparam(host, host).
+event endBkey(host, host, nonce, key).
+event beginBkey(host, host, nonce, key).
+
+query x: host, y: host; inj-event(endAparam(x, y)) ==> inj-event(beginAparam(x, y)).
+query x: host, y: host; inj-event(endBparam(x, y)) ==> inj-event(beginBparam(x, y)).
+query x: host, y: host, z: nonce, t: key; inj-event(endBkey(x,y,z,t)) ==> inj-event(beginBkey(x,y,z,t)).
+
+(* Role of the initiator with identity xA and key kas shared with S *)
+
+let processInitiator =
+        (* The attacker starts the initiator by choosing identity xA.
+	   We check that xA is honest (i.e. is A or B)
+	   and get its corresponding key.
+	*)
+        in(c, xA: host);
+	if xA = A || xA = B then
+	get keys(=xA, kas) in
+	(* Real start of the role *)
+	new Na: nonce; 
+	out(c, (xA, Na)); 
+	in(c, (nb: nonce, m1: bitstring, m2: bitstring));
+        let (b: host, kab: key, na2: nonce) = decrypt(m1, kas) in
+	event beginBparam(b, xA);
+	event beginBkey(b, xA, nb, kab);
+        if na2 = Na then 
+        out(c, (m2, encrypt(nonce_to_bitstring(nb), kab)));
+	(* OK protocol finished 
+	   If the interlocutor is honest, execute the events endAparam
+           and send a test message to check that the key kab is secret *)
+	if b = A || b = B then
+	event endAparam(xA, b);
+	out(c, encrypt(secretA, kab)).
+
+(* Role of the responder with identity xB and key kbs shared with S *)
+                         
+let processResponder =
+        (* The attacker starts the responder by choosing identity xB.
+	   We check that xB is honest (i.e. is A or B)
+	   and get its corresponding key. *)
+        in(c, xB: host);
+	if xB = A || xB = B then
+	get keys(=xB, kbs) in
+	(* Real start of the role *)
+	in(c, (a: host, na: nonce)); 
+	event beginAparam(a, xB);
+        new Nb: nonce; 
+	out(c, (xB, Nb, encrypt((a, na), kbs)));
+	in(c, (m3: bitstring, m4: bitstring));
+        let (=a, kab: key, =Nb) = decrypt(m3, kbs) in
+        if nonce_to_bitstring(Nb) = decrypt(m4, kab) then
+	(* OK protocol finished 
+           If the interlocutor is honest, execute the events endBparam
+           and endBkey, and send a test message to check that the key kab 
+	   is secret *)
+	if a = A || a = B then
+	event endBparam(xB, a);
+	event endBkey(xB, a, Nb, kab);
+	out(c, encrypt(secretB, kab)). 
+
+(* Server *)
+
+let processS = 
+	in(c, (b: host, nb: nonce, m5: bitstring));
+	get keys(=b, kbs2) in (* get the key of b from the key table *)
+        let (a: host, na: nonce) = decrypt(m5,kbs2) in
+	get keys(=a, kas2) in (* get the key of a from the key table *)
+        new kab: key;
+	out(c, (nb, encrypt((b, kab, na), kas2), encrypt((a, kab, nb), kbs2))).
+
+(* Key registration *)
+
+let processK =
+        in(c, (h: host, k: key));
+        if h <> A && h <> B then insert keys(h,k).
+
+(* Start process *)
+
+process
+	new Kas: key; new Kbs: key;
+	insert keys(A, Kas);
+	insert keys(B, Kbs);
+	(
+          (* Launch an unbounded number of sessions of the initiator *)
+          (!processInitiator) | 
+          (* Launch an unbounded number of sessions of the responder *)
+          (!processResponder) |
+          (* Launch an unbounded number of sessions of the server *)
+          (!processS) |
+          (* Key registration process *)
+	  (!processK)
+        )
+

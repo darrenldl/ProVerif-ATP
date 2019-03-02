@@ -1,0 +1,88 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* set ignoreTypes = true. *)
+
+type skey.
+type pkey.
+type host.
+type key.
+
+pred c(any_type) [elimVar,decompData].
+
+fun pk(skey):pkey.
+fun encrypt(bitstring,pkey):bitstring.
+
+fun sign(bitstring,skey):bitstring.
+
+fun sencrypt(bitstring,key):bitstring.
+
+fun host(skey):host.
+
+name secret:bitstring.
+name sA:skey.
+name sB:skey.
+name sS:skey.
+name k:key.
+
+query c(secret[]).
+
+not c(sA[]).
+not c(sB[]).
+not c(sS[]).
+
+clauses
+(* Initialization *)
+
+c(pk(sA[]));
+c(pk(sB[]));
+c(pk(sS[]));
+
+(* The attacker *)
+
+forall x:skey, m:bitstring; c(x) & c(encrypt(m,pk(x))) -> c(m);
+forall x:skey; c(x) -> c(pk(x));
+forall x:bitstring, y:pkey; c(x) & c(y) -> c(encrypt(x,y));
+forall x:bitstring, y:skey; c(sign(x,y)) -> c(x);
+forall x:bitstring, y:skey; c(x) & c(y) -> c(sign(x,y));
+forall x:skey; c(host(x));
+forall x:bitstring, y:key; c(x) & c(y) -> c(sencrypt(x,y));
+forall x:key, m:bitstring; c(x) & c(sencrypt(m,x)) -> c(m);
+
+(* The protocol *)
+(* A *)
+
+forall x:skey, pkx:pkey; c((sign((host(sA[]), pk(sA[])), sS[]), sign((host(x), pkx), sS[]))) -> 
+c((sign((host(sA[]), pk(sA[])), sS[]), sign((host(x), pkx), sS[]), encrypt(sign((host(sA[]), host(x), k[pkx]), sA[]), pkx)));
+
+(* B *)
+
+forall s1:skey, xk:key; c((sign((host(sA[]), pk(s1)), sS[]), sign((host(sB[]), pk(sB[])), sS[]), encrypt(sign((host(sA[]), host(sB[]), xk), s1), pk(sB[])))) -> c(sencrypt(secret[], xk));
+
+(* server *)
+
+forall s1:skey, s2:skey; c((host(s1), host(s2))) -> c((sign((host(s1), pk(s1)), sS[]), sign((host(s2), pk(s2)), sS[]))).

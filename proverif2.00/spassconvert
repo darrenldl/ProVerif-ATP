@@ -1,0 +1,28 @@
+#!/bin/sh
+
+echo Needham-Schroeder public key
+./proverif -out spass -o examples/horn/spass/needham-orig examples/horn/secr/needham-orig
+echo Needham-Schroeder public key corrected
+./proverif -out spass -o examples/horn/spass/needham-corr-orig examples/horn/secr/needham-corr-orig
+echo Needham-Schroeder shared key
+./proverif -out spass -o examples/horn/spass/needham-shr-orig4 examples/horn/secr/needham-shr-orig4
+echo Needham-Schroeder shared key corrected
+./proverif -out spass -o examples/horn/spass/needham-shr-corr4 examples/horn/secr/needham-shr-corr4
+echo Denning-Sacco
+./proverif -out spass -o examples/horn/spass/denning-sacco-orig examples/horn/secr/denning-sacco-orig
+echo Denning-Sacco corrected
+./proverif -out spass -o examples/horn/spass/denning-sacco-corr-orig examples/horn/secr/denning-sacco-corr-orig
+echo Otway-Rees
+./proverif -out spass -o examples/horn/spass/otway-rees-orig examples/horn/secr/otway-rees-orig
+echo Otway-Rees Paulson err
+./proverif -out spass -o examples/horn/spass/otway-rees-paulson-err examples/horn/secr/otway-rees-paulson-err
+echo Yahalom
+./proverif -out spass -o examples/horn/spass/yahalom examples/horn/secr/yahalom
+echo Simplified Yahalom
+./proverif -out spass -o examples/horn/spass/simpleryahalom examples/horn/secr/simpleryahalom
+echo Skeme
+./proverif -out spass -o examples/horn/spass/skeme2 examples/horn/secr/skeme2
+./proverif -out spass -o examples/horn/spass/skeme3 examples/horn/secr/skeme3
+
+
+

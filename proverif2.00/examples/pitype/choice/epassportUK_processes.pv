@@ -1,0 +1,90 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* ePassport Protocol
+   Taken from Myrto Ryan, CSF'10 *)
+   
+(* set simplifyProcess = interactive. *)
+
+fun enc(bitstring, bitstring): bitstring.
+fun mac(bitstring,bitstring): bitstring.
+
+(* Symetric decryption *)
+
+reduc forall x: bitstring, y:bitstring; dec(enc(x,y),y) = x.
+
+
+(* addition of one *)
+
+free c: channel.
+free d_k:channel [private].
+free get_challenge: bitstring.
+free error_6A80: bitstring.
+free error: bitstring [private].
+
+let reader(c_k:channel) =
+	in(c_k, x_k:bitstring);
+	let (ke:bitstring,km:bitstring) = x_k in
+	out(c, get_challenge);
+	in(c,nt:bitstring);
+	new nr:bitstring; 
+	new kr:bitstring;
+	let m:bitstring = enc((nr,nt,kr),ke) in
+	out(c,(m,mac(m,km)));
+	in(c,y:bitstring).
+
+let passportUK(c_k:channel, ke:bitstring, km:bitstring) =
+	out(c_k,(ke,km));
+	in(c,x:bitstring);
+	if x = get_challenge
+	then
+	  new nt:bitstring;
+	  out(c,nt);
+	  in(c,y:bitstring);
+	  
+	  let (m_e:bitstring,m_m:bitstring) = y in
+	    if mac(m_e,km) = m_m
+	    then
+	      let (nr:bitstring,nt':bitstring,kr:bitstring) = dec(m_e,ke) in
+	        if nt = nt'
+	        then
+	          new kt:bitstring;
+	          let m:bitstring = enc((nt,nr,kt),ke) in
+	            out(c,(m,mac(m,km)))
+	          else 0
+	        else
+	          out(c,error_6A80)
+	      else
+	        out(c, error_6A80)
+	    else
+	      out(c,error_6A80).
+
+
+equivalence
+	new c_k:channel;(!reader(c_k) | !new ke:bitstring; new km:bitstring; passportUK(c_k,ke,km))
+	
+	new c_k:channel;(!reader(c_k) | !new ke:bitstring; new km:bitstring; !passportUK(c_k,ke,km))

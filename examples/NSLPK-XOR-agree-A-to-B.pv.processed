@@ -1,0 +1,177 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+fun tuple_2_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0((x0, x1)) = x0.
+
+fun tuple_2_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_1((x0, x1)) = x1.
+
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free I : bitstring.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+const ZERO : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+fun pkey(bitstring) : bitstring.
+
+table keys(bitstring, bitstring).
+
+fun sign(bitstring, bitstring) : bitstring.
+fun checksign(bitstring, bitstring) : bitstring.
+fun getmess(bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    checksign(sign(m, k), pkey(k)) = m.
+equation
+  forall m : bitstring, k : bitstring; 
+    getmess(sign(m, k)) = m.
+
+fun dec(bitstring, bitstring) : bitstring.
+fun enc(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
+
+fun aenc(bitstring, bitstring) : bitstring.
+fun adec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    adec(aenc(m, pkey(k)), k) = m.
+
+free objective : bitstring [private].
+
+query 
+  attacker(objective).
+
+const client_A_STEP_1 : bitstring.
+const client_A_STEP_2 : bitstring.
+const client_A_STEP_3 : bitstring.
+
+let client_A(skA : bitstring, pkS : bitstring) =
+  new Na : bitstring;
+  out(c, ((A, I), client_A_STEP_1));
+  in(c, sign_I_pkI : bitstring);
+  
+  if eq(tuple_2_get_0(checksign(sign_I_pkI, pkS)), I) then
+  let pkI : bitstring = tuple_2_get_1(checksign(sign_I_pkI, pkS)) in
+  out(c, (aenc((Na, A), pkI), client_A_STEP_2));
+  in(c, aenc_Na_xor_I_Ni : bitstring);
+  let Na_xor_I : bitstring = tuple_2_get_0(adec(aenc_Na_xor_I_Ni, skA)) in
+  let Ni : bitstring = tuple_2_get_1(adec(aenc_Na_xor_I_Ni, skA)) in
+  
+  if eq(xor(Na_xor_I, Na), I) then
+  out(c, (aenc(Ni, pkI), client_A_STEP_3));
+  0.
+
+const client_B_STEP_1 : bitstring.
+const client_B_STEP_2 : bitstring.
+const client_B_STEP_3 : bitstring.
+
+let client_B(skB : bitstring, pkS : bitstring) =
+  new Nb : bitstring;
+  out(c, ((B, A), client_B_STEP_1));
+  in(c, sign_A_pkA : bitstring);
+  
+  if eq(tuple_2_get_0(checksign(sign_A_pkA, pkS)), A) then
+  let pkA : bitstring = tuple_2_get_1(checksign(sign_A_pkA, pkS)) in
+  in(c, aenc_Na_A : bitstring);
+  let Na : bitstring = tuple_2_get_0(adec(aenc_Na_A, skB)) in
+  
+  if eq(tuple_2_get_1(adec(aenc_Na_A, skB)), A) then
+  out(c, (aenc((xor(Na, B), Nb), pkA), client_B_STEP_2));
+  in(c, aenc_Nb : bitstring);
+  
+  if eq(adec(aenc_Nb, skB), Nb) then
+  out(c, (objective, client_B_STEP_3));
+  0.
+
+const key_retrieval_server_STEP_1 : bitstring.
+
+let key_retrieval_server(skS : bitstring) =
+  in(c, (src : bitstring, dst : bitstring));
+  get keys(=dst, pkDst) in
+  out(c, (sign((dst, pkDst), skS), key_retrieval_server_STEP_1));
+  0.
+
+let key_register_server =
+  in(c, (host : bitstring, pk : bitstring));
+  
+  if host <> A && host <> B then
+  insert keys(host, pk);
+  0.
+
+const STEP_1 : bitstring.
+const STEP_2 : bitstring.
+const STEP_3 : bitstring.
+
+process
+  new skA : bitstring;
+  new skB : bitstring;
+  new skS : bitstring;
+  let pkA = pkey(skA) in
+  let pkB = pkey(skB) in
+  let pkS = pkey(skS) in
+  insert keys(A, pkA);
+  insert keys(B, pkB);
+  out(c, (pkA, STEP_1));
+  out(c, (pkB, STEP_2));
+  out(c, (pkS, STEP_3));
+  (
+    ! (
+      client_A(skA, pkS)
+    )
+  )
+  | (
+    (
+      ! (
+        client_B(skB, pkS)
+      )
+    )
+    | (
+      (
+        ! (
+          key_retrieval_server(skS)
+        )
+      )
+      | (
+        ! (
+          key_register_server
+        )
+      )
+    )
+  )

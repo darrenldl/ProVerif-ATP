@@ -1,0 +1,51 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+free c : channel.
+free k : bitstring [private].
+
+fun h(bitstring) : bitstring.
+fun xor(bitstring, bitstring) : bitstring.
+
+const ZERO : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+free objective : bitstring [private].
+
+query 
+  attacker(objective).
+
+const T_STEP_1 : bitstring.
+const T_STEP_2 : bitstring.
+
+let T =
+  in(c, r1 : bitstring);
+  out(c, (h(xor(k, r1)), T_STEP_1));
+  in(c, k_xor_k1 : bitstring);
+  let k1 = xor(k_xor_k1, k) in
+  out(c, (objective, T_STEP_2));
+  0.
+
+process
+  T

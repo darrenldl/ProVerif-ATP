@@ -1,0 +1,228 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* JFKr *)
+
+(* Exponential and Diffie-Hellman *)
+
+data g/0.
+fun exp/2.
+equation exp(exp(g,y),z) = exp(exp(g,z),y).
+
+(* Signature *)
+
+fun S/2.
+fun Pk/1.
+data true/0.
+reduc V(S(k,v), Pk(k),v) = true.
+reduc RecoverKey(S(k,v)) = Pk(k). (* For the attacker *)
+reduc RecoverText(S(k,v)) = v.    (* For the attacker *)
+
+(* Shared-key encryption *)
+
+fun E/2.
+reduc D(k,E(k,v)) = v.
+
+(* Keyed hash function *)
+
+fun H/2.
+
+(* Sets 
+
+data consset/2.
+data emptyset/0.
+pred member/2.
+clauses
+  member:x,consset(x,y);
+  member:x,y -> member:x,consset(z,y).
+*)
+
+(* Tags *)
+
+data tagE/0. data tagA/0. data tagV/0.
+
+(* Constructors for JFK's formatted messages
+   Selectors are implicit when using "data" *)
+
+data cons1/2. data cons2/5. data cons3/7. data cons4/2.
+
+(* More constants *)
+
+data constI/0. data constR/0. data saR/0.
+
+(* Free names *)
+
+free c. (* Public channel *)
+free pub, genprinc, getexponential, grpinfoR, init0, getprinc0.
+
+(* Secrecy assumptions *)
+
+not kAminus phase 0.
+not d.
+
+(* Initiator 
+   The process processI corresponds to I^A in the figure. *)
+
+let processI =
+  !
+  in(exponent, (dI, xI));
+  !
+  in(init, dummy);    (* Init message *)
+  new NI; 
+  out(c, cons1(NI, xI));
+  in(c, cons2(=NI, NR, xR, grpinfoR, tR));
+  let h = exp(xR, dI) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  let sI = S(kAminus, (NI, NR, xI, xR, grpinfoR)) in
+  out(getI, (dummy, NI, NR, xI, xR, tR, Ka, Ke, Kv, sI)).
+
+(* Responder
+   The process processR corresponds to R^A in the figure. *)
+
+let processR =
+  !
+  in(exponent, (dR, xR));
+  !
+  in(c, cons1(NI, xI));
+  new NR;
+  new tR;
+  out(c, cons2(NI, NR, xR, grpinfoR, tR));
+  new l;
+  (
+    (
+    !
+    in(c, cons3(=NI,=NR,xI,=xR,=tR,eI,hI));
+    out(l, (xI,eI,hI))
+    )
+  |
+    (
+    in(l, (xI,eI,hI));
+    processR4
+    )
+  ).
+
+let processR4 =
+  out(d0, (NR, IDA)) | 
+  let h = exp(xI,dR) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  let sR = S(kAminus, (NI, NR, xI, xR)) in
+  out(getR, (NI, NR, xI, xR, tR, eI, hI, Ka, Ke, Kv, sR)).
+
+(* Whole JFK system. *)
+
+process
+  new exponent;
+  new cp;
+  new ids;
+  ( ! new d; let x = exp(g,d) in out(getexponential, x); ! out(exponent, (d,x)) )
+  |
+  (
+    !
+    new kAminus;
+    let IDA = Pk(kAminus) in
+    new init; new getI; new getR;
+    out(getprinc0, (IDA, getI, getR, init));
+    ( processI | processR | (!out(cp, IDA)) | (!out(ids, (kAminus, IDA))))
+  )
+  |
+  (
+    in(ids, (kAIminus, IDAI));
+    in(ids, (kARminus, IDAR));
+    in(exponent, (dI,xI));
+    in(exponent, (dR,xR)); (* with in(pub, (NR, xR)) instead, attack for xR = g, so h = exp(g, dI) = xI. *) 
+    in(init0, (IDRp, saI,=IDAI,=IDAR,=xI,=xR));
+    new NI;
+    new NR; (* we could use instead in(pub, NR); *) 
+    new TR;
+    new NeI; new NhI; new NeR; new NhR; new NKv;
+    let h = exp(xR,dI) in
+    let Ka = H(h, (NI, NR, tagA)) in
+    let Ke = H(h, (NI, NR, tagE)) in
+    let Kv = H(h, (NI, NR, tagV)) in
+    let sR = S(kARminus, (NI, NR, xI, xR)) in
+    let eR = E(Ke, (IDAR, saR, sR)) in
+    let hR = H(Ka, (constR, eR)) in
+    let sI = S(kAIminus, (NI, NR, xI, xR, grpinfoR)) in
+    let eI = E(Ke, (IDAI, IDRp, saI, sI)) in
+    let hI = H(Ka, (constI, eI)) in
+    out(pub, (NI, NR, TR,
+	choice[eI, NeI], 
+	choice[hI, NhI],
+	choice[eR, NeR],
+	choice[hR, NhR],
+	choice[Kv, NKv]))
+  )      
+    
+
+    
+(* Context:
+
+new getprinc0;
+(
+  []
+|
+  !
+  in(getprinc0, (IDA, getI, getR, init));
+  new connect; new accept; new channelSIA;
+  out(getprinc, (IDA, init, accept, connect, channelSIA));
+  in(channelSIA, SIA);
+  event princ(kAminus, IDA, init, accept, connect, SIA);
+  ( processI2 | processR2 )
+)
+
+let processI2 =
+  !
+  in(getI, ((IDRp, saI), NI, NR, xI, xR, tR, Ka, Ke, Kv, sI));
+  let eI = E(Ke, (IDA, IDRp, saI, sI)) in
+  let hI = H(Ka, (constI, eI)) in
+  out(c, cons3(NI, NR, xI, xR, tR, eI, hI));
+  in(c, cons4(eR, hR));
+  if H(Ka, (constR, eR)) = hR then
+  let (IDRl, saR, sR) = D(Ke, eR) in
+  if V(sR, IDRl, (NI, NR, xI, xR)) = true then 
+  out(connect, (IDRl, IDRp, saI, saR, Kv)).
+
+let processR2 =
+  !
+  in(getR, (NI, NR, xI, xR, tR, eI, hI, Ka, Ke, Kv, sR));
+  if H(Ka, (constI, eI)) = hI then
+  let (IDIl, IDRp, saI, sI) = D(Ke,eI) in
+  if member:IDIl,SIA then
+  if V(sI, IDIl, (NI, NR, xI, xR, grpinfoR)) = true then
+  out(accept, (IDIl, IDRp, saI, saR, Kv));
+  let eR = E(Ke, (IDA, saR, sR)) in
+  let hR = H(Ka, (constR, eR)) in
+  out(c, cons4(eR, hR)).
+
+By putting the above process inside the above context, we get the
+full JFK script. (version without cache)
+
+*)

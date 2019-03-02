@@ -1,0 +1,53 @@
+free c : channel.
+
+const ZERO : bitstring.
+
+free k : bitstring [private].
+
+fun h(bitstring) : bitstring.
+fun xor(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+free objective_R : bitstring [private].
+
+query 
+  attacker(objective_R).
+
+let R =
+  new r0 : bitstring;
+  out(c, r0);
+  in(c, (r1_in : bitstring, h_res : bitstring));
+  
+  if h_res = h(xor(xor(r0, r1_in), k)) then
+  out(c, h(xor(xor(h_res, k), r0)));
+  out(c, objective_R);
+  0.
+
+let knowledge_from_1st_round =
+  new r0_from_1st : bitstring;
+  new r1_from_1st : bitstring;
+  out(c, r0_from_1st);
+  let h_res = h(xor(xor(r0_from_1st, r1_from_1st), k)) in
+  out(c, (r1_from_1st, h_res));
+  out(c, h(xor(xor(h_res, k), r0_from_1st)));
+  0.
+
+process
+  (
+    knowledge_from_1st_round
+  )
+  | (
+    R
+  )

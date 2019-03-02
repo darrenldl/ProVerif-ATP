@@ -1,0 +1,35 @@
+#!/bin/sh
+
+if [ -x ../../../xtime ]
+then
+    PROG=../../../xtime
+else 
+    PROG=time
+fi
+
+ocamlc -o ffgg ffgg.ml
+
+for i in 10 50 100 150 200
+do
+    ./ffgg $i > ffgg$i.pv
+    (echo "set traceDisplay = long."; cat ffgg$i.pv) > ffgg$i-long.pv
+    (echo "set reconstructTrace = no."; cat ffgg$i.pv) > ffgg$i-notrace.pv
+done
+
+(
+
+for i in 10 50 100 150 200
+do
+    echo FFGG$i
+    echo -n "No trace: "
+    $PROG ../../../proverif ffgg$i-notrace.pv > ffgg$i.out.notrace
+    grep user ffgg$i.out.notrace
+    echo -n "Short display: "
+    $PROG ../../../proverif ffgg$i.pv > ffgg$i.out
+    grep user ffgg$i.out
+#    echo -n "Long display: "
+#    $PROG ../../../proverif ffgg$i-long.pv > ffgg$i.out.long
+#    grep user ffgg$i.out.long
+done
+
+) | tee results

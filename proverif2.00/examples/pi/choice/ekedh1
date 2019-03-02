@@ -1,0 +1,115 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Bellovin, Merritt, Oakland 92, section 3.1
+   Version in which A and B talk to anybody
+
+   The tool was very slow on this example. Some subsumption
+   tests take more than 2 minutes! Problem solved by the following
+   optimization: when phases 0 to i do not contain choice, we
+   use attacker/mess instead of attacker2/mess2 for them
+   (because the left and right sides are always equal in these
+   phases).
+ *)
+
+free c.
+
+(* Symmetric cryptography
+   One does not know whether decryption succeeds or not
+   For use with weak secrets *)
+
+fun enc/2.
+fun dec/2.
+equation dec(enc(x,y),y) = x.
+equation enc(dec(x,y),y) = x.
+
+(* Symmetric cryptography
+   One knows whether decryption succeeds or not *)
+
+fun senc/2.
+reduc sdec(senc(x,y),y) = x.
+
+(* Diffie-Hellman *)
+
+fun g/1.
+fun f/2.
+equation f(x,g(y)) = f(y,g(x)).
+
+(* Host name -> password *)
+
+fun passwdA/1. (* passwdA(hostX) = the password that X shares with A *)
+fun passwdB/1. (* passwdB(hostX) = the password that X shares with B *)
+
+(* param verboseRules  = yes. *)
+
+free hostA, hostB.
+private free P.
+
+let processA =
+	new RA;
+	out(c, (hostA, enc(g(RA), P)));
+	in(c,(m2,m3));
+	let gRB = dec(m2,P) in
+	let K = f(RA, gRB) in
+	let challengeB = sdec(m3, K) in
+	new challengeA;
+	out(c, senc((challengeA,challengeB), K));
+	in(c, m4);
+	if (challengeA) = sdec(m4, K) then
+	0.
+
+
+let processB =
+	in(c, (=hostX, m));
+	let gRA = dec(m, P) in
+	new RB;
+	let K = f(RB, gRA) in
+	new challengeB;
+	out(c, (enc(g(RB), P), senc(challengeB, K)));
+	in(c,m3);
+	let (challengeA,=challengeB) = sdec(m3, K) in
+	out(c, senc((challengeA), K)).
+
+let processAtalkingX =
+	in(c, hostX);
+	let P = passwdA(hostX) in
+	processA.
+
+let processBtalkingX =
+	in(c, hostX);
+	let P = passwdB(hostX) in
+	processB.
+
+process 
+
+	(!let hostX = hostB in processA) | 
+	(!let hostX = hostA in processB) | 
+	(!processAtalkingX) | 
+	(!processBtalkingX) |
+	(phase 1;
+	new w;
+	out(c, choice[w,P]))

@@ -1,0 +1,100 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+Yahalom protocol. Version of Burrows, Abadi, Needham, SRC039
+
+Message 1 A -> B: A; Na 
+Message 2 B -> S: B; { A; Na; Nb }Kbs 
+Message 3 S -> A: { B; Kab; Na; Nb }Kas ; { A; Kab }Kbs 
+Message 4 A -> B: { A; Kab }Kbs ; { Nb }Kab
+
+*)
+
+free c.
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+(* Shared key cryptography *)
+
+fun encrypt/2.
+reduc decrypt(encrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not kas.
+not kbs.
+
+private free secretA, secretB.
+query attacker:secretA;
+      attacker:secretB.
+query evinj:endAparam(x,y) ==> evinj:beginAparam(x,y).
+query evinj:endAkey(x,y,z) ==> evinj:beginAkey(x,y,z).
+query evinj:endBparam(x,y) ==> evinj:beginBparam(x,y).
+query evinj:endBkey(x,y,z) ==> evinj:beginBkey(x,y,z).
+
+let processA =
+	new Na;
+	out(c, (host(kas), Na));
+	in(c, (cert1, cert2));
+	let (b, k, =Na, nb) = decrypt(cert1, kas) in
+	event beginBparam(host(kas), b);
+	event beginBkey(host(kas), b, k);
+	out(c, (cert2, encrypt(nb, k)));
+	(* OK *)
+	if b = host(kbs) then
+	event endAparam(host(kas), b);
+	event endAkey(host(kas), b, k);
+	out(c, encrypt(secretA, k)).
+
+let processB =
+	in(c, (a,na));
+	event beginAparam(a,host(kbs));
+	new Nb;
+	out(c, (host(kbs), encrypt((a, na, Nb), kbs)));
+	in(c, (cert2, m));
+	let (=a, k) = decrypt(cert2, kbs) in
+	event beginAkey(a, host(kbs), k);
+	if Nb = decrypt(m, k) then
+	(* OK *)
+	if a = host(kas) then
+	event endBparam(a, host(kbs));
+	event endBkey(a, host(kbs), k);
+	out(c, encrypt(secretB, k)).
+
+let processS =
+	in(c, (h2, m));
+	let k2 = getkey(h2) in
+	let (h1, n1, n2) = decrypt(m, k2) in
+	let k1 = getkey(h1) in
+	new k;
+	out(c, (encrypt((h2, k, n1, n2), k1), encrypt((h1, k), k2))).
+
+
+process new kas; new kbs; 
+	((!processA) | (!processB) | (!processS))

@@ -1,0 +1,157 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Needham Shroeder shared key protocol
+
+The weakness of this protocol is that if an attacker has
+a session key k[Kas[], Kbs[], Na[Kbs[],session0]]
+for one session0, he can have all secrets of B, since B cannot
+distinguish different sessions.
+
+Notice that we have slightly changed the protocol such that
+the analyzer terminates. The
+	{ Nb }Kab -> { Nb-1 }Kab 
+is replaced by
+	{ Nb, 0 }Kab -> { Nb, 1 }Kab
+
+
+Three predicates:
+comp:M iff M is a term containing only names of session0
+cs0:M iff the attacker can get M in session0
+cs1:M iff the attacker can get M in session1 using compromised terms 
+of session0.
+
+Rules:
+1) rules for comp:
+2) comp:x1 & ... & comp:xn -> cs0:a[session0,x1, ..., xn] for every 
+session name a
+3) the usual rules of the protocol with cs0 and session0
+4) cs0:M -> cs1:M
+5) the usual rules of the protocol with cs1 and session1
+
+ *)
+
+
+pred cs0/1 elimVar, decompData.
+pred cs1/1 elimVar, decompData.
+pred comp/1 elimVar, decompData.
+
+not cs0:Kas[].
+not cs1:Kas[].
+
+fun encrypt/2.
+
+fun host/1.
+
+(* constants 0 and 1 *)
+
+data c0/0.
+data c1/0.
+
+data session0/0.
+data session1/0.
+
+query cs1:secretA[session1].
+query cs1:secretB[session1].
+
+reduc
+
+(* Attacker *)
+
+cs0:k & cs0:encrypt(m,k) -> cs0:m;
+cs0:host(x);
+cs0:x & cs0:y -> cs0:encrypt(x,y);
+
+(* key compromise *)
+
+comp:Kas[];
+comp:x -> comp:Na[x,session0];
+comp:x -> comp:J[x,session0];
+comp:x & comp:y -> comp:Nb[x,y,session0];
+comp:x & comp:y & comp:z -> comp:k[x,y,z,session0]; 
+comp:x -> comp:host(x);
+comp:x & comp:y -> comp:encrypt(x,y);
+comp:secretA[session0];
+comp:secretB[session0];
+
+comp:x -> cs0:Na[x, session0];
+comp:x -> cs0:J[x,session0];
+comp:x & comp:y -> cs0:Nb[x,y,session0];
+comp:x & comp:y & comp:z -> cs0:k[x,y,z,session0]; 
+cs0:secretA[session0];
+cs0:secretB[session0];
+
+(* A *)
+
+cs0:h & cs0:bm -> cs0:(host(Kas[]), h, Na[h,session0], bm);
+cs0:encrypt((Na[h,session0], h, key, m), Kas[]) -> cs0:m;
+cs0:encrypt((Na[h,session0], h, key, m), Kas[]) & cs0:encrypt((c0, n), key) -> cs0:encrypt((c1, n), key);
+
+cs0:encrypt((Na[host(Kas[]),session0], host(Kas[]), key, m), Kas[]) -> cs0:encrypt(secretA[session0], key);
+
+
+(* B *)
+
+cs0:h -> cs0:encrypt((h, J[h,session0]), Kas[]);
+cs0:encrypt((key, h, J[h,session0]), Kas[]) -> cs0:encrypt((c0, Nb[key,h,session0]), key);
+
+cs0:encrypt((key, host(Kas[]), J[host(Kas[]),session0]), Kas[]) & cs0:encrypt((c1, Nb[key, host(Kas[]), session0]), key) -> cs0:encrypt(secretB[session0], key);
+
+(* S *)
+
+cs0:(host(Ks1), host(Ks2), n, encrypt((host(Ks1), j), Ks2)) -> cs0:encrypt((n, host(Ks2), k[Ks1, Ks2, n, session0], encrypt((k[Ks1, Ks2, n, session0], host(Ks1), j), Ks2)), Ks1);
+
+(* Implication *)
+
+cs0:x -> cs1:x;
+
+(* Attacker *)
+
+cs1:k & cs1:encrypt(m,k) -> cs1:m;
+cs1:host(x);
+cs1:x & cs1:y -> cs1:encrypt(x,y);
+
+(* A *)
+
+cs1:h & cs1:bm -> cs1:(host(Kas[]), h, Na[h,session1], bm);
+cs1:encrypt((Na[h,session1], h, key, m), Kas[]) -> cs1:m;
+cs1:encrypt((Na[h,session1], h, key, m), Kas[]) & cs1:encrypt((c0, n), key) -> cs1:encrypt((c1, n), key);
+
+cs1:encrypt((Na[host(Kas[]),session1], host(Kas[]), key, m), Kas[]) -> cs1:encrypt(secretA[session1], key);
+
+
+(* B *)
+
+cs1:h -> cs1:encrypt((h, J[h,session1]), Kas[]);
+cs1:encrypt((key, h, J[h,session1]), Kas[]) -> cs1:encrypt((c0, Nb[key,h,session1]), key);
+
+cs1:encrypt((key, host(Kas[]), J[host(Kas[]),session1]), Kas[]) & cs1:encrypt((c1, Nb[key, host(Kas[]), session1]), key) -> cs1:encrypt(secretB[session1], key);
+
+(* S *)
+
+cs1:(host(Ks1), host(Ks2), n, encrypt((host(Ks1), j), Ks2)) -> cs1:encrypt((n, host(Ks2), k[Ks1, Ks2, n, session1], encrypt((k[Ks1, Ks2, n, session1], host(Ks1), j), Ks2)), Ks1).
+

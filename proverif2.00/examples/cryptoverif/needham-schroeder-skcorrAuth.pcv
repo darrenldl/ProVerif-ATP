@@ -1,0 +1,171 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Needham Schroeder shared key protocol.
+   Corrected version.
+   With messages of key confirmation, in order to prove correspondence
+   properties.
+ *)
+
+param N.
+param N2.
+param N3.
+
+type nonce [large,fixed].
+type host [bounded].
+type key [fixed].
+type enc_seed [fixed].
+
+
+(* Shared-key encryption (IND-CPA + INT-CTXT Stream cipher) *)
+proba Penc.
+proba Pencctxt.
+expand IND_CPA_INT_CTXT_sym_enc_all_args(key, bitstring, bitstring, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc, Pencctxt).
+
+
+(* Concatenation functions *)
+fun concat1(nonce, host, key, bitstring):bitstring [data].
+fun concat2(host, nonce):bitstring [data].
+fun concat3(key, host, nonce):bitstring [data].
+
+fun minusone(nonce):nonce [data].
+fun nonceToBitstring(nonce):bitstring [data].
+
+ifdef(`CryptoVerif',`
+equation forall y:key,z:host,t:nonce,y2:nonce,z2:host,t2:key,v2:bitstring;
+	concat3(y,z,t) <> concat1(y2,z2,t2,v2).
+equation forall z:host,t:nonce,y2:nonce,z2:host,t2:key,v2:bitstring;
+	concat2(z,t) <> concat1(y2,z2,t2,v2).
+equation forall z:host,t:nonce,y2:key,z2:host,t2:nonce;
+	concat2(z,t) <> concat3(y2,z2,t2).
+
+equation forall x:nonce; minusone(x) <> x.
+
+(* The function Z returns for each bitstring, a bitstring
+   of the same length, consisting only of zeroes. *)
+fun Zconcat1(bitstring):bitstring.
+const Zconcat2:bitstring.
+const Zconcat3:bitstring.
+equation forall y:nonce,z:host,t:key,u:bitstring;
+	Z(concat1(y,z,t,u)) = Zconcat1(Z(u)).
+equation forall y:host,z:nonce; 
+	Z(concat2(y,z)) = Zconcat2.
+equation forall y:key,z:host,t:nonce; 
+	Z(concat3(y,z,t)) = Zconcat3.
+equation forall m:bitstring, k:key, r: enc_seed;
+	Z(enc_r(m, k, r)) = Z(m).
+',`
+const Zbitstring:bitstring.
+equation forall x:bitstring; Z(x) = Zbitstring.
+')
+
+(* Peers *)
+const A : host.
+const B : host.
+fun acceptA(host):bitstring.
+fun acceptB(host):bitstring.
+
+(* Queries *)
+
+event partA(host, bitstring).
+event fullA(host, bitstring).
+event partB(host, bitstring).
+event fullB(host, bitstring).
+
+query x:bitstring; inj-event(partA(B,x)) ==> inj-event(partB(A,x)).
+query x:bitstring; inj-event(fullB(A,x)) ==> inj-event(fullA(B,x)).
+
+(* Channels and Processes *)
+channel c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, 
+	c15, c16, c17, start, finish.
+
+let processA(Kas: key) =
+	in(c1, (h: host, bm: bitstring)); (* From B - just forwarded, no authentication *)
+        new Na: nonce;
+        out(c3, (A, h, Na, bm)); (* To server *)
+        in(c4, m2: bitstring); (* From server *)
+        let injbot(concat1(=Na, =h, k, m)) = dec(m2, Kas) in
+	out(c5, m); (* To B *)
+	in(c15, e4:bitstring); (* From B *)
+	let injbot(nonceToBitstring(Nb)) = dec(e4, k) in
+	let e5 = enc(nonceToBitstring(minusone(Nb)), k) in
+	event partA(h, (m,e4));
+	event fullA(h, (m,e4,e5));
+	out(c16, (e5, acceptA(h))).
+
+let processB(Kbs: key) =
+	in(c6, h: host);
+	new J: nonce;
+	let e2 = enc(concat2(h,J), Kbs) in
+	out(c7, e2);
+	in(c8, m4: bitstring);
+	let injbot(concat3(k, =h, =J)) = dec(m4, Kbs) in
+	new Nb:nonce;
+	let e3 = enc(nonceToBitstring(Nb), k) in
+	event partB(h, (m4,e3));
+	out(c14, e3);
+	in(c17, e6:bitstring);
+	if injbot(nonceToBitstring(minusone(Nb))) = dec(e6, k) then
+	event fullB(h, (m4,e3,e6));
+	out(c13, acceptB(h)).
+
+table keys(host, key).
+
+let processK(Kas:key, Kbs:key) =
+	in(c9, (Khost: host, Kkey: key));
+	if Khost = A then
+	   insert keys(A, Kas)
+	else if Khost = B then
+	   insert keys(B, Kbs)
+	else
+	   insert keys(Khost, Kkey).
+
+let processS = 
+	in(c10, (h1: host, h2: host, n: nonce, bm: bitstring));
+	get keys(=h1, kh1) in
+	get keys(=h2, kh2) in
+	let injbot(concat2(=h1, j)) = dec(bm, kh2) in
+	new k: key;
+	let e3 = enc(concat3(k, h1, j), kh2) in
+	let e4 = enc(concat1(n, h2, k, e3), kh1) in
+	out(c11, e4).
+
+process
+	in(start, ());
+	new Kas: key;
+	new Kbs: key;
+	out(start, ());
+	((! iA <= N processA(Kas)) |
+	 (! iB <= N processB(Kbs)) |
+	 (! iS <= N processS) |
+	 (! iK <= N2 processK(Kas,Kbs)))
+
+
+(* EXPECTED
+All queries proved.
+7.000s (user 7.000s + system 0.000s), max rss 100832K
+END *)

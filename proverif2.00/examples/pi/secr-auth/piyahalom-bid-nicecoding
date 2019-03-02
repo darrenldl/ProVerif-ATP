@@ -1,0 +1,147 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c.
+(* 
+
+A -> B : A, N_A
+B -> S : B, N_B, { A, N_A }_Kbs
+S -> A : N_B, { B, K_ab, N_A }_Kas, { A, K_ab, N_B }_Kbs
+A -> B : { A, K_ab, N_B }_Kbs, { N_B }_Kab
+
+Full agreement is wrong (the adversary can arrange so that A does not see
+{ A, K_ab, N_B }_Kbs).
+
+No agreement on N_A, but agreement on N_B and on the session key K_ab.
+
+Attack of Syverson for evinj:endAparam(x) ==> evinj:beginAparam(x).
+*)
+
+(* Table of host names/keys shared with the server 
+   The constructor host maps keys to host names.
+   The private destructor getkey maps host names to keys.
+
+   The adversary can create any number of dishonest participants
+   by generating a fresh key k and computing host(k) to get the 
+   corresponding identity.
+ *)
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+(* Shared key cryptography *)
+
+fun encrypt/2.
+reduc decrypt(encrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not kas.
+
+(* honestParticipants is a private channel on which we send the name of
+   the honest participants; we use this information to test whether
+   a participant is honest *)
+private free honestParticipants.
+
+private free secretA, secretB.
+query attacker:secretA;
+      attacker:secretB.
+
+query evinj:endAparam(x) ==> evinj:beginAparam(x).
+query evinj:endBparam(x) ==> evinj:beginBparam(x).
+query evinj:endBkey(x,y,z,t) ==> evinj:beginBkey(x,y,z,t).
+
+(* Role of the initiator with identity A and key kas shared with S *)
+
+let processInitiator =
+	new Na; 
+	out(c, (A, Na)); 
+	in(c, (nb, m1, m2));
+        let (b, kab, na2) = decrypt(m1, kas) in
+	event beginBparam(b);
+	event beginBkey(b, A, nb, kab);
+        if na2 = Na then 
+        out(c, (m2, encrypt(nb, kab)));
+	(* OK protocol finished 
+	   If the interlocutor is honest, execute the events endAparam
+           and send a test message to check that the key kab is secret *)
+	in(honestParticipants, =b);
+	event endAparam(A);
+	out(c, encrypt(secretA, kab)).
+
+(* Role of the responder with identity A and key kas shared with S *)
+                         
+let processResponder =
+	in(c, (a, na)); 
+	event beginAparam(a);
+        new Nb; 
+	out(c, (A, Nb, encrypt((a, na), kas)));
+	in(c, (m3, m4));
+        let (=a, kab, =Nb) = decrypt(m3, kas) in
+        if Nb = decrypt(m4, kab) then
+	(* OK protocol finished 
+           If the interlocutor is honest, execute the events endBparam
+           and endBkey, and send a test message to check that the key kab 
+	   is secret *)
+	in(honestParticipants, =a);
+	event endBparam(A);
+	event endBkey(A, a, Nb, kab);
+	out(c, encrypt(secretB, kab)). 
+
+(* Server *)
+
+let processS = 
+	in(c, (b, nb, m5));
+	let kbs2 = getkey(b) in
+        let (a, na) = decrypt(m5,kbs2) in
+        let kas2 = getkey(a) in
+        new kab;
+	out(c, (nb, encrypt((b, kab, na), kas2), encrypt((a, kab, nb), kbs2))).
+
+(* Start process *)
+
+process
+(* First replication: create an unbounded number of honest principals *) 
+( 
+    !
+    (* Create a principal of key kas shared with S and identity A *)
+    new kas; let A = host(kas) in 
+    (
+       (* The attacker knows the host names (but not the secret keys) *)
+       out(c, A) |
+       (* This principal is honest: we send its name on channel
+          "honestParticipants" to record that fact *)
+       (!out(honestParticipants, A)) | 
+       (* Launch an unbounded number of sessions of the initiator A *)
+       (!processInitiator) | 
+       (* Launch an unbounded number of sessions of the responder A *)
+       (!processResponder)
+    )
+)
+|
+(* Launch an unbounded number of sessions of the server *)
+(!processS)

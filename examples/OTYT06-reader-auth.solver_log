@@ -1,0 +1,82 @@
+% Refutation found. Thanks to Tanya!
+% SZS status Theorem for OTYT06-reader-auth
+% SZS output start Proof for OTYT06-reader-auth
+fof(f72,axiom,(
+  pred_attacker(constr_CONST_0x30)),
+  file('OTYT06-reader-auth.p',unknown)).
+fof(f74,axiom,(
+  ! [X13,X14] : (pred_attacker(tuple_2(X13,X14)) => pred_attacker(X13))),
+  file('OTYT06-reader-auth.p',unknown)).
+fof(f82,axiom,(
+  ! [X24,X25] : ((pred_attacker(X25) & pred_attacker(X24)) => pred_attacker(tuple_2(name_objective,constr_T_STEP_2)))),
+  file('OTYT06-reader-auth.p',unknown)).
+fof(f83,conjecture,(
+  pred_attacker(name_objective)),
+  file('OTYT06-reader-auth.p',unknown)).
+fof(f84,negated_conjecture,(
+  ~pred_attacker(name_objective)),
+  inference(negated_conjecture,[],[f83])).
+fof(f92,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
+  inference(rectify,[],[f74])).
+fof(f99,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_2(name_objective,constr_T_STEP_2)))),
+  inference(rectify,[],[f82])).
+fof(f100,plain,(
+  ~pred_attacker(name_objective)),
+  inference(flattening,[],[f84])).
+fof(f108,plain,(
+  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f92])).
+fof(f115,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f99])).
+fof(f116,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f115])).
+fof(f187,plain,(
+  pred_attacker(constr_CONST_0x30)),
+  inference(cnf_transformation,[],[f72])).
+fof(f189,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f108])).
+fof(f196,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f116])).
+fof(f197,plain,(
+  ~pred_attacker(name_objective)),
+  inference(cnf_transformation,[],[f100])).
+fof(f199,plain,(
+  spl0_0 <=> ! [X0] : ~pred_attacker(X0)),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
+fof(f200,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl0_0),
+  inference(avatar_component_clause,[],[f199])).
+fof(f205,plain,(
+  spl0_2 <=> pred_attacker(tuple_2(name_objective,constr_T_STEP_2))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
+fof(f206,plain,(
+  pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~spl0_2),
+  inference(avatar_component_clause,[],[f205])).
+fof(f207,plain,(
+  spl0_0 | spl0_0 | spl0_2),
+  inference(avatar_split_clause,[],[f196,f205,f199,f199])).
+fof(f208,plain,(
+  pred_attacker(name_objective) | ~spl0_2),
+  inference(resolution,[],[f189,f206])).
+fof(f209,plain,(
+  $false | ~spl0_2),
+  inference(subsumption_resolution,[],[f208,f197])).
+fof(f210,plain,(
+  ~spl0_2),
+  inference(avatar_contradiction_clause,[],[f209])).
+fof(f211,plain,(
+  $false | ~spl0_0),
+  inference(resolution,[],[f200,f187])).
+fof(f235,plain,(
+  ~spl0_0),
+  inference(avatar_contradiction_clause,[],[f211])).
+fof(f236,plain,(
+  $false),
+  inference(avatar_sat_refutation,[],[f207,f210,f235])).
+% SZS output end Proof for OTYT06-reader-auth

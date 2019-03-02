@@ -1,0 +1,72 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+pred c/1 decompData, elimVar.
+
+fun host/1.
+
+fun encrypt/2.
+
+query c:secretA[].
+query c:secretB[].
+
+reduc
+
+(* attacker *)
+c:encrypt(m,k) & c:k -> c:m;
+c:x & c:y -> c:encrypt(x,y);
+c:x -> c:host(x);
+
+
+c:host(shrA[]);
+c:host(shrB[]);
+
+(* A *)
+
+c:X -> c:N[X];
+c:X -> c:encrypt((Na[X], N[X], host(shrA[]), X), shrA[]);
+
+c:encrypt((Na[host(shrB[])],key), shrA[]) -> c:encrypt(secretA[], key);
+
+(* B *)
+
+c:x & c:y -> c:encrypt((Nb[y],x,y,host(shrB[])), shrB[]);
+
+c:encrypt((Nb[host(shrA[])],key), shrB[]) -> c:encrypt(secretB[], key);
+
+(* Server *)
+
+c:x & c:host(shra) & c:host(shrb) 
+& c:encrypt((na, x,host(shra), host(shrb)), shra) 
+& c:encrypt((nb, x,host(shra), host(shrb)), shrb)
+-> c:encrypt((na, k[x,shra,shrb]), shra);
+
+c:x & c:host(shra) & c:host(shrb) 
+& c:encrypt((na, x,host(shra), host(shrb)), shra) 
+& c:encrypt((nb, x,host(shra), host(shrb)), shrb)
+-> c:encrypt((nb,k[x,shra,shrb]), shrb).
+

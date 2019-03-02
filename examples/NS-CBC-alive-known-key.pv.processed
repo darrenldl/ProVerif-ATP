@@ -1,0 +1,189 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+fun tuple_2_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0((x0, x1)) = x0.
+
+fun tuple_2_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_1((x0, x1)) = x1.
+
+fun tuple_4_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
+    tuple_4_get_0((x0, x1, x2, x3)) = x0.
+
+fun tuple_4_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
+    tuple_4_get_1((x0, x1, x2, x3)) = x1.
+
+fun tuple_4_get_2(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
+    tuple_4_get_2((x0, x1, x2, x3)) = x2.
+
+fun tuple_4_get_3(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
+    tuple_4_get_3((x0, x1, x2, x3)) = x3.
+
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free I : bitstring.
+
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
+
+fun succ(bitstring) : bitstring[data].
+fun cbc_enc_1(bitstring, bitstring) : bitstring.
+fun cbc_enc_2(bitstring, bitstring, bitstring) : bitstring.
+fun cbc_enc_3(bitstring, bitstring, bitstring, bitstring) : bitstring.
+fun cbc_enc_4(bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring.
+fun cbc_dec_1(bitstring, bitstring) : bitstring.
+fun cbc_dec_2(bitstring, bitstring) : bitstring.
+fun cbc_dec_3(bitstring, bitstring) : bitstring.
+fun cbc_dec_4(bitstring, bitstring) : bitstring.
+fun cbc_2_get_1_prefixes(bitstring) : bitstring.
+fun cbc_3_get_1_prefixes(bitstring) : bitstring.
+fun cbc_3_get_2_prefixes(bitstring) : bitstring.
+fun cbc_4_get_1_prefixes(bitstring) : bitstring.
+fun cbc_4_get_2_prefixes(bitstring) : bitstring.
+fun cbc_4_get_3_prefixes(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring, k : bitstring; 
+    cbc_2_get_1_prefixes(cbc_enc_2(x0, x1, k)) = cbc_enc_1(x0, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, k : bitstring; 
+    cbc_3_get_1_prefixes(cbc_enc_3(x0, x1, x2, k)) = cbc_enc_1(x0, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, k : bitstring; 
+    cbc_3_get_2_prefixes(cbc_enc_3(x0, x1, x2, k)) = cbc_enc_2(x0, x1, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring, k : bitstring; 
+    cbc_4_get_1_prefixes(cbc_enc_4(x0, x1, x2, x3, k)) = cbc_enc_1(x0, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring, k : bitstring; 
+    cbc_4_get_2_prefixes(cbc_enc_4(x0, x1, x2, x3, k)) = cbc_enc_2(x0, x1, k).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring, k : bitstring; 
+    cbc_4_get_3_prefixes(cbc_enc_4(x0, x1, x2, x3, k)) = cbc_enc_3(x0, x1, x2, k).
+equation
+  forall x0 : bitstring, k : bitstring; 
+    cbc_dec_1(cbc_enc_1(x0, k), k) = x0.
+equation
+  forall x0 : bitstring, x1 : bitstring, k : bitstring; 
+    cbc_dec_2(cbc_enc_2(x0, x1, k), k) = (x0, x1).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, k : bitstring; 
+    cbc_dec_3(cbc_enc_3(x0, x1, x2, k), k) = (x0, x1, x2).
+equation
+  forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring, k : bitstring; 
+    cbc_dec_4(cbc_enc_4(x0, x1, x2, x3, k), k) = (x0, x1, x2, x3).
+
+free objective1 : bitstring [private].
+free objective2 : bitstring [private].
+
+query 
+  attacker((objective1, objective2)).
+
+const client_A_STEP_1 : bitstring.
+const client_A_STEP_2 : bitstring.
+const client_A_STEP_3 : bitstring.
+const client_A_STEP_4 : bitstring.
+const client_A_STEP_5 : bitstring.
+const client_A_STEP_6 : bitstring.
+
+let client_A(Kas : bitstring) =
+  new Na : bitstring;
+  out(c, ((A, B, Na), client_A_STEP_1));
+  in(c, enc_Na_B_enc_Kab_A : bitstring);
+  
+  if eq(tuple_4_get_0(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)), Na) then
+  
+  if eq(tuple_4_get_1(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)), B) then
+  let Kab : bitstring = tuple_4_get_2(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
+  let enc_Kab_A : bitstring = tuple_4_get_3(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
+  out(c, (enc_Kab_A, client_A_STEP_2));
+  in(c, enc_Nb : bitstring);
+  let Nb = cbc_dec_1(enc_Nb, Kab) in
+  out(c, (cbc_enc_1(succ(Nb), Kab), client_A_STEP_3));
+  new Na' : bitstring;
+  in(c, enc_Kab_A' : bitstring);
+  let Kab' : bitstring = tuple_2_get_0(cbc_dec_2(enc_Kab_A', Kas)) in
+  
+  if eq(tuple_2_get_1(cbc_dec_2(enc_Kab_A', Kas)), A) then
+  out(c, (cbc_enc_1(Na', Kab'), client_A_STEP_4));
+  in(c, enc_succ_Na' : bitstring);
+  
+  if eq(cbc_dec_1(enc_succ_Na', Kab'), succ(Na')) then
+  out(c, (objective1, client_A_STEP_5));
+  out(c, (enc(objective2, Kab'), client_A_STEP_6));
+  0.
+
+const client_B_STEP_1 : bitstring.
+
+let client_B(Kbs : bitstring) =
+  new Nb : bitstring;
+  in(c, enc_Kab_A : bitstring);
+  let Kab : bitstring = tuple_2_get_0(cbc_dec_2(enc_Kab_A, Kbs)) in
+  
+  if eq(tuple_2_get_1(cbc_dec_2(enc_Kab_A, Kbs)), A) then
+  out(c, (cbc_enc_1(Nb, Kab), client_B_STEP_1));
+  in(c, enc_succ_Nb : bitstring);
+  
+  if eq(cbc_dec_1(enc_succ_Nb, Kab), succ(Nb)) then
+  0.
+
+const server_S_STEP_1 : bitstring.
+
+let server_S(Kas : bitstring, Kbs : bitstring) =
+  new Kab : bitstring;
+  in(c, (A : bitstring, B : bitstring, Na : bitstring));
+  out(c, (cbc_enc_4(Na, B, Kab, cbc_enc_2(Kab, A, Kbs), Kas), server_S_STEP_1));
+  0.
+
+process
+  new Kas : bitstring;
+  new Kbs : bitstring;
+  (
+    ! (
+      client_A(Kas)
+    )
+  )
+  | (
+    (
+      ! (
+        client_B(Kbs)
+      )
+    )
+    | (
+      ! (
+        server_S(Kas, Kbs)
+      )
+    )
+  )

@@ -1,0 +1,31 @@
+free c : channel.
+
+free A : bitstring.
+free B : bitstring.
+free S : bitstring.
+
+const ZERO : bitstring.
+
+fun pk_enc(bitstring, bitstring) : bitstring.
+reduc forall m:bitstring, k:bitstring;
+  pk_dec(pk_enc(m, pkey(k)), k) = m.
+
+fun mult(bitstring, bitstring) : bitstring.
+
+fun plus(bitstring, bitstring) : bitstring.
+
+let client_A(pkS : bitstring) =
+  new Ka : bitstring;
+  out(c, ((B, pk_enc(Ka, pkS)), STEP_1)); (* 1. *)
+
+let client_B =
+  new Kb : bitstring;
+
+let server_S(skS : bitstring, pkS : bitstring) =
+  in(c, (target : bitstring,
+         msg1   : bitstring));            (* 1. *)
+  let Kt = pk_dec(msg1, skS) in
+  out(c, target);                         (* 2. *)
+
+process
+  client_A | client_B

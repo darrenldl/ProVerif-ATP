@@ -1,0 +1,139 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c:channel.
+(* 
+
+? -> A : pkB
+A -> B : { N_A, A }_pkB
+B -> S : (B,A)
+S -> B : { A, pkA }_sS
+B -> A : { N_A, N_B, pkB }_pkA
+A -> B : { N_B }_pkB
+
+*)
+
+type skey.
+type pkey.
+type host.
+type nonce.
+
+(* Public key encryption *)
+
+fun pk(skey):pkey.
+fun encrypt(bitstring,pkey):bitstring.
+reduc forall x:bitstring, y:skey; decrypt(encrypt(x,pk(y)),y) = x.
+
+(* Host *)
+
+fun fhost(skey):host.
+reduc forall x:skey; getkey(fhost(x)) = x [private].
+
+(* Signatures *)
+
+fun sign(bitstring,skey):bitstring.
+reduc forall x:bitstring, y:skey; checksign(sign(x,y),pk(y)) = x.
+reduc forall x:bitstring, y:skey; getmess(sign(x,y)) = x.
+
+(* Shared-key encryption *)
+
+fun sencrypt(bitstring, nonce):bitstring.
+reduc forall x:bitstring, y:nonce; sdecrypt(sencrypt(x,y),y) = x.
+
+
+fun nonce2bitstring(nonce):bitstring [data,typeConverter].
+
+(* Secrecy assumptions *)
+
+not attacker(new skA).
+not attacker(new skB).
+not attacker(new skS).
+
+free secretBNa, secretBNb: bitstring [private].
+
+let processA(hostA:host, hostB:host, pkA:pkey, skA:skey, pkS:pkey, secretANa:bitstring, secretANb:bitstring) =  
+	(* Choose the other host *)
+	in(c,hostX:host);
+	(* Get the public key certificate for the other host *)
+	out(c, (hostA, hostX));
+	in(c, ms:bitstring);
+	let (pkX:pkey, =hostX) = checksign(ms,pkS) in
+        (* Message 1 *)
+	new Na:nonce; 
+        out(c, encrypt((Na, hostA), pkX));
+        in(c, m:bitstring); 
+        let (=Na, NX2:nonce, =hostX) = decrypt(m, skA) in
+        out(c, encrypt(nonce2bitstring(NX2), pkX));
+        (* OK *)
+	if hostX = hostB then
+	out(c, sencrypt(secretANa, Na));
+	out(c, sencrypt(secretANb, NX2)).
+
+let processB(hostA:host, hostB:host, pkB:pkey, skB:skey, pkS:pkey, secretBNa:bitstring, secretBNb:bitstring) =
+        (* Message 1 *)
+	in(c, m:bitstring); 
+	let (NY:nonce, hostY:host) = decrypt(m, skB) in
+	(* Get the public key certificate for the other host *)
+        out(c, (hostB, hostY));
+	in(c,ms:bitstring);
+        let (pkY:pkey,=hostY) = checksign(ms,pkS) in
+        (* Message 2 *)
+	new Nb:nonce;
+        (* Message 3 *)
+	out(c, encrypt((NY, Nb, hostB), pkY));
+	in(c, m3:bitstring);
+        if nonce2bitstring(Nb) = decrypt(m3, skB) then
+	(* OK *)
+        if hostY = hostA then
+	out(c, sencrypt(secretBNa, NY));
+	out(c, sencrypt(secretBNb, Nb)).
+
+let processS(skS:skey) =  
+                in(c,m:bitstring); 
+	        let (a:host,b:host) = m in
+		let sb = getkey(b) in
+                out(c,sign((pk(sb),b),skS)).
+
+process in(c, xANa:bitstring);
+	in(c, yANa:bitstring);
+	in(c, xANb:bitstring);
+	in(c, yANb:bitstring);
+	let secretANa = choice[xANa, yANa] in
+	let secretANb = choice[xANb, yANb] in
+	new skA:skey; let pkA = pk(skA) in
+        out(c, pkA);
+        new skB:skey; let pkB = pk(skB) in
+        out(c, pkB);
+	new skS:skey; let pkS = pk(skS) in
+	out(c, pkS);
+	let hostA = fhost(skA) in
+	out(c, hostA);
+	let hostB = fhost(skB) in
+	out(c, hostB);
+	((!processA(hostA, hostB, pkA, skA, pkS, secretANa, secretANb)) | 
+	(!processB(hostA, hostB, pkB, skB, pkS, secretBNa, secretBNb)) |
+	 (!processS(skS)))

@@ -1,0 +1,79 @@
+free c : channel.
+
+free A : bitstring.
+free B : bitstring.
+free S : bitstring.
+
+const ZERO : bitstring.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+(* associativity *)
+equation forall x:bitstring, y:bitstring, z:bitstring; xor(x, xor(y, z)) = xor(xor(x, y), z).
+
+(* commutativity *)
+equation forall x:bitstring, y:bitstring; xor(x, y) = xor(y, x).
+
+(* neutral element *)
+equation forall x:bitstring; xor(x, ZERO) = x.
+
+(* nilpotence *)
+equation forall x:bitstring; xor(x, x) = ZERO.
+
+fun pkey(bitstring) : bitstring.
+
+fun aenc(bitstring, bitstring) : bitstring.
+fun adec(bitstring, bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  adec(aenc(m, pkey(k)), k) = m.
+
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  dec(enc(m, k), k) = m.
+
+(* homomorphism *)
+fun mul(bitstring, bitstring) : bitstring.
+equation forall x:bitstring, y:bitstring, k:bitstring;
+  mul(aenc(x, k), aenc(y, k)) = aenc(mul(x, y), k).
+
+fun div1(bitstring, bitstring) : bitstring.
+fun div2(bitstring, bitstring) : bitstring.
+equation forall x:bitstring, y:bitstring;
+  div1(mul(x, y), y) = x.
+equation forall x:bitstring, y:bitstring;
+  div2(mul(x, y), x) = y.
+
+free objective : bitstring [private].
+
+query attacker(objective).
+
+let client_A(pkS : bitstring) =
+  new Ka : bitstring;
+  out(c, (B, aenc(Ka, pkS))); (* 1. OUT A -> S*)
+  in(c, (=B, Ka_xor_Kb : bitstring));
+  let Kb = xor(Ka, Ka_xor_Kb) in
+  0.
+
+let client_B(pkS : bitstring) =
+  new Kb : bitstring;
+  in(c, =A);        (* 2. IN  S -> B *)
+  out(c, (A, aenc(Kb, pkS))); (* 3. OUT B -> S *)
+  in(c, (=B, Kb_xor_Ka : bitstring));
+  let Ka = xor(Kb_xor_Ka, Kb) in
+  out(c, enc(objective, Kb)).
+
+let server_S(skS : bitstring, pkS : bitstring) =
+  in(c, (=B, enc_Ka_pkS : bitstring)); (* 1. IN  A -> S *)
+  let Ka = adec(enc_Ka_pkS, skS) in
+  out(c, A);                           (* 2. OUT S -> B *)
+  in(c, (=A, enc_Kb_pkS : bitstring)); (* 3. IN  B -> S *)
+  let Kb = adec(enc_Kb_pkS, skS) in
+  out(c, (B, xor(Kb, Ka))).
+
+process
+  new skS:bitstring;
+
+  let pkS = pkey(skS) in
+
+  client_A(pkS) | client_B(pkS) | server_S(skS, pkS)

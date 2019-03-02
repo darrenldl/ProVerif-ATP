@@ -1,0 +1,134 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Kerberos, modified by Gong et al,
+   Version taken from Delaune, Jacquemard, LSV-04-1
+   The unrecognizable tuples lead to non-termination.
+   Try to solve this!
+   Simplified version of kerberos-gl2 to investigate the termination 
+   problem. *)
+
+(* param selFun = NounifsetMaxsize. *)
+param verboseRules = yes.
+
+free c.
+
+(* Symmetric cryptography
+   One does not know whether decryption succeeds or not
+   For use with weak secrets *)
+
+fun enc/2.
+fun dec/2.
+equation dec(enc(x,y),y) = x.
+(* equation enc(dec(x,y),y) = x. *)
+
+(* Unrecognizable pairs.
+   An implementation is concatenation, when the elements have known lengths *)
+
+fun pair/2.
+fun fst/1.
+(* fun snd/1. *)
+equation fst(pair(x,y)) = x.
+(* equation snd(pair(x,y)) = y. *)
+(* equation pair(fst(x), snd(x)) = x. *)
+
+private free PA.
+not PA.
+not K.
+weaksecret PA.
+
+process !in(c, N1); new K; out(c, enc(pair(N1, K), PA))
+
+(* Here is a commented output 
+
+Equations encoded as destructors:
+dec(enc(x_18,y_19),y_19) => x_18
+fst(pair(x_20,y_21)) => x_20
+
+-- Weak secret: PA
+Starting rules:
+Rule 1: attacker:v_25 & attacker:v_24 -> attacker:pair(v_25,v_24)
+Rule 2: attacker:v_26 -> attacker:fst(v_26)
+Rule 3: attacker:pair(x_27,y_28) -> attacker:x_27
+Rule 4: attacker:v_30 & attacker:v_29 -> attacker:enc(v_30,v_29)
+Rule 5: attacker:v_32 & attacker:v_31 -> attacker:dec(v_32,v_31)
+Rule 6: attacker:enc(x_33,y_34) & attacker:y_34 -> attacker:x_33
+Rule 10: attacker:v_39 -> attacker_guess:v_39,v_39 [selected conclusion]
+Rule 11: attacker_guess:PA[],weaksecretcst()
+Rule 14: attacker_guess:v_48,v_50 & attacker_guess:v_49,v_51 -> attacker_guess:pair(v_48,v_49),pair(v_50,v_51)
+Rule 15: attacker_guess:v_53,v_54 -> attacker_guess:fst(v_53),fst(v_54)
+Rule 16: attacker_guess:v_55,pair(x_56,y_57) -> attacker_guess:fst(v_55),x_56
+Rule 17: attacker_guess:pair(x_58,y_59),v_60 -> attacker_guess:x_58,fst(v_60)
+Rule 18: attacker_guess:pair(x_61,y_62),pair(x_63,y_64) -> attacker_guess:x_61,x_63
+Rule 19: attacker_guess:v_67,v_69 & attacker_guess:v_68,v_70 -> attacker_guess:enc(v_67,v_68),enc(v_69,v_70)
+Rule 20: attacker_guess:v_73,v_75 & attacker_guess:v_74,v_76 -> attacker_guess:dec(v_73,v_74),dec(v_75,v_76)
+Rule 21: attacker_guess:v_77,enc(x_79,y_80) & attacker_guess:v_78,y_80 -> attacker_guess:dec(v_77,v_78),x_79
+Rule 22: attacker_guess:enc(x_81,y_82),v_83 & attacker_guess:y_82,v_84 -> attacker_guess:x_81,dec(v_83,v_84)
+Rule 23: attacker_guess:enc(x_85,y_86),enc(x_87,y_88) & attacker_guess:y_86,y_88 -> attacker_guess:x_85,x_87
+Rule 24: attacker:v_93 -> attacker:enc(pair(v_93,K[v_93,sid_94]),PA[])
+
+Completing...
+
+10 + 22: attacker:enc(x_267,y_268) & attacker_guess:y_268,v_269 -> attacker_guess:x_267,dec(enc(x_267,y_268),v_269)
+
+24 + (10 + 22): attacker:v_452 & attacker_guess:PA[],v_453 -> attacker_guess:pair(v_452,K[v_452,sid_454]),dec(enc(pair(v_452,K[v_452,sid_454]),PA[]),v_453)
+
+11 + (24 + (10 + 22)): attacker:v_536 -> attacker_guess:pair(v_536,K[v_536,sid_537]),dec(enc(pair(v_536,K[v_536,sid_537]),PA[]),weaksecretcst())
+
+A = (11 + (24 + (10 + 22))) + 17: attacker:x_588 -> attacker_guess:x_588,fst(dec(enc(pair(x_588,K[x_588,sid_589]),PA[]),weaksecretcst()))
+
+A + 22: attacker:enc(x_618,y_619) & attacker_guess:y_619,v_620 -> attacker_guess:x_618,dec(fst(dec(enc(pair(enc(x_618,y_619),K[enc(x_618,y_619),sid_621]),PA[]),weaksecretcst())),v_620)
+
+A + 17: attacker:pair(x_628,y_629) -> attacker_guess:x_628,fst(fst(dec(enc(pair(pair(x_628,y_629),K[pair(x_628,y_629),sid_630]),PA[]),weaksecretcst())))
+
+24 + (A + 22): attacker:v_637 & attacker_guess:PA[],v_638 -> attacker_guess:pair(v_637,K[v_637,sid_639]),dec(fst(dec(enc(pair(enc(pair(v_637,K[v_637,sid_639]),PA[]),K[enc(pair(v_637,K[v_637,sid_639]),PA[]),sid_640]),PA[]),weaksecretcst())),v_638)
+
+A'1 = 4 + (A + 22): attacker:x_657 & attacker:y_658 -> attacker_guess:x_657,dec(fst(dec(enc(pair(enc(x_657,y_658),K[enc(x_657,y_658),sid_659]),PA[]),weaksecretcst())),y_658)
+
+A'2 = 1 + (A + 17): attacker:x_672 & attacker:y_673 -> attacker_guess:x_672,fst(fst(dec(enc(pair(pair(x_672,y_673),K[pair(x_672,y_673),sid_674]),PA[]),weaksecretcst())))
+
+11 + (24 + (A + 22)): attacker:v_695 -> attacker_guess:pair(v_695,K[v_695,sid_696]),dec(fst(dec(enc(pair(enc(pair(v_695,K[v_695,sid_696]),PA[]),K[enc(pair(v_695,K[v_695,sid_696]),PA[]),sid_697]),PA[]),weaksecretcst())),weaksecretcst())
+
+A'3 = (11 + (24 + (A + 22))) + 17: attacker:v_695 -> attacker_guess:v_695,fst(dec(fst(dec(enc(pair(enc(pair(v_695,K[v_695,sid_696]),PA[]),K[enc(pair(v_695,K[v_695,sid_696]),PA[]),sid_697]),PA[]),weaksecretcst())),weaksecretcst()))
+
+A'1, A'2, A'3 are of the same form as A. We can apply again 4+( +22) 
+1+( +17), and 11+(24+( +22))+17 as many times as we want to them. ==> Loop!
+
+
+More generally, assume you have 
+     1:	att(x) -> attg(x, M(x))
+as well as g/g' converse symbols (like pair/fst, pair/snd, enc/dec) so
+     2:	attg(g(y),z) -> attg(y, g'(z))
+and  3:	att(y) -> att(g(y))
+By resolution 
+3 + (1 + 2): att(y) -> attg(y, g'(M(g(y))))
+so we have a loop...
+Try to adjust the selection function to select the conclusion in 2?
+No, it leads to non-termination because of unification with
+rules ... -> bad.
+
+*)

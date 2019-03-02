@@ -1,0 +1,124 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Wide Mouth Frog protocol *)
+
+(* set ignoreTypes = none. *)
+
+type coins.
+type host.
+type key.
+type tag.
+
+free c: channel.
+
+(* 
+A -> S : A, { c0, B, Kab }_{Kas}
+S -> B : { c1, A, Kab }_{Kbs}
+I added tags to distinguish the two encryptions.
+*)
+
+(* Shared key encryption *)
+
+fun internal_encrypt(bitstring, key, coins):bitstring.
+reduc forall x:bitstring, y:key, r:coins; decrypt(internal_encrypt(x,y,r),y) = x.
+letfun encrypt(x: bitstring, k: key) = new r: coins; internal_encrypt(x,k,r).
+
+(* Host names *)
+free A, B:host.
+
+(* Tags to distinguish the first from the second encryption *)
+free c0,c1:tag.
+
+(* Table of keys *)
+table keys(host, key).
+
+(* Queries *)
+
+event beginBkey(host,host,key).
+event endBkey(host,host,key).
+query xA:host, xB:host, xkAB:key; event(endBkey(xA, xB, xkAB)) ==> event(beginBkey(xA, xB, xkAB)).
+
+free secretInit, secretResp:bitstring [private].
+noninterf secretInit.
+noninterf secretResp.
+
+(* Initiator *)
+
+let processInit = 
+        (* Start honest initiator xI (A or B) wishing to talk to (honest or dishonest) xR.
+	   Kis is the key of xI *)
+        in(c, (xI: host, xR:host ));
+	if xI = A || xI = B then
+	get keys(=xI, Kis: key) in
+	(* Real initiator role *)
+	new Kab: key;
+	event beginBkey(xI, xR, Kab);
+        out(c, (xI, encrypt((c0, xR, Kab), Kis)));
+	(* OK *)
+	if xR = A || xR = B then 
+	out(c, encrypt(secretInit, Kab)).
+
+(* Server *)
+
+let processS = 
+	in(c, (a:host, m:bitstring));
+	get keys(=a, kas: key) in
+        let (=c0, b:host, kab:key) = decrypt(m,kas) in
+	get keys(=b, kbs: key) in
+	out(c, encrypt((c1, a, kab), kbs)).
+
+(* Key registration *)
+                      
+let processK =
+        in(c, (h:host,k:key));
+	if h <> A && h <> B then insert keys(h,k).
+   
+(* Responder *)
+
+let processResp = 
+        (* Start honest responder of identity xR, which can be A or B.
+	   Krs is its corresponding key *)
+        in(c, xR:host);
+	if xR = A || xR = B then
+	get keys(=xR, Krs: key) in
+	(* Real responder role *)	
+	in(c, m:bitstring); 
+	let (=c1, a:host, kab:key) = decrypt(m, Krs) in
+	(* OK *)
+	if a = A || a = B then
+	event endBkey(a, xR, kab);
+	out(c, encrypt(secretResp, kab)).
+
+process 
+	new Kas:key; new Kbs:key; 
+	insert keys(A, Kas);
+	insert keys(B, Kbs);
+	((!processInit) | 
+	 (!processResp) |
+	 (!processS) | 
+	 (!processK))

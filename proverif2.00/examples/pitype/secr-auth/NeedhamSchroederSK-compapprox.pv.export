@@ -1,0 +1,139 @@
+set keyCompromise = approx.
+
+free c : channel.
+
+type key.
+type host.
+type nonce.
+type tag.
+
+fun encrypt(bitstring, key) : bitstring.
+
+reduc
+  forall x : bitstring, y : key; decrypt(encrypt(x, y), y) = x.
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+free A : host.
+free B : host.
+
+table keys(host, key).
+
+query 
+  attacker(new secretA);
+  attacker(new secretB).
+
+event endAparam(host, host).
+event endBparam(host, host).
+event beginAparam(host, host).
+event beginBparam(host, host).
+event endAkey(host, host, key).
+event beginAkey(host, host, key).
+event endBkey(host, host, key).
+event beginBkey(host, host, key).
+
+query x : host, y : host;
+  inj-event(endAparam(x, y)) ==> inj-event(beginAparam(x, y)).
+query x : host, y : host, z : key;
+  inj-event(endAkey(x, y, z)) ==> inj-event(beginAkey(x, y, z)).
+query x : host, y : host;
+  inj-event(endBparam(x, y)) ==> inj-event(beginBparam(x, y)).
+query x : host, y : host, z : key;
+  inj-event(endBkey(x, y, z)) ==> inj-event(beginBkey(x, y, z)).
+
+const c0 : tag[data].
+const c1 : tag[data].
+
+let processInitiator =
+  new secretA : bitstring;
+  in(c, (xA : host, h : host));
+  
+  if xA = A || xA = B then
+  get keys(=xA, kas) in
+  event beginBparam(xA, h);
+  new Na : nonce;
+  out(c, (xA, h, Na));
+  in(c, m2 : bitstring);
+  let (=Na, =h, k : key, m : bitstring) = decrypt(m2, kas) in
+  event beginBkey(xA, h, k);
+  out(c, m);
+  in(c, m3 : bitstring);
+  let (=c0, n : nonce) = decrypt(m3, k) in
+  out(c, encrypt((c1, n), k));
+  
+  if h = B || h = A then
+  event endAparam(xA, h);
+  event endAkey(xA, h, k);
+  out(c, encrypt(secretA, k));
+  0
+  .
+
+let processResponder =
+  new secretB : bitstring;
+  in(c, xB : host);
+  
+  if xB = A || xB = B then
+  get keys(=xB, kbs) in
+  in(c, m4 : bitstring);
+  let (k : key, h : host) = decrypt(m4, kbs) in
+  event beginAparam(h, xB);
+  event beginAkey(h, xB, k);
+  new Nb : nonce;
+  out(c, encrypt((c0, Nb), k));
+  in(c, m5 : bitstring);
+  let (=c1, =Nb) = decrypt(m5, k) in
+  
+  if h = A || h = B then
+  event endBparam(h, xB);
+  event endBkey(h, xB, k);
+  out(c, encrypt(secretB, k));
+  0
+  .
+
+let processS =
+  in(c, (h1 : host, h2 : host, n : nonce));
+  get keys(=h1, ks1) in
+  get keys(=h2, ks2) in
+  new k : key;
+  out(c, encrypt((n, h2, k, encrypt((k, h1), ks2)), ks1));
+  0
+  .
+
+let processK =
+  in(c, (h : host, k : key));
+  
+  if h <> A && h <> B then
+  insert keys(h, k);
+  0
+  .
+
+process
+  new Kas : key;
+  new Kbs : key;
+  insert keys(A, Kas);
+  insert keys(B, Kbs);
+  (
+    ! (
+      processInitiator
+    )
+  )
+  | (
+    (
+      ! (
+        processResponder
+      )
+    )
+    | (
+      (
+        ! (
+          processS
+        )
+      )
+      | (
+        ! (
+          processK
+        )
+      )
+    )
+  )

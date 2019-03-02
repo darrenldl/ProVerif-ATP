@@ -1,0 +1,138 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Needham Shroeder shared key protocol
+
+The weakness of this protocol is that if an attacker has
+a session key k[Kas[], Kbs[], Na[Kbs[],c0]]
+for one c0, he can have all secrets of B, since B cannot
+distinguish different sessions.
+
+Notice that we have slightly changed the protocol such that
+the analyzer terminates. The
+	{ Nb }Kab -> { Nb-1 }Kab 
+is replaced by
+	{ Nb, 0 }Kab -> { Nb, 1 }Kab
+
+ *)
+
+
+pred c/1 elimVar, decompData.
+pred comp/1 elimVar, decompData.
+
+fun encrypt/2.
+fun host/1.
+
+(* constants 0 and 1 *)
+
+data c0/0.
+data c1/0.
+
+query c:secretA[i].
+query c:secretB[i].
+query c:secretA[c1].
+query c:secretB[c1].
+
+reduc
+
+(* Attacker *)
+
+c:k & c:encrypt(m,k) -> c:m;
+c:x -> c:host(x);
+c:x & c:y -> c:encrypt(x,y);
+
+c:host(Kas[]);
+c:host(Kbs[]);
+
+
+(* key compromise 
+c:k[Kas[], Kbs[], Na[host(Kbs[]),c0],c0]; *)
+
+comp:Kas[];
+comp:Kbs[];
+comp:x -> comp:Na[x,c0];
+comp:x -> comp:J[x,c0];
+comp:x & comp:y -> comp:Nb[x,y,c0];
+comp:x & comp:y & comp:z -> comp:k[x,y,z,c0]; 
+comp:x -> comp:host(x);
+comp:x & comp:y -> comp:encrypt(x,y);
+comp:x -> c:Na[x, c0];
+comp:x -> c:J[x,c0];
+comp:x & comp:y -> c:Nb[x,y,c0];
+comp:x & comp:y & comp:z -> c:k[x,y,z,c0]; 
+
+(* A *)
+
+c:h & c:bm -> c:(host(Kas[]), h, Na[h,i], bm);
+c:encrypt((Na[h,i], h, key, m), Kas[]) -> c:m;
+c:encrypt((Na[h,i], h, key, m), Kas[]) & c:encrypt((c0, n), key) -> c:encrypt((c1, n), key);
+
+c:encrypt((Na[host(Kbs[]),i], host(Kbs[]), key, m), Kas[]) -> c:encrypt(secretA[i], key);
+
+
+(* B *)
+
+c:h -> c:encrypt((h, J[h,i]), Kbs[]);
+c:encrypt((key, h, J[h,i]), Kbs[]) -> c:encrypt((c0, Nb[key,h,i]), key);
+
+c:encrypt((key, host(Kas[]), J[host(Kas[]),i]), Kbs[]) & c:encrypt((c1, Nb[key, host(Kas[]), i]), key) -> c:encrypt(secretB[i], key);
+
+(* S *)
+
+c:(host(Ks1), host(Ks2), n, encrypt((host(Ks1), j), Ks2)) -> c:encrypt((n, host(Ks2), k[Ks1, Ks2, n, i], encrypt((k[Ks1, Ks2, n, i], host(Ks1), j), Ks2)), Ks1).
+
+(*
+
+Prendre un Na compromis et un J neuf. Envoyer au serveur comme si ca venait de A. 
+
+Rule 1: c:k & c:encrypt(m,k) -> c:m
+Rule 2: c:x -> c:host(x)
+Rule 3: c:x & c:y -> c:encrypt(x,y)
+Rule 4: c:host(Kas[])
+Rule 5: c:host(Kbs[])
+Rule 6: c:c0()
+Rule 7: c:c1()
+Rule 8: comp:Kas[]
+Rule 9: comp:Kbs[]
+Rule 10: comp:x -> comp:Na[x,c0()]
+Rule 11: comp:x -> comp:J[x,c0()]
+Rule 12: comp:x & comp:y -> comp:Nb[x,y,c0()]
+Rule 13: comp:x & comp:y & comp:z -> comp:k[x,y,z,c0()]
+Rule 14: comp:x -> comp:host(x)
+Rule 15: comp:x & comp:y -> comp:encrypt(x,y)
+Rule 16: comp:x -> c:Na[x,c0()]
+Rule 17: comp:x -> c:J[x,c0()]
+Rule 18: comp:x & comp:y -> c:Nb[x,y,c0()]
+Rule 19: comp:x & comp:y & comp:z -> c:k[x,y,z,c0()]
+Rule 20: c:h & c:bm -> c:(host(Kas[]),h,Na[h,i],bm)
+Rule 21: c:encrypt((Na[h,i],h,key,m),Kas[]) -> c:m
+Rule 22: c:encrypt((Na[h,i],h,key,m),Kas[]) & c:encrypt((c0(),n),key) -> c:encrypt((c1(),n),key)
+Rule 23: c:encrypt((Na[host(Kbs[]),i],host(Kbs[]),key,m),Kas[]) -> c:encrypt(secretA[i],key)
+Rule 24: c:h -> c:encrypt((h,J[h,i]),Kbs[])
+Rule 25: c:encrypt((key,h,J[h,i]),Kbs[]) -> c:encrypt((c0(),Nb[key,h,i]),key)
+Rule 26: c:encrypt((key,host(Kas[]),J[host(Kas[]),i]),Kbs[]) & c:encrypt((c1(),Nb[key,host(Kas[]),i]),key) -> c:encrypt(secretB[i],key)
+Rule 27: c:(host(Ks1),host(Ks2),n,encrypt((host(Ks1),j),Ks2)) -> c:encrypt((n,host(Ks2),k[Ks1,Ks2,n,i],encrypt((k[Ks1,Ks2,n,i],host(Ks1),j),Ks2)),Ks1)

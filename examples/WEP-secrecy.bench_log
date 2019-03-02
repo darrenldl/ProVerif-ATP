@@ -1,0 +1,250 @@
+% Refutation found. Thanks to Tanya!
+% SZS status Theorem for WEP-secrecy
+% SZS output start Proof for WEP-secrecy
+fof(f67,axiom,(
+  ! [X0,X1] : constr_split(constr_concat(X0,X1)) = tuple_2(X0,X1)),
+  file('WEP-secrecy.p',unknown)).
+fof(f68,axiom,(
+  ! [X2,X3,X4,X5] : constr_concat(constr_xor(X2,X3),constr_xor(X4,X5)) = constr_xor(constr_concat(X2,X4),constr_concat(X3,X5))),
+  file('WEP-secrecy.p',unknown)).
+fof(f69,axiom,(
+  ! [X6,X7] : constr_xor(constr_C(X6),constr_C(X7)) = constr_C(constr_xor(X6,X7))),
+  file('WEP-secrecy.p',unknown)).
+fof(f70,axiom,(
+  ! [X8] : constr_ZERO = constr_xor(X8,X8)),
+  file('WEP-secrecy.p',unknown)).
+fof(f71,axiom,(
+  ! [X9] : constr_xor(X9,constr_ZERO) = X9),
+  file('WEP-secrecy.p',unknown)).
+fof(f72,axiom,(
+  ! [X10,X11] : constr_xor(X10,X11) = constr_xor(X11,X10)),
+  file('WEP-secrecy.p',unknown)).
+fof(f73,axiom,(
+  ! [X12,X13,X14] : constr_xor(X12,constr_xor(X13,X14)) = constr_xor(constr_xor(X12,X13),X14)),
+  file('WEP-secrecy.p',unknown)).
+fof(f75,axiom,(
+  ! [X16,X17] : ((pred_attacker(X17) & pred_attacker(X16)) => pred_attacker(constr_xor(X16,X17)))),
+  file('WEP-secrecy.p',unknown)).
+fof(f77,axiom,(
+  ! [X18] : (pred_attacker(X18) => pred_attacker(constr_split(X18)))),
+  file('WEP-secrecy.p',unknown)).
+fof(f81,axiom,(
+  pred_attacker(constr_ZERO)),
+  file('WEP-secrecy.p',unknown)).
+fof(f91,axiom,(
+  ! [X26,X27] : (pred_attacker(tuple_2(X26,X27)) => pred_attacker(X26))),
+  file('WEP-secrecy.p',unknown)).
+fof(f92,axiom,(
+  ! [X28,X29] : (pred_attacker(tuple_2(X28,X29)) => pred_attacker(X29))),
+  file('WEP-secrecy.p',unknown)).
+fof(f98,axiom,(
+  ! [X36] : (pred_attacker(X36) => pred_attacker(tuple_2(tuple_2(name_v,constr_xor(constr_concat(X36,constr_C(X36)),constr_RC4(name_v,name_Kab))),constr_enc_oracle_STEP_1)))),
+  file('WEP-secrecy.p',unknown)).
+fof(f99,axiom,(
+  pred_attacker(tuple_2(tuple_2(name_v,constr_xor(constr_concat(name_objective,constr_C(name_objective)),constr_RC4(name_v,name_Kab))),constr_B_STEP_1))),
+  file('WEP-secrecy.p',unknown)).
+fof(f100,conjecture,(
+  pred_attacker(name_objective)),
+  file('WEP-secrecy.p',unknown)).
+fof(f101,negated_conjecture,(
+  ~pred_attacker(name_objective)),
+  inference(negated_conjecture,[],[f100])).
+fof(f102,plain,(
+  ! [X0,X1,X2,X3] : constr_concat(constr_xor(X0,X1),constr_xor(X2,X3)) = constr_xor(constr_concat(X0,X2),constr_concat(X1,X3))),
+  inference(rectify,[],[f68])).
+fof(f103,plain,(
+  ! [X0,X1] : constr_xor(constr_C(X0),constr_C(X1)) = constr_C(constr_xor(X0,X1))),
+  inference(rectify,[],[f69])).
+fof(f104,plain,(
+  ! [X0] : constr_ZERO = constr_xor(X0,X0)),
+  inference(rectify,[],[f70])).
+fof(f105,plain,(
+  ! [X0] : constr_xor(X0,constr_ZERO) = X0),
+  inference(rectify,[],[f71])).
+fof(f106,plain,(
+  ! [X0,X1] : constr_xor(X0,X1) = constr_xor(X1,X0)),
+  inference(rectify,[],[f72])).
+fof(f107,plain,(
+  ! [X0,X1,X2] : constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2)),
+  inference(rectify,[],[f73])).
+fof(f109,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_xor(X0,X1)))),
+  inference(rectify,[],[f75])).
+fof(f110,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(constr_split(X0)))),
+  inference(rectify,[],[f77])).
+fof(f115,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
+  inference(rectify,[],[f91])).
+fof(f116,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X1))),
+  inference(rectify,[],[f92])).
+fof(f121,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_2(tuple_2(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab))),constr_enc_oracle_STEP_1)))),
+  inference(rectify,[],[f98])).
+fof(f122,plain,(
+  ~pred_attacker(name_objective)),
+  inference(flattening,[],[f101])).
+fof(f125,plain,(
+  ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f109])).
+fof(f126,plain,(
+  ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f125])).
+fof(f127,plain,(
+  ! [X0] : (pred_attacker(constr_split(X0)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f110])).
+fof(f135,plain,(
+  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f115])).
+fof(f136,plain,(
+  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f116])).
+fof(f141,plain,(
+  ! [X0] : (pred_attacker(tuple_2(tuple_2(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab))),constr_enc_oracle_STEP_1)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f121])).
+fof(f208,plain,(
+  ( ! [X0,X1] : (constr_split(constr_concat(X0,X1)) = tuple_2(X0,X1)) )),
+  inference(cnf_transformation,[],[f67])).
+fof(f209,plain,(
+  ( ! [X2,X0,X3,X1] : (constr_concat(constr_xor(X0,X1),constr_xor(X2,X3)) = constr_xor(constr_concat(X0,X2),constr_concat(X1,X3))) )),
+  inference(cnf_transformation,[],[f102])).
+fof(f210,plain,(
+  ( ! [X0,X1] : (constr_xor(constr_C(X0),constr_C(X1)) = constr_C(constr_xor(X0,X1))) )),
+  inference(cnf_transformation,[],[f103])).
+fof(f211,plain,(
+  ( ! [X0] : (constr_ZERO = constr_xor(X0,X0)) )),
+  inference(cnf_transformation,[],[f104])).
+fof(f212,plain,(
+  ( ! [X0] : (constr_xor(X0,constr_ZERO) = X0) )),
+  inference(cnf_transformation,[],[f105])).
+fof(f213,plain,(
+  ( ! [X0,X1] : (constr_xor(X0,X1) = constr_xor(X1,X0)) )),
+  inference(cnf_transformation,[],[f106])).
+fof(f214,plain,(
+  ( ! [X2,X0,X1] : (constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2)) )),
+  inference(cnf_transformation,[],[f107])).
+fof(f215,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f126])).
+fof(f217,plain,(
+  ( ! [X0] : (pred_attacker(constr_split(X0)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f127])).
+fof(f221,plain,(
+  pred_attacker(constr_ZERO)),
+  inference(cnf_transformation,[],[f81])).
+fof(f231,plain,(
+  ( ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1))) )),
+  inference(cnf_transformation,[],[f135])).
+fof(f232,plain,(
+  ( ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_2(X0,X1))) )),
+  inference(cnf_transformation,[],[f136])).
+fof(f237,plain,(
+  ( ! [X0] : (pred_attacker(tuple_2(tuple_2(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab))),constr_enc_oracle_STEP_1)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f141])).
+fof(f238,plain,(
+  pred_attacker(tuple_2(tuple_2(name_v,constr_xor(constr_concat(name_objective,constr_C(name_objective)),constr_RC4(name_v,name_Kab))),constr_B_STEP_1))),
+  inference(cnf_transformation,[],[f99])).
+fof(f239,plain,(
+  ~pred_attacker(name_objective)),
+  inference(cnf_transformation,[],[f122])).
+fof(f241,plain,(
+  ( ! [X0,X1] : (~pred_attacker(constr_split(constr_concat(X0,X1))) | pred_attacker(X0)) )),
+  inference(definition_unfolding,[],[f231,f208])).
+fof(f242,plain,(
+  ( ! [X0,X1] : (~pred_attacker(constr_split(constr_concat(X0,X1))) | pred_attacker(X1)) )),
+  inference(definition_unfolding,[],[f232,f208])).
+fof(f243,plain,(
+  ( ! [X0] : (pred_attacker(constr_split(constr_concat(constr_split(constr_concat(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab)))),constr_enc_oracle_STEP_1))) | ~pred_attacker(X0)) )),
+  inference(definition_unfolding,[],[f237,f208,f208])).
+fof(f244,plain,(
+  pred_attacker(constr_split(constr_concat(constr_split(constr_concat(name_v,constr_xor(constr_concat(name_objective,constr_C(name_objective)),constr_RC4(name_v,name_Kab)))),constr_B_STEP_1)))),
+  inference(definition_unfolding,[],[f238,f208,f208])).
+fof(f245,plain,(
+  ( ! [X0] : (pred_attacker(constr_split(constr_concat(constr_split(constr_concat(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(X0,constr_C(X0))))),constr_enc_oracle_STEP_1))) | ~pred_attacker(X0)) )),
+  inference(forward_demodulation,[],[f243,f213])).
+fof(f246,plain,(
+  pred_attacker(constr_split(constr_concat(constr_split(constr_concat(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(name_objective,constr_C(name_objective))))),constr_B_STEP_1)))),
+  inference(forward_demodulation,[],[f244,f213])).
+fof(f247,plain,(
+  ( ! [X1] : (constr_xor(constr_ZERO,X1) = X1) )),
+  inference(superposition,[],[f213,f212])).
+fof(f257,plain,(
+  ( ! [X0,X1] : (~pred_attacker(constr_concat(X0,X1)) | pred_attacker(X0)) )),
+  inference(resolution,[],[f241,f217])).
+fof(f269,plain,(
+  ( ! [X2] : (constr_ZERO = constr_C(constr_xor(X2,X2))) )),
+  inference(superposition,[],[f210,f211])).
+fof(f276,plain,(
+  constr_ZERO = constr_C(constr_ZERO)),
+  inference(forward_demodulation,[],[f269,f211])).
+fof(f283,plain,(
+  ( ! [X0,X1] : (constr_xor(constr_ZERO,X1) = constr_xor(X0,constr_xor(X0,X1))) )),
+  inference(superposition,[],[f214,f211])).
+fof(f299,plain,(
+  ( ! [X0,X1] : (constr_xor(X0,constr_xor(X0,X1)) = X1) )),
+  inference(forward_demodulation,[],[f283,f247])).
+fof(f312,plain,(
+  ( ! [X4,X3] : (~pred_attacker(constr_xor(X3,X4)) | pred_attacker(X4) | ~pred_attacker(X3)) )),
+  inference(superposition,[],[f215,f299])).
+fof(f319,plain,(
+  ( ! [X4,X5] : (constr_ZERO = constr_concat(constr_xor(X4,X4),constr_xor(X5,X5))) )),
+  inference(superposition,[],[f209,f211])).
+fof(f328,plain,(
+  ( ! [X4] : (constr_ZERO = constr_concat(constr_xor(X4,X4),constr_ZERO)) )),
+  inference(forward_demodulation,[],[f319,f211])).
+fof(f329,plain,(
+  constr_ZERO = constr_concat(constr_ZERO,constr_ZERO)),
+  inference(forward_demodulation,[],[f328,f211])).
+fof(f347,plain,(
+  pred_attacker(constr_split(constr_concat(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(name_objective,constr_C(name_objective))))))),
+  inference(resolution,[],[f246,f241])).
+fof(f370,plain,(
+  ( ! [X1] : (pred_attacker(constr_split(constr_concat(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(X1,constr_C(X1)))))) | ~pred_attacker(X1)) )),
+  inference(resolution,[],[f245,f241])).
+fof(f844,plain,(
+  pred_attacker(constr_xor(constr_RC4(name_v,name_Kab),constr_concat(name_objective,constr_C(name_objective))))),
+  inference(resolution,[],[f347,f242])).
+fof(f961,plain,(
+  pred_attacker(constr_split(constr_concat(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(constr_ZERO,constr_ZERO))))) | ~pred_attacker(constr_ZERO)),
+  inference(superposition,[],[f370,f276])).
+fof(f964,plain,(
+  pred_attacker(constr_split(constr_concat(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(constr_ZERO,constr_ZERO)))))),
+  inference(subsumption_resolution,[],[f961,f221])).
+fof(f965,plain,(
+  pred_attacker(constr_split(constr_concat(name_v,constr_xor(constr_concat(constr_ZERO,constr_ZERO),constr_RC4(name_v,name_Kab)))))),
+  inference(forward_demodulation,[],[f964,f213])).
+fof(f966,plain,(
+  pred_attacker(constr_split(constr_concat(name_v,constr_xor(constr_ZERO,constr_RC4(name_v,name_Kab)))))),
+  inference(forward_demodulation,[],[f965,f329])).
+fof(f967,plain,(
+  pred_attacker(constr_split(constr_concat(name_v,constr_RC4(name_v,name_Kab))))),
+  inference(forward_demodulation,[],[f966,f247])).
+fof(f968,plain,(
+  pred_attacker(constr_RC4(name_v,name_Kab))),
+  inference(resolution,[],[f967,f242])).
+fof(f1049,plain,(
+  pred_attacker(constr_concat(name_objective,constr_C(name_objective))) | ~pred_attacker(constr_RC4(name_v,name_Kab))),
+  inference(resolution,[],[f844,f312])).
+fof(f1051,plain,(
+  pred_attacker(constr_concat(name_objective,constr_C(name_objective)))),
+  inference(subsumption_resolution,[],[f1049,f968])).
+fof(f1170,plain,(
+  pred_attacker(name_objective)),
+  inference(resolution,[],[f1051,f257])).
+fof(f1171,plain,(
+  $false),
+  inference(subsumption_resolution,[],[f1170,f239])).
+% SZS output end Proof for WEP-secrecy
+% ------------------------------
+% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Termination reason: Refutation
+
+% Memory used [KB]: 6140
+% Time elapsed: 0.173 s
+% ------------------------------
+----  Runtime statistics ----
+clauses created: 1030
+clauses deleted: 608
+-----------------------------
+% ------------------------------

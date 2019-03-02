@@ -1,0 +1,161 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+
+WooLam shared-key auth protocol (1997)
+
+A -> B : A
+B -> A : N (fresh)
+A -> B : { A,B,N }_kAS
+B -> S : { A,B,{ A,B,N }_kAS }_kBS
+S -> B : { A,B,N }_kBS
+B: verify { A,B,N }_kBS = the message from S
+
+The types avoid the attack.
+
+*)
+
+set ignoreTypes = false.
+
+(* When types are ignored, the verification does not terminate.
+In fact, there is an attack against this protocol.
+(See WooLamSK-host-getkey.pv for a version that terminates
+with an attack, when types are ignored. It uses function symbols
+host/getkey to represent the key table, for termination.)
+     set ignoreTypes = true.
+*)
+
+free c: channel.
+
+type host.
+type nonce.
+type key.
+
+(* Shared key encryption *)
+
+fun encrypt(bitstring,key): bitstring.
+reduc forall x: bitstring, y: key; decrypt(encrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+(* 2 honest host names A and B *)
+
+free A, B: host.
+
+(* the table host names/keys 
+   The key table consists of pairs 
+   (host, key shared between the host and the server) *)
+table keys(host, key).
+
+(* Queries *)
+
+event beginBparam(host, host).
+event endBparam(host, host).
+event beginBfull(host, host, nonce).
+event endBfull(host, host, nonce).
+
+query x: host, y: host; inj-event(endBparam(x,y)) ==> inj-event(beginBparam(x,y)).
+query x: host, y: host, z: nonce; inj-event(endBfull(x,y,z)) ==> inj-event(beginBfull(x,y,z)).
+
+(* Role of the initiator with identity xA and key kas shared with S *)
+
+let processInitiator =
+        (* The attacker starts the initiator by choosing identity xA,
+	   and its interlocutor xB2.
+	   We check that xA is honest (i.e. is A or B)
+	   and get its corresponding key.
+	*)
+        in(c, (xA: host, xB2: host));
+	if xA = A || xA = B then
+	get keys(=xA, kas) in
+	(* Real start of the role *)
+	event beginBparam(xA, xB2);
+        out(c,xA); 
+	in(c,n: nonce); 
+	event beginBfull(xA, xB2, n);
+        out(c, encrypt((xA, xB2, n), kas)).
+
+(* Role of the responder with identity xB and key kbs shared with S *)
+
+let processResponder =
+        (* The attacker starts the responder by choosing identity xB.
+	   We check that xB is honest (i.e. is A or B)
+	   and get its corresponding key. *)
+        in(c, xB: host);
+	if xB = A || xB = B then
+	get keys(=xB, kbs) in
+	(* Real start of the role *)
+	in(c, xA2: host); 
+	new N: nonce; 
+	out(c, N); 
+	in(c, m: bitstring);
+        out(c, encrypt((xA2, xB, m), kbs));
+        in(c, m2: bitstring);
+	let (=xA2, =xB, =N) = decrypt(m2, kbs) in
+        (* OK *)
+        if xA2 = A || xA2 = B then 
+	event endBparam(xA2, xB);
+	event endBfull(xA2, xB, N).
+
+(* Server *)
+
+let processS = 
+	in(c, xB0: host);(* Choose the B host *)
+	get keys(=xB0, kbs) in
+        in(c,m: bitstring);
+        let (xA1: host, =xB0, m2: bitstring) = decrypt(m, kbs) in
+	get keys(=xA1, kas) in
+        let (=xA1, =xB0, n: nonce) = decrypt(m2, kas) in
+        out(c, encrypt((xA1, xB0, n), kbs)).
+
+(* Key registration *)
+
+let processK =
+        in(c, (h: host, k: key));
+        if h <> A && h <> B then insert keys(h,k).
+
+(* Start process *)
+
+process
+	new Kas: key; new Kbs: key;
+	insert keys(A, Kas);
+	insert keys(B, Kbs);
+	(
+          (* Launch an unbounded number of sessions of the initiator *)
+          (!processInitiator) | 
+          (* Launch an unbounded number of sessions of the responder *)
+          (!processResponder) |
+          (* Launch an unbounded number of sessions of the server *)
+          (!processS) |
+          (* Key registration process *)
+	  (!processK)
+        )
+

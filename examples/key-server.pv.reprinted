@@ -1,0 +1,95 @@
+free c : channel.
+
+const A : bitstring.
+
+free E : bitstring.
+
+fun test(bitstring) : bitstring.
+
+table keys(bitstring, bitstring).
+
+fun pkey(bitstring) : bitstring.
+fun xor(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring; 
+    xor(A, x) = x.
+
+fun sign(bitstring, bitstring) : bitstring.
+fun getmess(bitstring) : bitstring.
+fun checksign(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    checksign(sign(m, k), pkey(k)) = m;
+  forall m : bitstring, k : bitstring; 
+    checksign(sign(m, k), pkey(k)) = m.
+equation
+  forall m : bitstring, k : bitstring; 
+    getmess(sign(m, k)) = m.
+
+fun dec(bitstring, bitstring) : bitstring.
+fun enc(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
+
+fun aenc(bitstring, bitstring) : bitstring.
+fun adec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    adec(aenc(m, pkey(k)), k) = m.
+
+free objective : bitstring [private].
+
+query 
+  attacker(objective).
+
+let client_A(skA : bitstring, pkS : bitstring) =
+  let pkA = pkey(skA) in
+  in(c, T : bitstring);
+  out(c, (A, T));
+  in(c, sign_pkT_T : bitstring);
+  let (pkT : bitstring, =T) = checksign(sign_pkT_T, pkS) in
+  out(c, aenc(objective, pkT));
+  0.
+
+let key_retrieval_server(skS : bitstring) =
+  in(c, (src : bitstring, dst : bitstring));
+  get keys(=dst, pkDst) in
+  out(c, sign((pkDst, dst), skS));
+  0.
+
+let key_register_server =
+  in(c, (h : bitstring, pkH : bitstring));
+  
+  if h <> A then
+  insert keys(h, pkH);
+  0.
+
+process
+  new skS : bitstring;
+  new skA : bitstring;
+  let pkS = pkey(skS) in
+  let pkA = pkey(skA) in
+  insert keys(A, pkA);
+  out(c, pkS);
+  (
+    ! (
+      client_A(skA, pkS)
+    )
+  )
+  | (
+    (
+      ! (
+        key_retrieval_server(skS)
+      )
+    )
+    | (
+      ! (
+        key_register_server
+      )
+    )
+  )

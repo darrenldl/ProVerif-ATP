@@ -1,0 +1,130 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free C : bitstring.
+free D : bitstring.
+
+const ZERO : bitstring.
+
+fun add(bitstring, bitstring) : bitstring.
+fun neg(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    add(x, add(y, z)) = add(add(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    add(x, y) = add(y, x).
+equation
+  forall x : bitstring; 
+    add(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    add(x, neg(x)) = ZERO.
+
+free Sa : bitstring [private].
+free Sb : bitstring [private].
+free Sc : bitstring [private].
+free Sd : bitstring [private].
+
+fun aenc(bitstring, bitstring) : bitstring.
+fun adec(bitstring, bitstring) : bitstring.
+fun pkey(bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    adec(aenc(m, pkey(k)), k) = m.
+
+const client_A_STEP_1 : bitstring.
+const client_A_STEP_2 : bitstring.
+
+let client_A(skA : bitstring) =
+  new Na : bitstring;
+  in(c, pkNextT : bitstring);
+  in(c, lastT : bitstring);
+  out(c, ((A, aenc(add(Na, Sa), pkNextT)), client_A_STEP_1));
+  in(c, (=lastT, aenc_add_Na_Sa_Sb_Sc_Sd : bitstring));
+  let add_Na_Sa_Sb_Sc_Sd = adec(aenc_add_Na_Sa_Sb_Sc_Sd, skA) in
+  let add_Sa_Sb_Sc_Sd = add(add_Na_Sa_Sb_Sc_Sd, neg(Na)) in
+  out(c, (add_Sa_Sb_Sc_Sd, client_A_STEP_2));
+  0.
+
+const client_B_STEP_1 : bitstring.
+
+let client_B(skB : bitstring) =
+  in(c, prevT : bitstring);
+  in(c, pkNextT : bitstring);
+  in(c, (=prevT, aenc_add_Na_Sa : bitstring));
+  let add_Na_Sa = adec(aenc_add_Na_Sa, skB) in
+  out(c, ((B, aenc(add(add_Na_Sa, Sb), pkNextT)), client_B_STEP_1));
+  0.
+
+const client_C_STEP_1 : bitstring.
+
+let client_C(skC : bitstring) =
+  in(c, prevT : bitstring);
+  in(c, pkNextT : bitstring);
+  in(c, (=prevT, aenc_add_Na_Sa_Sb : bitstring));
+  let add_Na_Sa_Sb = adec(aenc_add_Na_Sa_Sb, skC) in
+  out(c, ((C, aenc(add(add_Na_Sa_Sb, Sc), pkNextT)), client_C_STEP_1));
+  0.
+
+const client_D_STEP_1 : bitstring.
+
+let client_D(skD : bitstring) =
+  in(c, prevT : bitstring);
+  in(c, pkNextT : bitstring);
+  in(c, (=prevT, aenc_add_Na_Sa_Sb_Sc : bitstring));
+  let add_Na_Sa_Sb_Sc = adec(aenc_add_Na_Sa_Sb_Sc, skD) in
+  out(c, ((D, aenc(add(add_Na_Sa_Sb_Sc, Sd), pkNextT)), client_D_STEP_1));
+  0.
+
+query 
+  attacker(Sa).
+
+const STEP_1 : bitstring.
+const STEP_2 : bitstring.
+const STEP_3 : bitstring.
+const STEP_4 : bitstring.
+
+process
+  new skA : bitstring;
+  new skB : bitstring;
+  new skC : bitstring;
+  new skD : bitstring;
+  let pkA = pkey(skA) in
+  let pkB = pkey(skB) in
+  let pkC = pkey(skC) in
+  let pkD = pkey(skD) in
+  out(c, (pkA, STEP_1));
+  out(c, (pkB, STEP_2));
+  out(c, (pkC, STEP_3));
+  out(c, (pkD, STEP_4));
+  (
+    client_A(skA)
+  )
+  | (
+    (
+      client_B(skB)
+    )
+    | (
+      (
+        client_C(skC)
+      )
+      | (
+        client_D(skD)
+      )
+    )
+  )

@@ -1,0 +1,110 @@
+free c : channel.
+
+type host.
+type nonce.
+type pkey.
+type skey.
+
+fun pk(skey) : pkey.
+fun sign(bitstring, skey) : bitstring.
+
+reduc
+  forall m : bitstring, k : skey; getmess(sign(m, k)) = m.
+reduc
+  forall m : bitstring, k : skey; checksign(sign(m, k), pk(k)) = m.
+
+not attacker(new skA).
+not attacker(new skB).
+not attacker(new skS).
+
+free A : host.
+free B : host.
+
+table keys(host, pkey).
+
+event beginBparam(host, host).
+event endBparam(host, host).
+event beginBfull(host, host, nonce).
+event endBfull(host, host, nonce).
+
+query x : host, y : host;
+  inj-event(endBparam(x, y)) ==> inj-event(beginBparam(x, y)).
+query x : host, y : host, z : nonce;
+  inj-event(endBfull(x, y, z)) ==> inj-event(beginBfull(x, y, z)).
+
+let processInitiator(skA : skey, skB : skey) =
+  in(c, (xA : host, xB0 : host));
+  
+  if xA = A || xA = B then
+  let skxA = if xA = A then (skA) else (skB) in
+  event beginBparam(xA, xB0);
+  out(c, xA);
+  in(c, n : nonce);
+  event beginBfull(xA, xB0, n);
+  out(c, sign((xA, xB0, n), skxA));
+  0
+  .
+
+let processResponder(pkS : pkey) =
+  in(c, xB : host);
+  
+  if xB = A || xB = B then
+  in(c, xA0 : host);
+  new n : nonce;
+  out(c, n);
+  in(c, m : bitstring);
+  out(c, xA0);
+  in(c, (=xA0, m4 : bitstring));
+  let (=xA0, pkA2 : pkey) = checksign(m4, pkS) in
+  let (=xA0, =xB, =n) = checksign(m, pkA2) in
+  
+  if xA0 = A || xA0 = B then
+  event endBparam(xA0, xB);
+  event endBfull(xA0, xB, n);
+  0
+  .
+
+let processS(skS : skey) =
+  in(c, xA : host);
+  get keys(=xA, pkA) in
+  out(c, (xA, sign((xA, pkA), skS)));
+  0
+  .
+
+let processK =
+  in(c, (h : host, k : pkey));
+  
+  if h <> A && h <> B then
+  insert keys(h, k);
+  0
+  .
+
+process
+  new skA : skey;
+  new skB : skey;
+  new skS : skey;
+  let pkA = pk(skA) in
+  let pkB = pk(skB) in
+  let pkS = pk(skS) in
+  out(c, pkA);
+  out(c, pkB);
+  out(c, pkS);
+  insert keys(A, pkA);
+  insert keys(B, pkB);
+  (
+    ! (
+      processInitiator(skA, skB)
+    )
+  )
+  | (
+    (
+      ! (
+        processResponder(pkS)
+      )
+    )
+    | (
+      ! (
+        processS(skS)
+      )
+    )
+  )

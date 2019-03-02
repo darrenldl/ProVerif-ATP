@@ -1,0 +1,36 @@
+free c : channel.
+
+free objective : bitstring [private].
+
+fun exp(bitstring, bitstring) : bitstring.
+fun mod(bitstring, bitstring) : bitstring.
+
+equation forall P:bitstring, G:bitstring, x:bitstring, y:bitstring;
+  mod(exp(exp(G, x), y), P) = mod(exp(exp(G, y), x), P).
+
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  dec(enc(m, k), k) = m.
+
+query attacker(objective).
+
+let A =
+  new P:bitstring;
+  new G:bitstring;
+  new Na:bitstring;
+  out(c, (P, G)); (* 1. *)
+  out(c, mod(exp(G, Na), P)); (* 2. *)
+  in(c, B : bitstring);
+  let s = mod(exp(B, Na), P) in
+  out(c, enc(objective, s)).
+
+let B =
+  new Nb:bitstring;
+  in(c, (P : bitstring, G : bitstring)); (* 1. *)
+  in(c, A : bitstring); (* 2. *)
+  out(c, mod(exp(G, Nb), P)); (* 3. *)
+  let s = mod(exp(A, Nb), P) in
+  0.
+
+process A | B

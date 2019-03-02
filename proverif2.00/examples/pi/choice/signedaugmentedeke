@@ -1,0 +1,121 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Augmented EKE, Bellovin, Merritt,
+   Section 3 
+   One does not know whether one decrypts { challengeA, challengeB }_K
+   and similar messages correctly. In this case, there is no attack. *)
+
+
+free c.
+
+(* Symmetric cryptography
+   One does not know whether decryption succeeds or not
+   For use with weak secrets *)
+
+fun enc/2.
+fun dec/2.
+equation dec(enc(x,y),y) = x.
+equation enc(dec(x,y),y) = x.
+
+(* Symmetric cryptography
+   One knows whether decryption succeeds or not 
+   -- not used in this script.
+
+fun senc/2.
+reduc sdec(senc(x,y),y) = x. *)
+
+(* Diffie-Hellman *)
+
+data g/0.
+fun exp/2.
+equation exp(exp(g,x),y) = exp(exp(g,y),x).
+
+(* Signature *)
+
+fun pk/1.
+fun sign/2.
+data true/0.
+reduc verif(sign(x,y), pk(y),x) = true.
+reduc getmess(sign(x,y)) = x.
+
+(* Host *)
+
+data host/2.
+
+
+free hostA, hostB.
+private free P.
+
+let processA = 
+	new RA;
+	out(c, (hostA, enc(exp(g,RA), pk(P))));
+	in(c, (m1, m2));
+	let gRB = dec(m1, pk(P)) in
+	let K = exp(gRB, RA) in
+	let (challengeB) = dec(m2, K) in
+	new challengeA;
+	out(c, enc((challengeA, challengeB), K));
+	in(c, m3);
+	if (challengeA) = dec(m3, K) then
+	out(c, enc(sign(K,P), K)).
+
+
+let processB =
+	in(c, (=hostX, gRA)); 
+	new RB;
+	let K = exp(gRA, RB) in
+	new challengeB;
+	out(c, (enc(exp(g,RB), pk(P)), enc(challengeB, K)));
+	in(c, m4);
+	let (challengeA, =challengeB) = dec(m4, K) in
+	out(c, enc(challengeA, K));
+	in(c, m5);
+	let fr = dec(m5, K) in
+	if verif(fr,pk(P),K) = true then
+	0.
+
+let processAtalkingX =
+	in(c, (PA,PB));
+	let hostX = host(PA,PB) in
+	let P = PA in
+	processA.
+
+let processBtalkingX =
+	in(c, (PA,PB));
+	let hostX = host(PA,PB) in
+	let P = PB in
+	processB.
+
+process
+	(!let hostX = hostB in processA) |
+	(!let hostX = hostA in processB) |
+	(!processAtalkingX) | 
+	(!processBtalkingX) | 
+	(phase 1;
+	new w;
+	out(c, choice[w,P]))

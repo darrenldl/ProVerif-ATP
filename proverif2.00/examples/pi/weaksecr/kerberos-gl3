@@ -1,0 +1,118 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Kerberos, modified by Gong et al,
+   Version taken from Delaune, Jacquemard, LSV-04-1
+
+   The unrecognizable tuples lead to non-termination.
+   Try to solve this!
+
+   Simplified version of kerberos-gl2 to investigate the termination 
+   problem. *)
+
+(* param selFun = NounifsetMaxsize. *)
+param movenew = false.
+(* param verboseRules = yes. *)
+
+
+free c.
+
+(* Symmetric cryptography
+   One does not know whether decryption succeeds or not
+   For use with weak secrets *)
+
+fun enc/2.
+fun dec/2.
+equation dec(enc(x,y),y) = x.
+equation enc(dec(x,y),y) = x.
+
+(* Symmetric cryptography
+   One knows whether decryption succeeds or not *)
+
+fun senc/2.
+reduc sdec(senc(x,y),y) = x.
+
+(* Public key cryptography *)
+
+fun penc/2.
+fun pk/1.
+reduc pdec(penc(x,pk(y)),y) = x.
+
+(* Unrecognizable pairs and triples.
+   An implementation is concatenation, when the elements have known lengths *)
+
+fun pair/2.
+fun fst/1.
+fun snd/1.
+equation fst(pair(x,y)) = x.
+equation snd(pair(x,y)) = y.
+equation pair(fst(x), snd(x)) = x.
+
+
+fun triple/2.
+fun fst3/1.
+fun snd3/1.
+equation fst3(triple(x,y)) = x.
+equation snd3(triple(x,y)) = y.
+equation triple(fst3(x),snd3(x)) = x.
+
+(* PA = pw(A,S), PB = pw(B, S) *)
+
+free hostA, hostB.
+private free PA, PB.
+weaksecret PA.
+weaksecret PB.
+
+let processA = 
+	in(c, hostX);
+	new N1;
+	new N2;
+	out(c, penc((hostA, hostX, N1, N2), pkS));
+	in(c, (m1, m2));
+	let p1 = dec(m1, PA) in
+        if N1 = fst(p1) then
+	let m3 = snd(p1) in
+	let K = sdec(m3, N2) in
+	out(c, m2).
+
+let processB =
+	in(c, m4);
+	let t1 = dec(m4, PB) in
+	let hostY = fst3(t1) in
+	let k = snd3(t1) in
+	0.
+
+let processS = 
+	in(c, m5);
+	let (=hostA, =hostB, N1, N2) = pdec(m5, skS) in
+	new K;
+	out(c, (enc(pair(N1, senc(K, N2)), PA), enc(triple(hostA, K), PB))).
+	    
+process new skS;
+	let pkS = pk(skS) in
+	out(c, pkS);
+	(!processA) | (!processB) | (!processS)

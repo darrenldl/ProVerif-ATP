@@ -1,0 +1,100 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+Running example for correspondences paper.
+Inspired freely from Woo and Lam public-key auth protocol (1997)
+
+B -> A: N, B
+A -> B: { pkA, B, N }_skA
+
+*)
+
+param N.
+param N2.
+param N3.
+param N4.
+
+type nonce [large,fixed].
+type host [bounded].
+type pkey [bounded].
+type skey [bounded].
+type keyseed [large,fixed].
+type signature [bounded].
+type blocksize [fixed].
+type blocksizebot [bounded].
+
+fun concat1(pkey, host, nonce):blocksize [data].
+
+(* Signatures *)
+
+proba Psign.
+proba Psigncoll.
+
+expand UF_CMA_proba_signature(keyseed, pkey, skey, blocksize, signature, skgen, pkgen, sign, check, Psign, Psigncoll).
+
+(* Queries *)
+
+channel c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13.
+const B:host.
+event eA(pkey,host,nonce).
+event eB(pkey,host,nonce).
+
+query x:pkey,y:host, z:nonce;
+	event(eB(x,y,z)) ==> event(eA(x,y,z)).
+query x:pkey,y:host, z:nonce;
+	inj-event(eB(x,y,z)) ==> inj-event(eA(x,y,z)).
+
+let processA(pkA: pkey, skA: skey) =
+	in(c2, (xN:nonce, xB:host));
+	event eA(pkA, xB, xN);
+	out(c3, sign(concat1(pkA, xB, xN), skA)).
+
+let processB(pkA: pkey) =
+	in(c4, xpkA:pkey);
+	new n:nonce;
+	out(c5, (n, B));
+	in(c6, s:signature);
+	if check(concat1(xpkA, B, n), xpkA, s) then
+	(* OK *)
+	if xpkA = pkA then
+	event eB(xpkA, B, n).
+
+process 
+	in(c0, ());
+	new rkA: keyseed;
+	let pkA = pkgen(rkA) in
+	let skA = skgen(rkA) in
+	out(c1, pkA);
+	((! iA <= N processA(pkA, skA)) |
+	 (! iB <= N processB(pkA)))
+
+
+(* EXPECTED
+All queries proved.
+0.036s (user 0.028s + system 0.008s), max rss 40416K
+END *)

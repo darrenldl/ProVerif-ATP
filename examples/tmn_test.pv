@@ -1,0 +1,73 @@
+free c : channel.
+
+free A : bitstring.
+free B : bitstring.
+free S : bitstring.
+
+const ZERO : bitstring.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+(* associativity *)
+equation forall x:bitstring, y:bitstring, z:bitstring; xor(x, xor(y, z)) = xor(xor(x, y), z).
+
+(* commutativity *)
+equation forall x:bitstring, y:bitstring; xor(x, y) = xor(y, x).
+
+(* neutral element *)
+equation forall x:bitstring; xor(x, ZERO) = x.
+
+(* nilpotence *)
+equation forall x:bitstring; xor(x, x) = ZERO.
+
+fun pkey(bitstring) : bitstring.
+
+fun pk_enc(bitstring, bitstring) : bitstring.
+fun pk_dec(bitstring, bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  pk_dec(pk_enc(m, pkey(k)), k) = m.
+
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  dec(enc(m, k), k) = m.
+
+(* homomorphism *)
+fun mul(bitstring, bitstring) : bitstring.
+equation forall x:bitstring, y:bitstring, k:bitstring;
+  mul(pk_enc(x, k), pk_enc(y, k)) = pk_enc(mul(x, y), k).
+
+fun div1(bitstring, bitstring) : bitstring.
+fun div2(bitstring, bitstring) : bitstring.
+equation forall x:bitstring, y:bitstring;
+  div1(mul(x, y), y) = x.
+equation forall x:bitstring, y:bitstring;
+  div2(mul(x, y), x) = y.
+
+free objective : bitstring [private].
+
+query attacker(objective).
+
+let session_i(pkS : bitstring) =
+  new Ka : bitstring;
+  new Kb : bitstring;
+  out(c, (B, pk_enc(Ka, pkS)));
+  out(c, A);
+  out(c, (A, pk_enc(Kb, pkS)));
+  out(c, (B, xor(Kb, Ka)));
+  out(c, enc(objective, Kb)).
+
+let server_S(skS : bitstring, pkS : bitstring) =
+  in(c, (=B, enc_Ka_pkS : bitstring)); (* 1. IN  A -> S *)
+  let Ka = pk_dec(enc_Ka_pkS, skS) in
+  out(c, A);                           (* 2. OUT S -> B *)
+  in(c, (=A, enc_Kb_pkS : bitstring)); (* 3. IN  B -> S *)
+  let Kb = pk_dec(enc_Kb_pkS, skS) in
+  out(c, xor(Kb, Ka)).
+
+process
+  new skS:bitstring;
+
+  let pkS = pkey(skS) in
+
+  session_i(pkS) | server_S(skS, pkS)

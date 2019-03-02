@@ -1,0 +1,76 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* 
+
+? -> A : pkB
+A -> B : { N_A, pkA }_pkB
+B -> A : { N_A, N_B, pkB }_pkA
+A -> B : { N_B }_pkB
+B -> A : { S }_hNa,Nb
+
+This protocol takes into account Lowe's correction.
+
+*)
+
+pred c/1 decompData, elimVar.
+
+(* Public key cryptography *)
+
+fun pk/1.
+fun encrypt/2.
+(* reduc decrypt(encrypt(x,pk(y)),y) = x. *)
+
+(* Hash function *)
+
+fun hash/2.
+
+(* Shared-key cryptography *)
+
+fun sencrypt/2.
+(* reduc sdecrypt(sencrypt(x,y),y) = x. *)
+
+query c:secret[].
+
+reduc
+
+c:encrypt(Nb[encrypt((v6,pk(skA[])),pk(skB[]))],pk(skB[])) & c:encrypt((v6,pk(skA[])),pk(skB[])) -> c:sencrypt(secret[],hash(v6,Nb[encrypt((v6,pk(skA[])),pk(skB[]))]));
+c:encrypt((v4,v5),pk(skB[])) -> c:encrypt((v4,Nb[encrypt((v4,v5),pk(skB[]))],pk(skB[])),v5);
+c:encrypt((Na[v3],v2,v3),pk(skA[])) & c:v3 -> c:encrypt(v2,v3);
+c:v1 -> c:encrypt((Na[v1],pk(skA[])),v1);
+c:pk(skB[]);
+c:pk(skA[]);
+c:c[];
+
+(* The attacker *)
+
+c:any7 & c:any6 -> c:sencrypt(any7,any6);
+c:encrypt(x,pk(y)) & c:y -> c:x;
+c:any5 -> c:pk(any5);
+c:any4 & c:any3 -> c:encrypt(any4,any3);
+c:any2 & c:any1 -> c:hash(any2,any1);
+c:sencrypt(x,y) & c:y -> c:x.

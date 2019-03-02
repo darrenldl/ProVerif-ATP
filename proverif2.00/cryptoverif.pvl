@@ -1,0 +1,613 @@
+(* This library is designed for maximal compatibility with CryptoVerif.
+It contains ProVerif definitions for cryptographic primitives under the
+same name as their corresponding CryptoVerif definitions---even though
+the ProVerif assumption is very often stronger than the more realistic
+CryptoVerif assumption. *)
+
+type bitstringbot.
+const bottom:bitstringbot.
+
+(* The cryptographic primitives that can be included in the honest
+   process (that is, those passed as arguments to the macros)
+   are programmed so that they never fail. 
+   This is important because terms never fail in CryptoVerif. *)
+
+(******************************** Key generation ************************************************)
+
+def keygen(keyseed, key, kgen) {
+
+fun kgen(keyseed): key.
+
+}
+
+(***************************** Symmetric encryption *********************************************)
+
+(* ProVerif cannot distinguish IND-CPA, IND-CPA and INT-CTXT, and
+IND-CCA2 and INT-PTXT symmetric encryption schemes. The definition
+used by ProVerif corresponds best to the strongest property, that is,
+IND-CPA and INT-CTXT. *)
+
+def IND_CPA_INT_CTXT_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc, Pencctxt) {
+
+fun enc_r(cleartext, key, enc_seed): ciphertext.
+fun injbot(cleartext):bitstringbot [data].
+
+fun dec(ciphertext, key): bitstringbot
+reduc forall m:cleartext, k:key, r:enc_seed; 
+	dec(enc_r(m, k, r), k) = injbot(m)
+otherwise forall c:ciphertext, k: key;
+        dec(c,k) = bottom.
+
+fun Z(cleartext):cleartext.
+
+(* The encryption function is probabilistic *)
+letfun enc(m: cleartext, k: key) =
+       r <-R enc_seed; enc_r(m, k, r).
+
+(* Encryption leaks Z(m), typically the length of m *) 
+reduc forall m:cleartext, r:enc_seed, k:key;  
+        leak(enc_r(m, k, r)) = Z(m).
+(* Note: providing a good definition of Z in ProVerif is a problem *)
+
+(* Test equality of keys *)
+reduc forall x:cleartext, x':cleartext, r:enc_seed, r':enc_seed, y:key;  
+        keyeq(enc_r(x,y,r),enc_r(x',y,r')) = true.
+
+}
+
+def IND_CPA_INT_CTXT_sym_enc(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pencctxt) { 
+
+type enc_seed [bounded].
+expand IND_CPA_INT_CTXT_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc, Pencctxt).
+
+}
+
+(* IND-CPA symmetric encryption *)
+
+def IND_CPA_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc) { 
+
+expand IND_CPA_INT_CTXT_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc, Pencctxt).
+
+(* Malleability *)
+reduc forall k: key, m:cleartext, r: enc_seed, m':cleartext, r': enc_seed;
+      mal(enc_r(m,k,r),m',r') = enc_r(m',k,r').
+
+}
+
+def IND_CPA_sym_enc(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc) { 
+
+type enc_seed [bounded].
+expand IND_CPA_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc).
+
+}
+
+(* AEAD *)
+
+def AEAD_all_args(key, cleartext, ciphertext, add_data, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc, Pencctxt) { 
+
+fun enc_r(cleartext, add_data, key, enc_seed): ciphertext.
+fun injbot(cleartext):bitstringbot [data].
+
+fun dec(ciphertext, add_data, key): bitstringbot
+reduc forall m:cleartext, d:add_data, k:key, r:enc_seed; 
+	dec(enc_r(m, d, k, r), d, k) = injbot(m)
+otherwise forall c:ciphertext, d:add_data, k:key;
+        dec(c, d, k) = bottom.
+
+fun Z(cleartext):cleartext.
+
+(* The encryption function is probabilistic *)
+letfun enc(m: cleartext, d:add_data, k: key) =
+       r <-R enc_seed; enc_r(m, d, k, r).
+
+(* The additional data is authenticated, but not encrypted, so it may leak *)
+reduc forall m:cleartext, d:add_data, r:enc_seed, k:key;
+        get_data(enc_r(m, d, k, r)) = d.
+
+(* Encryption leaks Z(m), typically the length of m *) 
+reduc forall m:cleartext, d:add_data, r:enc_seed, k:key;  
+        leak(enc_r(m, d, k, r)) = Z(m).
+(* Note: providing a good definition of Z in ProVerif is a problem *)
+
+(* Test equality of keys *)
+reduc forall x:cleartext, d:add_data, x':cleartext, d':add_data, r:enc_seed, r':enc_seed, y:key;  
+        keyeq(enc_r(x,d,y,r),enc_r(x',d',y,r')) = true.
+
+}
+
+def AEAD(key, cleartext, ciphertext, add_data, enc, dec, injbot, Z, Penc, Pencctxt) { 
+
+type enc_seed [bounded].
+expand AEAD_all_args(key, cleartext, ciphertext, add_data, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc, Pencctxt).
+
+}
+
+def AEAD_nonce_all_args(key, cleartext, ciphertext, add_data, nonce, enc, enc', dec, injbot, Z, Penc, Pencctxt) { 
+
+fun enc(cleartext, add_data, key, nonce): ciphertext.
+
+fun dec(ciphertext, add_data, key, nonce): cleartext
+reduc forall m:cleartext, d:add_data, k:key, r:nonce; 
+	dec(enc_r(m, d, k, n), d, k, n) = injbot(m)
+otherwise forall c:ciphertext, d:add_data, k:key, r:nonce;
+        dec(c, d, k, n) = bottom.
+
+fun Z(cleartext):cleartext.
+
+(* The additional data is authenticated, but not encrypted, so it may leak *)
+reduc forall m:cleartext, d:add_data, r:nonce, k:key;
+        get_data(enc_r(m, d, k, r)) = d.
+
+(* The scheme is broken if the same nonce is used twice *)
+fun break(ciphertext, ciphertext): key
+reduc forall m:cleartext, d:add_data, k:key, r:nonce;
+      break(enc_r(m, d, k, n),enc_r(m, d, k, n)) = dummy_key
+otherwise forall m:cleartext, d:add_data, m':cleartext, d':add_data, k:key, r:nonce;
+      break(enc_r(m, d, k, n),enc_r(m', d', k, n)) = k.
+      
+(* Encryption leaks Z(m), typically the length of m *) 
+reduc forall m:cleartext, d:add_data, r:nonce, k:key;  
+        leak(enc_r(m, d, k, r)) = Z(m).
+(* Note: providing a good definition of Z in ProVerif is a problem *)
+
+(* Test equality of keys *)
+reduc forall x:cleartext, d:add_data, x':cleartext, d':add_data, r:nonce, r':nonce, y:key;  
+        keyeq(enc_r(x,d,y,r),enc_r(x',d',y,r')) = true.
+
+
+}
+
+def AEAD_nonce(key, cleartext, ciphertext, add_data, nonce, enc, dec, injbot, Z, Penc, Pencctxt) {
+
+expand AEAD_nonce_all_args(key, cleartext, ciphertext, add_data, nonce, enc, enc', dec, injbot, Z, Penc, Pencctxt).
+
+}
+
+(* IND-CCA2 symmetric encryption *)
+
+def IND_CCA2_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, dec', injbot, Z, Penc) { 
+expand IND_CPA_INT_CTXT_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc, Pencctxt).
+}
+
+def IND_CCA2_sym_enc(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc) { 
+
+type enc_seed [bounded].
+expand IND_CCA2_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, dec', injbot, Z, Penc).
+
+}
+
+(* We omit INT-PTXT symmetric encryption. *)
+
+(* IND-CCA2 and INT-PTXT symmetric encryption *)
+
+def IND_CCA2_INT_PTXT_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, dec', injbot, Z, Penc, Pencptxt) { 
+expand IND_CPA_INT_CTXT_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, injbot, Z, Penc, Pencctxt).
+}
+
+def IND_CCA2_INT_PTXT_sym_enc(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pencptxt) { 
+
+type enc_seed [bounded].
+expand IND_CCA2_INT_PTXT_sym_enc_all_args(key, cleartext, ciphertext, enc_seed, enc, enc_r, enc_r', dec, dec', injbot, Z, Penc, Pencptxt).
+
+}
+
+(* ProVerif cannot distinguish a PRP block cipher from a SPRP block cipher.
+The definition used by ProVerif corresponds best to a SPRP block cipher *)
+
+def SPRP_cipher(key, blocksize, enc, dec, Penc) {
+
+fun enc(blocksize, key): blocksize.
+fun dec(blocksize, key): blocksize.
+
+equation forall m:blocksize, k:key; 
+	dec(enc(m, k), k) = m.
+equation forall m:blocksize, r:keyseed; 
+	enc(dec(m, k), k) = m.
+
+}
+
+def PRP_cipher(key, blocksize, enc, dec, Penc) {
+
+expand SPRP_cipher(key, blocksize, enc, dec, Penc).
+
+}
+
+def ICM_cipher(cipherkey, key, blocksize, enc, dec, enc_dec_oracle, qE, qD) {
+
+fun enc(cipherkey, blocksize, key): blocksize.
+fun dec(cipherkey, blocksize, key): blocksize.
+
+equation forall ck:cipherkey, m:blocksize, k:key; 
+	dec(ck, enc(ck, m, k), k) = m.
+equation forall ck:cipherkey, m:blocksize, r:keyseed; 
+	enc(ck, dec(ck, m, k), k) = m.
+
+param qE, qD [noninteractive].
+channel chE1, chE2, chD1, chD2.
+let enc_dec_oracle(ck: cipherkey) =
+    (foreach iE <= qE do in(chE1, (x:blocksize, ke:key)); out(chE2, enc(ck,x,ke)))
+  | (foreach iD <= qD do in(chD1, (m:blocksize, kd:key)); out(chD2, dec(ck,m,kd))). 
+
+}
+
+(*************************************** MACs ***************************************)
+(* MACs 
+   These are strong in ProVerif; they still leak the MACed message,
+   which is not protected according to the UF-CMA property.
+*)
+
+(* Deterministic MACs *)
+
+def SUF_CMA_det_mac_all_args(mkey, macinput, macres, mac, mac', check, Pmac) {
+
+fun mac(macinput, mkey):macres.
+
+fun check(macinput, mkey, macres): bool
+reduc forall m:macinput, k:mkey; 
+      check(m, k, mac(m, k)) = true
+otherwise forall m:macinput, k:mkey, t:macres; 
+      check(m, k, t) = false.
+
+reduc forall m: macinput, k: mkey;
+      getmess(mac(m,k)) = m.
+
+}
+
+def SUF_CMA_det_mac(mkey, macinput, macres, mac, check, Pmac) {
+
+expand SUF_CMA_det_mac_all_args(mkey, macinput, macres, mac, mac', check, Pmac).
+
+}
+
+(* Probabilistic MACs *)
+
+def UF_CMA_proba_mac_all_args(mkey, macinput, macres, mac_seed, mac, mac_r, mac_r', check, check', Pmac) {
+
+fun mac_r(macinput, mkey, mac_seed):macres.
+
+fun check(macinput, mkey, macres): bool
+reduc forall m:macinput, k:mkey, r: mac_seed; 
+      check(m, k, mac_r(m, k, r)) = true
+otherwise forall m:macinput, k:mkey, t:macres;
+      check(m, k, t) = false.
+
+reduc forall m: macinput, k: mkey, r: mac_seed;
+      getmess(mac(m,k,r)) = m.
+
+letfun mac(m: macinput, k: mkey) =
+    r <-R mac_seed; mac_r(m, k, r).
+
+}
+
+def UF_CMA_proba_mac(mkey, macinput, macres, mac, check, Pmac) {
+
+type mac_seed [bounded].
+expand UF_CMA_proba_mac_all_args(mkey, macinput, macres, mac_seed, mac, mac_r, mac_r', check, check', Pmac).
+
+}
+
+def SUF_CMA_proba_mac_all_args(mkey, macinput, macres, mac_seed, mac, mac_r, mac_r', check, Pmac) {
+
+expand UF_CMA_proba_mac_all_args(mkey, macinput, macres, mac_seed, mac, mac_r, mac_r', check, check', Pmac).
+
+}
+
+def SUF_CMA_proba_mac(mkey, macinput, macres, mac, check, Pmac) {
+
+type mac_seed [bounded].
+expand SUF_CMA_proba_mac_all_args(mkey, macinput, macres, mac_seed, mac, mac_r, mac_r', check, Pmac).
+
+}
+
+
+(******************************* Public-key encryption *******************************)
+
+def IND_CCA2_public_key_enc_all_args(keyseed, pkey, skey, cleartext, ciphertext, enc_seed, skgen, skgen2, pkgen, pkgen2, enc, enc_r, enc_r2, dec, dec2, injbot, Z, Penc, Penccoll) {
+
+fun enc_r(cleartext, pkey, enc_seed): ciphertext.
+fun skgen(keyseed):skey.
+fun pkgen(keyseed):pkey.
+
+fun injbot(cleartext):bitstringbot [data].
+
+letfun enc(m: cleartext, pk: pkey) =
+       r <-R enc_seed; enc_r(m,pk,r).
+
+(* The function Z returns for each bitstring, a bitstring
+   of the same length, consisting only of zeroes. *)
+fun Z(cleartext):cleartext.
+
+(* Encryption leaks Z(m), typically the length of m *) 
+reduc forall m:cleartext, r:enc_seed, pk:pkey;  
+        leak(enc_r(m, pk, r)) = Z(m).
+(* Note: providing a good definition of Z in ProVerif is a problem *)
+
+fun dec(ciphertext, skey): bitstringbot
+reduc forall m:cleartext, r:keyseed, r2:enc_seed; 
+	dec(enc_r(m, pkgen(r), r2), skgen(r)) = injbot(m)
+otherwise forall c:ciphertext, sk: skey;
+        dec(c, sk) = bottom.
+
+(* Test equality of keys *)
+reduc forall x:cleartext, x':cleartext, r:enc_seed, r':enc_seed, y:pkey;  
+        keyeq(enc_r(x,y,r),enc_r(x',y,r')) = true.
+
+}
+
+def IND_CCA2_public_key_enc(keyseed, pkey, skey, cleartext, ciphertext, skgen, pkgen, enc, dec, injbot, Z, Penc, Penccoll) {
+
+type enc_seed [bounded].
+expand IND_CCA2_public_key_enc_all_args(keyseed, pkey, skey, cleartext, ciphertext, enc_seed, skgen, skgen2, pkgen,pkgen2,  enc, enc_r, enc_r2, dec, dec2, injbot, Z, Penc, Penccoll).
+
+}
+
+(*************************************** Signatures ******************************)
+
+def UF_CMA_det_signature_all_args(keyseed, pkey, skey, signinput, signature, skgen, skgen2, pkgen, pkgen2, sign, sign2, check, check2, Psign, Psigncoll) {
+
+fun sign(signinput, skey): signature.
+fun skgen(keyseed):skey.
+fun pkgen(keyseed):pkey.
+
+fun check(signinput, pkey, signature): bool
+reduc forall m:signinput, r:keyseed; 
+	check(m, pkgen(r), sign(m, skgen(r))) = true
+otherwise forall m: signinput, pk: pkey, s: signature;
+        check(m, pk, s) = false.
+
+reduc forall m:signinput, r:keyseed;
+        getmess(sign(m, skgen(r))) = m.
+
+reduc forall m:signinput, r:keyseed;
+        getkey(sign(m, skgen(r))) = pkgen(r).
+
+}
+
+def UF_CMA_det_signature(keyseed, pkey, skey, signinput, signature, skgen, pkgen, sign, check, Psign, Psigncoll) {
+
+expand UF_CMA_det_signature_all_args(keyseed, pkey, skey, signinput, signature, skgen, skgen2, pkgen, pkgen2, sign, sign2, check, check2, Psign, Psigncoll).
+
+}
+
+def SUF_CMA_det_signature_all_args(keyseed, pkey, skey, signinput, signature, skgen, skgen2, pkgen, pkgen2, sign, sign2, check, check2, Psign, Psigncoll) {
+
+expand UF_CMA_det_signature_all_args(keyseed, pkey, skey, signinput, signature, skgen, skgen2, pkgen, pkgen2, sign, sign2, check, check2, Psign, Psigncoll).
+
+}
+
+def SUF_CMA_det_signature(keyseed, pkey, skey, signinput, signature, skgen, pkgen, sign, check, Psign, Psigncoll) {
+
+expand SUF_CMA_det_signature_all_args(keyseed, pkey, skey, signinput, signature, skgen, skgen2, pkgen, pkgen2, sign, sign2, check, check2, Psign, Psigncoll).
+
+}
+
+
+def UF_CMA_proba_signature_all_args(keyseed, pkey, skey, signinput, signature, sign_seed, skgen, skgen2, pkgen, pkgen2, sign, sign_r, signr2, check, check2, Psign, Psigncoll) {
+
+fun sign_r(signinput, skey, sign_seed): signature.
+fun skgen(keyseed):skey.
+fun pkgen(keyseed):pkey.
+
+letfun sign(m: signinput, sk: skey) =
+       r <-R sign_seed; sign_r(m,sk,r).
+
+fun check(signinput, pkey, signature): bool
+reduc forall m:signinput, r:keyseed, r2:sign_seed; 
+	check(m, pkgen(r), sign_r(m, skgen(r), r2)) = true
+otherwise forall m: signinput, pk: pkey, s: signature;
+        check(m, pk, s) = false.	
+
+reduc forall m:signinput, r:keyseed, r2:sign_seed;
+        getmess(sign_r(m, skgen(r), r2)) = m.
+
+reduc forall m:signinput, r:keyseed, r2:sign_seed;
+        getkey(sign_r(m, skgen(r), r2)) = pkgen(r).
+
+}
+
+def UF_CMA_proba_signature(keyseed, pkey, skey, signinput, signature, skgen, pkgen, sign, check, Psign, Psigncoll) {
+
+type sign_seed [bounded].
+expand UF_CMA_proba_signature_all_args(keyseed, pkey, skey, signinput, signature, sign_seed, skgen, skgen2, pkgen, pkgen2, sign, sign_r, signr2, check, check2, Psign, Psigncoll).
+
+}
+
+
+def SUF_CMA_proba_signature_all_args(keyseed, pkey, skey, signinput, signature, sign_seed, skgen, skgen2, pkgen, pkgen2, sign, sign_r, signr2, check, check2, Psign, Psigncoll) {
+
+expand UF_CMA_proba_signature_all_args(keyseed, pkey, skey, signinput, signature, sign_seed, skgen, skgen2, pkgen, pkgen2, sign, sign_r, signr2, check, check2, Psign, Psigncoll).
+
+}
+
+def SUF_CMA_proba_signature(keyseed, pkey, skey, signinput, signature, skgen, pkgen, sign, check, Psign, Psigncoll) {
+
+type sign_seed [bounded].
+expand SUF_CMA_proba_signature_all_args(keyseed, pkey, skey, signinput, signature, sign_seed, skgen, skgen2, pkgen, pkgen2, sign, sign_r, signr2, check, check2, Psign, Psigncoll).
+
+}
+
+(******************************* Hash functions ****************************)
+
+def ROM_hash(key, hashinput, hashoutput, hash, hashoracle, qH) {
+
+fun hash(key, hashinput):hashoutput.
+
+param qH [noninteractive].
+channel ch1, ch2.
+let hashoracle(k: key) = 
+        foreach iH <= qH do
+	in(ch1, x:hashinput);
+	out(ch2, hash(k,x)).
+
+}
+
+def ROM_hash_pair(key, hashinput1, hashinput2, hashoutput, hash, hashoracle, qH) {
+
+fun hash(key, hashinput1, hashinput2):hashoutput.
+
+param qH [noninteractive].
+channel ch1, ch2.
+let hashoracle(k: key) = 
+        foreach iH <= qH do
+	in(ch1, (x1:hashinput1, x2: hashinput2));
+	out(ch2, hash(k,x1,x2)).
+
+}
+
+def ROM_hash_triple(key, hashinput1, hashinput2, hashinput3, hashoutput, hash, hashoracle, qH) {
+
+fun hash(key, hashinput1, hashinput2, hashinput3):hashoutput.
+
+param qH [noninteractive].
+channel ch1, ch2.
+let hashoracle(k: key) = 
+        foreach iH <= qH do
+	in(ch1, (x1:hashinput1, x2: hashinput2, x3: hashinput3));
+	out(ch2, hash(k,x1,x2,x3)).
+
+}
+
+def ROM_hash_quad(key, hashinput1, hashinput2, hashinput3, hashinput4, hashoutput, hash, hashoracle, qH) {
+
+fun hash(key, hashinput1, hashinput2, hashinput3, hashinput4):hashoutput.
+
+param qH [noninteractive].
+channel ch1, ch2.
+let hashoracle(k: key) = 
+        foreach iH <= qH do
+	in(ch1, (x1:hashinput1, x2: hashinput2, x3: hashinput3, x4: hashinput4));
+	out(ch2, hash(k,x1,x2,x3,x4)).
+
+}
+
+def CollisionResistant_hash(key, hashinput, hashoutput, hash, hashoracle, Phash) {
+
+fun hash(key, hashinput):hashoutput.
+
+channel ch1, ch2.
+let hashoracle(k: key) =
+    in(ch1, ());
+    out(ch2, k).
+
+}
+
+(******************************** Diffie-Hellman ***************************)
+
+(* ProVerif has a single, strong model for Diffie-Hellman *)
+
+def CDH_all_args(G, Z, g, exp, exp', mult, pCDH) {
+
+fun exp(G,Z): G.
+const g:G.
+
+equation forall x:Z, y:Z;
+         exp(exp(g,x), y) = exp(exp(g,y), x).
+
+}
+
+def CDH(G, Z, g, exp, mult, pCDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def DDH_all_args(G, Z, g, exp, exp', mult, pDDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def DDH(G, Z, g, exp, mult, pDDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def GDH_all_args(G, Z, g, exp, exp', mult, pGDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def GDH(G, Z, g, exp, mult, pGDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def GDH_prime_order_all_args(G, Z, g, exp, exp', mult, pGDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def GDH_prime_order(G, Z, g, exp, mult, pGDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def square_CDH_all_args(G, Z, g, exp, exp', mult, pCDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def square_CDH(G, Z, g, exp, mult, pCDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def square_DDH_all_args(G, Z, g, exp, exp', mult, pDDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def square_DDH(G, Z, g, exp, mult, pDDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def square_GDH_all_args(G, Z, g, exp, exp', mult, pGDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def square_GDH(G, Z, g, exp, mult, pGDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def square_GDH_prime_order_all_args(G, Z, g, exp, exp', mult, pGDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+def square_GDH_prime_order(G, Z, g, exp, mult, pGDH) {
+expand CDH_all_args(G, Z, g, exp, exp', mult, pCDH).
+}
+
+(********************************* Miscellaneous ***************************)
+
+def PRF(key, input, output, f, Pprf) {
+
+fun f(key, input): output.
+
+}
+
+(* There is no good model of xor and one-way trapdoor permutations
+   in ProVerif, so we omit these primitives. One-way trapdoor permutations 
+   might be modeled as public-key encryption but that is not very satisfactory. *)
+
+(************ Composition of several primitives ********************
+
+Authenticated encryption
+- from encrypt then MAC
+- from AEAD
+- from AEAD_nonce
+
+AEAD
+- from encrypt then MAC
+- from AEAD_nonce
+
+In ProVerif, using such compositions does not make much sense.
+It is better to just use the properties of the composed primitive.
+*)
+
+def Auth_Enc_from_Enc_then_MAC(emkey, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pmac) { 
+expand IND_CPA_INT_CTXT_sym_enc(emkey, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pencctxt).
+}
+
+def AuthEnc_from_AEAD(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pencctxt) {
+expand IND_CPA_INT_CTXT_sym_enc(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pencctxt).
+}
+
+def AuthEnc_from_AEAD_nonce(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pencctxt) {
+expand IND_CPA_INT_CTXT_sym_enc(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pencctxt).
+}
+
+def AEAD_from_Enc_then_MAC(emkey, cleartext, ciphertext, add_data, enc, dec, injbot, Z, Penc, Pmac) { 
+expand AEAD(emkey, cleartext, ciphertext, add_data, enc, dec, injbot, Z, Penc, Pencctxt).
+}
+
+def AEAD_from_AEAD_nonce(key, cleartext, ciphertext, add_data, enc, dec, injbot, Z, Penc, Pencctxt) {
+expand AEAD(key, cleartext, ciphertext, add_data, enc, dec, injbot, Z, Penc, Pencctxt).
+}

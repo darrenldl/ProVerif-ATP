@@ -1,0 +1,65 @@
+How to upgrade from ProVerif 1.10 to ProVerif 1.11
+--------------------------------------------------
+
+Replace "param verbose = rules." with "param verboseRules = yes."
+and "param verbose = no." with "param verboseRules = no."
+
+
+How to upgrade from ProVerif 1.09 to ProVerif 1.10
+--------------------------------------------------
+
+The query system has been completely rewritten, and queries must be
+modified as follows:
+
+* authquery f/n. 
+must be replaced with
+  query ev:endf(x_1, ..., x_n) ==> ev:beginf(x_1, ..., x_n).
+where f is any identifier, beginf means "begin" concatenated before
+the identifier f, endf means "end" concatenated before the identifier f.
+
+* query M.
+must be replaced with
+  query attacker:M.
+or with
+  query putbegin ev:beginf_1, ..., beginf_n;
+        attacker:M.
+when we want to determine after which begin events f_1, ..., f_n
+the attacker can have M. 
+
+* query M phase p.
+must be replaced with
+  query attacker:M phase p.
+or with
+  query putbegin ev:beginf_1, ..., beginf_n;
+        attacker:M phase p.
+as above.
+
+* channelquery M,N.
+must be replaced with
+  query mess:M,N.
+or with
+  query putbegin ev:beginf_1, ..., beginf_n;
+        mess:M,N.
+as above.
+
+* channelquery M,N phase p.
+must be replaced with
+  query mess:M,N phase p.
+or with
+  query putbegin ev:beginf_1, ..., beginf_n;
+        mess:M,N phase p.
+as above.
+
+* endquery f(M_1, ..., M_n).
+must be replaced with
+  query ev:endf(M_1, ..., M_n).
+or with
+  query putbegin ev:beginf_1, ..., beginf_n;
+        ev:endf(M_1, ..., M_n).
+
+* remove "param injectiveAg = ...". When "param injectiveAg = true"
+was present, replace all "ev:" above with "evinj:".
+
+* replace "begin f(M_1, ..., M_n)" with "event beginf(M_1, ..., M_n)"
+  and "end f(M_1, ..., M_n)" with "event endf(M_1, ..., M_n)"
+  in the processes.

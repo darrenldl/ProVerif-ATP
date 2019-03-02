@@ -1,0 +1,21 @@
+opam-version: "1.2"
+name: "narrator"
+version: "0.1.0"
+maintainer: "Darren <darrenldldev@gmail.com>"
+            author: "Darren <darrenldldev@gmail.com>"
+homepage: ""
+bug-reports: ""
+license: ""
+dev-repo: ""
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
+install: ["jbuilder" "build" "@install"]
+remove: ["jbuilder" "remove" "narrator"]
+depends: [
+  "jbuilder"
+  "mparser"
+  "core_kernel"
+  "js_of_ocaml"
+  "lwt"
+]

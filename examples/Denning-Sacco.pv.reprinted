@@ -1,0 +1,60 @@
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free I : bitstring.
+
+fun succ(bitstring) : bitstring[data].
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
+
+query 
+  attacker(new Kab).
+
+let client_A(Kas : bitstring) =
+  new Na : bitstring;
+  out(c, (A, B));
+  in(c, enc_B_Kab_T_enc_A_Kab_T : bitstring);
+  let (=B, Kab : bitstring, T : bitstring, enc_A_Kab_T : bitstring) = dec(enc_B_Kab_T_enc_A_Kab_T, Kas) in
+  out(c, enc_A_Kab_T);
+  0.
+
+let client_B(Kbs : bitstring) =
+  new Nb : bitstring;
+  in(c, enc_A_Kab_T : bitstring);
+  let (=A, Kab : bitstring, T : bitstring) = dec(enc_A_Kab_T, Kbs) in
+  out(c, cbc_enc_1(Nb, Kab));
+  in(c, enc_succ_Nb : bitstring);
+  let (=succ(Nb)) = cbc_dec_1(enc_succ_Nb, Kab) in
+  0.
+
+let server_S(Kas : bitstring, Kbs : bitstring) =
+  new Kab : bitstring;
+  new T : bitstring;
+  in(c, (A : bitstring, B : bitstring));
+  out(c, enc((B, Kab, T, enc((A, Kab, T), Kbs)), Kas));
+  0.
+
+process
+  new Kas : bitstring;
+  new Kbs : bitstring;
+  (
+    ! (
+      client_A(Kas)
+    )
+  )
+  | (
+    (
+      ! (
+        client_B(Kbs)
+      )
+    )
+    | (
+      ! (
+        server_S(Kas, Kbs)
+      )
+    )
+  )

@@ -1,0 +1,144 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+
+Woo and Lam public-key auth protocol (1997)
+
+A -> B: A
+B -> A: N
+A -> B: { A, B, N }_skA
+B -> S: A
+S -> B: A, { A, pkA }_skS
+
+Correct
+
+*)
+
+free c: channel.
+
+type host.
+type nonce.
+type pkey.
+type skey.
+
+(* Signatures *)
+
+fun pk(skey): pkey.
+fun sign(bitstring, skey): bitstring.
+reduc forall m: bitstring, k: skey; getmess(sign(m,k)) = m.
+reduc forall m: bitstring, k: skey; checksign(sign(m,k), pk(k)) = m.
+
+(* Secrecy assumptions *)
+
+not attacker(new skA).
+not attacker(new skB).
+not attacker(new skS).
+
+(* 2 honest host names A and B *)
+
+free A, B: host.
+
+(* the table host names/keys 
+   The key table consists of pairs (host, public key) *)
+table keys(host, pkey).
+
+(* Queries *)
+
+event beginBparam(host, host).
+event endBparam(host, host).
+event beginBfull(host, host, nonce).
+event endBfull(host, host, nonce).
+
+query x: host, y: host; inj-event(endBparam(x,y)) ==> inj-event(beginBparam(x,y)).
+query x: host, y: host, z: nonce; inj-event(endBfull(x,y,z)) ==> inj-event(beginBfull(x,y,z)).
+
+(* Role of the initiator with identity xA and secret key skxA *)
+
+let processInitiator(skA: skey, skB: skey) =
+        (* The attacker starts the initiator by choosing identity xA
+	   and its interlocutor xB0.
+	   We check that xA is honest (i.e. is A or B)
+	   and get its corresponding key.
+	*)
+        in(c, (xA: host, xB0: host));
+	if xA = A || xA = B then
+	let skxA = if xA = A then skA else skB in
+	(* Real start of the role *)
+        event beginBparam(xA, xB0);
+        out(c, xA);
+        in(c,n: nonce);
+	event beginBfull(xA, xB0, n);
+	out(c,sign((xA, xB0, n),skxA)).
+
+(* Role of the responder with identity xB *)
+
+let processResponder(pkS: pkey) =
+        (* The attacker starts the responder by choosing identity xB.
+	   We check that xB is honest (i.e. is A or B). *)
+        in(c, xB: host);
+	if xB = A || xB = B then
+	(* Real start of the role *)
+	in(c, xA0: host);
+        new n: nonce; 
+	out(c,n);
+        in(c,m: bitstring); 
+        out(c, xA0);
+        in(c, (=xA0, m4: bitstring)); 
+        let (=xA0, pkA2: pkey) = checksign(m4, pkS) in
+        let (=xA0, =xB, =n) = checksign(m,pkA2) in
+	(* OK *)
+        if xA0 = A || xA0 = B then
+	event endBparam(xA0, xB);
+	event endBfull(xA0, xB, n).
+
+(* Server *)
+
+let processS(skS: skey) = 
+    	in(c, xA: host);
+	get keys(=xA, pkA) in
+	out(c, (xA, sign((xA, pkA), skS))).
+
+(* Key registration *)
+
+let processK =
+        in(c, (h: host, k: pkey));
+        if h <> A && h <> B then insert keys(h,k).
+
+(* Start process *)
+
+process new skA: skey; 
+	new skB: skey; 
+	new skS: skey;
+        let pkA = pk(skA) in
+        let pkB = pk(skB) in
+        let pkS = pk(skS) in
+	out(c, pkA); out(c, pkB); out(c, pkS);
+	insert keys(A, pkA);
+	insert keys(B, pkB);
+	((!processInitiator(skA, skB)) | 
+         (!processResponder(pkS)) | (!processS(skS)))

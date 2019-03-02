@@ -1,0 +1,151 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+
+Woo and Lam public-key auth protocol (1997)
+
+A -> B: A
+B -> A: N
+A -> B: { A, B, N }_skA
+B -> S: A
+S -> B: A, { A, pkA }_skS
+
+Correct
+
+
+SArename Rkey
+crypto sign rkS
+crypto sign rkA
+success
+
+Session identifier: (A, N)
+Authentication in one direction only.
+The adversary can forge a signature for a message that has already
+been signed, so the signature {A,B,N}_skA is not authenticated.
+
+*)
+
+param N.
+param N2.
+param N3.
+param N4.
+
+type nonce [large,fixed].
+type host [bounded].
+type pkey [bounded].
+type skey [bounded].
+type keyseed [large,fixed].
+type signature [bounded].
+type blocksize [fixed].
+type blocksizebot [bounded].
+
+fun concat1(host, host, nonce):blocksize [data].
+fun concat2(host, pkey):blocksize [data].
+
+equation forall x:host, y:host, z:nonce, x2:host, y2:pkey;
+	concat1(x,y,z) <> concat2(x2,y2).
+
+(* Signatures *)
+
+proba Psign.
+proba Psigncoll.
+
+expand UF_CMA_proba_signature(keyseed, pkey, skey, blocksize, signature, sskgen, spkgen, sign, check, Psign, Psigncoll).
+
+(* Queries *)
+
+channel c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14,
+	start, finish.
+
+const A:host.
+const B:host.
+fun acceptA(host):bitstring.
+fun acceptB(host):bitstring.
+
+event fullA(host,bitstring).
+event fullB(host,bitstring).
+
+query y:bitstring;
+	inj-event(fullB(A, y)) ==> inj-event(fullA(B,y)).
+
+let processA(skA: skey) =
+	in(c1, hostB0:host);
+	out(c2, A);
+	in(c3, n:nonce);
+	let m3 = sign(concat1(A, hostB0, n), skA) in
+	event fullA(hostB0, (A, n));
+	out(c4, (m3, acceptA(hostB0))).
+
+let processB(pkS: pkey) =
+	in(c5, hostA0:host);
+	new n:nonce;
+	out(c6, n);
+	in(c7, m:signature);
+	out(c8, hostA0);
+	in(c9, (=hostA0, pkA2:pkey, m4:signature));
+	if check(concat2(hostA0, pkA2), pkS, m4) then
+	if check(concat1(hostA0, B, n), pkA2, m) then
+	(* OK *)
+	event fullB(hostA0, (hostA0, n));
+	out(c14, acceptB(hostA0)).
+
+table keys(host, pkey).
+
+let processS(skS: skey) =
+	in(c10, hostA:host);
+	get keys(=hostA, pka) in
+	out(c11, (hostA, pka, sign(concat2(hostA, pka), skS))).
+
+let processK(pkA: pkey, pkB: pkey) =
+	in(c12, (Khost: host, Kkey: pkey));
+	if Khost = A then insert keys(A, pkA) else
+	if Khost = B then insert keys(B, pkB) else
+	insert keys(Khost, Kkey).
+
+process 
+	in(start, ());
+	new rkA: keyseed;
+	let pkA = spkgen(rkA) in
+	let skA = sskgen(rkA) in
+	new rkB: keyseed;
+	let pkB = spkgen(rkB) in
+	let skB = sskgen(rkB) in
+	new rkS: keyseed;
+	let pkS = spkgen(rkS) in
+	let skS = sskgen(rkS) in
+	out(c13, (pkA, pkB, pkS));
+	((! iA <= N processA(skA)) |
+	 (! iB <= N processB(pkS)) | 
+	 (! iS <= N processS(skS)) |
+	 (! iK <= N2 processK(pkA,pkB)))
+
+
+(* EXPECTED
+All queries proved.
+0.060s (user 0.060s + system 0.000s), max rss 25888K
+END *)

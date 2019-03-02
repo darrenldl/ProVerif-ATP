@@ -1,0 +1,204 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Otway Rees protocol.
+   Version of Otway Rees, Operating Systems Review Vol 21 no 1, p 8-10, 1987 
+
+A -> B: (C, A, B, { Na, C, A, B }_kA)
+B -> S: (C, A, B, { Na, C, A, B }_kA, { Nb, C, A, B }_kB)
+S -> B: (C, { Na, k }_kA, { Nb, k }_kB)
+B -> A: (C, { Na, k }_kA)
+
+"Attack" when A/B can talk to themselves: the responder role does not
+need to be run, the adversary can duplicate { Na, C, A, B }_kA.
+This version excludes this case.
+
+Full agreement is wrong, the adversary can make B see something else as
+{ Na, C, A, B }_kA, but it is not a real attack.
+
+The protocol should rather be written:
+A -> B,S: C, A, B
+A -> S: { Na, C, A, B }_kA
+B -> S: { Nb, C, A, B }_kB
+S -> A: { Na, k }_kA
+S -> B: { Nb, k }_kB
+
+Bparam injective agreement is wrong:
+A -> B: (C, A, B, { Na, C, A, B }_kA)
+B -> S: (C, A, B, { Na, C, A, B }_kA, { Nb, C, A, B }_kB)
+S -> B: (C, { Na, k }_kA, { Nb, k }_kB)
+B -> A: (C, { Na, k }_kA)
+
+I -> B: (C, A, B, { Na, C, A, B }_kA)
+B -> S: (C, A, B, { Na, C, A, B }_kA, { Nb', C, A, B }_kB)
+S -> B: (C, { Na, k' }_kA, { Nb', k' }_kB)
+B ->  : (C, { Na, k' }_kA)
+
+Moreover, A and B can get different keys k ! 
+(Strand spaces: Proving Security Protocols Correct, 
+Thayer, Herzog, Gutmman, JCS 99, p 36)
+ThayerFabregaHerzogGuttman-JCS1999.ps.gz
+
+A -> B: (C, A, B, { Na, C, A, B }_kA)
+B -> S: (C, A, B, { Na, C, A, B }_kA, { Nb, C, A, B }_kB)
+S -> B: (C, { Na, k }_kA, { Nb, k }_kB)  ===> B has key k
+I -> S: (C, A, B, { Na, C, A, B }_kA, { Nb, C, A, B }_kB)
+S -> I: (C, { Na, k' }_kA, { Nb, k' }_kB)
+I -> A: (C, { Na, k' }_kA)               ===> A has key k'
+
+*)
+
+free c: channel.
+
+type key.
+type host.
+type nonce.
+
+(* Shared key encryption *)
+
+fun encrypt(bitstring,key): bitstring.
+reduc forall x: bitstring, y: key; decrypt(encrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+(* 2 honest host names A and B *)
+
+free A, B: host.
+
+(* the table host names/keys 
+   The key table consists of pairs 
+   (host, key shared between the host and the server) *)
+table keys(host, key).
+
+(* Queries *)
+
+free secretA, secretB: bitstring [private].
+query attacker(secretA);
+      attacker(secretB).
+
+event endAparam(host,host).
+event endBparam(host,host).
+event beginAparam(host,host).
+event beginBparam(host,host).
+event endAkey(host, host, key).
+event beginAkey(host, host, key).
+event endBkey(host, host, key).
+event beginBkey(host, host, key).
+
+query x: host, y: host; inj-event(endAparam(x,y)) ==> inj-event(beginAparam(x,y)).
+query x: host, y: host, z: key; inj-event(endAkey(x,y,z)) ==> inj-event(beginAkey(x,y,z)).
+query x: host, y: host; inj-event(endBparam(x,y)) ==> inj-event(beginBparam(x,y)).
+query x: host, y: host, z: key; inj-event(endBkey(x,y,z)) ==> inj-event(beginBkey(x,y,z)).
+
+(* Role of the initiator with identity xA and key kA shared with S *)
+
+let processInitiator =
+        (* The attacker starts the initiator by choosing identity xA,
+	   and its interlocutor xB0.
+	   We check that xA is honest (i.e. is A or B)
+	   and get its corresponding key.
+	*)
+        in(c, (xA: host, xB0: host));
+	if (xA = A || xA = B) && xB0 <> xA then
+	get keys(=xA, kA) in
+	(* Real start of the role *)
+	event beginBparam(xA, xB0);
+	new C: nonce; 
+	new Na: nonce;
+        out(c, (C, xA, xB0, encrypt((Na, C, xA, xB0), kA)));
+	in(c, (=C, m2: bitstring));
+	let (=Na, k: key) = decrypt(m2, kA) in
+	event beginBkey(xA, xB0, k);
+	(* OK *)
+	if xB0 = A || xB0 = B then 
+        event endAparam(xA, xB0);
+	event endAkey(xA, xB0, k);
+	out(c, encrypt(secretA, k)).
+
+(* Role of the responder with identity xB and key kB shared with S *)
+
+let processResponder =
+        (* The attacker starts the responder by choosing identity xB.
+	   We check that xB is honest (i.e. is A or B)
+	   and get its corresponding key. *)
+        in(c, xB: host);
+	if xB = A || xB = B then
+	get keys(=xB, kB) in
+	(* Real start of the role *)
+	in(c, (C1: nonce, xA1: host, =xB, m2: bitstring));
+	event beginAparam(xA1, xB);
+	new Nb: nonce;
+	out(c, (C1, xA1, xB, m2, encrypt((Nb, C1, xA1, xB), kB)));
+	in(c, (=C1, m3: bitstring, m4: bitstring));
+	let (=Nb, k: key) = decrypt(m4, kB) in
+	event beginAkey(xA1, xB, k);
+	out(c, (C1, m3));
+	(* OK *)
+	if xA1 = A || xA1 = B then
+	event endBparam(xA1, xB);
+	event endBkey(xA1, xB, k);
+	out(c, encrypt(secretB, k)).
+
+(* Server *)
+
+let processS = 
+        in(c, (C1: nonce, xA1: host, xB1: host, m2: bitstring, m3: bitstring));
+    	get keys(=xA1, kA1) in
+	get keys(=xB1, kB1) in
+	let (Na1: nonce, =C1, =xA1, =xB1) = decrypt(m2, kA1) in
+	let (Nb1: nonce, =C1, =xA1, =xB1) = decrypt(m3, kB1) in
+	new k: key;
+        out(c, (C1, encrypt((Na1, k), kA1), 
+                    encrypt((Nb1, k), kB1))).
+
+
+(* Key registration *)
+
+let processK =
+        in(c, (h: host, k: key));
+        if h <> A && h <> B then insert keys(h,k).
+
+(* Start process *)
+
+process
+	new Kas: key; new Kbs: key;
+	insert keys(A, Kas);
+	insert keys(B, Kbs);
+	(
+          (* Launch an unbounded number of sessions of the initiator *)
+          (!processInitiator) | 
+          (* Launch an unbounded number of sessions of the responder *)
+          (!processResponder) |
+          (* Launch an unbounded number of sessions of the server *)
+          (!processS) |
+          (* Key registration process *)
+	  (!processK)
+        )
+

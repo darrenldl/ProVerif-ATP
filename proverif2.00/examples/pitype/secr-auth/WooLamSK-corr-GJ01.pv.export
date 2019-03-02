@@ -1,0 +1,111 @@
+free c : channel.
+
+type tag.
+type host.
+type nonce.
+type key.
+
+const m3 : tag[data].
+const m5 : tag[data].
+
+fun encrypt(bitstring, key) : bitstring.
+
+reduc
+  forall x : bitstring, y : key; decrypt(encrypt(x, y), y) = x.
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+free A : host.
+free B : host.
+
+table keys(host, key).
+
+event beginBparam(host, host).
+event endBparam(host, host).
+event beginBfull(host, host, nonce).
+event endBfull(host, host, nonce).
+
+query x : host, y : host;
+  inj-event(endBparam(x, y)) ==> inj-event(beginBparam(x, y)).
+query x : host, y : host, z : nonce;
+  inj-event(endBfull(x, y, z)) ==> inj-event(beginBfull(x, y, z)).
+
+let processInitiator =
+  in(c, (xA : host, xB2 : host));
+  
+  if xA = A || xA = B then
+  get keys(=xA, kas) in
+  event beginBparam(xA, xB2);
+  out(c, xA);
+  in(c, n : nonce);
+  event beginBfull(xA, xB2, n);
+  out(c, encrypt((m3, xB2, n), kas));
+  0
+  .
+
+let processResponder =
+  in(c, xB : host);
+  
+  if xB = A || xB = B then
+  get keys(=xB, kbs) in
+  in(c, xA2 : host);
+  new N : nonce;
+  out(c, N);
+  in(c, m : bitstring);
+  out(c, (xA2, xB, m));
+  in(c, m2 : bitstring);
+  let (=m5, =xA2, =N) = decrypt(m2, kbs) in
+  
+  if xA2 = A || xA2 = B then
+  event endBparam(xA2, xB);
+  event endBfull(xA2, xB, N);
+  0
+  .
+
+let processS =
+  in(c, (xA1 : host, xB1 : host, m2 : bitstring));
+  get keys(=xB1, kbs) in
+  get keys(=xA1, kas) in
+  let (=m3, =xB1, n : nonce) = decrypt(m2, kas) in
+  out(c, encrypt((m5, xA1, n), kbs));
+  0
+  .
+
+let processK =
+  in(c, (h : host, k : key));
+  
+  if h <> A && h <> B then
+  insert keys(h, k);
+  0
+  .
+
+process
+  new Kas : key;
+  new Kbs : key;
+  insert keys(A, Kas);
+  insert keys(B, Kbs);
+  (
+    ! (
+      processInitiator
+    )
+  )
+  | (
+    (
+      ! (
+        processResponder
+      )
+    )
+    | (
+      (
+        ! (
+          processS
+        )
+      )
+      | (
+        ! (
+          processK
+        )
+      )
+    )
+  )

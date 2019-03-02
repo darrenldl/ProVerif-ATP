@@ -1,0 +1,221 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* 
+
+Needham-Schroeder public key protocol
+
+Message 1: A -> S : (A, B)
+Message 2: S -> A : { pkB, B }skS
+Message 3: A -> B : { Na, A }pkB
+Message 4: B -> S : (B, A)
+Message 5: S -> B : { pkA, A }skS
+Message 6: B -> A : { Na, Nb }pkA
+Message 7: A -> B : { Nb }pkB
+
+The heart of the protocol is messages 3, 6, 7.
+Tags added to distinguish messages.
+
+*)
+
+free c: channel.
+
+type host.
+type nonce.
+type pkey.
+type skey.
+type spkey.
+type sskey.
+type tag.
+
+(* Public key encryption *)
+
+fun pk(skey): pkey.
+fun encrypt(bitstring, pkey): bitstring.
+reduc forall x: bitstring, y: skey; decrypt(encrypt(x,pk(y)),y) = x.
+
+(* Signatures *)
+
+fun spk(sskey): spkey.
+fun sign(bitstring, sskey): bitstring.
+reduc forall m: bitstring, k: sskey; getmess(sign(m,k)) = m.
+reduc forall m: bitstring, k: sskey; checksign(sign(m,k), spk(k)) = m.
+
+(* Shared key encryption *)
+
+fun sencrypt(bitstring,nonce): bitstring.
+reduc forall x: bitstring, y: nonce; sdecrypt(sencrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not attacker(new skA).
+not attacker(new skB).
+not attacker(new skS).
+
+(* 2 honest host names A and B *)
+
+free A, B: host.
+
+(* the table host names/keys 
+   The key table consists of pairs (host, public key) *)
+table keys(host, pkey).
+
+(* Queries *)
+
+free secretANa, secretANb, secretBNa, secretBNb: bitstring [private].
+query attacker(secretANa);
+      attacker(secretANb);
+      attacker(secretBNa);
+      attacker(secretBNb).
+
+event beginBparam(host, host).
+event endBparam(host, host).
+event beginAparam(host, host).
+event endAparam(host, host).
+event beginBfull(host, host, pkey, pkey, nonce, nonce).
+event endBfull(host, host, pkey, pkey, nonce, nonce).
+event beginAfull(host, host, pkey, pkey, nonce, nonce).
+event endAfull(host, host, pkey, pkey, nonce, nonce).
+
+
+query x: host, y: host; inj-event(endBparam(x,y)) ==> inj-event(beginBparam(x,y)).
+query x1: host, x2: host, x3: pkey, x4: pkey, x5: nonce, x6: nonce; 
+      	  inj-event(endBfull(x1,x2,x3,x4,x5,x6)) ==> inj-event(beginBfull(x1,x2,x3,x4,x5,x6)).
+query x: host, y: host; inj-event(endAparam(x,y)) ==> inj-event(beginAparam(x,y)).
+query x1: host, x2: host, x3: pkey, x4: pkey, x5: nonce, x6: nonce; 
+      	  inj-event(endAfull(x1,x2,x3,x4,x5,x6)) ==> inj-event(beginAfull(x1,x2,x3,x4,x5,x6)).
+
+(* Tags *)
+
+const c0:tag [data].
+const c1:tag [data].
+const c2:tag [data].
+const c3:tag [data].
+
+(* Role of the initiator with identity xA and secret key skxA *)
+
+let processInitiator(pkS: spkey, skA: skey, skB: skey) =
+        (* The attacker starts the initiator by choosing identity xA,
+	   and its interlocutor xB0.
+	   We check that xA is honest (i.e. is A or B)
+	   and get its corresponding key.
+	*)
+        in(c, (xA: host, hostX: host));
+	if xA = A || xA = B then
+	let skxA = if xA = A then skA else skB in
+	let pkxA = pk(skxA) in
+	(* Real start of the role *)
+	event beginBparam(xA, hostX); 
+	(* Get the public key certificate for the other host *)
+	out(c, (xA, hostX));
+	in(c, ms: bitstring); 
+	let (=c0,pkX: pkey,=hostX) = checksign(ms,pkS) in
+        (* Message 3 *)
+	new Na: nonce; 
+        out(c, encrypt((c1, Na, xA), pkX));
+        (* Message 6 *)
+        in(c, m: bitstring); 
+	let (=c2, =Na, NX2: nonce) = decrypt(m, skxA) in
+	event beginBfull(xA, hostX, pkX, pkxA, Na, NX2);
+        (* Message 7 *)
+        out(c, encrypt((c3, NX2), pkX));
+        (* OK *)
+	if hostX = B || hostX = A then
+	event endAparam(xA, hostX);
+	event endAfull(xA, hostX, pkX, pkxA, Na, NX2);
+	out(c, sencrypt(secretANa, Na));
+	out(c, sencrypt(secretANb, NX2)).
+
+(* Role of the responder with identity xB and secret key skxB *)
+
+let processResponder(pkS: spkey, skA: skey, skB: skey) =
+        (* The attacker starts the responder by choosing identity xB.
+	   We check that xB is honest (i.e. is A or B). *)
+        in(c, xB: host);
+	if xB = A || xB = B then
+	let skxB = if xB = A then skA else skB in
+	let pkxB = pk(skxB) in
+	(* Real start of the role *)
+        (* Message 3 *)
+	in(c, m: bitstring);
+	let (=c1, NY: nonce, hostY: host) = decrypt(m, skxB) in
+	event beginAparam(hostY, xB);
+	(* Get the public key certificate for the other host *)
+        out(c, (xB, hostY));
+	in(c,ms: bitstring);
+        let (=c0,pkY: pkey,=hostY) = checksign(ms,pkS) in
+        (* Message 2 *)
+	new Nb: nonce;
+	event beginAfull(hostY, xB, pkxB, pkY, NY, Nb);
+        (* Message 3 *)
+	out(c, encrypt((c2, NY, Nb), pkY));
+	in(c, m3: bitstring);
+        if (c3, Nb) = decrypt(m3, skB) then
+	(* OK *)
+        if hostY = A || hostY = B then
+	event endBparam(hostY, xB);
+	event endBfull(hostY, xB, pkxB, pkY, NY, Nb);
+	out(c, sencrypt(secretBNa, NY));
+	out(c, sencrypt(secretBNb, Nb)).
+
+(* Server *)
+
+let processS(skS: sskey) =  
+        in(c,(a: host, b: host)); 
+	get keys(=b, sb) in
+        out(c,sign((c0,sb,b),skS)).
+
+(* Key registration *)
+
+let processK =
+        in(c, (h: host, k: pkey));
+        if h <> A && h <> B then insert keys(h,k).
+
+(* Start process *)
+
+process new skA: skey; 
+	let pkA = pk(skA) in
+        out(c, pkA);
+	insert keys(A, pkA);
+        new skB: skey; 
+	let pkB = pk(skB) in
+        out(c, pkB);
+	insert keys(B, pkB);
+	new skS: sskey; 
+	let pkS = spk(skS) in
+	out(c, pkS);
+	(
+          (* Launch an unbounded number of sessions of the initiator *)
+          (!processInitiator(pkS, skA, skB)) | 
+          (* Launch an unbounded number of sessions of the responder *)
+          (!processResponder(pkS, skA, skB)) |
+          (* Launch an unbounded number of sessions of the server *)
+          (!processS(skS)) |
+          (* Key registration process *)
+	  (!processK)
+        )
+

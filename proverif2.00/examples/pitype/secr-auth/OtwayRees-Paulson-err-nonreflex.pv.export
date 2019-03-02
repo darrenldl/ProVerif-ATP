@@ -1,0 +1,132 @@
+free c : channel.
+
+type key.
+type host.
+type nonce.
+
+fun encrypt(bitstring, key) : bitstring.
+
+reduc
+  forall x : bitstring, y : key; decrypt(encrypt(x, y), y) = x.
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+free A : host.
+free B : host.
+
+table keys(host, key).
+
+free secretA : bitstring [private].
+free secretB : bitstring [private].
+
+query 
+  attacker(secretA);
+  attacker(secretB).
+
+event endAparam(host, host).
+event endBparam(host, host).
+event beginAparam(host, host).
+event beginBparam(host, host).
+event endAkey(host, host, key).
+event beginAkey(host, host, key).
+event endBkey(host, host, key).
+event beginBkey(host, host, key).
+
+query x : host, y : host;
+  inj-event(endAparam(x, y)) ==> inj-event(beginAparam(x, y)).
+query x : host, y : host, z : key;
+  inj-event(endAkey(x, y, z)) ==> inj-event(beginAkey(x, y, z)).
+query x : host, y : host;
+  inj-event(endBparam(x, y)) ==> inj-event(beginBparam(x, y)).
+query x : host, y : host, z : key;
+  inj-event(endBkey(x, y, z)) ==> inj-event(beginBkey(x, y, z)).
+
+let processInitiator =
+  in(c, (xA : host, xB0 : host));
+  
+  if xA = A || xA = B && xB0 <> xA then
+  get keys(=xA, kA) in
+  event beginBparam(xA, xB0);
+  new Na : nonce;
+  out(c, (Na, xA, xB0, encrypt((Na, xA, xB0), kA)));
+  in(c, (=Na, m2 : bitstring));
+  let (=Na, k : key) = decrypt(m2, kA) in
+  event beginBkey(xA, xB0, k);
+  
+  if xB0 = B || xB0 = A then
+  event endAparam(xA, xB0);
+  event endAkey(xA, xB0, k);
+  out(c, encrypt(secretA, k));
+  0
+  .
+
+let processResponder =
+  in(c, xB : host);
+  
+  if xB = A || xB = B then
+  get keys(=xB, kB) in
+  in(c, (na : nonce, xA1 : host, =xB, z : bitstring));
+  event beginAparam(xA1, xB);
+  new Nb : nonce;
+  out(c, (na, xA1, xB, z, Nb, encrypt((na, xA1, xB), kB)));
+  in(c, (=na, m3 : bitstring, m4 : bitstring));
+  let (=Nb, k : key) = decrypt(m4, kB) in
+  event beginAkey(xA1, xB, k);
+  out(c, (na, m3));
+  
+  if xA1 = A || xA1 = B then
+  event endBparam(xA1, xB);
+  event endBkey(xA1, xB, k);
+  out(c, encrypt(secretB, k));
+  0
+  .
+
+let processS =
+  in(c, (Na1 : nonce, xA1 : host, xB1 : host, m2 : bitstring, Nb1 : nonce, m3 : bitstring));
+  get keys(=xA1, kA1) in
+  get keys(=xB1, kB1) in
+  let (=Na1, =xA1, =xB1) = decrypt(m2, kA1) in
+  let (=Na1, =xA1, =xB1) = decrypt(m3, kB1) in
+  new k : key;
+  out(c, (Na1, encrypt((Na1, k), kA1), encrypt((Nb1, k), kB1)));
+  0
+  .
+
+let processK =
+  in(c, (h : host, k : key));
+  
+  if h <> A && h <> B then
+  insert keys(h, k);
+  0
+  .
+
+process
+  new Kas : key;
+  new Kbs : key;
+  insert keys(A, Kas);
+  insert keys(B, Kbs);
+  (
+    ! (
+      processInitiator
+    )
+  )
+  | (
+    (
+      ! (
+        processResponder
+      )
+    )
+    | (
+      (
+        ! (
+          processS
+        )
+      )
+      | (
+        ! (
+          processK
+        )
+      )
+    )
+  )

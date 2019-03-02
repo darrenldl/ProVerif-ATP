@@ -1,0 +1,245 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* JFKr *)
+
+type G.
+type texponent.
+type skey.
+type pkey.
+type key.
+type tag.
+type nonce.
+type grpinfo.
+type sainfo.
+
+fun G_to_key(G):key [data, typeConverter].
+
+(* Exponential and Diffie-Hellman *)
+
+const g: G.
+fun exp(G, texponent): G.
+equation forall y: texponent, z: texponent; exp(exp(g,y),z) = exp(exp(g,z),y).
+
+(* Signature *)
+
+fun S(skey, bitstring): bitstring.
+fun Pk(skey): pkey.
+reduc forall k: skey, v: bitstring; V(S(k,v), Pk(k),v) = true.
+reduc forall k: skey, v: bitstring; RecoverKey(S(k,v)) = Pk(k). (* For the attacker *)
+reduc forall k: skey, v: bitstring; RecoverText(S(k,v)) = v.    (* For the attacker *)
+
+(* Shared-key encryption *)
+
+fun E(key, bitstring): bitstring.
+reduc forall k: key, v: bitstring; D(k,E(k,v)) = v.
+
+(* Keyed hash function *)
+
+fun H(key, bitstring): key.
+
+(* Tags *)
+
+const tagE, tagA, tagV: tag [data].
+
+(* Constructors for JFK's formatted messages
+   Selectors are implicit when using "data" *)
+
+fun cons1(nonce, G): bitstring [data]. 
+fun cons2(nonce, nonce, G, grpinfo, key): bitstring [data] . 
+fun cons3(nonce, nonce, G, G, key, bitstring, key): bitstring [data]. 
+fun cons4(bitstring, key): bitstring [data].
+
+(* More constants *)
+
+const constI, constR: tag [data].
+const saR: sainfo [data].
+
+(* Free names *)
+
+free c: channel. (* Public channel *)
+free d0: channel.
+free pub, genprinc, getexponential, init0, getprinc0: channel.
+
+(* Secrecy assumptions *)
+
+not attacker(new kAminus) phase 0.
+not attacker(new d).
+
+(* Initiator 
+   The process processI corresponds to I^A in the figure. *)
+
+let processI(exponent: channel, init: channel, getI: channel, kAminus: skey) =
+  !
+  in(exponent, (dI: texponent, xI: G));
+  !
+  in(init, dummy: bitstring);    (* Init message *)
+  new NI: nonce; 
+  out(c, cons1(NI, xI));
+  in(c, cons2(=NI, NR, xR, grpinfoR, tR));
+  let h = G_to_key(exp(xR, dI)) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  let sI = S(kAminus, (NI, NR, xI, xR, grpinfoR)) in
+  out(getI, (dummy, NI, NR, xI, xR, tR, Ka, Ke, Kv, sI)).
+
+(* Responder
+   The process processR corresponds to R^A in the figure. *)
+
+free grpinfoR: grpinfo.
+
+let processR(exponent: channel, getR: channel, IDA: pkey, kAminus: skey) =
+  !
+  in(exponent, (dR: texponent, xR: G));
+  !
+  in(c, cons1(NI, xI));
+  new NR: nonce;
+  new tR: key;
+  out(c, cons2(NI, NR, xR, grpinfoR, tR));
+  new l: channel;
+  (
+    (
+    !
+    in(c, cons3(=NI,=NR,xI,=xR,=tR,eI,hI));
+    out(l, (xI,eI,hI))
+    )
+  |
+    (
+    in(l, (xI: G,eI: bitstring,hI: key));
+      (
+        out(d0, (NR, IDA)) | 
+	let h = G_to_key(exp(xI,dR)) in
+  	let Ka = H(h, (NI, NR, tagA)) in
+  	let Ke = H(h, (NI, NR, tagE)) in
+  	let Kv = H(h, (NI, NR, tagV)) in
+  	let sR = S(kAminus, (NI, NR, xI, xR)) in
+  	out(getR, (NI, NR, xI, xR, tR, eI, hI, Ka, Ke, Kv, sR))
+      )
+    )
+  ).
+
+(* Whole JFK system. *)
+
+process
+  new exponent: channel;
+  new cp: channel;
+  new ids: channel;
+  ( ! new d: texponent; let x = exp(g,d) in out(getexponential, x); ! out(exponent, (d,x)) )
+  |
+  (
+    !
+    new kAminus: skey;
+    let IDA = Pk(kAminus) in
+    new init: channel; new getI: channel; new getR: channel;
+    out(getprinc0, (IDA, getI, getR, init));
+    ( processI(exponent, init, getI, kAminus) | 
+      processR(exponent, getR, IDA, kAminus) | 
+      (!out(cp, IDA)) | (!out(ids, (kAminus, IDA))))
+  )
+  |
+  (
+    in(ids, (kAIminus: skey, IDAI: pkey));
+    in(ids, (kARminus: skey, IDAR: pkey));
+    in(exponent, (dI: texponent,xI: G));
+    in(exponent, (dR: texponent,xR: G)); (* with in(pub, (NR, xR)) instead, attack for xR = g, so h = exp(g, dI) = xI. *) 
+    in(init0, (IDRp: pkey, saI: sainfo,=IDAI,=IDAR,=xI,=xR));
+    new NI: nonce;
+    new NR: nonce; (* we could use instead in(pub, NR); *) 
+    new TR: key;
+    new NeI: bitstring; new NhI: key; new NeR: bitstring; new NhR: key; new NKv: key;
+    let h = G_to_key(exp(xR,dI)) in
+    let Ka = H(h, (NI, NR, tagA)) in
+    let Ke = H(h, (NI, NR, tagE)) in
+    let Kv = H(h, (NI, NR, tagV)) in
+    let sR = S(kARminus, (NI, NR, xI, xR)) in
+    let eR = E(Ke, (IDAR, saR, sR)) in
+    let hR = H(Ka, (constR, eR)) in
+    let sI = S(kAIminus, (NI, NR, xI, xR, grpinfoR)) in
+    let eI = E(Ke, (IDAI, IDRp, saI, sI)) in
+    let hI = H(Ka, (constI, eI)) in
+    out(pub, (NI, NR, TR,
+	choice[eI, NeI], 
+	choice[hI, NhI],
+	choice[eR, NeR],
+	choice[hR, NhR],
+	choice[Kv, NKv]))
+  )      
+    
+
+    
+(* 
+
+Let us name S' the above process.
+Let us define the context C as follows:
+
+new getprinc0;
+(
+  []
+|
+  !
+  in(getprinc0, (IDA, getI, getR, init));
+  new connect; new accept; new channelSIA;
+  out(getprinc, (IDA, init, accept, connect, channelSIA));
+  in(channelSIA, SIA);
+  event princ(kAminus, IDA, init, accept, connect, SIA);
+  ( processI2 | processR2 )
+)
+
+let processI2 =
+  !
+  in(getI, ((IDRp, saI), NI, NR, xI, xR, tR, Ka, Ke, Kv, sI));
+  let eI = E(Ke, (IDA, IDRp, saI, sI)) in
+  let hI = H(Ka, (constI, eI)) in
+  out(c, cons3(NI, NR, xI, xR, tR, eI, hI));
+  in(c, cons4(eR, hR));
+  if H(Ka, (constR, eR)) = hR then
+  let (IDRl, saR, sR) = D(Ke, eR) in
+  if V(sR, IDRl, (NI, NR, xI, xR)) = true then 
+  out(connect, (IDRl, IDRp, saI, saR, Kv)).
+
+let processR2 =
+  !
+  in(getR, (NI, NR, xI, xR, tR, eI, hI, Ka, Ke, Kv, sR));
+  if H(Ka, (constI, eI)) = hI then
+  let (IDIl, IDRp, saI, sI) = D(Ke,eI) in
+  if member:IDIl,SIA then
+  if V(sI, IDIl, (NI, NR, xI, xR, grpinfoR)) = true then
+  out(accept, (IDIl, IDRp, saI, saR, Kv));
+  let eR = E(Ke, (IDA, saR, sR)) in
+  let hR = H(Ka, (constR, eR)) in
+  out(c, cons4(eR, hR)).
+
+The full JFKr script S (version without cache) is weakly observationally
+equivalent to C[S'] (more precisely, fst(S) is equivalent to
+fst(C[S']) and snd(S) is equivalent to snd(C[S'])). This is proved by
+eliminating communications on the private channel getprinc and on each
+instance of getI and getR.  ProVerif shows that S' satisfies
+equivalence, then so does C[S'] by the contextual property of
+equivalence, then fst(S) is weakly observationally equivalent to snd(S).
+
+*)

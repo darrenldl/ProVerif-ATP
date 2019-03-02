@@ -1,0 +1,98 @@
+free c_UE_SN : channel.
+free c_SN_HN : channel.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+const ZERO:bitstring.
+
+(* associativity *)
+equation forall x:bitstring, y:bitstring, z:bitstring; xor(x, xor(y, z)) = xor(xor(x, y), z).
+
+(* commutativity *)
+equation forall x:bitstring, y:bitstring; xor(x, y) = xor(y, x).
+
+(* neutral element *)
+equation forall x:bitstring; xor(x, ZERO) = x.
+
+(* nilpotence *)
+equation forall x:bitstring; xor(x, x) = ZERO.
+
+free SUPI : bitstring [private].
+free pk_HN : bitstring [private].
+free K : bitstring [private].
+
+free SNname : bitstring.
+free SUCI : bitstring.
+
+(* Unrelated hash functions *)
+fun f1(bitstring, bitstring) : bitstring.
+fun f2(bitstring, bitstring) : bitstring.
+fun f3(bitstring, bitstring) : bitstring.
+fun f4(bitstring, bitstring) : bitstring.
+fun f5(bitstring, bitstring) : bitstring.
+
+fun challenge(bitstring, bitstring, bitstring) : bitstring.
+fun sha256(bitstring) : bitstring.
+fun key_seed(bitstring, bitstring, bitstring, bitstring) : bitstring.
+
+fun inc(bitstring) : bitstring.
+
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+equation forall m:bitstring, k:bitstring;
+  dec(enc(m, k), k) = m.
+
+free objective : bitstring [private].
+
+query attacker(objective).
+
+let home_network =
+  new R : bitstring;
+  new SQN_HN : bitstring;
+
+  let MAC  = f1(K, (SQN_HN, R)) in
+  let AK   = f5(K, R) in
+  let CONC = xor(SQN_HN, AK) in
+  let AUTN = (CONC, MAC) in
+  let xRES = challenge(K, R, SNname) in
+  let HXRES = sha256((R, xRES)) in
+  let K_SEAF = key_seed(K, R, SQN_HN, SNname) in
+  let SQN_HN = inc(SQN_HN) in
+
+  out(c_SN_HN, (R, AUTN, HXRES, K_SEAF));
+  in(c_SN_HN, (RES : bitstring, =SUCI));
+  if RES = xRES then (
+    out(c_SN_HN, SUPI);
+    out(c_UE_SN, objective)
+  ).
+
+let serving_network =
+  in(c_SN_HN, (R : bitstring, AUTN : bitstring, HXRES : bitstring, K_SEAF : bitstring));
+  out(c_UE_SN, (R, AUTN));
+  in(c_UE_SN, RES : bitstring);
+
+  if sha256((R, RES)) = HXRES then (
+    out(c_SN_HN, (RES, SUCI));
+    in(c_SN_HN, =SUPI)
+  ).
+
+let subscriber =
+  new SQN_HN : bitstring;
+  in(c_UE_SN, (R : bitstring, AUTN : bitstring));
+
+  let (xCONC : bitstring, xMAC : bitstring) = AUTN in
+  let AK = f5(K, R) in
+  let xSQN_HN = xor(AK, xCONC) in
+  let MAC = f1(K, (SQN_HN, R)) in
+
+  if xMAC = MAC then ( (* only check (i), assume (ii) is always true *)
+    let SQN_UE = xSQN_HN in
+    let RES = challenge(K, R, SNname) in
+    let K_SEAF = key_seed(K, R, SQN_HN, SNname) in
+
+    out(c_UE_SN, RES);
+    out(c_UE_SN, enc(objective, K_SEAF))
+  ).
+
+process
+  subscriber | serving_network | home_network

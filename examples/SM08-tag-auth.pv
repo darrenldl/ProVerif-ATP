@@ -1,0 +1,57 @@
+free c : channel.
+
+const ZERO:bitstring.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+(* associativity *)
+equation forall x:bitstring, y:bitstring, z:bitstring; xor(x, xor(y, z)) = xor(xor(x, y), z).
+
+(* commutativity *)
+equation forall x:bitstring, y:bitstring; xor(x, y) = xor(y, x).
+
+(* neutral element *)
+equation forall x:bitstring; xor(x, ZERO) = x.
+
+(* nilpotence *)
+equation forall x:bitstring; xor(x, x) = ZERO.
+
+fun f(bitstring, bitstring) : bitstring.
+
+fun cyc_shl_half_len(bitstring) : bitstring.
+fun cyc_shr_half_len(bitstring) : bitstring.
+
+fun cyc_shl_quart_len(bitstring) : bitstring.
+fun cyc_shr_quart_len(bitstring) : bitstring.
+
+free t : bitstring [private].
+free u : bitstring [private].
+
+free objective : bitstring [private].
+
+query attacker(objective).
+
+let R =
+  new r1 : bitstring;
+  out(c, r1);
+  in(c, (M1_in : bitstring,
+         M2_in : bitstring));
+  let r2 = xor(M1_in, t) in
+  if M2_in = f(xor(r1,r2), t) then (
+    let M3 = xor(u, cyc_shr_half_len(r2)) in
+    out(c, M3);
+    out(c, objective)
+  ).
+
+let knowledge_from_1st_round =
+  new r1_from_1st : bitstring;
+  out(c, r1_from_1st);
+  new r2_from_1st : bitstring;
+  let M1 = xor(t, r2_from_1st) in
+  let M2 = f(xor(r1_from_1st, r2_from_1st), t) in
+  out(c, (M1, M2));
+  let M3 = xor(u, cyc_shr_half_len(r2_from_1st)) in
+  out(c, M3).
+  
+process
+  knowledge_from_1st_round | R

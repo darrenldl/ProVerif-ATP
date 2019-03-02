@@ -1,0 +1,187 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Needham Schroeder public key protocol. *)
+
+(* Example updated from CV 1.28 by Benjamin Beurdouche *)
+
+(* In order to determine the proof, use interactive mode:
+   set interactiveMode = true.
+The proof is as follows: *)
+
+proof {
+crypto uf_cma(sign) rkS;
+crypto ind_cca2(enc) rkA;
+crypto ind_cca2(enc) rkB;
+success;
+auto
+}
+
+param N.
+param N2.
+param N3.
+param N4.
+
+type nonce [large,fixed].
+type host [bounded].
+type pkey [bounded].
+type skey [bounded].
+type keyseed [large,fixed].
+type spkey [bounded].
+type sskey [bounded].
+type skeyseed [large,fixed].
+type signature [bounded].
+type blocksize [fixed].
+type blocksizebot [bounded].
+type sblocksize [bounded].
+
+(* Concatenation and Padding functions *)
+fun concat1(nonce, host):blocksize [data].
+fun concat2(nonce, nonce, host):blocksize [data].
+fun concat3(pkey, host):sblocksize [data].
+fun pad(nonce):blocksize [data].
+
+equation forall z:nonce,t:nonce,u:host,y2:nonce,z2:host;
+	concat2(z,t,u) <> concat1(y2,z2).
+equation forall y:nonce,y2:nonce,z2:host;
+	pad(y) <> concat1(y2,z2).
+equation forall z:nonce,t:nonce,u:host,y2:nonce;
+	concat2(z,t,u) <> pad(y2).
+
+(* Public-key encryption (CCA2) *)
+proba Penc.
+proba Penccoll.
+expand IND_CCA2_public_key_enc(keyseed, pkey, skey, blocksize, bitstring, skgen, pkgen, enc, dec, injbot, Z, Penc, Penccoll).
+
+const Zblocksize: blocksize.
+equation forall x: blocksize; Z(x) = Zblocksize.
+
+(* Signatures *)
+proba Psign.
+proba Psigncoll.
+expand UF_CMA_proba_signature(skeyseed, spkey, sskey, sblocksize, signature, sskgen, spkgen, sign, check, Psign, Psigncoll).
+
+table keys(host, pkey).
+
+(* Peers *)
+const A : host.
+const B : host.
+fun acceptA(host):bitstring.
+fun acceptB(host):bitstring.
+
+(* Queries and Events *)
+event fullA(host, nonce, bitstring).
+event partA(host, bitstring).
+event fullB(host, nonce, bitstring).
+event partB(host, bitstring).
+
+query secret keyA.
+query x:bitstring; inj-event(partA(B, x)) ==> inj-event(partB(A, x)) public_vars keyA.
+query x:bitstring, k:nonce; inj-event(fullB(A, k, x)) ==> inj-event(fullA(B, k, x)) public_vars keyA.
+query x:bitstring, k:nonce, k':nonce;
+	event(fullB(A, k, x)) && event(fullA(B, k', x)) ==> (k = k') public_vars keyA.
+
+(* Channels and Processes *)
+channel c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14,
+	c15, c16, c17, c18, c19, start, finish.
+
+let processA(skA:skey, pkS:spkey) =
+	in(c1, hostX: host);
+	out(c2, (A, hostX));
+	in(c3, (pkX: pkey, =hostX, ms: signature));
+	if check(concat3(pkX, hostX), pkS, ms) then
+	(* Message 3 *)
+   new Na: nonce;
+	let m1 = enc(concat1(Na, A), pkX) in
+        out(c4, m1);
+	(* Message 6 *)
+        in(c5, m: bitstring);
+	let injbot(concat2(=Na, Nb, =hostX)) = dec(m, skA) in
+	(* Message 7 *)
+	let m3 = enc(pad(Nb), pkX) in
+	event partA(hostX, (m1, m));
+	event fullA(hostX, Nb, (m1, m, m3));
+	if hostX = B then
+	   let keyA:nonce = Nb in out(c6, (m3, acceptA(hostX)))
+	else
+	   out(c6, (m3, acceptA(hostX))); in(c18, =()); out(c18, Nb).
+
+let processB(skB:skey, pkS:spkey) =
+	(* Message 3 *)
+	in(c7, m:bitstring);
+	let injbot(concat1(Na, hostY)) = dec(m, skB) in
+	out(c8, (B, hostY));
+	in(c9, (pkY: pkey, =hostY, ms: signature));
+	if check(concat3(pkY, hostY), pkS, ms) then
+	(* Message 6 *)
+	new Nb: nonce;
+	let m2 = enc(concat2(Na, Nb, B), pkY) in
+	event partB(hostY, (m, m2));
+	out(c10, m2);
+	(* Message 7 *)
+	in(c11, m3: bitstring);
+	let injbot(pad(=Nb)) = dec(m3, skB) in
+	(* OK *)
+	event fullB(hostY, Nb, (m, m2, m3));
+	if hostY = A then
+	   out(c17, acceptB(hostY))
+	else
+      out(c17, acceptB(hostY)); in(c19, =()); out(c19, Nb).
+
+let processK(pkA:pkey, pkB:pkey) =
+	in(c12, (Khost: host, Kkey: pkey));
+	if Khost = A then insert keys(A, pkA) else
+	if Khost = B then insert keys(B, pkB) else
+	insert keys(Khost, Kkey).
+
+let processS(skS:sskey) =
+	in(c13, (h1: host, h2: host));
+	get keys(=h2, pk2) in
+	out(c14, (pk2, h2, sign(concat3(pk2, h2), skS))).
+
+process
+	in(start, ());
+	new rkA: keyseed;
+	let pkA = pkgen(rkA) in
+	let skA = skgen(rkA) in
+	new rkB: keyseed;
+	let pkB = pkgen(rkB) in
+	let skB = skgen(rkB) in
+	new rkS: skeyseed;
+	let pkS = spkgen(rkS) in
+	let skS = sskgen(rkS) in
+	out(c15, (pkA, pkB, pkS));
+	((! iA <= N processA(skA,pkS)) |
+	 (! iB <= N processB(skB,pkS)) |
+	 (! iS <= N processS(skS)) |
+	 (! iK <= N2 processK(pkA,pkB)))
+
+
+(* EXPECTED
+RESULT Could not prove event(fullB(A, k, x)) && event(fullA(B, k', x)) ==> (k = k') with public variables keyA; inj-event(fullB(A, k, x)) ==> inj-event(fullA(B, k, x)) with public variables keyA; secrecy of keyA.
+4.460s (user 4.440s + system 0.020s), max rss 240960K
+END *)

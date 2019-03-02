@@ -1,0 +1,168 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Version with possibly dishonest participants.
+   Using two series of function symbols to prevent repeated applications
+   of the same cryptographic rule.
+*)
+
+param N.
+param N2.
+param N3.
+
+type nonce [large,fixed].
+type host [bounded].
+type key [fixed].
+type maxenc [bounded].
+
+(* A function f(x1...xn) is declared [data] when:
+   - it is injective
+   - the values of x1...xn are computable in polynomial time from f(x1...xn) *)
+
+fun concat1(nonce, nonce, host, host):maxenc [data].
+fun concat2(nonce, key):maxenc [data].
+
+equation forall y:nonce,z:nonce,t:host,u:host, y2:nonce,z2:key; concat1(y,z,t,u) <> concat2(y2,z2).
+
+(* Shared-key encryption (IND-CPA + INT-CTXT Stream cipher) *)
+
+proba Penc.
+proba Pencctxt.
+
+expand IND_CPA_INT_CTXT_sym_enc(key, maxenc, bitstring, enc, dec, injbot, Z, Penc, Pencctxt).
+
+(* The function Z returns for each bitstring, a bitstring
+   of the same length, consisting only of zeroes. *)
+const Zconcat1:maxenc.
+const Zconcat2:maxenc.
+equation forall y:nonce,z:nonce,t:host,u:host; 
+	Z(concat1(y,z,t,u)) = Zconcat1.
+equation forall y:nonce,z:key; 
+	Z(concat2(y,z)) = Zconcat2.
+
+table keys(host, key).
+
+(* Queries *)
+
+channel c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
+	start, cAK, cBK.
+
+const A : host.
+const B : host.
+fun acceptA(host):bitstring.
+fun acceptB(host):bitstring.
+
+event partA(host, bitstring).
+event partB(host, bitstring).
+event partB2(host, bitstring).
+event fullA(host, key, bitstring).
+event fullB(host, key, bitstring).
+
+query secret keyB [real_or_random].
+query secret keyA [real_or_random].
+query x:bitstring;
+	event(partB(A,x)) ==> event(partA(B,x)) public_vars keyA, keyB.
+query x:bitstring;
+	inj-event(partB(A,x)) ==> inj-event(partA(B,x)) public_vars keyA, keyB.
+query k:key, x:bitstring;
+	inj-event(fullA(B,k,x)) ==> inj-event(fullB(A,k,x)) public_vars keyA, keyB.
+query k:key, x:bitstring;
+	inj-event(fullA(B,k,x)) ==> inj-event(partB2(A,x)) public_vars keyA, keyB.
+query k:key, x:bitstring;
+	inj-event(fullA(B,k,x)) ==> inj-event(partB(A,x)) public_vars keyA, keyB.
+query k:key, k':key, x:bitstring;
+	event(fullB(A,k,x)) && event(fullA(B,k',x)) ==> k = k' public_vars keyA, keyB. 
+
+let processA(Kas: key) = 
+	in(c1, hb: host);
+	new M : nonce;
+	new Na : nonce;
+	let ea1 = enc(concat1(Na, M, A, hb), Kas) in
+	event partA(hb, (M, A, hb));
+	out(c2, (M, A, hb, ea1));
+	in(c3, (=M, ea2: bitstring));
+	let injbot(concat2(=Na, k)) = dec(ea2, Kas) in
+	event fullA(hb, k, (M, A, hb));
+	if hb = B then
+	(
+	let keyA:key = k in out(c11, acceptA(hb))
+	)
+	else
+	(
+	out(c11, acceptA(hb)); in(cAK, ()); out(cAK, k)
+	).
+
+let processB(Kbs: key) =
+	in(c4, (M: nonce, ha: host, =B, ea:bitstring));
+	new Nb : nonce;
+	let e2 = enc(concat1(Nb, M, ha, B), Kbs) in
+	event partB2(ha, (M, ha, B));
+	out(c5, (M, ha, B, ea, e2));
+	in(c6, (=M, ea2: bitstring, eb2: bitstring));
+	let injbot(concat2(=Nb, k)) = dec(eb2, Kbs) in
+	event partB(ha, (M, ha, B));
+	event fullB(ha, k, (M, ha, B));
+	if ha = A then
+	(
+	let keyB:key = k in out(c7, (M, ea2, acceptB(ha)))
+	)
+	else
+	(
+	out(c7, (M, ea2, acceptB(ha))); in(cBK, ()); out(cBK, k)
+	).
+
+let processK(Kas: key, Kbs: key) =
+	in(c8, (Khost: host, Kkey: key));
+	if Khost = A then insert keys(A,Kas) else
+	if Khost = B then insert keys(B,Kbs) else
+	insert keys(Khost,Kkey).
+
+let processS =
+	in(c9, (M: nonce, ha: host, hb: host, ea1: bitstring, eb1: bitstring));
+	get keys(=ha, kas) in
+	get keys(=hb, kbs) in
+	let injbot(concat1(Na, =M, =ha, =hb)) = dec(ea1, kas) in
+	let injbot(concat1(Nb, =M, =ha, =hb)) = dec(eb1, kbs) in
+	new k: key;
+	let e1 = enc(concat2(Na, k), kas) in
+	let e2 = enc(concat2(Nb, k), kbs) in
+	out(c10, (M, e1, e2)).
+	
+process 
+	in(start, ());
+	new Kas: key;
+	new Kbs: key;
+	out(c13, ());
+	((! iA <= N processA(Kas)) |
+	 (! iB <= N processB(Kbs)) | 
+	 (! iS <= N processS) |
+	 (! iK <= N2 processK(Kas, Kbs)))
+
+(* EXPECTED
+RESULT Could not prove event(fullB(A, k, x)) && event(fullA(B, k', x)) ==> (k = k') with public variables keyA, keyB; inj-event(fullA(B, k, x)) ==> inj-event(partB(A, x)) with public variables keyA, keyB; inj-event(fullA(B, k, x)) ==> inj-event(fullB(A, k, x)) with public variables keyA, keyB; inj-event(partB(A, x)) ==> inj-event(partA(B, x)) with public variables keyA, keyB.
+2.400s (user 2.390s + system 0.010s), max rss 104816K
+END *)

@@ -1,0 +1,58 @@
+#!/bin/sh
+
+if [ -x ../../../xtime ]
+then
+    if [ .$1 = . ]
+    then
+        PROG=../../../xtime
+    else
+        PROG="../../../xtime -repeat 10 -o /dev/null"
+    fi
+else
+    PROG=
+fi
+
+ANALYZER=../../../proverif
+
+(
+echo JFKi
+for i in SECRECY EVCACHE EVNOCACHE IDISECR
+do
+
+echo $i
+m4 -D$i JFKi > prot-JFKi-$i.pv
+$PROG $ANALYZER prot-JFKi-$i.pv > prot-JFKi-$i.result
+egrep '(RESULT|goal reachable)' prot-JFKi-$i.result
+grep system prot-JFKi-$i.result | grep user
+
+done
+
+echo
+echo JFKr
+for i in SECRECY EVCACHE EVNOCACHE IDRSECRACT IDSECR
+do
+
+echo $i
+m4 -D$i JFKr > prot-JFKr-$i.pv
+$PROG $ANALYZER prot-JFKr-$i.pv > prot-JFKr-$i.result
+egrep '(RESULT|goal reachable)' prot-JFKr-$i.result
+grep system prot-JFKr-$i.result | grep user
+
+done
+
+
+echo
+echo Proof of Lemma 9
+
+$PROG $ANALYZER tokenlemma.pv > tokenlemma.result
+grep 'RESULT' tokenlemma.result
+grep system tokenlemma.result | grep user
+
+echo
+echo Proof of Lemma 10
+
+$PROG $ANALYZER JFKr-coresec.pv > JFKr-coresec.result
+grep 'RESULT' JFKr-coresec.result
+grep system JFKr-coresec.result | grep user
+
+) | tee results

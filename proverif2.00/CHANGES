@@ -1,0 +1,646 @@
+This file summarizes the most important changes between versions
+of ProVerif.
+
+Version 2.00
+
+- New keywords in the typed pi calculus front-end:
+  do, foreach, implementation, public_vars, secret
+  These keywords cannot be used as identifiers.
+- Identifiers of processes (in declarations "let P(...) = ")
+  must be distinct from other identifiers.
+- Allow the conjunction of several events or facts before the
+  arrow ==> in queries.
+- Interactive simulator:
+  - Display events and public terms in order of addition.
+  - Show the recipe used to compute a term in the list of public terms,
+    when terms are added to public terms.
+  - Allow zooming in the graphical trace display.
+  - Show fresh names created by the adversary and public terms
+    computed by the adversary in the graphical trace display.
+  - When the user needs to enter a recipe, display the list of terms,
+    so that he has enough information.
+  - Button "Forward" to redo a step undone by the "Backward" button.
+- Compatibility with CryptoVerif
+  - Allow
+      a <-R T; P          as a synonym of new a: T; P
+      x[:T] <- M; P       as a synonym of let x[:T] = M in P
+      foreach i <= N do P as a synonym of ! i <= N P and of ! P
+  - Allow and ignore CryptoVerif implementation annotations
+  - Allow disequations "equation forall x1:T1, ..., xn:Tn; M1 <> M2."
+    and just check that they are valid.
+  - Support for event, get, insert in terms (by expansion into processes)
+  - New queries:
+      query secret x.
+      query secret x [real_or_random].
+    to test the secrecy of a bound variable or name x.
+  - Allow public variables in correspondence and secrecy queries, e.g.:
+      query event(e1) ==> event(e2) public_vars x1,...,xn.
+      query secret x public_vars x1,...,xn.
+- Fixed bug that could cause the addition of a spurious edge,
+  when a replication is executed just after a box in the graphical
+  display of traces.
+- Fixed bug: trace reconstruction failed abnormally in the absence
+  of free names.
+- Display an error message instead of looping when there is a recursive
+  macro in the pi calculus front-end without types.
+
+Version 1.98pl1
+
+- Several bug fixes and minor improvements in the simulator:
+  - Added reduction of "event", which was missing.
+  - Added column "Events" to show the events that have been executed.
+  (Use a menu option to show it.)
+  - The column "Tables" is not shown by default, but can be shown
+  using a menu option.
+  - The elements of the same table are grouped together.
+  - The user can add an element to public, by providing the term that
+  allows to compute it.
+  - Fixed bugs in which the state of the simulator was not correctly
+  reinitialized.
+
+Version 1.98
+
+- Simulator to run ProVerif scripts interactively
+  (proverif_interact).
+
+Version 1.97pl3
+
+- Modified the code so that it is compatible with OCaml 4.06
+
+Version 1.97pl2
+
+- Fixed bug that could cause an internal error in trace reconstruction,
+  when a message was received of a type different from the one expected
+  by the input.
+- Fixed bug that happened when "sync" was under a process macro.
+  It could lead to unbound variables, causing an internal error.
+
+Version 1.97pl1
+
+- Allow assuming that some blocking predicates are false in
+  order to execute the else branch of let...suchthat in trace
+  reconstruction. (These assumptions are displayed to the user.)
+- Improved the function that verifies that a trace falsifies an
+  injective query.
+- Fixed bug: inequalities were forgotten in the proof of queries with
+  non-blocking predicates after ==>.
+- Fixed bug in the treatment of queries with symbols involved in the
+  equational theory present above variables before ==>. These queries are
+  now forbidden.
+
+Version 1.97
+
+- In the display of traces, showed the recipe used by the adversary
+compute the terms he sends; minor revision of messages.
+- In the graphical display of traces, 
+  * explained why the trace is an attack.
+  * introduced abbreviations when the label on an edge is too long.
+  * added syntactic colors to the keywords and the name of the processes.
+  * added line numbers referring to the process.
+- Syntactic coloring in the long trace display.
+- Fixed display of attacks against observational equivalence that
+come from pattern-matchings in inputs.
+- Fixed bug that could lead to an infinite loop in
+the unification that precedes trace reconstruction.
+- Fixed bug that could lead to an internal error
+due to bad types in pattern matching.
+- Fixed a bug when the goal is a communication on a private channel 
+  (trivial attacks were not found).
+
+Version 1.96
+
+- Graphical display of attacks
+- Simplification of "if M then P else Q" when M is a constant
+true or false. (Useful in particular because the expansion
+of terms into processes may create such processes.)
+- Fixed bug that could lead to an internal error in the
+reconstruction of the derivation for queries "weaksecr"
+when ProVerif was compiled with the bytecode compiler.
+
+Version 1.95
+
+- Allow the user to set the environment of events used for proving
+  injective correspondences (useful to speed up the proof in some
+  examples).
+- Allow the user to set the ordering of function symbols, used
+  to prove termination of convergent equational theories.
+- Fixed bug in the lexicographic path ordering used
+  to prove termination of convergent equational theories.
+- Fixed bug that could lead to a stack overflow with very large sets
+  of clauses (>150000 clauses).
+- Fixed bug that lead to saying that queries event(e(M)) ==> event(e(M))
+  (with the same event before and after the arrow) were false, while
+  in fact they are true.
+- Fixed bug that could lead to incorrect occurrence numbers in
+  some warning messages.
+- Some documentation improvements (in particular, some syntax traps
+  are mentioned in Section 6.3.5 of the manual)
+
+Version 1.94pl1
+
+- Fixed bug that could cause a false attack to be erroneously considered
+  as a real attack when maxDepth is set.
+- Fixed bug that could lead to an internal error in trace reconstruction
+  when a Horn clause derivation could not be reconstructed.
+- Fixed bug that could cause an internal error, in the presence of events
+  when trying to simplify the process in order to prove an equivalence.
+  (Events should be ignored but not cause an error in this case.)
+- Fixed parsing bug which prevented function declared by "letfun"
+  and predicates without arguments to be used without parentheses.
+- Fixed bug: bound names "new x" were not recognized in "not" and
+  "nounif" declarations after the process simplification made in order
+  to prove equivalences.
+- Fixed bug that could lead to an incorrect type error in the typing
+  of the term "let pat = M in M1 else M2".
+
+Version 1.94
+
+- Added barrier synchronization (sync) and allow swapping of data at barriers
+  in order to prove equivalences. See https://hal.inria.fr/hal-01306440
+
+Version 1.93
+
+- Allow "diff" as a synonym for "choice".
+
+Version 1.92
+
+- Added a setting that allows choosing how terms "if ... then ... else ..."
+are expanded.
+
+Version 1.91
+
+- Allow "or fail" in arguments of letfun. When "or fail" is present
+for a certain argument, and this argument fails, it is still passed
+to the letfun body (as in version 1.90). When "or fail" is absent
+and the argument fails, the function defined by letfun also fails.
+- Allow "or fail" in arguments of process definitions.
+When "or fail" is present for a certain argument, and this argument
+fails, it is still passed to the process. When "or fail" is absent
+and the argument fails, the process stops (as in version 1.90).
+- Fixed internal error when using the construct new a[x,y...]:t
+inside letfun
+- Fixed internal error in process simplification, when a process
+macro that defines a fresh name is expanded several times.
+
+Version 1.90
+
+- Reimplemented the merging of two processes into one biprocess
+(with V. Cheval)
+- Allowing to specify which arguments the internal reprsentation of
+a name should have, using the construct new a[x,y,...]:t
+- Allow to declare several equations in a single declaration, possibly
+with options [convergent] or [linear]. This extension allows one
+to bypass the termination test for equations corresponding to a
+convergent rewrite system: ProVerif continues with a warning when
+the termination test fails for equations marked [convergent].
+- Modified the semantics of boolean operators && and ||: when the result
+is known from the first argument, the second argument is supposed not
+to be evaluated, so the conjunction or disjunction succeeds in this case
+even if the second argument fails.
+- Fixed serious bug that could yield incorrect result with
+"set ignoreTypes = false".
+- Fixed bug in display of an error message in the verification of
+the implementability of predicates
+- Fixed bug with "set movenew = true" and queries "new a[x = ...]":
+when x was defined above "new a" and also under "new a" and movenew
+lead to moving "new a" under the second definition of x, the wrong
+occurrence of x was used in the query.
+
+Version 1.89
+
+- Changed the weight of the goal in the selection function to 3000, to give
+the possibility to have a nounif declaration (with weight less than 3000)
+such that ProVerif selects facts that match that nounif declaration
+rather than selecting the goal.
+- Fixed bug in Spass output.
+- Allow "table(t(...))" in query, not, and nounif.
+- Improved unification modulo to speed it up and avoid a
+stack overflow.
+
+Version 1.88pl1
+
+- Changed priorities in the parser, so that (! P1 | ! P2) is
+interpreted as ((! P1) | (! P2)) and not as (! (P1 | ! P2)).
+- Fixed bug that could lead to an internal error when a query, a not, or
+a nounif declaration refers to a bound name that is never generated.
+ProVerif now displays a proper error message in this case.
+
+Version 1.88
+
+- Remove subsumed clauses and tautologies from attacker clauses
+before displaying them.
+
+Version 1.87beta6
+
+- Fixed several bugs that lead to internal errors instead of
+displaying a proper error message.
+- Elimination of redundant hypotheses now considers blocking predicates
+like events.
+
+Summary of changes between version 1.86pl4 and version 1.87beta5:
+
+- Typed and untyped pi calculus front-ends:
+  Extended definition of destructors, by Vincent Cheval.
+  Now, destructors must be deterministic.
+- Typed pi calculus front-end:
+   - Extension of the class of observational equivalences that can be proved,
+   by encoding more operations into terms. Automatic transformation of
+   processes to benefit from this extension, by Vincent Cheval.
+   - Query "equivalence P1 P2" to prove the observational equivalence between
+   two processes P1 and P2, by Vincent Cheval.
+   - Functions marked "typeConverter" are now automatically marked "data" as
+   well.
+   - Added an "else" branch to the "get" construct
+- New keywords:
+   - Typed pi calculus front-end: equivalence, fail, or, otherwise
+   - Untyped pi calculus front-end: can, fail, otherwise, where
+  These keywords can no longer be used as ordinary identifiers.
+- Fixed bugs:
+   - Fixed bug in attack reconstruction
+   - Fixed bug for query noninterf...among: a clause was forgotten
+   that allows the adversary to test whether the secret is a tuple.
+   - Fixed bug in attack reconstruction with patterns =M where the
+   term M contains a destructor with several rewrite rules.
+   - Removed decompData/decompDataSelect options for user-defined
+   predicates in the pi/typed pi calculus front-ends, for several reasons:
+      * These predicates caused bugs
+      * For user-defined predicates, it is not very likely that
+      decompData/decompDataSelect are useful
+      * The same effect can be achieved by using the equivalences
+      forall x1:T1, ..., xn:Tn; p(x1) && ... && p(xn) <=> p(f(x1,...,xn))
+      for each data constructor f, in the "clauses" section.
+   - Improved termination heuristic so that it does not trigger
+   uselessly.
+   - Fixed bug with references to bound names of the form new a[x_1 = ...]
+   where the variable name x_1 ends with underscore followed by a number.
+   (This bug could lead to an error message saying x_1 was not bound,
+   when in fact it was.)
+   - Fixed bug with nested "letfun" with local variables (there was some
+   mixing between these variables)
+   - Fixed bug: choice was ignored when it occurred only in patterns.
+   - Fixed bug: "else" branches could not be omitted in "if" and
+   "let...suchthat" terms.
+- Improved the proof of equivalences in case "if M then P else Q"
+with Q = 0: the case in which M fails and the case in which M succeeds
+and is false cannot be distinguished by the adversary.
+- The term "let pat = M in M'" has changed meaning: when M or the
+pattern-matching fails, its value is fail, instead of stopping the
+whole process.
+- The argument of events is always evaluated, even when the event itself
+is useless (proof of equivalences, of correspondences that do not involve
+that event).
+- Patterns (x, =M) in which M depends on x are now forbidden for simplicity.
+(Use pattern matching followed by a test to encode that.)
+- Optimized elimination of redundant hypotheses
+
+Details of the changes in the beta releases:
+
+* Version 1.87beta5
+
+- Cosmetic changes only.
+
+* Version 1.87beta4 (not a public release)
+
+- Reactivated all front-ends
+- New destructors in the untyped front-end
+- Simplified the test that destructors are deterministic
+- Optimized elimination of redundant hypotheses
+- When proving equivalences, the arguments of names are now
+choice[.,.] instead of pairs.
+- Fixed soundness bugs with choice and with noninterf in case of
+inputs with pattern-matching
+- Fixed bug in the generation of Horn clauses for trace properties
+(some branches were cut too quickly)
+- Fixed bug: choice was ignored when it occurred only in patterns.
+- Fixed bug with references to bound names of the form new a[x_1 = ...]
+where the variable name x_1 ends with underscore followed by a number.
+(This bug could lead to an error message saying x_1 was not bound,
+when in fact it was.)
+- Fixed bug in the computation of rewrite rules for new
+destructors (it may have generated too many rules)
+
+* Version 1.87beta3 (not a public release; restricted to the typed
+front-end)
+
+- Optimized elimination of redundant hypotheses
+- In the definition of user-defined predicates, the meaning of clauses
+is the following: the fact in the conclusion holds when the hypotheses
+hold and all the arguments of the predicates, equalities and
+inequalities in the clause do not fail. (This is closer to the
+semantics of user-defined predicates with the old destructors.)
+- The argument of events is always evaluated, even when the event itself
+is useless (proof of equivalences, of correspondences that do not involve
+that event).
+- Patterns (x, =M) in which M depends on x are now forbidden for simplicity.
+(Use pattern matching followed by a test to encode that.)
+- Final fix for the bug that could lead to forgetting some rewrite
+rules of destructors, when the new destructors of ProVerif 1.87beta
+were combined with equational theories. (This bug was quickly patched
+in version 1.87beta2.)
+- Fixed bug in which a non-deterministic destructor was not detected as such.
+- With respect to ProVerif version 1.86, the term "let pat = M in M'" has
+changed meaning: when M or the pattern-matching fails, its value is fail,
+instead of stopping the whole process.
+
+* Version 1.87beta2 (not a public release; restricted to the typed
+front-end)
+
+- Re-allow proofs of trace properties, noninterf, weaksecr,
+updated to the new destructors of ProVerif 1.87beta
+- Added an "else" branch to the "get" construct
+- Improved the proof of equivalences in case "if M then P else Q"
+with Q = 0: the case in which M fails and the case in which M succeeds
+and is false cannot be distinguished by the adversary.
+- Fixed bug in attack reconstruction: f(...fail...) was left as it is
+instead of reducing it to fail, when f is a constructor.
+- Fixed bug in merging of parallel processes that could lead to
+swapping the first and second processes to merge.
+- Quick patch for a bug that could lead to forgetting some rewrite
+rules of destructors, when the new destructors of ProVerif 1.87beta
+were combined with equational theories
+- Also fixed problems that occurred in ProVerif 1.86pl4:
+   - Fixed bug for query noninterf...among: a clause was forgotten
+   that allows the adversary to test whether the secret is a tuple.
+   - Fixed bug in attack reconstruction with patterns =M where the
+   term M contains a destructor with several rewrite rules.
+   - Removed decompData/decompDataSelect options for user-defined
+   predicates in the pi/typed pi calculus front-ends, for several reasons:
+      * These predicates caused bugs
+      * For user-defined predicates, it is not very likely that
+      decompData/decompDataSelect are useful
+      * The same effect can be achieved by using the equivalences
+      forall x1:T1, ..., xn:Tn; p(x1) && ... && p(xn) <=> p(f(x1,...,xn))
+      for each data constructor f, in the "clauses" section.
+   - Improved termination heuristic so that it does not trigger
+   uselessly.
+
+* Version 1.87beta (restricted to the typed front-end and to proofs of
+equivalences with choice)
+
+- Extended definition of destructors, by Vincent Cheval.
+Now, destructors must be deterministic.
+- Extension of the class of observational equivalences that can be proved,
+by encoding more operations into terms. Automatic transformation of
+processes to benefit from this extension, by Vincent Cheval.
+- Query "equivalence P1 P2" to prove the observational equivalence between
+two processes P1 and P2, by Vincent Cheval.
+- Functions marked "typeConverter" are now automatically marked "data" as
+well.
+- Fixed bug in attack reconstruction
+
+
+Version 1.86pl4
+
+- Removed setting "set ignoreTypes = attacker", still accepted as a synonym
+of "set ignoreTypes = false" for compatibility.
+- Functions marked "data" can no longer be marked "private". (Functions
+marked "private, data" were not correctly handled.)
+- Equations now must not introduce variables in their right-hand side
+that do not occur in the left-hand side. (There was a bug with such
+equations.)
+- Fixed bug that could cause Internal error: Name ... has bad type/bad arity.
+- Fixed bug that could cause an internal error due to an incorrect
+expansion of the condition of "get ... suchthat".
+
+Version 1.86pl3
+
+- Fixed bugs in the generation of clauses for proofs of equivalences.
+
+Version 1.86pl2
+
+- Fixed bug in the selection function for proofs of equivalences.
+(This bug could cause non-termination.)
+
+Version 1.86pl1
+
+- Fixed minor display bug (missing parenthesis in display of outputs
+on private channels)
+- Fixed bug in the proof of non-blocking predicates in queries
+
+Version 1.86
+
+- HTML output, using the command line option -html <html directory>
+- basic emacs mode with coloring
+
+Version 1.85
+
+- documentation for the typed pi calculus front-end, which is now
+the recommended input format.
+- fixed bug in attack reconstruction with passive adversaries.
+- fixed display bug that could lead in some rare cases to display
+distinct variables with the same name.
+- nicer display: occurrences starting from 1 and in increasing order,
+omit trailing 0, reuse initial variable name when possible, ...
+
+Version 1.84pl2
+
+- fixed bug in the generation of clauses for observational
+equivalence (choice)
+
+Version 1.84pl1
+
+- some improvements in error messages
+- fixed display bug for queries with empty conjunctions
+- fixed internal error in trace reconstruction for equivalences that
+appeared when the final, distinguishing step was a test that a message
+is a given constant.
+
+Version 1.84
+
+- elimVar and elimVarStrict are now forbidden in pi calculus front-ends.
+- elimtrue no longer accepts star variables.
+- improved performance of simplification of derivations and of
+unifyDerivation for very large traces.
+
+Version 1.83
+
+- renamed the executable to proverif
+- improved the simplification of derivations, in particular in
+the presence of private channels.
+- fixed internal error that happened in some cases when trying
+to reconstruct attacks against injective correspondences.
+
+Version 1.82
+
+- fixed bug in the compromise of session keys (free names were missing
+  in the terms that are allowed to build compromised terms).
+- fixed two bugs in trace reconstruction (one in the presence of choice,
+  one in the presence of phases).
+- fixed some bugs in the protocol models.
+- fixed bugs in proveriftotex (use LaTeX macros when special TeX characters
+  appear in the ProVerif file to convert; some ProVerif constructs were
+  not handled due to an outdated lexer file).
+- typed front-end: for CryptoVerif compatibility,
+   - added a def/expand macro mechanism
+   - added -lib command-line option
+   - added tables, in particular useful for tables of keys
+   (the same construct will be added to CryptoVerif; one will be able to use
+   it instead of find in the initial game)
+   - allow empty patterns (), allow "let" without "in", allow "if f(...) then"
+   when f returns a result of type bool.
+
+Version 1.81 (not a public release)
+
+- improved proof of injective correspondences when there are
+several occurrences in the process of the events that occur after ==>
+in the query.
+- heuristic "unifyDerivation" now active by default, and iterated
+(following File, Vigo, CSF'09).
+- when -in <format> is not specified, the input format is now selected
+by the extension of the file:
+    .pv for the typed pi-calculus front-end
+    .pi for the untyped pi-calculus front-end
+    .horntype for the typed Horn clauses front-end
+In all other cases, the untyped Horn clauses front-end. Case is not
+significant in file extensions.
+- typed front-end:
+   - type "bool" and constants "true" and "false" now declared by default;
+   - "not" allowed as an ordinary function;
+   - bound names of the process must be preceded by "new" when they are
+     used in queries, for more clarity;
+   - "if", "let", "new" now allowed in terms (by expanding them into processes).
+   - declarations "param", "proba", "proof" allowed (but ignored) for
+     compatibility with CryptoVerif
+   - for type declarations, options between brackets allowed (but ignored) for
+     compatibility with CryptoVerif
+   - ! i <= N allowed for compatibility with CryptoVerif.
+   - yield allowed as a synonym of 0 for compatibility with CryptoVerif
+   - declarations "letfun f(x1:t1, ..., xn:tn) = M"
+   - declaration "channel c1,...,cn." as a synonym for
+     "free c1,...,cn:channel." for compatibility with CryptoVerif.
+
+Version 1.80 (not a public release)
+
+- new front-end with types and parametric processes (in progress)
+- reorganized examples according to the front-end they use
+- do not display the generated clauses by default (but a command-line
+option "-test" and a setting "param verboseClauses = explained" display them)
+- removed setting "param channels = names"
+- allow injective events to occur several times (but only in different
+branches of tests)
+- fixed bug in the verification that a rewrite system is confluent
+
+Version 1.18pl1
+
+- fixed bug in attack reconstruction in the presence of a passive
+adversary that caused an internal error.
+- minor changes in the examples.
+
+Version 1.18
+
+- reconstruction of attacks against injective correspondences
+- when an injective correspondence is not proved, also give the result
+of the corresponding non-injective correspondence, for information.
+
+Version 1.17
+
+- reconstruction of attacks for processes with "choice"
+- reconstruction of attacks for query noninterf
+- display of traces with locations of the executed inputs, outputs, and events
+in the process.
+- display terms that represent names in the form a[x = ..., y = ..., ...]
+to relate the arguments of the names to variables in the process.
+- option -color to display a colored output on terminals that support ANSI
+color codes.
+
+Version 1.16
+
+- reconstruction of attacks for query weaksecret
+- fixed bug with predicate is_name in the output of clauses in Spass format
+
+Version 1.15
+
+- ProVerif now provides explanations of where the clauses come from
+- ProVerif uses abbreviations in the display of derivations
+- ProVerif explains the derivations by referring to the process
+- fixed some bugs in the output of clauses in Spass format
+- fixed a recently introduced bug in attack reconstruction that caused
+attack reconstruction to fail in some cases in which it should have succeeded.
+
+Version 1.14
+
+- fixed some bugs.
+- removed "param allVarsInNames = ...", replaced with an automatic mechanism
+- improved naming of variables in clauses, so that they use process variable
+  names more often.
+- extended "nounif" instructions.
+- removed limitation to 10 phases.
+- added optimization "refTransAtt" for reflexive and transitive predicates
+  whose arguments are known by the attacker (by Avik Chaudhuri and
+  Bruno Blanchet).
+
+Version 1.13
+
+- fixed bug with queries "query f ==> x == y."
+- the system is now capable of saying that some injective queries are false.
+- additional option "param redundantHypElim = beginOnly."
+
+Version 1.12
+
+- improved trace reconstruction for very big traces.
+
+Version 1.11
+
+- verification of protocols subject to dictionary attacks
+- verification of observational equivalence of processes that differ
+  only by the terms they use
+- reconstruction of an execution trace that corresponds to an attack
+- generalization of the optimizations
+  pred p/n decompData (see rules F1 & ... & Fn <-> F and F1 & ... & Fn <=> F),
+  pred p/n elimVar (see elimtrue F),
+  and, for the pi-calculus front-end, not F.
+- reworked treatment of equations
+- various bug fixes and internal improvements
+- removed deprecated keywords anytrue, tupleinv, blocking.
+
+Version 1.10
+
+- new query system (incompatible with previous versions)
+- converter ProVerif to TeX
+- improved treatment of inequalities in the presence of equations
+(previously, syntactic inequality was used as a sound approximation
+of inequality modulo an equational theory)
+
+Version 1.09
+
+- proof of strong secrecy
+- scenarios with several phases
+- inequalities with universally quantified variables.
+- precise analysis of else clauses of destructors
+(before, they were considered as a parallel composition)
+- improvement in treatment of equations
+- optimization: elimination of redundant hypotheses in clauses
+
+Version 1.08 (not a public release)
+
+- let ... suchthat ... construct and predicates.
+- special treatment for lists.
+
+Version 1.07
+
+- A few more optimizations.
+
+Version 1.06 (not a public release)
+
+- A single executable program, that can take several input formats and
+output several kinds of results.
+
+Version 1.05alpha (not a public release)
+
+- More general treatment of equations (including f(x,g(y)) = f(y,g(x))
+used for Diffie-Hellman but also other simple equations; however,
+associativity for instance is not supported).
+- Pattern-matching construct
+- Parameter to set whether communications are allowed on channels that
+are not names.
+- Key compromise is now compatible with authenticity
+- Verification of more general event specifications, not only
+authenticity (begin* and end*)
+- Optimization of the subsumption test (can give dramatic speedups)
+- Redundancy test: when a rule with empty selection is derivable from
+several other rules with empty selection, it is removed.
+- Various small bug fixes and cosmetic changes
+
+Version 1.00alpha
+
+First release.

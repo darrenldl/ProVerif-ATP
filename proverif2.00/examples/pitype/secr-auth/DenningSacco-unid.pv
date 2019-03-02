@@ -1,0 +1,155 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Denning-Sacco
+   In this model, I separate the keys for encryption and the
+   keys for signature, which complicates the model. *)
+
+free c: channel.
+
+type host.
+type key.
+type pkey.
+type skey.
+type spkey.
+type sskey.
+
+fun key_to_bitstring(key):bitstring [data,typeConverter].
+
+(* Public key encryption *)
+
+fun pk(skey): pkey.
+fun encrypt(bitstring, pkey): bitstring.
+reduc forall x: bitstring, y: skey; decrypt(encrypt(x,pk(y)),y) = x.
+
+(* Signatures *)
+
+fun spk(sskey): spkey.
+fun sign(bitstring, sskey): bitstring.
+reduc forall m: bitstring, k: sskey; getmess(sign(m,k)) = m.
+reduc forall m: bitstring, k: sskey; checksign(sign(m,k), spk(k)) = m.
+
+(* Shared key encryption *)
+
+fun sencrypt(bitstring,key): bitstring.
+reduc forall x: bitstring, y: key; sdecrypt(sencrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not attacker(new skA).
+not attacker(new skB).
+not attacker(new skS).
+
+(* 2 honest host names A and B *)
+
+free A, B: host.
+
+(* the table host names/encryption keys 
+   The key table consists of pairs (host, public key) *)
+table enc_keys(host, pkey).
+
+(* the table host names/signature verification keys 
+   The key table consists of pairs (host, public key) *)
+table sign_keys(host, spkey).
+
+(* Queries *)
+
+free secretA, secretB: bitstring [private].
+query attacker(secretA);
+      attacker(secretB).
+
+event endBparam(host,host).
+event beginBparam(host,host).
+event endBkey(host, host, key).
+event beginBkey(host, host, key).
+
+query x: host, y: host; inj-event(endBparam(x,y)) ==> inj-event(beginBparam(x,y)).
+query x: host, y: host, z: key; inj-event(endBkey(x,y,z)) ==> inj-event(beginBkey(x,y,z)).
+
+(* Initiator *)
+
+let processInitiator(pkS: spkey, xA: host, skA: sskey, pkA: spkey) =
+	in(c, (cert1: bitstring, cert2: bitstring));
+	let (=xA, =pkA) = checksign(cert1, pkS) in
+	let (h2: host, pk2: pkey) = checksign(cert2, pkS) in
+	event beginBparam(xA, h2);
+	new k: key;
+	event beginBkey(xA, h2, k);
+	out(c, (cert1, cert2, encrypt(sign(key_to_bitstring(k), skA), pk2)));
+	if h2 = B then
+	out(c, sencrypt(secretA, k)).
+
+(* Responder *)
+
+let processResponder(pkS: spkey,  xB: host, skB: skey, pkB: pkey) =
+	in(c, (cert1: bitstring, cert2: bitstring, km: bitstring));
+	let (h1: host, pk1: spkey) = checksign(cert1, pkS) in
+	let (=xB, =pkB) = checksign(cert2, pkS) in
+	let ks = decrypt(km,skB) in
+	let key_to_bitstring(k) = checksign(ks, pk1) in
+	if h1 = A then
+	event endBparam(h1, xB);
+	event endBkey(h1, xB, k);
+	out(c, sencrypt(secretB, k)).
+
+(* Server *)
+
+let processS(skS: sskey) =
+	in(c, (h1: host,h2: host));
+	get sign_keys(=h1, pk1) in
+	get enc_keys(=h2, pk2) in
+	out(c, (sign((h1, pk1), skS), sign((h2, pk2), skS))).
+
+(* Signature key registration *)
+
+let process_signK =
+        in(c, (h: host, pk: spkey));
+	if h <> A then insert sign_keys(h, pk).
+
+(* Encryption key registration *)
+
+let process_encK =
+        in(c, (h: host, pk: pkey));
+	if h <> B then insert enc_keys(h, pk).
+
+(* Main process *)
+
+process new skA: sskey; 
+	let pkA = spk(skA) in
+        out(c, pkA);
+	insert sign_keys(A, pkA);
+        new skB: skey; 
+	let pkB = pk(skB) in
+        out(c, pkB);
+	insert enc_keys(B, pkB);
+	new skS: sskey; 
+	let pkS = spk(skS) in
+	out(c, pkS);
+	((!processInitiator(pkS, A, skA, pkA)) | 
+	 (!processResponder(pkS, B, skB, pkB)) |
+	 (!processS(skS)) |
+	 (!process_signK) | (!process_encK))

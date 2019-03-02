@@ -1,0 +1,53 @@
+Analysis of the ARINC823 protocols.
+
+This directory contains all models used to verify the ARINC823
+protocols in ProVerif.
+
+- gen is a script that analyzes all files.
+- results is a summary of the results provided by this analysis.
+
+1. Directory "sharedkey": the shared-key protocol
+
+arinc823-secret-key.m4.pv is the master file from which all models 
+are generated using the m4 preprocessor. The generated files are
+arinc823-secret-key.$p.$e.$s.pv where
+        $p is the property
+	   - AUTHENTICATION for authentication properties
+	   - KEY_SECRECY for secrecy of keys 
+	   - SECRECY for secrecy of messages 
+	   - UKS for no unknown key share attacks
+        $e is
+	   - ENC_SUPPORTED when the aircraft supports encryption
+	   - ENC_NOTSUPPORTED when it does not
+        $s is 
+	   - FAST when the equations encode(encode_OFF,x) = x
+	   and compress(comp_OFF,x) = x are omitted.
+	   - SLOW when they are included. (These scripts are so slow
+	   that not all of them terminated within a reasonable amount of time.)
+
+2. Directory "publickey": the public-key protocol
+
+arinc823-public-key.m4.pv is the master file from which all models 
+are generated using the m4 preprocessor. The generated files are
+arinc823-public-key.$p.$c.$e.$s.pv where
+        $p is the property
+	   - AUTHENTICATION for authentication properties (including
+	   no unknown key share attacks)
+	   - KEY_SECRECY for secrecy of keys 
+	   - SECRECY for secrecy of messages
+	$c determines the compromise scenario 
+	   - PFS for forward secrecy (all long-term keys compromised after
+	   the end of the protocol)
+	   - COMPROMISE_U for key compromise impersonation in which U is
+	   compromised.
+	   - COMPROMISE_V for key compromise impersonation in which V is
+	   compromised.
+        $e is
+	   - ENC_SUPPORTED when the aircraft supports encryption
+	   - ENC_NOTSUPPORTED when it does not
+        $s is 
+	   - FAST when the equations encode(encode_OFF,x) = x
+	   and compress(comp_OFF,x) = x are omitted.
+	   - SLOW when they are included. (These scripts are so slow
+	   that not all of them terminated within a reasonable amount of time.)
+

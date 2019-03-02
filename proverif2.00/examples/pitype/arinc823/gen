@@ -1,0 +1,95 @@
+#!/bin/bash
+
+##Please update to correspond to the location of ProVerif on your computer
+TIMER=../../../../xtime
+PROVERIF=../../../../proverif
+
+
+## Analysis of the shared-key protocol, in ProVerif
+
+cd sharedkey
+
+if [ -x $TIMER ]
+then
+    PROG=$TIMER
+else
+    PROG=
+fi
+
+(
+for prop in AUTHENTICATION SECRECY KEY_SECRECY UKS   
+do
+
+for enc in ENC_SUPPORTED ENC_NOTSUPPORTED
+do
+
+for speed in FAST #SLOW
+do
+echo PROTOCOL shared-key PV $prop.$enc.$speed
+
+m4 -D$prop -D$enc -D$speed arinc823-secret-key.m4.pv > arinc823-secret-key.$prop.$enc.$speed.pv
+$PROG $PROVERIF arinc823-secret-key.$prop.$enc.$speed.pv > arinc823-secret-key.$prop.$enc.$speed.result
+egrep '(RESULT|goal reachable)' arinc823-secret-key.$prop.$enc.$speed.result
+grep system arinc823-secret-key.$prop.$enc.$speed.result | grep user
+
+done
+done
+done
+
+) | tee results
+
+## Analysis of the public-key protocol, in ProVerif
+
+cd ../publickey
+
+# The arguments of analyze are
+# $1 = property
+# $2 = compromise status
+# $3 = encryption or not
+# $4 = fast (without encode(encode_OFF, x) = x and compress(comp_OFF, x) = x) or slow (with it)
+
+function analyze()
+{
+echo PROTOCOL public-key PV $1.$2.$3.$4
+
+file=arinc823-public-key.$1.$2.$3.$4
+
+m4 -D$1 -D$2 -D$3 -D$4 arinc823-public-key.m4.pv > $file.pv
+$PROG $PROVERIF $file.pv > $file.result
+egrep '(RESULT|goal reachable)' $file.result
+grep system $file.result | grep user
+}
+
+(
+for prop in SECRECY AUTHENTICATION KEY_SECRECY
+do
+for enc in ENC_SUPPORTED ENC_NOTSUPPORTED
+do
+for speed in FAST #SLOW
+do
+analyze $prop NO_COMPROMISE $enc $speed
+done
+done
+done
+
+analyze SECRECY PFS ENC_SUPPORTED FAST
+analyze KEY_SECRECY PFS ENC_SUPPORTED FAST
+analyze AUTHENTICATION COMPROMISE_U ENC_SUPPORTED FAST
+analyze AUTHENTICATION COMPROMISE_V ENC_SUPPORTED FAST
+
+) | tee results
+
+## Build the full summary
+
+cd ..
+
+(
+echo SHARED KEY PROTOCOL
+echo
+egrep '(PROTOCOL|RESULT|system)' sharedkey/results
+echo
+echo PUBLIC KEY PROTOCOL
+echo
+egrep '(PROTOCOL|RESULT|system)' publickey/results
+ 
+) | tee results

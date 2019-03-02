@@ -1,0 +1,166 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+Yahalom protocol. Version of Burrows, Abadi, Needham, SRC039
+
+Message 1 A -> B: A; Na 
+Message 2 B -> S: B; { A; Na; Nb }Kbs 
+Message 3 S -> A: { B; Kab; Na; Nb }Kas ; { A; Kab }Kbs 
+Message 4 A -> B: { A; Kab }Kbs ; { Nb }Kab
+
+*)
+
+free c: channel.
+
+type key.
+type host.
+type nonce.
+
+fun nonce_to_bitstring(nonce): bitstring [data,typeConverter].
+
+(* Shared key encryption *)
+
+fun encrypt(bitstring,key): bitstring.
+reduc forall x: bitstring, y: key; decrypt(encrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+(* 2 honest host names A and B *)
+
+free A, B: host.
+
+(* the table host names/keys 
+   The key table consists of pairs 
+   (host, key shared between the host and the server) *)
+table keys(host, key).
+
+(* Queries *)
+
+free secretA, secretB: bitstring [private].
+query attacker(secretA);
+      attacker(secretB).
+
+event endAparam(host,host).
+event endBparam(host,host).
+event beginAparam(host,host).
+event beginBparam(host,host).
+event endAkey(host, host, key).
+event beginAkey(host, host, key).
+event endBkey(host, host, key).
+event beginBkey(host, host, key).
+
+query x: host, y: host; inj-event(endAparam(x,y)) ==> inj-event(beginAparam(x,y)).
+query x: host, y: host, z: key; inj-event(endAkey(x,y,z)) ==> inj-event(beginAkey(x,y,z)).
+query x: host, y: host; inj-event(endBparam(x,y)) ==> inj-event(beginBparam(x,y)).
+query x: host, y: host, z: key; inj-event(endBkey(x,y,z)) ==> inj-event(beginBkey(x,y,z)).
+
+(* Role of the initiator with identity xA and key kas shared with S *)
+
+let processInitiator =
+        (* The attacker starts the initiator by choosing identity xA.
+	   We check that xA is honest (i.e. is A or B)
+	   and get its corresponding key.
+	*)
+        in(c, xA: host);
+	if xA = A || xA = B then
+	get keys(=xA, kas) in
+	(* Real start of the role *)
+	new Na: nonce;
+	out(c, (xA, Na));
+	in(c, (cert1: bitstring, cert2: bitstring));
+	let (b: host, k: key, =Na, nb: nonce) = decrypt(cert1, kas) in
+	event beginBparam(xA, b);
+	event beginBkey(xA, b, k);
+	out(c, (cert2, encrypt(nonce_to_bitstring(nb), k)));
+	(* OK *)
+	if b = A || b = B then
+	event endAparam(xA, b);
+	event endAkey(xA, b, k);
+	out(c, encrypt(secretA, k)).
+
+(* Role of the responder with identity xB and key kbs shared with S *)
+                         
+let processResponder =
+        (* The attacker starts the responder by choosing identity xB.
+	   We check that xB is honest (i.e. is A or B)
+	   and get its corresponding key. *)
+        in(c, xB: host);
+	if xB = A || xB = B then
+	get keys(=xB, kbs) in
+	(* Real start of the role *)
+	in(c, (a: host, na: nonce));
+	event beginAparam(a,xB);
+	new Nb: nonce;
+	out(c, (xB, encrypt((a, na, Nb), kbs)));
+	in(c, (cert2: bitstring, m: bitstring));
+	let (=a, k: key) = decrypt(cert2, kbs) in
+	event beginAkey(a, xB, k);
+	if nonce_to_bitstring(Nb) = decrypt(m, k) then
+	(* OK *)
+	if a = A || a = B then
+	event endBparam(a, xB);
+	event endBkey(a, xB, k);
+	out(c, encrypt(secretB, k)).
+
+(* Server *)
+
+let processS =
+	in(c, (h2: host, m: bitstring));
+	get keys(=h2, k2) in (* get the key of h2 from the key table *)
+	let (h1: host, n1: nonce, n2: nonce) = decrypt(m, k2) in
+	get keys(=h1, k1) in (* get the key of h1 from the key table *)
+	new k: key;
+	out(c, (encrypt((h2, k, n1, n2), k1), encrypt((h1, k), k2))).
+
+
+(* Key registration *)
+
+let processK =
+        in(c, (h: host, k: key));
+        if h <> A && h <> B then insert keys(h,k).
+
+(* Start process *)
+
+process
+	new Kas: key; new Kbs: key;
+	insert keys(A, Kas);
+	insert keys(B, Kbs);
+	(
+          (* Launch an unbounded number of sessions of the initiator *)
+          (!processInitiator) | 
+          (* Launch an unbounded number of sessions of the responder *)
+          (!processResponder) |
+          (* Launch an unbounded number of sessions of the server *)
+          (!processS) |
+          (* Key registration process *)
+	  (!processK)
+        )
+

@@ -1,0 +1,104 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+type coins.
+type host.
+type key.
+type tag.
+
+free c: channel.
+
+(* 
+A -> S : A, { c0, B, Kab }_{Kas}
+S -> B : { c1, A, Kab }_{Kbs}
+I added tags to distinguish the two encryptions.
+*)
+
+not attacker(new Kas).
+not attacker(new Kbs).
+
+(* Shared key encryption *)
+
+fun encrypt(bitstring, key, coins):bitstring.
+reduc forall x:bitstring, y:key, r:coins; decrypt(encrypt(x,y,r),y) = x.
+
+(* Host names *)
+free A, B:host.
+
+(* Tags to distinguish the first from the second encryption *)
+free c0,c1:tag.
+
+(* Channel on which the table of keys is sent *)
+table keytable(host, key).
+
+let processInit = 
+        (* Start honest initiator xI (A or B) wishing to talk to (honest or dishonest) xR.
+	   Kis is the key of xI *)
+        in(c, (xI: host, xR:host ));
+	if xI = A || xI = B then
+	get keytable(=xI, Kis) in
+	(* Real initiator role *)
+	new Kab: key;
+	new r: coins;
+        out(c, (xI, encrypt((c0, xR, Kab), Kis, r)));
+	(* OK *)
+	if xR = A || xR = B then 
+	new Kab':key;
+	out(c, choice[Kab, Kab']).
+
+let processS = 
+	in(c, (a:host, m:bitstring));
+	get keytable(=a, kas) in
+        let (=c0, b:host, kab:key) = decrypt(m,kas) in
+	get keytable(=b, kbs) in
+	new r: coins;
+	out(c, encrypt((c1, a, kab), kbs, r)).
+                      
+let processK =
+        in(c, (h:host,k:key));
+	if h <> A && h <> B then insert keytable(h,k).
+   
+let processResp = 
+        (* Start honest responder of identity xR, which can be A or B.
+	   Krs is its corresponding key *)
+        in(c, xR:host);
+	if xR = A || xR = B then
+	get keytable(=xR, Krs) in
+	(* Real responder role *)	
+	in(c, m:bitstring); 
+	let (=c1, a:host, kab:key) = decrypt(m, Krs) in
+	(* OK *)
+	0.
+
+process 
+	new Kas:key; new Kbs:key; 
+	insert keytable(A, Kas);
+	insert keytable(B, Kbs);
+	((!processInit) | 
+	 (!processResp) |
+	 (!processS) | 
+	 (!processK))

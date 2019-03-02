@@ -1,0 +1,500 @@
+#!/bin/bash
+
+if [ -x ./xtime ]
+then
+    if [ .$2 = . ]
+    then
+	PROG=./xtime
+    else
+	PROG="./xtime -repeat 10 -o /dev/null"
+    fi
+else
+    PROG=
+fi
+
+PROVERIF="$PROG ./proverif -test"
+
+if [ \( .$1 != .all \) -a \( .$1 != .secr \) -a \( .$1 != .bidsecr \) -a \( .$1 != .both \) -a \( .$1 != .noninterf \) -a \( .$1 != .weak \) -a \( .$1 != .choice \) -a \( .$1 != .obsequi \) -a \( .$1 != .attack \) -a \( .$1 != .bugs \) -a \( .$1 != .jfk \) -a \( .$1 != .mailprot \) -a \( .$1 != .ffgg \) ]
+then
+	echo  Usage: test "<test-name>" [repeat]
+	echo  where "<test-name>" can be all, secr, bidsecr, both, noninterf, 
+	echo  weak, choice, obsequi, attack, bugs, jfk, mailprot, or ffgg.
+	exit 2
+fi
+
+mkdir -p tests
+
+output=$1`date '+%Y.%m.%d-%H_%M_%S'`
+
+(
+
+#  Test for secrecy using clauses (CSFW'01)
+
+if [ \( .$1 = .all \) -o \( .$1 = .secr \) ]
+then
+
+echo
+echo SECRECY TESTS
+echo
+
+echo PROTOCOL Needham-Schroeder public key
+$PROVERIF examples/horn/secr/needham-orig
+echo PROTOCOL Needham-Schroeder public key corrected
+$PROVERIF examples/horn/secr/needham-corr-orig
+echo PROTOCOL Needham-Schroeder shared key
+$PROVERIF examples/horn/secr/needham-shr-orig4
+echo PROTOCOL Needham-Schroeder shared key corrected
+$PROVERIF examples/horn/secr/needham-shr-corr4
+echo PROTOCOL Denning-Sacco
+$PROVERIF examples/horn/secr/denning-sacco-orig
+echo PROTOCOL Denning-Sacco corrected
+$PROVERIF examples/horn/secr/denning-sacco-corr-orig
+echo PROTOCOL Otway-Rees
+$PROVERIF examples/horn/secr/otway-rees-orig
+echo PROTOCOL Otway-Rees Paulson err
+$PROVERIF examples/horn/secr/otway-rees-paulson-err
+echo PROTOCOL Yahalom
+$PROVERIF examples/horn/secr/yahalom
+echo PROTOCOL Simplified Yahalom
+$PROVERIF examples/horn/secr/simpleryahalom
+echo PROTOCOL Skeme
+$PROVERIF examples/horn/secr/skeme-eq
+
+fi
+
+
+#  Bidirectional test for secrecy using clauses
+
+if [ \( .$1 = .all \) -o \( .$1 = .bidsecr \) ]
+then
+
+echo
+echo BIDIRECTIONAL SECRECY TESTS
+echo
+
+echo PROTOCOL Needham-Schroeder public key
+$PROVERIF examples/horn/secr/needham-orig-bid
+echo PROTOCOL Needham-Schroeder public key corrected
+$PROVERIF examples/horn/secr/needham-corr-orig-bid
+echo PROTOCOL Needham-Schroeder shared key
+$PROVERIF examples/horn/secr/needham-shr-orig-bid
+echo PROTOCOL Needham-Schroeder shared key corrected
+$PROVERIF examples/horn/secr/needham-shr-corr-bid
+echo PROTOCOL Denning-Sacco
+$PROVERIF examples/horn/secr/denning-sacco-orig-bid
+echo PROTOCOL Denning-Sacco corrected
+$PROVERIF examples/horn/secr/denning-sacco-corr-orig-bid
+echo PROTOCOL Otway-Rees
+$PROVERIF examples/horn/secr/otway-rees-orig-bid
+echo PROTOCOL Otway-Rees Paulson err
+$PROVERIF examples/horn/secr/otway-rees-paulson-err-bid
+echo PROTOCOL Yahalom
+$PROVERIF examples/horn/secr/yahalom-bid
+echo PROTOCOL Simplified Yahalom
+$PROVERIF examples/horn/secr/simpleryahalom-bid
+echo PROTOCOL Skeme
+$PROVERIF examples/horn/secr/skeme-eq-bid
+
+
+fi
+
+# Tests for secrecy and authentication (pi calculus)
+
+if [ \( .$1 = .all \) -o \( .$1 = .both \) ]
+then
+
+echo
+echo SECRECY AND AUTHENTICATION TESTS
+echo
+
+cd examples/pi/secr-auth
+(echo  "param keyCompromise = approx."; cat  pineedham-shr-orig4) > pineedham-shr-orig4-compapprox
+(echo  "param keyCompromise = approx."; cat  pineedham-shr-corr4) > pineedham-shr-corr4-compapprox
+(echo  "param keyCompromise = strict."; cat  pineedham-shr-orig4) > pineedham-shr-orig4-comp
+(echo  "param keyCompromise = strict."; cat  pineedham-shr-corr4) > pineedham-shr-corr4-comp
+cd ../../..
+
+
+function analyzeb()
+{
+    echo PROTOCOL $1
+    $PROVERIF -in pi examples/pi/secr-auth/$2
+}
+
+analyzeb "Needham-Schroeder public key" pineedham-orig
+analyzeb "Needham-Schroeder public key corrected" pineedham-corr-orig
+analyzeb "Woo Lam public key (1992)" piwoolampk-orig
+analyzeb "Woo Lam public key (1997)" piwoolampk
+analyzeb "Woo Lam shared key (GJorig)" piwoolam-orig2
+analyzeb "Woo Lam shared key (GJcorr)" piwoolam-corr3
+
+analyzeb "Denning-Sacco" pidenning-sacco-orig
+analyzeb "Denning-Sacco corrected" pidenning-sacco-corr-orig
+analyzeb "Needham-Schroeder shared key" pineedham-shr-orig4
+analyzeb "Needham-Schroeder shared key corrected" pineedham-shr-corr4
+analyzeb "Needham-Schroeder shared key comp. approx" pineedham-shr-orig4-compapprox
+analyzeb "Needham-Schroeder shared key corrected comp. approx" pineedham-shr-corr4-compapprox
+analyzeb "Needham-Schroeder shared key comp." pineedham-shr-orig4-comp
+analyzeb "Needham-Schroeder shared key corrected comp." pineedham-shr-corr4-comp
+analyzeb "Yahalom" piyahalom-orig
+analyzeb "Simplified Yahalom, unidirectional" piyahalom
+analyzeb "Simplified Yahalom, bidirectional" piyahalom-bid
+analyzeb "Simplified Yahalom, bidirectional with nicer encoding" piyahalom-bid-nicecoding
+analyzeb "Otway-Rees" piotwayrees
+analyzeb "Otway-Rees abadi" piotwayreesabadi
+analyzeb "Otway-Rees Paulson err" piotway-rees-paulson-err
+analyzeb "Skeme" piskeme
+
+fi
+
+# Tests for non-interference (Oakland'04)
+
+if [ \( .$1 = .all \) -o \( .$1 = .noninterf \) ]
+then
+
+echo
+echo NON-INTERFERENCE TESTS
+echo
+
+echo PROTOCOL Otway-Rees
+$PROVERIF -in pi examples/pi/noninterf/piotwayrees
+echo PROTOCOL Otway-Rees \(probabilistic encryption\)
+$PROVERIF -in pi examples/pi/noninterf/piotwayrees-proba
+echo PROTOCOL Otway-Rees \(key\)
+$PROVERIF -in pi examples/pi/noninterf/piotwayrees-key
+
+echo PROTOCOL Needham-Schroeder public key corrected
+$PROVERIF -in pi examples/pi/noninterf/pineedham-corr-orig
+
+echo PROTOCOL Yahalom
+$PROVERIF -in pi examples/pi/noninterf/piyahalom-orig
+
+echo PROTOCOL Skeme
+$PROVERIF -in pi examples/pi/noninterf/piskeme
+
+fi
+
+# Tests for weak secrets
+
+if [ \( .$1 = .all \) -o \( .$1 = .weak \) ]
+then
+
+echo
+echo WEAK SECRET TESTS
+echo
+
+function analyzew()
+{
+    echo PROTOCOL $1
+    $PROVERIF -in pi examples/pi/weaksecr/$2
+}
+
+analyzew "Trivial vote example" pivote
+analyzew "Trivial handshake example" pihandshake
+analyzew "EKE (A and B talk only to honest participants)" eke1
+analyzew "EKE (A and B talk to anybody)" eke2
+analyzew "EKE DH" ekedh1
+analyzew "EKE DH 2" ekedh2
+analyzew "Augmented EKE" augmentedeke1
+analyzew "Augmented EKE 2" augmentedeke2
+analyzew "Signed Augmented EKE 2" signedaugmentedeke2
+analyzew "Enhanced Kerberos (recognizable tuples)" kerberos-gl1
+
+fi
+
+# Tests for choice (LICS'05 and others)
+
+if [ \( .$1 = .all \) -o \( .$1 = .choice \) ]
+then
+
+echo
+echo CHOICE TESTS
+echo
+
+function analyzec()
+{
+    echo PROTOCOL $1
+    $PROVERIF -in pi examples/pi/choice/$2
+}
+
+analyzec "DH" dh-fs
+analyzec "NDE" nde-pk
+analyzec "MACS" macs
+
+analyzec "Trivial vote example" pivote
+analyzec "Trivial handshake example" pihandshake
+analyzec "EKE (A and B talk only to honest participants)" eke1
+analyzec "EKE (A and B talk to anybody)" eke
+analyzec "EKE DH" ekedh1
+analyzec "EKE DH 2" ekedh
+analyzec "EKE DH 3 (without rounds of key confirmation)" ekedh3
+analyzec "Augmented EKE" augmentedeke
+analyzec "Signed augmented EKE" signedaugmentedeke
+analyzec "Needham-Schroeder corrected" pineedham-corr-orig
+analyzec "Needham-Schroeder corrected (secrets A and B)" pineedham-corr-orig2
+analyzec "Wide Mouth Frog" wmf-auth
+analyzec "Wide Mouth Frog (multisessions, flawed version -- false attack)" wmf-many-auth
+analyzec "Wide Mouth Frog (multisessions, corrected version -- false attack)" wmf-many-auth3
+analyzec "Wide Mouth Frog (lemma for multisessions, flawed version)" wmf-many-auth2
+analyzec "Wide Mouth Frog (lemma for multisessions, corrected version)" wmf-many-auth4
+analyzec "JFKr, core security: equivalence for messages" JFKr-coresec
+
+
+fi
+
+# Tests for choice (exactly LICS'05)
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .obsequi \) \) -a \( -d ../../dev/web/webperso/proverif/obsequi \) ]
+then
+
+echo
+echo "CHOICE TESTS (LICS'05)"
+echo
+
+
+function analyzeo()
+{
+    echo PROTOCOL $1
+    $PROVERIF -in pi ../../dev/web/webperso/proverif/obsequi/$2
+}
+
+analyzeo "DH" dh-fs
+analyzeo "NDE" nde-pk
+analyzeo "MACS" macs
+
+analyzeo "EKE" eke
+analyzeo "EKE DH" ekedh
+analyzeo "Augmented EKE" augmentedeke
+analyzeo "Signed augmented EKE" signedaugmentedeke
+analyzeo "Wide Mouth Frog" wmf-auth
+analyzeo "JFKr, core security: equivalence for messages" JFKr-coresec
+
+fi
+
+# Tests for attacks (CSFW'05)
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .attack \) \) -a \( -d examplesnd/attackspeed \) ]
+then
+
+echo
+echo "ATTACK TESTS"
+echo
+
+function analyze()
+{
+    echo PROTOCOL $1
+    $PROVERIF -in pi examplesnd/attackspeed/$2
+}
+
+function analyzenotrace()
+{
+    echo PROTOCOL $1
+    (echo "param reconstructTrace = no."; cat examplesnd/attackspeed/$2) > examplesnd/attackspeed/$2.notrace
+    $PROVERIF -in pi examplesnd/attackspeed/$2.notrace
+}
+
+function analyzenounif()
+{
+    echo PROTOCOL $1
+    (echo "param unifyDerivation = false."; cat examplesnd/attackspeed/$2) > examplesnd/attackspeed/$2.nounif
+    $PROVERIF -in pi examplesnd/attackspeed/$2.nounif
+}
+
+function analyzenobacktrack()
+{
+    echo PROTOCOL $1
+    (echo "param traceBacktracking = false."; cat examplesnd/attackspeed/$2) > examplesnd/attackspeed/$2.noback
+    $PROVERIF -in pi examplesnd/attackspeed/$2.noback
+}
+
+echo PROTOCOL Test traces without unification heuristic
+
+analyzenounif "Needham-Schroeder public key" pineedham-orig
+analyzenounif "Woo Lam public key (1992)" piwoolampk-orig
+analyzenounif "Woo Lam shared key (GJorig)" piwoolam-orig2
+
+analyzenounif "Denning-Sacco" pidenning-sacco-orig
+analyzenounif "Yahalom" piyahalom-orig
+analyzenounif "Simplified Yahalom, bidirectional" piyahalom-bid
+analyzenounif "Otway-Rees" piotwayrees
+analyzenounif "Otway-Rees abadi" piotwayreesabadi
+analyzenounif "Otway-Rees Paulson err" piotway-rees-paulson-err
+
+analyzenounif "Skeme" Skeme
+
+analyzenounif "JFKr" JFKr
+analyzenounif "JFKr (no cache)" JFKr-nocache
+
+analyzenounif "WS Leiden" Leiden.tf.pf
+analyzenounif "WS firewall-authentication" firewall-authentication.tf.pf
+analyzenounif "WS username-digest" username-digest.tf.pf
+analyzenounif "WS username-signature" username-signature.tf.pf
+analyzenounif "WS x509-signature" x509-signature.tf.pf
+
+analyzenounif "FFGG 50" piffgg-orig50
+analyzenounif "Certified email" mailprot
+
+echo PROTOCOL Test traces 
+
+analyze "Needham-Schroeder public key" pineedham-orig
+analyze "Woo Lam public key (1992)" piwoolampk-orig
+analyze "Woo Lam shared key (GJorig)" piwoolam-orig2
+
+analyze "Denning-Sacco" pidenning-sacco-orig
+analyze "Yahalom" piyahalom-orig
+analyze "Simplified Yahalom, bidirectional" piyahalom-bid
+analyze "Otway-Rees" piotwayrees
+analyze "Otway-Rees abadi" piotwayreesabadi
+analyze "Otway-Rees Paulson err" piotway-rees-paulson-err
+
+analyze "Skeme" Skeme
+
+analyze "JFKr" JFKr
+analyze "JFKr (no cache)" JFKr-nocache
+
+analyze "WS Leiden" Leiden.tf.pf
+analyze "WS firewall-authentication" firewall-authentication.tf.pf
+analyze "WS username-digest" username-digest.tf.pf
+analyze "WS username-signature" username-signature.tf.pf
+analyze "WS x509-signature" x509-signature.tf.pf
+
+analyze "FFGG 50" piffgg-orig50
+analyze "Certified email" mailprot
+
+echo PROTOCOL Test without trace reconstruction
+
+analyzenotrace "Needham-Schroeder public key" pineedham-orig
+analyzenotrace "Woo Lam public key (1992)" piwoolampk-orig
+analyzenotrace "Woo Lam shared key (GJorig)" piwoolam-orig2
+
+analyzenotrace "Denning-Sacco" pidenning-sacco-orig
+analyzenotrace "Yahalom" piyahalom-orig
+analyzenotrace "Simplified Yahalom, bidirectional" piyahalom-bid
+analyzenotrace "Otway-Rees" piotwayrees
+analyzenotrace "Otway-Rees abadi" piotwayreesabadi
+analyzenotrace "Otway-Rees Paulson err" piotway-rees-paulson-err
+
+analyzenotrace "Skeme" Skeme
+
+analyzenotrace "JFKr" JFKr
+analyzenotrace "JFKr (no cache)" JFKr-nocache
+
+analyzenotrace "WS Leiden" Leiden.tf.pf
+analyzenotrace "WS firewall-authentication" firewall-authentication.tf.pf
+analyzenotrace "WS username-digest" username-digest.tf.pf
+analyzenotrace "WS username-signature" username-signature.tf.pf
+analyzenotrace "WS x509-signature" x509-signature.tf.pf
+
+analyzenotrace "FFGG 50" piffgg-orig50
+analyzenotrace "Certified email" mailprot
+
+echo PROTOCOL Test without backtracking
+
+analyzenobacktrack "Needham-Schroeder public key" pineedham-orig
+analyzenobacktrack "Woo Lam public key (1992)" piwoolampk-orig
+analyzenobacktrack "Woo Lam shared key (GJorig)" piwoolam-orig2
+
+analyzenobacktrack "Denning-Sacco" pidenning-sacco-orig
+analyzenobacktrack "Yahalom" piyahalom-orig
+analyzenobacktrack "Simplified Yahalom, bidirectional" piyahalom-bid
+analyzenobacktrack "Otway-Rees" piotwayrees
+analyzenobacktrack "Otway-Rees abadi" piotwayreesabadi
+analyzenobacktrack "Otway-Rees Paulson err" piotway-rees-paulson-err
+
+analyzenobacktrack "Skeme" Skeme
+
+analyzenobacktrack "JFKr" JFKr
+analyzenobacktrack "JFKr (no cache)" JFKr-nocache
+
+analyzenobacktrack "WS Leiden" Leiden.tf.pf
+analyzenobacktrack "WS firewall-authentication" firewall-authentication.tf.pf
+analyzenobacktrack "WS username-digest" username-digest.tf.pf
+analyzenobacktrack "WS username-signature" username-signature.tf.pf
+analyzenobacktrack "WS x509-signature" x509-signature.tf.pf
+
+analyzenobacktrack "FFGG 50" piffgg-orig50
+analyzenobacktrack "Certified email" mailprot
+
+fi
+
+# Tests for previous bugs
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .bugs \) \) -a \( \( -d examplesnd/pibugs \) -o \( -d examplesnd/bugs \) \) ]
+then
+
+echo
+echo "REGRESSION TESTS ON OLD BUGS"
+echo
+
+
+for i in examplesnd/pibugs/* 
+do
+    if [ -f $i ]
+    then
+	 echo PROTOCOL $i
+         $PROVERIF -in pi $i
+    fi
+done
+
+for i in examplesnd/bugs/* 
+do
+    if [ -f $i ] 
+    then
+	 echo PROTOCOL $i
+         $PROVERIF $i
+    fi
+done
+
+
+fi
+
+# JFK
+
+if [ \( .$1 = .all \) -o \( .$1 = .jfk \) ]
+then
+
+echo
+echo JFK TESTS
+echo
+
+cd examples/pi/jfk
+./gen
+cd ../../..
+
+fi
+
+# Certified email protocol
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .mailprot \) \) -a \( -d examples/pi/mailprotAbadi \) ]
+then
+
+echo
+echo CERTIFIED EMAIL PROTOCOL TESTS
+echo
+
+cd examples/pi/mailprotAbadi/onefile2
+./generate
+cd ../journalsas2
+./generate
+cd ../../../..
+
+fi
+
+# FFGG
+
+if [ \( .$1 = .all \) -o \( .$1 = .ffgg \) ]
+then
+
+echo
+echo FFGG TESTS
+echo
+
+cd examples/pi/ffgg 
+./gen
+cd ../../..
+
+fi
+
+) > tests/$output 2>&1
+
+egrep \(TESTS\|PROTOCOL\|RESULT\|user\) tests/$output > tests/sum-$output

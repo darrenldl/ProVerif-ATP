@@ -1,0 +1,45 @@
+free c : channel.
+free Ka : bitstring [private].
+free Kb : bitstring [private].
+free objective : bitstring [private].
+
+fun comm_enc(bitstring, bitstring) : bitstring.
+fun comm_dec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    comm_dec(comm_enc(m, k), k) = m.
+
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
+
+query 
+  attacker(objective).
+
+let A =
+  new m : bitstring;
+  out(c, comm_enc(m, Ka));
+  in(c, msg1 : bitstring);
+  let msg2 = comm_dec(msg1, Ka) in
+  out(c, msg2);
+  out(c, enc(objective, m));
+  0.
+
+let B =
+  in(c, msg1 : bitstring);
+  out(c, comm_enc(msg1, Kb));
+  in(c, msg2 : bitstring);
+  let m = comm_dec(msg2, Kb) in
+  0.
+
+process
+  (
+    A
+  )
+  | (
+    B
+  )

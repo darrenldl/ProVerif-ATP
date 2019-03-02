@@ -1,0 +1,78 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+free c : channel.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+const ZERO : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+fun C(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    C(xor(x, y)) = xor(C(x), C(y)).
+
+fun concat(bitstring, bitstring) : bitstring.
+
+equation
+  forall x1 : bitstring, y1 : bitstring, x2 : bitstring, y2 : bitstring; 
+    xor(concat(x1, y1), concat(x2, y2)) = concat(xor(x1, x2), xor(y1, y2)).
+
+fun split(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    split(concat(x, y)) = (x, y).
+
+fun RC4(bitstring, bitstring) : bitstring.
+
+free Kab : bitstring [private].
+free v : bitstring [private].
+free objective : bitstring [private].
+
+query 
+  attacker(objective).
+
+const enc_oracle_STEP_1 : bitstring.
+
+let enc_oracle =
+  in(c, M : bitstring);
+  out(c, ((v, xor(concat(M, C(M)), RC4(v, Kab))), enc_oracle_STEP_1));
+  0.
+
+const B_STEP_1 : bitstring.
+
+let B =
+  out(c, ((v, xor(concat(objective, C(objective)), RC4(v, Kab))), B_STEP_1));
+  0.
+
+process
+  (
+    enc_oracle
+  )
+  | (
+    B
+  )

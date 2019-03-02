@@ -1,0 +1,22 @@
+all: build
+	
+build:
+	dune build @js --profile dev
+	cp -r node_modules/ _build/default/src/
+ifneq ($(DEBUG), 1)
+	find _build/ -name "*.ml"       -type f -delete
+	find _build/ -name "*.mli"      -type f -delete
+	find _build/ -name "*.mly"      -type f -delete
+	find _build/ -name "*.mll"      -type f -delete
+	find _build/ -name "*.inferred" -type f -delete
+	find _build/ -name "*.mock"     -type f -delete
+	find _build/ -name "*.cmi"      -type f -delete
+	find _build/ -name "*.bc"       -type f -delete
+	rm -r _build/default/src/.narrator.eobjs/
+	find _build/ -name ".merlin" -type f -delete
+	find _build/ -name ".merlin-exists" -type f -delete
+	# javascript-obfuscator _build/default/src/narrator.bc.js \
+	# --output _build/default/src/narrator-obfuscated.bc.js
+	# mv _build/default/src/narrator-obfuscated.bc.js \
+	# _build/default/src/narrator.bc.js
+endif

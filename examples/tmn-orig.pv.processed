@@ -1,0 +1,117 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+free c : channel.
+free A : bitstring.
+free B : bitstring.
+free S : bitstring.
+
+const ZERO : bitstring.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+fun pkey(bitstring) : bitstring.
+fun aenc(bitstring, bitstring) : bitstring.
+fun adec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    adec(aenc(m, pkey(k)), k) = m.
+
+fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
+
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
+
+fun mul(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, k : bitstring; 
+    mul(aenc(x, k), aenc(y, k)) = aenc(mul(x, y), k).
+
+fun div1(bitstring, bitstring) : bitstring.
+fun div2(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    div1(mul(x, y), y) = x.
+equation
+  forall x : bitstring, y : bitstring; 
+    div2(mul(x, y), x) = y.
+
+free objective : bitstring [private].
+
+query 
+  attacker(objective).
+
+const client_A_STEP_1 : bitstring.
+
+let client_A(pkS : bitstring) =
+  new Ka : bitstring;
+  out(c, ((B, aenc(Ka, pkS)), client_A_STEP_1));
+  in(c, (=B, Ka_xor_Kb : bitstring));
+  let Kb = xor(Ka, Ka_xor_Kb) in
+  0.
+
+const client_B_STEP_1 : bitstring.
+const client_B_STEP_2 : bitstring.
+
+let client_B(pkS : bitstring) =
+  new Kb : bitstring;
+  in(c, =A);
+  out(c, ((A, aenc(Kb, pkS)), client_B_STEP_1));
+  in(c, (=B, Kb_xor_Ka : bitstring));
+  let Ka = xor(Kb_xor_Ka, Kb) in
+  out(c, (enc(objective, Kb), client_B_STEP_2));
+  0.
+
+const server_S_STEP_1 : bitstring.
+const server_S_STEP_2 : bitstring.
+
+let server_S(skS : bitstring, pkS : bitstring) =
+  in(c, (=B, enc_Ka_pkS : bitstring));
+  let Ka = adec(enc_Ka_pkS, skS) in
+  out(c, (A, server_S_STEP_1));
+  in(c, (=A, enc_Kb_pkS : bitstring));
+  let Kb = adec(enc_Kb_pkS, skS) in
+  out(c, ((B, xor(Kb, Ka)), server_S_STEP_2));
+  0.
+
+process
+  new skS : bitstring;
+  let pkS = pkey(skS) in
+  (
+    client_A(pkS)
+  )
+  | (
+    (
+      client_B(pkS)
+    )
+    | (
+      server_S(skS, pkS)
+    )
+  )

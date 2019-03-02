@@ -1,0 +1,63 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Wide Mouth Frog protocol.
+   Example taken from Abadi, Gordon, A Calculus for Cryptographic
+   Protocols. The Spi Calculus. SRC research report 149.
+   Pages 14--
+*)
+
+(* Shared-key encryption *)
+
+fun encrypt/2.
+reduc decrypt(encrypt(x,y),y) = x.
+
+free c,e.
+
+let processA = 
+	new Kab;
+	out(c, encrypt(Kab, Kas));
+	out(c, encrypt(M, Kab)).
+
+let processS =
+	in(c, x);
+	let y = decrypt(x, Kas) in
+	out(c, encrypt(y, Ksb)).
+
+let processB =
+	in(c, x);
+	let y = decrypt(x, Ksb) in
+	in(c, z);
+	let w = decrypt(z,y) in
+	out(e, choice[w,M]).
+
+
+process
+	in(c, M);
+	new Kas;
+	new Ksb;
+	(processA | processS | processB)

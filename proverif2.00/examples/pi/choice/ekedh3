@@ -1,0 +1,102 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Bellovin, Merritt, Oakland 92, section 3.1
+   Version in which A and B talk to anybody 
+   The tool was very slow on this example. Problem solved
+   as for ekedh1.
+*)
+
+free c.
+
+(* Symmetric cryptography
+   One does not know whether decryption succeeds or not
+   For use with weak secrets *)
+
+fun enc/2.
+fun dec/2.
+equation dec(enc(x,y),y) = x.
+equation enc(dec(x,y),y) = x.
+
+(* Symmetric cryptography
+   One knows whether decryption succeeds or not *)
+
+fun senc/2.
+reduc sdec(senc(x,y),y) = x.
+
+(* Diffie-Hellman *)
+
+fun g/1.
+fun f/2.
+equation f(x,g(y)) = f(y,g(x)).
+
+(* Host *)
+
+data host/2.
+
+(* param verboseRules  = yes. *)
+
+free hostA, hostB.
+private free P.
+
+let processA =
+	new RA;
+	out(c, (hostA, enc(g(RA), P)));
+	in(c,(m2,m3));
+	let gRB = dec(m2,P) in
+	let K = f(RA, gRB) in
+	out(c, K).
+
+
+let processB =
+	in(c, (=hostX, m));
+	let gRA = dec(m, P) in
+	new RB;
+	let K = f(RB, gRA) in
+	out(c, (enc(g(RB), P), K)).
+
+let processAtalkingX =
+        in(c, (PA,PB));
+        let hostX = host(PA,PB) in
+        let P = PA in
+        processA.
+
+let processBtalkingX =
+        in(c, (PA,PB));
+        let hostX = host(PA,PB) in
+        let P = PB in
+        processB.
+
+process 
+
+	(!let hostX = hostB in processA) | 
+	(!let hostX = hostA in processB) | 
+	(!processAtalkingX) | 
+	(!processBtalkingX) |
+	(phase 1;
+	new w;
+	out(c, choice[w,P]))

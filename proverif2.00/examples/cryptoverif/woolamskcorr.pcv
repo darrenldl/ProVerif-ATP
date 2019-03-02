@@ -1,0 +1,146 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(*
+
+WooLam shared-key auth protocol (1992, computer)
+Corrections of Gordon, Jeffrey CSFW'01
+
+A -> B : A
+B -> A : N (fresh)
+A -> B : { m3, B, N }_kAS
+B -> S : A,B,{ m3, B, N }_kAS
+S -> B : { m5, A, N }_kBS
+B: verify { m5, A, N }_kBS = the message from S
+
+Correct.
+Session identifier (A, N)
+Authentication in one direction only.
+{ m3, B, N }_kAS is not authenticated because it is just
+forwarded by B to the server without checking it.
+
+*)
+
+param N.
+param N2.
+param N3.
+
+type nonce [large,fixed].
+type host [bounded].
+type key [fixed].
+type tag [bounded].
+type cleartext [bounded].
+type ciphertext [bounded].
+
+fun concat1(tag, host, nonce):cleartext [data].
+
+(* Shared-key encryption (IND-CPA + INT-CTXT Stream cipher) *)
+
+proba Penc.
+proba Pencctxt.
+
+expand IND_CPA_INT_CTXT_sym_enc(key, cleartext, ciphertext, enc, dec, injbot, Z, Penc, Pencctxt).
+
+(* The function Z returns for each bitstring, a bitstring
+   of the same length, consisting only of zeroes. *)
+const Zconcat1:cleartext.
+equation forall y:tag, h:host, z:nonce; 
+	Z(concat1(y,h,z)) = Zconcat1.
+
+(* Queries *)
+
+channel c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14,
+	start, finish.
+
+const A: host.
+const B: host.
+fun acceptA(host):bitstring.
+fun acceptB(host):bitstring.
+
+const tag3: tag.
+const tag5: tag.
+
+event fullA(host, bitstring).
+event fullB(host, bitstring).
+
+query y:bitstring;
+	inj-event(fullB(A,y)) ==> inj-event(fullA(B,y)).
+
+let processA(Kas: key) =
+	in(c1, hostB2:host); (* Choose the B host *)
+	out(c2, A);
+	in(c3, n:nonce);
+	let e1 = enc(concat1(tag3, hostB2, n), Kas) in
+	event fullA(hostB2, (A, n));
+	out(c4, (e1, acceptA(hostB2))).
+
+let processB(Kbs: key) =
+	in(c5, hostA2:host);
+	new N:nonce;
+	out(c6, N);
+	in(c7, m:ciphertext);
+	out(c8, (hostA2, B, m));
+	in(c9, m2:ciphertext);
+	if injbot(concat1(tag5, hostA2, N)) = dec(m2, Kbs) then
+	(* OK *)
+	event fullB(hostA2, (hostA2, N));
+	out(c14, acceptB(hostA2)).
+
+table keys(host, key).
+
+let processK(Kas:key, Kbs:key) =
+   in(c10, (Khost: host, Kkey: key));
+   if Khost = A then
+      insert keys(A,Kas)
+   else if Khost = B then
+      insert keys(B,Kbs)
+   else
+      insert keys(Khost,Kkey).
+
+let processS =
+	in(c11, (hostA1:host, hostB0:host, m:ciphertext));
+	get keys(=hostB0, kbs) in
+	get keys(=hostA1, kas) in
+	let injbot(concat1(=tag3, =hostB0, n)) = dec(m, kas) in
+	let e3 = enc(concat1(tag5, hostA1, n), kbs) in
+	out(c12, e3).
+
+
+process 
+	in(start, ());
+	new Kas: key;
+	new Kbs: key;
+	out(c13, ());
+    	((! iA <= N processA(Kas)) |
+	 (! iB <= N processB(Kbs)) |
+	 (! iS <= N processS) |
+	 (! iK <= N2 processK(Kas,Kbs)))
+
+(* EXPECTED
+All queries proved.
+0.180s (user 0.180s + system 0.000s), max rss 35296K
+END *)

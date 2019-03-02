@@ -1,0 +1,65 @@
+const ZERO : bitstring.
+const QUERY : bitstring.
+
+free c : channel.
+
+fun h(bitstring) : bitstring.
+fun xor(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+fun rotate(bitstring, bitstring) : bitstring.
+fun split_L(bitstring) : bitstring.
+fun split_R(bitstring) : bitstring.
+
+free k : bitstring [private].
+free ID : bitstring [private].
+free objective : bitstring [private].
+
+query 
+  attacker(objective).
+
+let R =
+  new r1 : bitstring;
+  out(c, (QUERY, r1));
+  in(c, (r2 : bitstring, left_xor_ID2_g : bitstring));
+  let g = h(xor(xor(r1, r2), k)) in
+  let ID2 = rotate(ID, g) in
+  let left = split_L(xor(ID2, g)) in
+  let right = split_R(xor(ID2, g)) in
+  
+  if left = left_xor_ID2_g then
+  out(c, right);
+  out(c, objective);
+  0.
+
+let sess_1 =
+  new r1_s1 : bitstring;
+  out(c, r1_s1);
+  new r2_s1 : bitstring;
+  let g_s1 = h(xor(xor(r1_s1, r2_s1), k)) in
+  let ID2_s1 = rotate(ID, g_s1) in
+  let left_s1 = split_L(xor(ID2_s1, g_s1)) in
+  let right_s1 = split_R(xor(ID2_s1, g_s1)) in
+  out(c, (r2_s1, left_s1));
+  out(c, right_s1);
+  0.
+
+process
+  (
+    sess_1
+  )
+  | (
+    R
+  )

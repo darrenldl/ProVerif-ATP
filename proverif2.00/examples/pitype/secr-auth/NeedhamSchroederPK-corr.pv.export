@@ -1,0 +1,170 @@
+free c : channel.
+
+type host.
+type nonce.
+type pkey.
+type skey.
+type spkey.
+type sskey.
+
+fun nonce_to_bitstring(nonce) : bitstring[data, typeConverter].
+fun pk(skey) : pkey.
+fun encrypt(bitstring, pkey) : bitstring.
+
+reduc
+  forall x : bitstring, y : skey; decrypt(encrypt(x, pk(y)), y) = x.
+
+fun spk(sskey) : spkey.
+fun sign(bitstring, sskey) : bitstring.
+
+reduc
+  forall m : bitstring, k : sskey; getmess(sign(m, k)) = m.
+reduc
+  forall m : bitstring, k : sskey; checksign(sign(m, k), spk(k)) = m.
+
+fun sencrypt(bitstring, nonce) : bitstring.
+
+reduc
+  forall x : bitstring, y : nonce; sdecrypt(sencrypt(x, y), y) = x.
+
+not attacker(new skA).
+not attacker(new skB).
+not attacker(new skS).
+
+free A : host.
+free B : host.
+
+table keys(host, pkey).
+
+free secretANa : bitstring [private].
+free secretANb : bitstring [private].
+free secretBNa : bitstring [private].
+free secretBNb : bitstring [private].
+
+query 
+  attacker(secretANa);
+  attacker(secretANb);
+  attacker(secretBNa);
+  attacker(secretBNb).
+
+event beginBparam(host, host).
+event endBparam(host, host).
+event beginAparam(host, host).
+event endAparam(host, host).
+event beginBfull(host, host, pkey, pkey, nonce, nonce).
+event endBfull(host, host, pkey, pkey, nonce, nonce).
+event beginAfull(host, host, pkey, pkey, nonce, nonce).
+event endAfull(host, host, pkey, pkey, nonce, nonce).
+
+query x : host, y : host;
+  inj-event(endBparam(x, y)) ==> inj-event(beginBparam(x, y)).
+query x1 : host, x2 : host, x3 : pkey, x4 : pkey, x5 : nonce, x6 : nonce;
+  inj-event(endBfull(x1, x2, x3, x4, x5, x6)) ==> inj-event(beginBfull(x1, x2, x3, x4, x5, x6)).
+query x : host, y : host;
+  inj-event(endAparam(x, y)) ==> inj-event(beginAparam(x, y)).
+query x1 : host, x2 : host, x3 : pkey, x4 : pkey, x5 : nonce, x6 : nonce;
+  inj-event(endAfull(x1, x2, x3, x4, x5, x6)) ==> inj-event(beginAfull(x1, x2, x3, x4, x5, x6)).
+
+let processInitiator(pkS : spkey, skA : skey, skB : skey) =
+  in(c, (xA : host, hostX : host));
+  
+  if xA = A || xA = B then
+  let skxA = if xA = A then (skA) else (skB) in
+  let pkxA = pk(skxA) in
+  event beginBparam(xA, hostX);
+  out(c, (xA, hostX));
+  in(c, ms : bitstring);
+  let (pkX : pkey, =hostX) = checksign(ms, pkS) in
+  new Na : nonce;
+  out(c, encrypt((Na, xA), pkX));
+  in(c, m : bitstring);
+  let (=Na, NX2 : nonce, =hostX) = decrypt(m, skA) in
+  event beginBfull(xA, hostX, pkX, pkxA, Na, NX2);
+  out(c, encrypt(nonce_to_bitstring(NX2), pkX));
+  
+  if hostX = B || hostX = A then
+  event endAparam(xA, hostX);
+  event endAfull(xA, hostX, pkX, pkxA, Na, NX2);
+  out(c, sencrypt(secretANa, Na));
+  out(c, sencrypt(secretANb, NX2));
+  0
+  .
+
+let processResponder(pkS : spkey, skA : skey, skB : skey) =
+  in(c, xB : host);
+  
+  if xB = A || xB = B then
+  let skxB = if xB = A then (skA) else (skB) in
+  let pkxB = pk(skxB) in
+  in(c, m : bitstring);
+  let (NY : nonce, hostY : host) = decrypt(m, skxB) in
+  event beginAparam(hostY, xB);
+  out(c, (xB, hostY));
+  in(c, ms : bitstring);
+  let (pkY : pkey, =hostY) = checksign(ms, pkS) in
+  new Nb : nonce;
+  event beginAfull(hostY, xB, pkxB, pkY, NY, Nb);
+  out(c, encrypt((NY, Nb, xB), pkY));
+  in(c, m3 : bitstring);
+  
+  if nonce_to_bitstring(Nb) = decrypt(m3, skB) then
+  
+  if hostY = A || hostY = B then
+  event endBparam(hostY, xB);
+  event endBfull(hostY, xB, pkxB, pkY, NY, Nb);
+  out(c, sencrypt(secretBNa, NY));
+  out(c, sencrypt(secretBNb, Nb));
+  0
+  .
+
+let processS(skS : sskey) =
+  in(c, (a : host, b : host));
+  get keys(=b, sb) in
+  out(c, sign((sb, b), skS));
+  0
+  .
+
+let processK =
+  in(c, (h : host, k : pkey));
+  
+  if h <> A && h <> B then
+  insert keys(h, k);
+  0
+  .
+
+process
+  new skA : skey;
+  let pkA = pk(skA) in
+  out(c, pkA);
+  insert keys(A, pkA);
+  new skB : skey;
+  let pkB = pk(skB) in
+  out(c, pkB);
+  insert keys(B, pkB);
+  new skS : sskey;
+  let pkS = spk(skS) in
+  out(c, pkS);
+  (
+    ! (
+      processInitiator(pkS, skA, skB)
+    )
+  )
+  | (
+    (
+      ! (
+        processResponder(pkS, skA, skB)
+      )
+    )
+    | (
+      (
+        ! (
+          processS(skS)
+        )
+      )
+      | (
+        ! (
+          processK
+        )
+      )
+    )
+  )

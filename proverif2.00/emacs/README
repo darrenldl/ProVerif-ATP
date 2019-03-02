@@ -1,0 +1,18 @@
+This directory provides an Emacs mode for editing ProVerif files.
+
+To use this mode:
+
+1. Copy the file proverif.el to a directory where Emacs will find it 
+(that is, in your emacs load-path)
+
+2. Add the following lines to your .emacs file:
+
+        (setq auto-mode-alist
+	      (cons '("\\.horn$" . proverif-horn-mode) 
+	      (cons '("\\.horntype$" . proverif-horntype-mode) 
+	      (cons '("\\.pv[l]?$" . proverif-pv-mode) 
+              (cons '("\\.pi$" . proverif-pi-mode) auto-mode-alist)))))
+        (autoload 'proverif-pv-mode "proverif" "Major mode for editing ProVerif code." t)
+        (autoload 'proverif-pi-mode "proverif" "Major mode for editing ProVerif code." t)
+        (autoload 'proverif-horn-mode "proverif" "Major mode for editing ProVerif code." t)
+        (autoload 'proverif-horntype-mode "proverif" "Major mode for editing ProVerif code." t)

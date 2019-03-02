@@ -1,0 +1,116 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c.
+(* Otway Rees protocol.
+   Version of Abadi and Needham, Prudent engineering practice...
+
+A -> B: (A, B, Na)
+B -> S: (A, B, Na, Nb)
+S -> B: ({ Na, A, B, k }_kA, { Nb, A, B, k }_kB)
+B -> A: { Na, A, B, k }_kA
+
+Attack
+I -> B : (A,B,v217)
+B -> S : (A,B,v217,Nb[(A,B,v217),v215])
+S -> B : (...., encrypt((Nb[(A,B,v217),v215],A,B,k[(A,B,v217,Nb[(A,B,v217),v215]),v219]),kB[]))
+B says end(B)
+
+Attack
+A -> I : (A, B, Na)
+I -> S : (A, B, Na, v217)
+S -> I : ({ Na, A, B, k }_kA, {v217, , A, B, k }_kB)
+I -> A : { Na, A, B, k }_kA
+
+*)
+
+(* Shared-key cryptography *)
+
+fun encrypt/2.
+reduc decrypt(encrypt(m,k),k) = m.
+
+(* Host name / key *)
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+(* Secrecy assumptions *)
+
+not kA.
+not kB.
+
+private free secretA, secretB.
+query attacker:secretA;
+      attacker:secretB.
+query evinj:endAparam(x) ==> evinj:beginAparam(x).
+query evinj:endAkey(x,y,z) ==> evinj:beginAkey(x,y,z).
+query evinj:endBparam(x) ==> evinj:beginBparam(x).
+query evinj:endBkey(x,y,z) ==> evinj:beginBkey(x,y,z).
+
+let processA =
+	in(c, hostB0);
+	new Na;
+	event beginBparam(hostB0);
+        out(c, (hostA, hostB0, Na));
+	in(c, m);
+	let (=Na, =hostA, =hostB0, k) = decrypt(m, kA) in
+	event beginBkey(hostA, hostB0, k);
+	(* OK *)
+	if hostB0 = hostB then 
+	event endAparam(hostA);
+        event endAkey(hostA, hostB0, k);
+	out(c, encrypt(secretA, k)).
+
+
+let processB = 
+	in(c, (hostA1, =hostB, m2)); 
+	event beginAparam(hostA1); 
+	new Nb; 
+	out(c, (hostA1, hostB, m2, Nb)); 
+	in(c, (m3, m4)); 
+	let (=Nb, =hostA1, =hostB, k) = decrypt(m4, kB) in 
+	event beginAkey(hostA1, hostB, k); 
+	out(c, m3);
+	(* OK *)
+	if hostA1 = hostA then
+	event endBparam(hostB);
+	event endBkey(hostA1, hostB, k);
+	out(c, encrypt(secretB, k)).
+
+
+let processS = in(c, m);
+	       let (hostA1, hostB1, Na1, Nb1) = m in
+	       new k;
+               out(c, (encrypt((Na1, hostA1, hostB1, k), getkey(hostA1)), 
+                       encrypt((Nb1, hostA1, hostB1, k), getkey(hostB1)))).
+
+
+process new kA; new kB;
+	let hostA = host(kA) in 
+	let hostB = host(kB) in
+	out(c, hostA); out(c, hostB);
+	((!processA) | (!processB) | (!processS))

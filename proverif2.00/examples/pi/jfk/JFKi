@@ -1,0 +1,472 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* JFKi *)
+
+param redundantHypElim = beginOnly.
+
+(* Exponential and Diffie-Hellman *)
+
+data g/0.
+fun exp/2.
+equation exp(exp(g,y),z) = exp(exp(g,z),y).
+
+(* Signature *)
+
+fun S/2.
+fun Pk/1.
+data true/0.
+fun V/3.
+fun RecoverKey/1.
+fun RecoverText/1.
+equation V(S(k,v), Pk(k),v) = true.
+equation RecoverKey(S(k,v)) = Pk(k). (* For the attacker *)
+equation RecoverText(S(k,v)) = v.    (* For the attacker *)
+
+(* Shared-key encryption *)
+
+fun E/2.
+fun D/2.
+equation D(k,E(k,v)) = v.
+
+(* Keyed hash function *)
+
+fun H/2.
+
+(* Sets *)
+
+data consset/2.
+data emptyset/0.
+pred member/2.
+clauses
+  member:x,consset(x,y);
+  member:x,y -> member:x,consset(z,y).
+
+(* Tags *)
+
+data tagE/0. data tagA/0. data tagV/0.
+
+(* Constructors for JFK's formatted messages
+   Selectors are implicit when using "data" *)
+
+data cons1/3. data cons2/7. data cons3/7. data cons4/2.
+
+(* More constants *)
+
+data constI/0. data constR/0. data saR/0.
+
+(* Free names *)
+
+free c. (* Public channel *)
+free pub, getprinc, getexponential, grpinfoR.
+
+(* Queries: properties to prove *)
+
+(* Correspondence assertions *)
+
+ifdef(`EVCACHE',`
+  (* Denial of service for I. *)
+  query evinj:enddosi(XIDA, XNI) ==> 
+    (evinj:mess2rec(XIDA, XNI, XNR, XxR, XgrpinfoR, XIDB, XsR2, XtR, XxI, XIDRp, XsaI) ==>
+    (evinj:mess1(XIDA, XNI, XxI, XIDRp, XinitA, Xautorid, XsaI) ==>
+     evinj:init(XinitA, Xautorid, XIDRp, XsaI)))
+   & ev:princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA).
+
+  (* First part of Property 1 of Theorem 3.  *)
+  query ev:accept(XacceptB, XIDA, XsaI, XsaR, XKv) ==> 
+		  ev:princ(XkBminus, XIDB, XinitB, XacceptB, XconnectB, XSIB)
+		& member:XIDA,XSIB.
+
+  (* First part of Property 2 of Theorem 3.  *)
+  query evinj:connect(XconnectA, XIDB, XsaI, XsaR, XKv) ==>
+		  evinj:init(XinitA, Xautorid, XIDRp, XsaI)
+		& ev:princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA)
+		& member:XIDB, Xautorid.
+
+  (* Second part of Property 2 of Theorem 3. *)
+  query evinj:connecthonest(XconnectA, XIDB, XsaI, XsaR, XKv) ==> 
+		  evinj:accept(XacceptB, XIDA, XsaI, XsaR, XKv) 
+		& ev:princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA)
+                & ev:princ(XkBminus, XIDB, XinitB, XacceptB, XconnectB, XSIB).
+
+  (* Certificates that the attacker can have *)
+  query attacker:S(kAminus, x).
+
+  define(`HONESTEVENTS')
+')
+
+
+ifdef(`EVNOCACHE',`
+  (* To prove these injective correspondences, you need to replace the caching 
+     of message 3 with a version without caching *)
+
+  (* Denial of service for R. *)
+  query evinj:enddosr(XIDA, XNI, XNR) ==> 
+     ev:princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA)
+   & (evinj:mess3rec(XIDA, XNI, XNR, XxI, XxR, XtR, XeI, XhI) ==>
+     (evinj:mess2(XIDA, XNI, XNR, XxIp, XxR, XgR, XS, XtR, XIDRpp) ==>
+      evinj:mess1rec(XIDA, XNI, XxIp, XIDRpp))).
+
+  (* Second part of Property 1 of Theorem 3. *)
+  query evinj:accepthonest(XacceptB, XIDA, XsaI, XsaR, XKv) ==> 
+		  evinj:init(XinitA, Xautorid, XIDRp, XsaI) 
+		& ev:princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA)
+                & ev:princ(XkBminus, XIDB, XinitB, XacceptB, XconnectB, XSIB).
+
+  (* Reordering *)
+  query evinj:connecthonest(XconnectA, XIDB, XsaI, XsaR, XKv) ==> 
+                  ev:princ(XkAminus, XIDA, XinitA, XacceptA, XconnectA, XSIA)
+                & ev:princ(XkBminus, XIDB, XinitB, XacceptB, XconnectB, XSIB)
+		&(evinj:mess4rec(XIDA, XeR, XhR, XconnectA, XIDB, XsaI, XsaR, XKv) ==>
+                 (evinj:mess4(XIDB, XIDA, XeR, XhR, XNI, XNR, XxI, XxR, XtR, XeI, XhI) ==>
+                 (evinj:accept(XacceptB, XIDA, XsaI, XsaR, XKv) ==>
+		 (evinj:mess3rec(XIDB, XNI, XNR, XxI, XxR, XtR, XeI, XhI) ==>
+		 (evinj:mess3(XIDA, XNI, XNR, XxI, XxR, XtRp, XeI, XhI, XgR, XIDRp, XsaI, XKv) ==>
+		 (evinj:mess2rec(XIDA, XNI, XNR, XxR, XgR, XIDB, S(XkBminus, (XxR, XgR)), XtRp, XxI, XIDRp, XsaI) ==> 
+		  (evinj:mess2(XIDB, XNI, XNR, XxIp, XxR, XgR, S(XkBminus, (XxR, XgR)), XtR, XIDRpp) ==>
+	           evinj:mess1rec(XIDB, XNI, XxIp, XIDRpp))
+		& (evinj:mess1(XIDA, XNI, XxI, XIDRp, XinitA, Xautorid, XsaI) ==>
+		   evinj:init(XinitA, Xautorid, XIDRp, XsaI)))))))).
+
+  (* Note the presence of XtRp in events mess3 and mess2rec and 
+     XxIp and XIDRpp in events mess2 and mess1rec, instead of 
+     XtR, XxI, and XIDRp respectively *)
+
+  define(`NOCACHE')
+  define(`HONESTEVENTS')
+')
+
+(* Secrecy *)
+
+ifdef(`SECRECY',`
+  (* Secrecy of the exchanged key Kv, from the point of view of I and R *)
+  private free secretI, secretR.
+  query attacker:secretI;
+        attacker:secretR.
+')
+
+(* Identity protection.
+   The predicate member: must be removed, because it is not supported
+   for observational equivalence proofs. So we use a version without cache.
+   Only compliant principals are allowed to connect to R. *)
+
+ifdef(`IDISECR',`
+  (* Identity protection for I against active adversaries *)
+  private fun honest/1.
+  reduc ishonest(Pk(honest(x))) = true.
+
+  private free hIminus0, hIminus3, hminus1, hminus2.
+  noninterf hIminus0 among (hminus1, hminus2), 
+            hIminus3 among (hminus1, hminus2).
+  not hminus1.
+  not hminus2.
+  not hAminus.
+  define(`NOCACHE')
+')
+
+
+(* Secrecy assumptions *)
+
+ifdef(`IDISECR',,
+not kAminus phase 0.
+)
+not d.
+ifdef(`NOCACHE',,
+not f.
+)
+
+(* Initiator 
+   The process processI corresponds to I^A in the figure. *)
+
+let processI =
+  !
+  in(exponent, (dI, xI));
+  !
+  in(init, (autorid, IDRp, saI));    (* Init message *)
+  event init(init, autorid, IDRp, saI); 
+  new NI; 
+  event mess1(IDA, NI, xI, IDRp, init, autorid, saI);
+  out(c, cons1(NI, xI, IDRp));
+  in(c, cons2(=NI, NR, xR, grpinfoR, IDRl, sR2, tR));
+  event mess2rec(IDA, NI, NR, xR, grpinfoR, IDRl, sR2, tR, xI, IDRp, saI);
+ifdef(`IDISECR',
+  (* Only honest hosts are allowed to connect to I in this case *)
+  if ishonest(IDRl) = true then
+,`
+  if member:IDRl,autorid then
+')
+  event enddosi(IDA, NI);
+  if V(sR2, IDRl, (xR, grpinfoR)) = true then 
+  let h = exp(xR, dI) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  let sI = S(kAminus, (NI, NR, xI, xR, IDRl, saI)) in
+  let eI = E(Ke, (IDA, saI, sI)) in
+  let hI = H(Ka, (constI, eI)) in
+  event mess3(IDA, NI, NR, xI, xR, tR, eI, hI, grpinfoR, IDRp, saI, Kv);
+  out(c, cons3(NI, NR, xI, xR, tR, eI, hI));
+  in(c, cons4(eR, hR));
+  if H(Ka, (constR, eR)) = hR then
+  let (sR, saR) = D(Ke, eR) in
+  if V(sR, IDRl, (NI, NR, xI, xR, IDA, saI, saR)) = true then 
+  event mess4rec(IDA, eR, hR, connect, IDRl, saI, saR, Kv);
+ifdef(`HONESTEVENTS',
+  (
+    in(honestC, =IDRl);
+    event connecthonest(connect, IDRl, saI, saR, Kv)
+  )
+  |
+)
+  event connect(connect, IDRl, saI, saR, Kv);
+  out(connect, (IDRl, saI, saR, Kv));
+ifdef(`SECRECY',
+  in(honestC, =IDRl);
+  out(c, E(Kv, secretI));
+)
+  0.
+
+(* Responder
+   The process processR corresponds to R^A in the figure. *)
+
+ifdef(`NOCACHE',`
+
+let processR =
+  new KR;
+  !
+  in(exponent, (dR, xR));
+  !
+  in(c, cons1(NI, xI, IDRp));
+  event mess1rec(IDA, NI, xI, IDRp);
+  new NR;
+  new tR;
+  event mess2(IDA, NI, NR, xI, xR, grpinfoR, S(kAminus, (xR, grpinfoR)), tR, IDRp);
+  out(c, cons2(NI, NR, xR, grpinfoR, IDA, S(kAminus, (xR, grpinfoR)), tR));
+  new l;
+  (
+    (
+    !
+    in(c, cons3(=NI,=NR,xI,=xR,=tR,eI,hI));
+    out(l, (xI,eI,hI))
+    )
+  |
+    (
+    in(l, (xI,eI,hI));
+    event mess3rec(IDA, NI, NR, xI, xR, tR, eI, hI);
+    processR4
+    )
+  ).
+
+',`
+
+let processR =
+  new KR;
+  (
+    (
+    !
+    in(exponent, (dR, xR));
+    !
+    in(c, cons1(NI, xI, IDRp));
+    new NR;
+    let tR = H(KR, (xR, NR, NI)) in
+    event mess2(IDA, NI, NR, xI, xR, grpinfoR, S(kAminus, (xR, grpinfoR)), tR, IDRp);
+    out(c, cons2(NI, NR, xR, grpinfoR, IDA, S(kAminus, (xR, grpinfoR)), tR))
+    )
+  |
+    new f;
+    (
+      out(f, emptyset)
+    |
+      (
+        !
+        in(c, cons3(NI,NR,xI,xR,tR,eI,hI));
+        event mess3rec(IDA, NI, NR, xI, xR, tR, eI, hI);
+        if tR = H(KR, (xR, NR, NI)) then
+        in(f, cache);
+        (
+          out(f, consset(tR, cache))
+        |
+          if member:tR,cache then 0 else 
+          new l;
+          (
+	    (
+            !
+            in(exponent, (dR, =xR));
+            out(l, dR)
+            )
+          |
+            (
+            in(l, dR);
+            processR4
+            )
+          )
+        )
+      )
+    )
+  ).
+
+')
+
+
+let processR4 =
+  event enddosr(IDA, NI, NR);
+  let h = exp(xI,dR) in
+  let Ka = H(h, (NI, NR, tagA)) in
+  let Ke = H(h, (NI, NR, tagE)) in
+  let Kv = H(h, (NI, NR, tagV)) in
+  if H(Ka, (constI, eI)) = hI then
+  let (IDIl, saI, sI) = D(Ke,eI) in
+ifdef(`IDISECR',
+  if ishonest(IDIl) = true then
+,`
+  if member:IDIl,SIA then
+')
+  if V(sI, IDIl, (NI, NR, xI, xR, IDA, grpinfoR)) = true then
+ifdef(`HONESTEVENTS',
+  (
+    in(honestC, =IDIl);
+    event accepthonest(accept, IDIl, saI, saR, Kv)
+  )
+  |
+)
+  event accept(accept, IDIl, saI, saR, Kv);
+  out(accept, (IDIl, saI, saR, Kv));
+  (
+    (
+      let sR = S(kAminus, (NI, NR, xI, xR, IDIl, saI, saR)) in
+      let eR = E(Ke, (sR, saR)) in
+      let hR = H(Ka, (constR, eR)) in
+      event mess4(IDA, IDIl, eR, hR, NI, NR, xI, xR, tR, eI, hI);
+      out(c, cons4(eR, hR));
+ifdef(`SECRECY',
+      in(honestC, =IDIl);
+      out(c, E(Kv, secretR));
+)
+      0
+    )
+  ).
+
+
+(* Whole JFK system. *)
+
+ifdef(`IDISECR',
+(* Version for identity protection with active adversaries *)
+
+process
+  new exponent;
+  ( ! new d; let x = exp(g,d) in out(getexponential, x); ! out(exponent, (d,x)) )
+  |
+  new initI;     (* private channel used to launch principals playing role I *)
+  let kminus1 = honest(hminus1) in
+  let ID1 = Pk(kminus1) in
+  let kminus2 = honest(hminus2) in
+  let ID2 = Pk(kminus2) in
+  out(pub, ID1);
+  out(pub, ID2);
+  (
+    (
+      (* Create principal playing role I, with secret key kIminus0 *)
+      let kIminus0 = honest(hIminus0) in
+      let IDI0 = Pk(kIminus0) in
+      new connect0; new init0;
+      out(pub, init0);
+      (
+        (! in(connect0, x))
+      | out(initI, (kIminus0, IDI0, init0, connect0))
+      )
+    )
+  |
+    (
+      (* Create principal playing role I, with secret key kIminus3 *)
+      let kIminus3 = honest(hIminus3) in
+      let IDI3 = Pk(kIminus3) in
+      new connect3; new init3;
+      out(pub, init3);
+      (
+        (! in(connect3, x))
+      | out(initI, (kIminus3, IDI3, init3, connect3))
+      )
+    )
+  |
+    (
+      !
+      new hAminus;
+      let kAminus = honest(hAminus) in
+      let IDA = Pk(kAminus) in
+      new connect; new accept; new init; new channelSIA;
+      out(getprinc, (IDA, init, channelSIA));
+      in(channelSIA, SIA);
+      (
+        (! in(accept, x))
+      | (! in(connect, x))
+      | out(initI, (kAminus, IDA, init, connect))
+      | processR 
+      )
+    )
+  |
+    (! in(initI, (kAminus, IDA, init, connect)); processI) 
+  )
+
+,
+(* Standard version of the process *)
+
+process
+
+  new exponent;
+  ( ! new d; let x = exp(g,d) in out(getexponential, x); ! out(exponent, (d,x)) )
+  |
+  new honestC;  (* private channel used to simulate the set C of honest principals *)
+  !
+  new kAminus;
+  let IDA = Pk(kAminus) in
+  new connect; new accept; new init; new channelSIA;
+ifdef(`SECRECY',
+  (* Do not give accept and connect to the adversary when proving secrecy of Kv:
+     These messages contain Kv! Instead, input on these channels here. *)
+  out(getprinc, (IDA, init,  channelSIA));
+  in(channelSIA, SIA);
+  event princ(kAminus, IDA, init, accept, connect, SIA);
+  (
+    ( phase 1; out(pub, kAminus) )
+  | (! in(accept, x))
+  | (! in(connect, x))
+  | (! out(honestC, IDA) )   (* IDA is in C *)
+  | processI
+  | processR
+  )
+,
+  out(getprinc, (IDA, init, accept, connect, channelSIA));
+  in(channelSIA, SIA);
+  event princ(kAminus, IDA, init, accept, connect, SIA);
+  (
+    (! out(honestC, IDA) )   (* IDA is in C *)
+  | processI
+  | processR
+  )
+)
+
+)

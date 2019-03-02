@@ -1,0 +1,182 @@
+const ZERO : bitstring.
+
+free c : channel.
+
+free Kab : bitstring [ private ].
+free Kbc : bitstring [ private ].
+
+free Kas : bitstring [ private ].
+free Kbs : bitstring [ private ].
+free Kcs : bitstring.
+
+(*fun key2bits(symkey)    : bitstring.
+reduc forall x:symkey; bits2key(key2bits(x)) = x.*)
+
+fun con3(bitstring, bitstring, bitstring) : bitstring.
+reduc forall x1 : bitstring, x2 : bitstring, x3 : bitstring;
+  decon3(con3(x1, x2, x3)) = (x1, x2, x3).
+fun con4(bitstring, bitstring, bitstring, bitstring) : bitstring.
+reduc forall x1 : bitstring, x2 : bitstring, x3 : bitstring, x4 : bitstring;
+  decon4(con4(x1, x2, x3, x4)) = (x1, x2, x3, x4).
+fun con5(bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring.
+reduc forall x1 : bitstring, x2 : bitstring, x3 : bitstring, x4 : bitstring, x5 : bitstring;
+  decon5(con5(x1, x2, x3, x4, x5)) = (x1, x2, x3, x4, x5).
+
+free idA : bitstring.
+free idB : bitstring.
+free idC : bitstring.
+free idS : bitstring.
+
+(* Symmetric key crpyotgraphy*)
+fun enc(bitstring, bitstring): bitstring.
+reduc forall x: bitstring, y: bitstring; dec(enc(x,y), y) = x.
+
+fun h(bitstring, bitstring) : bitstring.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+(*query attacker(Kas).*)
+(*query attacker(Kbs).*)
+(*query attacker(Kcs).*)
+query attacker(Kab).
+(*query attacker(Kbc).*)
+
+let A =
+  new Na:bitstring;
+  let Xa = (
+    h(con3(idA, idB, Na), Kas), (* 1. calc hash A -> B *)
+    (idA, idB, Na)              (* 1. calc rest A -> B *)
+  ) in
+  out(c, Xa);                   (* 1. send A -> B *)
+  in(c, (idA1 : bitstring, idB1 : bitstring, xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring)); (* 6. recv B -> A *)
+  if idA1 = idA then (                                       (* 6. check B -> A *)
+  if idB1 = idB then (                                       (* 6. check B -> A *)
+  let Kab = xor(xor_Kab_h_Na_Kas, h(Na, Kas)) in   (* 6. new key Kab *)
+  let idA_idB_Na = dec(enc_idA_idB_Na_Kab, Kab) in
+  if idA_idB_Na = con3(idA, idB, Na) then (                  (* 6. check B -> A : verify key Kab *)
+    0                                                        (* completed *)
+  ))).
+
+let B =
+  in(c, (hsh : bitstring, (idSrc  : bitstring,         (* 1. recv A -> B *)
+                           idDst  : bitstring,
+                           Nounce : bitstring)));
+
+  if idSrc = idA then (                                (* 1. check rest A -> B *)
+  if idDst = idB then (                                (* 1. check rest A -> B *)
+  if hsh   = h(con3(idSrc, idDst, Nounce), Kas) then ( (* 1. check hash A -> B *)
+    new Nb:bitstring;
+
+    let Na     = Nounce in                             (* 1. recon A -> B *)
+    let Xa     = (hsh, (idA, idB, Na)) in              (* 1. recon A -> B *)
+    let Xa_con = con4(hsh, idA, idB, Na) in
+    let Xb     = (
+      h(con4(idB, idC, Nb, Xa_con), Kbs),              (* 2. calc hash B -> C *)
+      (idB, idC, Nb, Xa)                               (* 2. calc rest B -> C *)
+    ) in
+    out(c, Xb);                                        (* 2. send B -> C *)
+    in(c, (idA1 : bitstring, idB1 : bitstring, xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring, (* 5. recv C -> B *)
+           idB2 : bitstring, idA2 : bitstring, xor_Kab_h_Nb_Kbs : bitstring, enc_idB_idA_Nb_Kab : bitstring,
+           idB3 : bitstring, idC1 : bitstring, xor_Kbc_h_Nb_Kbs : bitstring, enc_idB_idC_Nb_Kbc : bitstring));
+    if idA1 = idA then (                                       (* 5. check C -> B *)
+    if idA2 = idA then (                                       (* 5. check C -> B *)
+    if idB1 = idB then (                                       (* 5. check C -> B *)
+    if idB2 = idB then (                                       (* 5. check C -> B *)
+    if idB3 = idB then (                                       (* 5. check C -> B *)
+    if idC1 = idC then (                                       (* 5. check C -> B *)
+    let Kbc = xor(xor_Kbc_h_Nb_Kbs, h(Nb, Kbs)) in   (* 5. new key Kbc *)
+    let idB_idC_Nb = dec(enc_idB_idC_Nb_Kbc, Kbc) in
+    if idB_idC_Nb  = con3(idB, idC, Nb) then (                 (* 5. check C -> B : verify key Kbc *)
+    let Kab = xor(xor_Kab_h_Nb_Kbs, h(Nb, Kbs)) in   (* 5. new key Kab *)
+    let idB_idA_Nb = dec(enc_idB_idA_Nb_Kab, Kab) in
+    if idB_idA_Nb  = con3(idB, idA, Nb) then (                 (* 5. check C -> B : verify key Kab *)
+      out(c, (idA, idB, xor_Kab_h_Na_Kas, enc_idA_idB_Na_Kab)); (* 6. send B -> A *)
+      0                                                         (* completed *)
+    ))))))))
+  ))).
+
+let C =
+  in(c, (hsh1st : bitstring, (idSrc1st  : bitstring,                      (* 2. recv B -> C *)
+                              idDst1st  : bitstring,
+                              Nounce1st : bitstring, (hsh2nd : bitstring, (idSrc2nd  : bitstring,
+                                                                           idDst2nd  : bitstring,
+                                                                           Nounce2nd : bitstring))
+                                                                           )));
+
+  if idSrc1st = idB then (                                          (* 3. check rest B -> C *)
+  if idDst1st = idC then (                                          (* 3. check rest B -> C *)
+  if idSrc2nd = idA then (                                          (* 3. check rest B -> C *)
+  if idDst2nd = idB then (                                          (* 3. check rest B -> C *)
+  if hsh1st   = h(con4(idSrc1st, idDst1st, Nounce1st,               (* 3. check hash B -> C *)
+                       con4(hsh2nd, idSrc2nd, idDst2nd, Nounce2nd)),
+                  Kbc) then (
+    new Nc:bitstring;
+    out(c, Nc);                                               (* info leak due to compromise *)
+
+    let Na     = Nounce2nd in                                       (* recon A -> B in 1. *)
+    let Xa     = (hsh2nd, (idA, idB, Na)) in                        (* recon A -> B in 1. *)
+    let Xa_con = con4(hsh2nd, idA, idB, Na) in
+
+    let Nb     = Nounce1st in                                       (* recon B -> C in 2. *)
+    let Xb     = (hsh1st, (idB, idC, Nb, Xa)) in                    (* recon B -> C in 2. *)
+    let Xb_con = con5(hsh1st, idB, idC, Nb, Xa_con) in
+
+    let Xc = (
+      h(con4(idC, idS, Nc, Xb), Kcs),                               (* 3. calc hash C -> S *)
+      (idC, idS, Nc, Xb)                                            (* 3. calc rest C -> S *)
+    ) in
+    out(c, Xc);                                                     (* 3. send C -> S *)
+    in(c, (xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring, (* 4. recv S -> C *)
+           xor_Kab_h_Nb_Kbs : bitstring, enc_idB_idA_Nb_Kab : bitstring,
+           xor_Kbc_h_Nb_Kbs : bitstring, enc_idB_idC_Nb_Kbc : bitstring,
+           xor_Kbc_h_Nc_Kcs : bitstring, enc_idC_idB_Nc_Kbc : bitstring));   (* <= only entry that C can manipulate *)
+    let Kbc = xor(xor_Kbc_h_Nc_Kcs, h(Nc, Kcs)) in   (* 4. new key Kbc *)
+    out(c, Kbc);                                               (* info leak due to compromise *)
+    let idC_idB_Nc = dec(enc_idC_idB_Nc_Kbc, Kbc) in
+    if idC_idB_Nc  = con3(idC, idB, Nc) then (                  (* 4. check S -> C : verify key Kbc *)
+      out(c, (idA, idB, xor_Kab_h_Na_Kas, enc_idA_idB_Na_Kab,   (* 5. send C -> B *)
+              idB, idA, xor_Kab_h_Nb_Kbs, enc_idB_idA_Nb_Kab,
+              idB, idC, xor_Kbc_h_Nb_Kbs, enc_idB_idC_Nb_Kbc));
+      0                                                         (* completed *)
+    )
+  ))))).
+
+let S =
+  in(c, (hsh1st : bitstring, (idSrc1st  : bitstring,   (* 3. recv C -> S *)
+                              idDst1st  : bitstring,
+                              Nounce1st : bitstring, (hsh2nd : bitstring, (idSrc2nd  : bitstring,
+                                                                           idDst2nd  : bitstring,
+                                                                           Nounce2nd : bitstring, (hsh3rd : bitstring, (idSrc3rd  : bitstring,
+                                                                                                                        idDst3rd  : bitstring,
+                                                                                                                        Nounce3rd : bitstring))
+                                                                                                                        )))));
+  if idSrc1st = idC then (                                                 (* 3. check rest C -> S *)
+  if idDst1st = idS then (                                                 (* 3. check rest C -> S *)
+  if idSrc2nd = idB then (                                                 (* 3. check rest C -> S *)
+  if idDst2nd = idC then (                                                 (* 3. check rest C -> S *)
+  if idSrc3rd = idA then (                                                 (* 3. check rest C -> S *)
+  if idDst3rd = idB then (                                                 (* 3. check rest C -> S *)
+  if hsh1st   = h(con4(idSrc1st, idDst1st, Nounce1st,                      (* 3. check hash C -> S *)
+                       con5(hsh2nd, idSrc2nd, idDst2nd, Nounce2nd,
+                            con4(hsh3rd, idSrc3rd, idDst3rd, Nounce3rd))),
+                  Kcs) then (
+    let Na     = Nounce3rd in                                       (* recon A -> B in 1. *)
+    let Xa     = (hsh3rd, (idA, idB, Na)) in                        (* recon A -> B in 1. *)
+    let Xa_con = con4(hsh3rd, idA, idB, Na) in
+
+    let Nb     = Nounce2nd in                                       (* recon B -> C in 2. *)
+    let Xb     = (hsh2nd, (idB, idC, Nb, Xa)) in                    (* recon B -> C in 2. *)
+    let Xb_con = con5(hsh2nd, idB, idC, Nb, Xa_con) in
+
+    let Nc     = Nounce1st in                                       (* recon C -> S in 3. *)
+    let Xc     = (hsh1st, (idC, idS, Nc, Xb)) in                    (* recon C -> S in 3. *)
+    let Xc_con = con5(hsh1st, idC, idS, Nc, Xb_con) in
+
+    out(c, (xor(Kab, h(Na, Kas)), enc(con3(idA, idB, Na), Kab),  (* 4. send S -> C *)
+            xor(Kab, h(Nb, Kbs)), enc(con3(idB, idA, Nb), Kab),
+            xor(Kbc, h(Nb, Kbs)), enc(con3(idB, idC, Nb), Kbc),
+            xor(Kbc, h(Nc, Kcs)), enc(con3(idC, idB, Nc), Kbc)))
+  ))))))).
+
+process
+  A|B|C|S

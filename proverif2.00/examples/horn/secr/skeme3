@@ -1,0 +1,85 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* SKEME *)
+
+pred c/1 decompData, elimVar.
+
+(* Public key cryptography *)
+
+fun pk/1.
+fun encrypt/2.
+
+(* Hash function *)
+
+fun hash/1.
+
+(* Diffie-Hellman *)
+(* equation f(x,g(y)) = f(y,g(x)). *)
+
+fun g/1.
+fun h/2.
+
+(* Keyed hash function *)
+
+fun keyhash/2.
+
+query c:secretA[].
+query c:secretB[].
+
+(* Secrecy assumptions *)
+
+not c:skA[].
+not c:skB[].
+not c:x[pk(skB[])].
+not c:y[(encrypt((pk(skA[]), a), pk(skB[])), b)].
+not c:Ka[pk(skB[])].
+not c:Kb[(encrypt((pk(skA[]),Ka[pk(skB[])]),pk(skB[])),g(x[pk(skB[])]))].
+
+reduc
+
+c:keyhash((g(y[(encrypt((pk(skA[]),v14),pk(skB[])),v15)]),v15,pk(skA[]),pk(skB[])),hash((v14,Kb[(encrypt((pk(skA[]),v14),pk(skB[])),v15)]))) & c:(encrypt((pk(skA[]),v14),pk(skB[])),v15) -> c:encrypt(secretB[],pk(hash(h(y[(encrypt((pk(skA[]),v14),pk(skB[])),v15)],v15))));
+c:keyhash((g(y[(encrypt((pk(skA[]),v13),pk(skB[])),g(v12))]),g(v12),pk(skA[]),pk(skB[])),hash((v13,Kb[(encrypt((pk(skA[]),v13),pk(skB[])),g(v12))]))) & c:(encrypt((pk(skA[]),v13),pk(skB[])),g(v12)) -> c:encrypt(secretB[],pk(hash(h(v12,g(y[(encrypt((pk(skA[]),v13),pk(skB[])),g(v12))])))));
+c:(encrypt((v9,v10),pk(skB[])),v11) -> c:(encrypt(Kb[(encrypt((v9,v10),pk(skB[])),v11)],v9),g(y[(encrypt((v9,v10),pk(skB[])),v11)]),keyhash((v11,g(y[(encrypt((v9,v10),pk(skB[])),v11)]),pk(skB[]),v9),hash((v10,Kb[(encrypt((v9,v10),pk(skB[])),v11)]))));
+c:(encrypt(v8,pk(skA[])),v7,keyhash((g(x[pk(skB[])]),v7,pk(skB[]),pk(skA[])),hash((Ka[pk(skB[])],v8)))) & c:pk(skB[]) -> c:encrypt(secretA[],pk(hash(h(x[pk(skB[])],v7))));
+c:(encrypt(v6,pk(skA[])),g(v5),keyhash((g(x[pk(skB[])]),g(v5),pk(skB[]),pk(skA[])),hash((Ka[pk(skB[])],v6)))) & c:pk(skB[]) -> c:encrypt(secretA[],pk(hash(h(v5,g(x[pk(skB[])])))));
+c:(encrypt(v4,pk(skA[])),v2,keyhash((g(x[v3]),v2,v3,pk(skA[])),hash((Ka[v3],v4)))) & c:v3 -> c:keyhash((v2,g(x[v3]),pk(skA[]),v3),hash((Ka[v3],v4)));
+c:v1 -> c:(encrypt((pk(skA[]),Ka[v1]),v1),g(x[v1]));
+c:pk(skB[]);
+c:pk(skA[]);
+c:c[];
+c:encrypt(x,pk(y)) & c:y -> c:x;
+c:any9 -> c:pk(any9);
+c:any8 & c:any7 -> c:keyhash(any8,any7);
+c:any6 & c:any5 -> c:encrypt(any6,any5);
+c:any4 -> c:hash(any4);
+c:any3 & c:any2 -> c:h(any3,any2);
+c:any1 -> c:g(any1);
+c:x & c:y -> c:h(x,y);
+c:x & c:g(y) -> c:h(y,g(x));
+c:x & c:h(x,g(y)) -> c:g(y);
+c:x & c:h(y,g(x)) -> c:g(y).

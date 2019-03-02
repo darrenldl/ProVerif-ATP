@@ -1,0 +1,162 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* SSH v2 *)
+
+(* In fact, we consider a simplified version of SSH, without negociation.
+   We assume that the chosen parameters are 
+   - the standard Diffie-Hellman key exchange
+   - a symmetric encryption algorithm (different from none)
+   - a mac algorithm (different from none)
+   - no compression
+   We do not consider key re-exchange.
+
+   Only the transport layer protocol of SSH is considered. 
+   We do not consider the SSH authentication protocol.
+
+   In the computation of the mac, we ignore the sequence of the
+   messages (difficult to model in our framework). Also note
+   that the mac is really useful only when the encryption is malleable,
+   and we model a perfect encryption that is not malleable.
+ *)
+
+free c: channel.
+
+type key.
+type tag.
+type ktag.
+type pkey.
+type skey.
+type G.
+type exponent.
+
+(* Shared key encryption *)
+
+fun enc(key, bitstring): bitstring.
+reduc forall x: bitstring, y: key; dec(y, enc(y,x)) = x.
+
+(* Hash function *)
+
+fun H(bitstring):key.
+
+(* Non-message revealing signatures *)
+
+fun pk(skey): pkey.
+fun nmrsign(skey, key): bitstring.
+reduc forall x: key, y: skey; checknmrsign(pk(y), nmrsign(y,x), x) = true.
+
+(* Diffie-Hellman *)
+
+const g: G.
+fun exp(G, exponent): G.
+equation forall x: exponent, y: exponent; exp(exp(g, x), y) = exp(exp(g, y), x).
+
+(* Mac *)
+
+fun mac(key, bitstring): bitstring.
+
+(* Constants *)
+
+const KEXDHINIT, KEXDHREPLY: tag [data].
+
+const keyEncStoC, keyEncCtoS, keyMacStoC, keyMacCtoS: ktag [data].
+
+(* Secrecy assumptions *)
+
+not attacker(new dhsecretC).
+not attacker(new dhsecretS).
+not attacker(new SSigKey).
+
+free secretC: bitstring [private].
+query attacker(secretC).
+
+
+let processClient(SVerKey: pkey) =
+    new dhsecretC: exponent;
+    let dhpublicC = exp(g, dhsecretC) in
+    out(c, (KEXDHINIT, dhpublicC));
+    in(c, (=KEXDHREPLY, ServerVerKey: pkey, dhpublicS: G, sign: bitstring));
+    let K = exp(dhpublicS, dhsecretC) in
+    let h = H((ServerVerKey, dhpublicC, dhpublicS, K)) in
+    if checknmrsign(ServerVerKey, sign, h) = true then
+    let enckeyCtoS = H((K, h, keyEncCtoS)) in
+    let enckeyStoC = H((K, h, keyEncStoC)) in
+    let mackeyCtoS = H((K, h, keyMacCtoS)) in
+    let mackeyStoC = H((K, h, keyMacStoC)) in
+
+    new CsecchannelToS: channel;
+    new CsecchannelFromS: channel;
+
+    (! in(CsecchannelToS, m2payload: bitstring);
+       out(c, (enc(enckeyCtoS, m2payload), mac(mackeyCtoS, m2payload)))
+    ) 
+    |
+    (! in (c,(m4enc: bitstring, m4mac: bitstring));
+       let m4payload = dec(enckeyStoC, m4enc) in
+       if m4mac = mac(mackeyStoC, m4payload) then
+       out(CsecchannelFromS, m4payload))
+    |
+    (
+    (* Send a secret if we are connected to a honest server *)
+    if ServerVerKey = SVerKey then
+    out(CsecchannelToS, secretC)
+    ).
+
+
+let processServer(SSigKey: skey, SVerKey: pkey) =
+    in(c, (=KEXDHINIT, dhpublicC: G));
+    new dhsecretS: exponent;
+    let dhpublicS = exp(g, dhsecretS) in
+    let K = exp(dhpublicC, dhsecretS) in
+    let h = H((SVerKey, dhpublicC, dhpublicS, K)) in
+    out(c, (KEXDHREPLY, SVerKey, dhpublicS, nmrsign(SSigKey, h)));
+    let enckeyCtoS = H((K, h, keyEncCtoS)) in
+    let enckeyStoC = H((K, h, keyEncStoC)) in
+    let mackeyCtoS = H((K, h, keyMacCtoS)) in
+    let mackeyStoC = H((K, h, keyMacStoC)) in
+
+    new SsecchannelToC: channel;
+    new SsecchannelFromC: channel;
+
+    (! in(SsecchannelToC, m3payload: bitstring);
+       out(c, (enc(enckeyStoC, m3payload), mac(mackeyStoC, m3payload)))
+    )
+    |
+    (! in(c, (m2enc: bitstring,m2mac: bitstring));
+       let m2payload = dec(enckeyCtoS, m2enc) in
+       if m2mac = mac(mackeyCtoS, m2payload) then
+       out(SsecchannelFromC, m2payload)
+    )
+    |
+    0.
+
+process
+    new SSigKey: skey;
+    let SVerKey = pk(SSigKey) in
+    out(c, SVerKey);
+    ((!processClient(SVerKey)) | (!processServer(SSigKey, SVerKey)))
+

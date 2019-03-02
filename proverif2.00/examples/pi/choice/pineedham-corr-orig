@@ -1,0 +1,128 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c.
+(* 
+
+? -> A : pkB
+A -> B : { N_A, A }_pkB
+B -> S : (B,A)
+S -> B : { A, pkA }_sS
+B -> A : { N_A, N_B, pkB }_pkA
+A -> B : { N_B }_pkB
+
+*)
+
+(* Public key cryptography *)
+
+fun pk/1.
+fun encrypt/2.
+reduc decrypt(encrypt(x,pk(y)),y) = x.
+
+(* Host *)
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+(* Signatures *)
+
+fun sign/2.
+reduc checksign(sign(x,y),pk(y)) = x.
+reduc getmess(sign(x,y)) = x.
+
+(* Shared-key cryptography *)
+
+fun sencrypt/2.
+reduc sdecrypt(sencrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not skA.
+not skB.
+not skS.
+
+private free secretBNa, secretBNb.
+
+let processA =  
+	(* Choose the other host *)
+	in(c,hostX);
+	(* Get the public key certificate for the other host *)
+	out(c, (hostA, hostX));
+	in(c, ms);
+	let (pkX,=hostX) = checksign(ms,pkS) in
+        (* Message 1 *)
+	new Na; 
+        out(c, encrypt((Na, hostA), pkX));
+        in(c, m); 
+        let (=Na, NX2, =hostX) = decrypt(m, skA) in
+        out(c, encrypt(NX2, pkX));
+        (* OK *)
+	if hostX = hostB then
+	out(c, sencrypt(secretANa, Na));
+	out(c, sencrypt(secretANb, NX2)).
+
+let processB =
+        (* Message 1 *)
+	in(c, m); 
+	let (NY, hostY) = decrypt(m, skB) in
+	(* Get the public key certificate for the other host *)
+        out(c, (hostB, hostY));
+	in(c,ms);
+        let (pkY,=hostY) = checksign(ms,pkS) in
+        (* Message 2 *)
+	new Nb;
+        (* Message 3 *)
+	out(c, encrypt((NY, Nb, hostB), pkY));
+	in(c, m3);
+        if Nb = decrypt(m3, skB) then
+	(* OK *)
+        if hostY = hostA then
+	out(c, sencrypt(secretBNa, NY));
+	out(c, sencrypt(secretBNb, Nb)).
+
+let processS =  in(c,m); 
+	        let (a,b) = m in
+		let sb = getkey(b) in
+                out(c,sign((pk(sb),b),skS)).
+
+process in(c, xANa);
+	in(c, yANa);
+	in(c, xANb);
+	in(c, yANb);
+	let secretANa = choice[xANa, yANa] in
+	let secretANb = choice[xANb, yANb] in
+	new skA; let pkA = pk(skA) in
+        out(c, pkA);
+        new skB; let pkB = pk(skB) in
+        out(c, pkB);
+	new skS; let pkS = pk(skS) in
+	out(c, pkS);
+	let hostA = host(skA) in
+	out(c, hostA);
+	let hostB = host(skB) in
+	out(c, hostB);
+	((!processA) | (!processB) | (!processS))

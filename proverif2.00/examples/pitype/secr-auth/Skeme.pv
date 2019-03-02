@@ -1,0 +1,142 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* SKEME *)
+
+free c: channel.
+
+type nonce.
+type pkey.
+type skey.
+type key.
+type exponent.
+
+fun nonce_to_bitstring(nonce): bitstring [data, typeConverter].
+
+(* Public key encryption *)
+
+fun pk(skey): pkey.
+fun encrypt(bitstring, pkey): bitstring.
+reduc forall x: bitstring, y: skey; decrypt(encrypt(x,pk(y)),y) = x.
+
+(* Hash function *)
+
+fun hash(bitstring):key.
+
+(* Diffie-Hellman *)
+
+const g: bitstring.
+fun exp(bitstring, exponent): bitstring.
+equation forall x: exponent, y: exponent; exp(exp(g, x), y) = exp(exp(g, y), x).
+
+(* Keyed hash function *)
+
+fun keyhash(bitstring, key):bitstring.
+
+(* Shared key encryption *)
+
+fun sencrypt(bitstring,key): bitstring.
+reduc forall x: bitstring, y: key; sdecrypt(sencrypt(x,y),y) = x.
+
+(* Secrecy assumptions *)
+
+not attacker(new skA).
+not attacker(new skB).
+not attacker(new x).
+not attacker(new y).
+
+free secretA, secretB: bitstring [private].
+query attacker(secretA);
+      attacker(secretB).
+
+event endAparam(pkey).
+event beginAparam(pkey).
+event endBparam(pkey).
+event beginBparam(pkey).
+event endAkey(pkey, key).
+event beginAkey(pkey, key).
+event endBkey(pkey, key).
+event beginBkey(pkey, key).
+
+query t: pkey; inj-event(endAparam(t)) ==> inj-event(beginAparam(t)).
+query t: pkey, z: key; inj-event(endAkey(t,z)) ==> inj-event(beginAkey(t,z)).
+query t: pkey; inj-event(endBparam(t)) ==> inj-event(beginBparam(t)).
+query t: pkey, z: key; inj-event(endBkey(t,z)) ==> inj-event(beginBkey(t,z)).
+
+(* A *)
+
+let processA(skA: skey, pkA: pkey, pkB: pkey) = 
+        in(c, pkX: pkey);
+        event beginBparam(pkX);
+        new x: exponent; 
+	let gx = exp(g,x) in
+	new Ka: nonce;
+        out(c, (encrypt((pkA, Ka), pkX), gx));
+        in(c, (m1: bitstring, m2: bitstring, m3: bitstring));
+	let nonce_to_bitstring(Kb) = decrypt(m1, skA) in
+        let K0 = hash((Ka, Kb)) in
+	if m3 = keyhash((gx, m2, pkX, pkA), K0) then
+        let sh = hash(exp(m2, x)) in 
+        event beginBkey(pkX, sh);
+        out(c, keyhash((m2, gx, pkA, pkX), K0));
+	(* OK *)
+        if pkX = pkB then 
+	event endAparam(pkA); 
+	event endAkey(pkA, sh); 
+	out(c, sencrypt(secretA, sh)).
+
+(* B *)
+
+let processB(skB: skey, pkB: pkey, pkA: pkey) = 
+        in(c, (m1: bitstring, m2: bitstring));
+        let (pkAr: pkey, Ka: nonce) = decrypt(m1, skB) in
+	event beginAparam(pkAr);
+        new Kb: nonce;
+        let K0 = hash((Ka, Kb)) in
+	new y: exponent;
+	let gy = exp(g,y) in
+        let sh = hash(exp(m2, y)) in
+	event beginAkey(pkAr, sh);
+	out(c, (encrypt(nonce_to_bitstring(Kb), pkAr), gy, keyhash((m2, gy, pkB, pkAr), K0)));
+        in(c, m3: bitstring);
+	if m3 = keyhash((gy, m2, pkAr, pkB), K0) then
+        (* OK *)
+	if pkAr = pkA then 
+	event endBparam(pkB); 
+	event endBkey(pkB, sh); 
+	out(c, sencrypt(secretB, sh)).
+
+
+process 
+	new skA: skey; 
+    	let pkA = pk(skA) in
+	out(c, pkA);
+	new skB: skey; 
+	let pkB = pk(skB) in
+	out(c, pkB);
+	((!processA(skA, pkA, pkB)) | (!processB(skB, pkB, pkA)))
+

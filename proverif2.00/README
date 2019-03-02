@@ -1,0 +1,131 @@
+Protocol verifier, copyright INRIA-CNRS, by Bruno Blanchet,
+Vincent Cheval, and Marc Sylvestre 2000-2018.
+
+This software can be used to prove secrecy and authenticity properties
+of cryptographic protocols.
+
+INSTALL
+
+To run this software, you need Objective Caml version 3.00 or
+higher. Objective Caml can be downloaded from
+	http://caml.inria.fr
+
+The installation of graphviz is required if you want to have a drawing
+of graphs representing attacks that ProVerif found. It can be downloaded from
+	http://graphviz.org
+
+The installation GTK+2.24 and LablGTK2 is required if you want to
+run the interactive simulator proverif_interact. Use the package manager
+of your distribution to install GTK+2 and download lablgtk-2.18.6.tar.gz
+from
+	http://lablgtk.forge.ocamlcore.org/
+and follow the installation instructions in their README file.
+
+Furthermore, on Mac OS X, you need to install XCode if you do not
+already have it. It can be downloaded from
+	https://developer.apple.com/xcode/
+
+* under Unix / Mac
+
+Uncompress the source and documentation archives using tar:
+
+	gunzip proverif2.00.tar.gz
+	tar -xf proverif2.00.tar
+	gunzip proverifdoc2.00.tar.gz
+	tar -xf proverifdoc2.00.tar
+
+or if you have GNU tar:
+
+	tar -xzf proverif2.00.tar.gz
+	tar -xzf proverifdoc2.00.tar.gz
+
+This will create a directory named proverif2.00 in the current directory.
+Go into this directory, and build the programs:
+
+	cd proverif2.00
+	./build
+
+* under Windows 
+
+Uncompress the archives proverif2.00.tar.gz and proverifdoc2.00.tar.gz
+using Winzip, in the directory of your choice. This will create a
+subdirectory named proverif2.00. Open a DOS window, cd into the
+proverif2.00 directory and run the build .BAT file:
+
+	build
+
+The system can run under Windows, but it is not very Windows-friendly:
+you have to use the command line to run the programs. Improving the interface
+is on the to-do list...
+
+USAGE
+
+This software contains three executable programs, proverif, proveriftotex,
+and proverif_interact. 
+
+The program proverif takes as input a description of a cryptographic
+protocol, and checks whether it satisfies secrecy, authenticity, or
+equivalence properties. The description of the protocol can have
+several different formats.  The recommended format is the typed pi
+calculus format, which is a dialect of the applied pi calculus (Abadi
+and Fournet, POPL'01).  The description of the protocol is first
+translated into Horn clauses, then the core of the verifier is called.
+This input format is documented in the file docs/manual.pdf
+(found in proverifdoc2.00.tar.gz). Examples of protocol descriptions 
+can be found in the examples/pitype subdirectory. 
+To run these examples, use 
+        ./proverif <filename>.pv
+or if your filename does not end in .pv,
+        ./proverif -in pitype <filename>
+For example:
+	./proverif examples/pitype/secr-auth/NeedhamSchroederPK.pv
+
+Other input formats are documented in the file docs/manual-untyped.pv
+Research papers can be downloaded at
+	http://prosecco.inria.fr/personal/bblanche/publications/index.html
+They are not included in the distribution because of copyright differences.
+(You cannot redistribute these papers.)
+
+The program proveriftotex takes as input a protocol description
+and converts it into a LaTeX file. This is useful for including
+protocols in research papers.
+
+The program proverif_interact is an interactive simulator for ProVerif
+scripts.
+
+The scripts "test" and "test-type" runs several tests (Unix or cygwin only):
+You can run them by
+         ./test all
+         ./test-type all
+The output of these scripts is written in the directory tests. The
+filename of the output contains the argument of "test" and the
+date/time of the run.
+
+COPYRIGHT
+
+This software is distributed under the GNU general public license.
+See the file LICENSE for more information.
+
+BUG REPORTS
+
+Bugs and comments should be reported by e-mail to
+	Bruno.Blanchet@inria.fr
+
+MAILING LIST
+
+A mailing list is available for discussions on ProVerif. New releases
+are announced on this mailing list.
+
+* If you wish to subscribe, send an email to sympa@inria.fr with subject
+"subscribe proverif <your name>" (without quotes) and an empty body.
+
+* To post a message on the list, send it to proverif@inria.fr. 
+To avoid spam, only people that have subscribed to the list can post.
+
+ACKNOWLEDGMENTS
+
+I would like to thank all users of ProVerif who contributed to the
+development of the software by their helpful remarks.
+From July 2008 to October 2010, the development of ProVerif was partly 
+supported by DGA.
+

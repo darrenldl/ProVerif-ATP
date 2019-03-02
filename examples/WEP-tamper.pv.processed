@@ -1,0 +1,96 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+fun tuple_2_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0((x0, x1)) = x0.
+
+fun tuple_2_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_1((x0, x1)) = x1.
+
+free c : channel.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+const ZERO : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+fun C(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    C(xor(x, y)) = xor(C(x), C(y)).
+
+fun concat(bitstring, bitstring) : bitstring.
+
+equation
+  forall x1 : bitstring, y1 : bitstring, x2 : bitstring, y2 : bitstring; 
+    xor(concat(x1, y1), concat(x2, y2)) = concat(xor(x1, x2), xor(y1, y2)).
+
+fun split(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    split(concat(x, y)) = (x, y).
+
+fun RC4(bitstring, bitstring) : bitstring.
+
+free Kab : bitstring [private].
+free v : bitstring [private].
+free M : bitstring [private].
+free objective : bitstring [private].
+
+query 
+  attacker(objective).
+
+const A_STEP_1 : bitstring.
+
+let A =
+  out(c, ((v, xor(concat(M, C(M)), RC4(v, Kab))), A_STEP_1));
+  0.
+
+const B_STEP_1 : bitstring.
+
+let B =
+  in(c, (=v, M_CM_xor_RC4_v_Kab : bitstring));
+  let M_CM = xor(M_CM_xor_RC4_v_Kab, RC4(v, Kab)) in
+  let inM : bitstring = tuple_2_get_0(split(M_CM)) in
+  let CM : bitstring = tuple_2_get_1(split(M_CM)) in
+  
+  if C(inM) = CM && inM <> M then
+  out(c, (objective, B_STEP_1));
+  0.
+
+process
+  (
+    A
+  )
+  | (
+    B
+  )

@@ -1,0 +1,126 @@
+% Refutation found. Thanks to Tanya!
+% SZS status Theorem for DH
+% SZS output start Proof for DH
+fof(f106,axiom,(
+  ! [X0,X1] : constr_dec(constr_enc(X1,X0),X0) = X1),
+  file('DH.p',unknown)).
+fof(f114,axiom,(
+  ! [X13,X14] : ((pred_attacker(X14) & pred_attacker(X13)) => pred_attacker(constr_dec(X13,X14)))),
+  file('DH.p',unknown)).
+fof(f125,axiom,(
+  ! [X17,X18] : (pred_attacker(tuple_2(X17,X18)) => pred_attacker(X17))),
+  file('DH.p',unknown)).
+fof(f126,axiom,(
+  ! [X19,X20] : (pred_attacker(tuple_2(X19,X20)) => pred_attacker(X20))),
+  file('DH.p',unknown)).
+fof(f132,axiom,(
+  pred_attacker(tuple_2(tuple_2(name_P_8,name_G_9),constr_A_STEP_1))),
+  file('DH.p',unknown)).
+fof(f133,axiom,(
+  pred_attacker(tuple_2(constr_mod(constr_exp(name_G_9,name_Na),name_P_8),constr_A_STEP_2))),
+  file('DH.p',unknown)).
+fof(f134,axiom,(
+  ! [X27] : (pred_attacker(X27) => pred_attacker(tuple_2(constr_enc(name_objective,constr_mod(constr_exp(X27,name_Na),name_P_8)),constr_A_STEP_3)))),
+  file('DH.p',unknown)).
+fof(f136,conjecture,(
+  pred_attacker(name_objective)),
+  file('DH.p',unknown)).
+fof(f137,negated_conjecture,(
+  ~pred_attacker(name_objective)),
+  inference(negated_conjecture,[],[f136])).
+fof(f143,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_dec(X0,X1)))),
+  inference(rectify,[],[f114])).
+fof(f145,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
+  inference(rectify,[],[f125])).
+fof(f146,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X1))),
+  inference(rectify,[],[f126])).
+fof(f151,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_2(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_8)),constr_A_STEP_3)))),
+  inference(rectify,[],[f134])).
+fof(f153,plain,(
+  ~pred_attacker(name_objective)),
+  inference(flattening,[],[f137])).
+fof(f162,plain,(
+  ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f143])).
+fof(f163,plain,(
+  ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f162])).
+fof(f166,plain,(
+  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f145])).
+fof(f167,plain,(
+  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f146])).
+fof(f172,plain,(
+  ! [X0] : (pred_attacker(tuple_2(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_8)),constr_A_STEP_3)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f151])).
+fof(f280,plain,(
+  ( ! [X0,X1] : (constr_dec(constr_enc(X1,X0),X0) = X1) )),
+  inference(cnf_transformation,[],[f106])).
+fof(f287,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f163])).
+fof(f298,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f166])).
+fof(f299,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X1)) )),
+  inference(cnf_transformation,[],[f167])).
+fof(f304,plain,(
+  pred_attacker(tuple_2(tuple_2(name_P_8,name_G_9),constr_A_STEP_1))),
+  inference(cnf_transformation,[],[f132])).
+fof(f305,plain,(
+  pred_attacker(tuple_2(constr_mod(constr_exp(name_G_9,name_Na),name_P_8),constr_A_STEP_2))),
+  inference(cnf_transformation,[],[f133])).
+fof(f306,plain,(
+  ( ! [X0] : (pred_attacker(tuple_2(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_8)),constr_A_STEP_3)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f172])).
+fof(f308,plain,(
+  ~pred_attacker(name_objective)),
+  inference(cnf_transformation,[],[f153])).
+fof(f317,plain,(
+  pred_attacker(tuple_2(name_P_8,name_G_9))),
+  inference(resolution,[],[f304,f298])).
+fof(f318,plain,(
+  pred_attacker(name_G_9)),
+  inference(resolution,[],[f317,f299])).
+fof(f322,plain,(
+  ( ! [X0,X1] : (~pred_attacker(constr_enc(X0,X1)) | ~pred_attacker(X1) | pred_attacker(X0)) )),
+  inference(superposition,[],[f287,f280])).
+fof(f326,plain,(
+  pred_attacker(constr_mod(constr_exp(name_G_9,name_Na),name_P_8))),
+  inference(resolution,[],[f305,f298])).
+fof(f328,plain,(
+  ( ! [X1] : (pred_attacker(constr_enc(name_objective,constr_mod(constr_exp(X1,name_Na),name_P_8))) | ~pred_attacker(X1)) )),
+  inference(resolution,[],[f306,f298])).
+fof(f333,plain,(
+  ( ! [X0] : (~pred_attacker(X0) | ~pred_attacker(constr_mod(constr_exp(X0,name_Na),name_P_8)) | pred_attacker(name_objective)) )),
+  inference(resolution,[],[f328,f322])).
+fof(f334,plain,(
+  ( ! [X0] : (~pred_attacker(constr_mod(constr_exp(X0,name_Na),name_P_8)) | ~pred_attacker(X0)) )),
+  inference(subsumption_resolution,[],[f333,f308])).
+fof(f343,plain,(
+  ~pred_attacker(name_G_9)),
+  inference(resolution,[],[f334,f326])).
+fof(f347,plain,(
+  $false),
+  inference(subsumption_resolution,[],[f343,f318])).
+% SZS output end Proof for DH
+% ------------------------------
+% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Termination reason: Refutation
+
+% Memory used [KB]: 4989
+% Time elapsed: 0.014 s
+% ------------------------------
+----  Runtime statistics ----
+clauses created: 170
+clauses deleted: 16
+ssat_new_components: 2
+ssat_sat_clauses: 1
+-----------------------------
+% ------------------------------

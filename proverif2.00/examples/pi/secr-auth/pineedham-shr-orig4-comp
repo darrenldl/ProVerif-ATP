@@ -1,0 +1,108 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+param keyCompromise = strict.
+(* Needham-Schroeder shared key *)
+
+free c.
+
+(* Shared-key cryptography *)
+
+fun encrypt/2.
+reduc decrypt(encrypt(m,k),k) = m.
+
+(* Host name / key *)
+
+fun host/1.
+private reduc getkey(host(x)) = x.
+
+(* constants 0 and 1 *)
+
+data c0/0.
+data c1/0.
+
+(* Secrecy assumptions *)
+
+not Kas.
+not Kbs.
+
+query attacker:secretA[];
+      attacker:secretB[].
+query evinj:endAparam(x,y) ==> evinj:beginAparam(x,y).
+query evinj:endAkey(x,y,z) ==> evinj:beginAkey(x,y,z).
+query evinj:endBparam(x,y) ==> evinj:beginBparam(x,y).
+query evinj:endBkey(x,y,z) ==> evinj:beginBkey(x,y,z).
+
+
+let processA =
+	new secretA;
+	in(c, h);
+	event beginBparam(A,h);
+	new Na;
+	out(c,(A, h, Na));
+	in(c,m2);
+	let (=Na, =h, k, m) = decrypt(m2, Kas) in
+	event beginBkey(A, h, k);
+	out(c,m);
+	in(c, m3);
+	let (=c0, n) = decrypt(m3, k) in
+	out(c, encrypt((c1, n), k));
+	if h = B then
+	event endAparam(A, h);
+	event endAkey(A, h, k);
+	out(c, encrypt(secretA, k)).
+
+let processB =
+	new secretB;
+	in(c,m4);
+	let (k,h) = decrypt(m4,Kbs) in
+	event beginAparam(h, B);
+	event beginAkey(h, B, k);
+	new Nb;
+	out(c, encrypt((c0, Nb), k));
+	in(c,m5);
+	let (=c1, =Nb) = decrypt(m5,k) in
+	if h = A then
+	event endBparam(h, B);
+	event endBkey(h, B, k);
+	out(c, encrypt(secretB, k)).
+
+let processS =
+	in(c, (h1,h2,n));
+	let ks1 = getkey(h1) in
+	let ks2 = getkey(h2) in
+	new k;
+	out(c, encrypt((n, h2, k, encrypt((k,h1),ks2)), ks1)).
+
+process
+	new Kas;
+	new Kbs;
+	let A = host(Kas) in
+	let B = host(Kbs) in
+	out(c, A);
+	out(c, B);
+	((!processA) | (!processB) | (!processS))

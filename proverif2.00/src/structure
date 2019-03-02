@@ -1,0 +1,57 @@
+parsing_helper.ml: functions for error messages
+
+For Horn clauses input
+lexer.mll: lexer 
+parser.mly: parser
+ptree.mli: type declarations for the parse tree
+types.mli: type declarations for the facts and clauses
+syntax.ml: translates parse tree into tree with bound variables (as declared in types.mli), front-end without types
+tsyntax.ml: translates parse tree into tree with bound variables (as declared in types.mli), front-end with types
+
+display.ml: various display functions
+param.ml: various parameters and declarations of predicates, function symbols, ...
+terms.ml: various term manipulation functions
+termsEq.ml: various term manipulation functions with an equational theory
+termslinks.ml: various functions for manipulating terms with links (without expanding them)
+
+rules.ml: the resolution algorithm on clauses.
+selfun.ml: selection function (determines the resolution strategy)
+queue.ml: queue of clauses, used for the resolution algorithm
+history.ml: reconstruct a derivation when a clause has been derived.
+
+spassout.ml: output of clauses in SPASS format
+
+For pi calculus input
+  Front-end without types:
+    pilexer.mll: lexer 
+    piparser.mly: parser
+    piptree.mli: type declarations for the parse tree
+    pisyntax.ml: translates parse tree into tree with bound variables (as declared in pitypes.mli)
+  Front-end with types:
+    pitlexer.mll: lexer 
+    pitparser.mly: parser
+    pitptree.mli: type declarations for the parse tree
+    pitsyntax.ml: translates parse tree into tree with bound variables (as declared in pitypes.mli)
+pitypes.mli: type declarations for the processes and queries 
+stringmap.ml: map from strings to values, useful to represent environments
+pievent.ml: routines for managing events
+pitransl.ml: translates a process into clauses for secrecy (POPL'02), correspondences (SAS'02), strong secrecy (Oakland'04), weak secrets (LICS'05)
+simplify.ml: merges two processes into one biprocess, in order to prove equivalences (POST'13 presents an earlier version of this work)
+pitranslweak.ml: translates a process into clauses for proving equivalences, i.e. processes with "choice" (see LICS'05)
+noninterf.ml: clauses manipulations and selection function for strong secrecy (Oakland'04)
+weaksecr.ml clauses manipulations and selection function for proving equivalences and verifying protocols using weak secrets (LICS'05)
+piauth.ml: checks whether a correspondence query is true after resolution.
+reduction*.ml: reconstruct a trace (attack) from a derivation (see CSFW'05)
+	including:
+	- reduction_helper.ml: helper functions for trace reconstruction
+	- reduction.ml: trace reconstruction for secrecy (POPL'02), correspondences (SAS'02), strong secrecy (Oakland'04), weak secrets (LICS'05)
+	- reduction_bipro.ml: trace reconstruction for equivalences, i.e. processes with "choice" (see LICS'05)
+
+main.ml: main program; interprets the command line and calls the desired functions.
+
+
+Program that translates ProVerif input to TeX:
+lexertotex.mll: lexer for the pi calculus front-end
+pitlexertotex.mll: lexer for the typed pi calculus front-end
+fileprint.ml: helper file, mainly defines functions for printing to a file
+proveriftotex.ml: main file

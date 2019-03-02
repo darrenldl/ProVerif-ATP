@@ -1,0 +1,105 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Denning-Sacco
+   In this model, I separate the keys for encryption and the
+   keys for signature, which complicates the model. *)
+
+free c: channel.
+
+type host.
+type key.
+type pkey.
+type skey.
+type spkey.
+type sskey.
+
+(* Probabilistic public key encryption *)
+
+type seed.
+fun pk(skey): pkey.
+fun internal_encrypt(bitstring, pkey, seed): bitstring.
+reduc forall x: bitstring, y: skey, r: seed; 
+        decrypt(internal_encrypt(x,pk(y),r),y) = x.
+letfun encrypt(x: bitstring, y:pkey) = new r: seed; internal_encrypt(x,y,r).
+
+(* Signatures *)
+
+fun spk(sskey): spkey.
+fun sign(bitstring, sskey): bitstring.
+reduc forall m: bitstring, k: sskey; getmess(sign(m,k)) = m.
+reduc forall m: bitstring, k: sskey; checksign(sign(m,k), spk(k)) = m.
+
+(* Probabilistic shared key encryption *)
+
+type sseed.
+fun internal_sencrypt(bitstring,key,sseed): bitstring.
+reduc forall x: bitstring, y: key, r: sseed; sdecrypt(internal_sencrypt(x,y,r),y) = x.
+letfun sencrypt(x: bitstring, y: key) = new r: sseed; internal_sencrypt(x,y,r).
+
+(* Secrecy assumptions *)
+
+not attacker(new skA).
+not attacker(new skB).
+
+(* Queries *)
+
+const n1, secrcst: bitstring.
+
+free secretB, secretB1: bitstring [private].
+noninterf secretB1 among ((secrcst, secretB), n1).
+
+(* Initiator *)
+
+let processInitiator(skA: sskey, pkA: spkey, pkB: pkey) =
+        in(c, pk2: pkey);
+	new k: key;
+	out(c, encrypt(sign((pkA, pk2, k), skA), pk2));
+	if pk2 = pkB then
+	in(c, m: bitstring);
+	new n2: bitstring;
+	out(c, sencrypt(n2, k)).
+
+(* Responder *)
+
+let processResponder(skB: skey, pkB: pkey, pkA: spkey) =
+	in(c, km: bitstring);
+	let ks = decrypt(km,skB) in
+	let (=pkA, =pkB, k:key) = checksign(ks, pkA) in
+	out(c, sencrypt(secretB1, k)).
+
+(* Main process *)
+
+process new skA: sskey; 
+	let pkA = spk(skA) in
+        out(c, pkA);
+        new skB: skey; 
+	let pkB = pk(skB) in
+        out(c, pkB);
+	((!processInitiator(skA, pkA, pkB)) | 
+	 (!processResponder(skB, pkB, pkA)))
+

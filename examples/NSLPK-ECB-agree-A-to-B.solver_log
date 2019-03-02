@@ -1,0 +1,805 @@
+% Refutation found. Thanks to Tanya!
+% SZS status Theorem for NSLPK-ECB-agree-A-to-B
+% SZS output start Proof for NSLPK-ECB-agree-A-to-B
+fof(f227,axiom,(
+  name_A != name_I),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f233,axiom,(
+  name_B != name_I),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f256,axiom,(
+  ! [X4,X5] : constr_checksign(constr_sign(X5,X4),constr_pkey(X4)) = X5),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f258,axiom,(
+  ! [X11,X12,X13,X14] : constr_ecb_dec_3(constr_ecb_enc_3(X12,X13,X14,constr_pkey(X11)),X11) = tuple_3(X12,X13,X14)),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f259,axiom,(
+  ! [X15,X16,X17] : constr_ecb_dec_2(constr_ecb_enc_2(X16,X17,constr_pkey(X15)),X15) = tuple_2(X16,X17)),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f260,axiom,(
+  ! [X18,X19] : constr_ecb_dec_1(constr_ecb_enc_1(X19,constr_pkey(X18)),X18) = X19),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f262,axiom,(
+  ! [X25,X26,X27,X28] : constr_ecb_enc_3(X26,X27,X28,X25) = tuple_3(constr_ecb_enc_1(X26,X25),constr_ecb_enc_1(X27,X25),constr_ecb_enc_1(X28,X25))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f263,axiom,(
+  ! [X29,X30,X31] : constr_ecb_enc_2(X30,X31,X29) = tuple_2(constr_ecb_enc_1(X30,X29),constr_ecb_enc_1(X31,X29))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f264,axiom,(
+  ! [X32,X33,X34] : constr_tuple_3_get_2(tuple_3(X32,X33,X34)) = X34),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f265,axiom,(
+  ! [X35,X36,X37] : constr_tuple_3_get_1(tuple_3(X35,X36,X37)) = X36),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f266,axiom,(
+  ! [X38,X39,X40] : constr_tuple_3_get_0x30(tuple_3(X38,X39,X40)) = X38),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f267,axiom,(
+  ! [X41,X42] : constr_tuple_2_get_1(tuple_2(X41,X42)) = X42),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f268,axiom,(
+  ! [X43,X44] : constr_tuple_2_get_0x30(tuple_2(X43,X44)) = X43),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f269,axiom,(
+  ! [X45] : pred_eq(X45,X45)),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f277,axiom,(
+  ! [X53] : (pred_attacker(X53) => pred_attacker(constr_pkey(X53)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f284,axiom,(
+  ! [X66,X67,X68] : ((pred_attacker(X68) & pred_attacker(X67) & pred_attacker(X66)) => pred_attacker(constr_ecb_enc_2(X66,X67,X68)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f285,axiom,(
+  ! [X69,X70] : ((pred_attacker(X70) & pred_attacker(X69)) => pred_attacker(constr_ecb_enc_1(X69,X70)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f289,axiom,(
+  ! [X77,X78] : ((pred_attacker(X78) & pred_attacker(X77)) => pred_attacker(constr_ecb_dec_1(X77,X78)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f305,axiom,(
+  pred_attacker(constr_CONST_0x30)),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f311,axiom,(
+  ! [X103,X104,X105] : ((pred_attacker(X105) & pred_attacker(X104) & pred_attacker(X103)) => pred_attacker(tuple_3(X103,X104,X105)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f313,axiom,(
+  ! [X109,X110,X111] : (pred_attacker(tuple_3(X109,X110,X111)) => pred_attacker(X110))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f315,axiom,(
+  ! [X115,X116] : ((pred_attacker(X116) & pred_attacker(X115)) => pred_attacker(tuple_2(X115,X116)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f316,axiom,(
+  ! [X117,X118] : (pred_attacker(tuple_2(X117,X118)) => pred_attacker(X117))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f317,axiom,(
+  ! [X119,X120] : (pred_attacker(tuple_2(X119,X120)) => pred_attacker(X120))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f321,axiom,(
+  pred_attacker(name_I)),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f323,axiom,(
+  pred_attacker(name_A)),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f326,axiom,(
+  pred_table(tuple_keys(name_A,constr_pkey(name_skA)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f328,axiom,(
+  pred_attacker(tuple_2(constr_pkey(name_skA),constr_STEP_1))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f329,axiom,(
+  pred_attacker(tuple_2(constr_pkey(name_skB),constr_STEP_2))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f332,axiom,(
+  ! [X127,X128] : ((pred_attacker(X128) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(X128,constr_pkey(name_skS))),name_I)) => pred_attacker(tuple_2(constr_ecb_enc_2(name_Na(X127),name_A,constr_tuple_2_get_1(constr_checksign(X128,constr_pkey(name_skS)))),constr_client_A_STEP_2)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f333,axiom,(
+  ! [X129,X130,X131] : ((pred_attacker(X131) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(X131,constr_pkey(name_skS))),name_I) & pred_attacker(X130) & pred_eq(constr_tuple_3_get_0x30(constr_ecb_dec_3(X130,name_skA)),name_Na(X129)) & pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(X130,name_skA)),name_I)) => pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(X130,name_skA)),constr_tuple_2_get_1(constr_checksign(X131,constr_pkey(name_skS)))),constr_client_A_STEP_3)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f335,axiom,(
+  ! [X132,X133,X134] : ((pred_attacker(X134) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(X134,constr_pkey(name_skS))),name_A) & pred_attacker(X133) & pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X133,name_skB)),name_A)) => pred_attacker(tuple_2(constr_ecb_enc_3(constr_tuple_2_get_0x30(constr_ecb_dec_2(X133,name_skB)),name_Nb(X132),name_B,constr_tuple_2_get_1(constr_checksign(X134,constr_pkey(name_skS)))),constr_client_B_STEP_2)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f336,axiom,(
+  ! [X135,X136,X137,X138] : ((pred_attacker(X138) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(X138,constr_pkey(name_skS))),name_A) & pred_attacker(X136) & pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X136,name_skB)),name_A) & pred_attacker(X137) & pred_eq(constr_ecb_dec_1(X137,name_skB),name_Nb(X135))) => pred_attacker(tuple_2(name_objective,constr_client_B_STEP_3)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f337,axiom,(
+  ! [X139,X140,X141] : ((pred_attacker(tuple_2(X141,X139)) & pred_table(tuple_keys(X139,X140))) => pred_attacker(tuple_2(constr_sign(tuple_2(X139,X140),name_skS),constr_key_retrieval_server_STEP_1)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f338,axiom,(
+  ! [X142,X143] : ((pred_attacker(tuple_2(X142,X143)) & name_A != X142 & name_B != X142) => pred_table(tuple_keys(X142,X143)))),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f339,conjecture,(
+  pred_attacker(name_objective)),
+  file('NSLPK-ECB-agree-A-to-B.p',unknown)).
+fof(f340,negated_conjecture,(
+  ~pred_attacker(name_objective)),
+  inference(negated_conjecture,[],[f339])).
+fof(f342,plain,(
+  ! [X0,X1] : constr_checksign(constr_sign(X1,X0),constr_pkey(X0)) = X1),
+  inference(rectify,[],[f256])).
+fof(f344,plain,(
+  ! [X0,X1,X2,X3] : constr_ecb_dec_3(constr_ecb_enc_3(X1,X2,X3,constr_pkey(X0)),X0) = tuple_3(X1,X2,X3)),
+  inference(rectify,[],[f258])).
+fof(f345,plain,(
+  ! [X0,X1,X2] : constr_ecb_dec_2(constr_ecb_enc_2(X1,X2,constr_pkey(X0)),X0) = tuple_2(X1,X2)),
+  inference(rectify,[],[f259])).
+fof(f346,plain,(
+  ! [X0,X1] : constr_ecb_dec_1(constr_ecb_enc_1(X1,constr_pkey(X0)),X0) = X1),
+  inference(rectify,[],[f260])).
+fof(f348,plain,(
+  ! [X0,X1,X2,X3] : constr_ecb_enc_3(X1,X2,X3,X0) = tuple_3(constr_ecb_enc_1(X1,X0),constr_ecb_enc_1(X2,X0),constr_ecb_enc_1(X3,X0))),
+  inference(rectify,[],[f262])).
+fof(f349,plain,(
+  ! [X0,X1,X2] : constr_ecb_enc_2(X1,X2,X0) = tuple_2(constr_ecb_enc_1(X1,X0),constr_ecb_enc_1(X2,X0))),
+  inference(rectify,[],[f263])).
+fof(f350,plain,(
+  ! [X0,X1,X2] : constr_tuple_3_get_2(tuple_3(X0,X1,X2)) = X2),
+  inference(rectify,[],[f264])).
+fof(f351,plain,(
+  ! [X0,X1,X2] : constr_tuple_3_get_1(tuple_3(X0,X1,X2)) = X1),
+  inference(rectify,[],[f265])).
+fof(f352,plain,(
+  ! [X0,X1,X2] : constr_tuple_3_get_0x30(tuple_3(X0,X1,X2)) = X0),
+  inference(rectify,[],[f266])).
+fof(f353,plain,(
+  ! [X0,X1] : constr_tuple_2_get_1(tuple_2(X0,X1)) = X1),
+  inference(rectify,[],[f267])).
+fof(f354,plain,(
+  ! [X0,X1] : constr_tuple_2_get_0x30(tuple_2(X0,X1)) = X0),
+  inference(rectify,[],[f268])).
+fof(f355,plain,(
+  ! [X0] : pred_eq(X0,X0)),
+  inference(rectify,[],[f269])).
+fof(f362,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(constr_pkey(X0)))),
+  inference(rectify,[],[f277])).
+fof(f367,plain,(
+  ! [X0,X1,X2] : ((pred_attacker(X2) & pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_ecb_enc_2(X0,X1,X2)))),
+  inference(rectify,[],[f284])).
+fof(f368,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_ecb_enc_1(X0,X1)))),
+  inference(rectify,[],[f285])).
+fof(f372,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_ecb_dec_1(X0,X1)))),
+  inference(rectify,[],[f289])).
+fof(f380,plain,(
+  ! [X0,X1,X2] : ((pred_attacker(X2) & pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_3(X0,X1,X2)))),
+  inference(rectify,[],[f311])).
+fof(f382,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_3(X0,X1,X2)) => pred_attacker(X1))),
+  inference(rectify,[],[f313])).
+fof(f384,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_2(X0,X1)))),
+  inference(rectify,[],[f315])).
+fof(f385,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
+  inference(rectify,[],[f316])).
+fof(f386,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X1))),
+  inference(rectify,[],[f317])).
+fof(f391,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(X1,constr_pkey(name_skS))),name_I)) => pred_attacker(tuple_2(constr_ecb_enc_2(name_Na(X0),name_A,constr_tuple_2_get_1(constr_checksign(X1,constr_pkey(name_skS)))),constr_client_A_STEP_2)))),
+  inference(rectify,[],[f332])).
+fof(f392,plain,(
+  ! [X0,X1,X2] : ((pred_attacker(X2) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_I) & pred_attacker(X1) & pred_eq(constr_tuple_3_get_0x30(constr_ecb_dec_3(X1,name_skA)),name_Na(X0)) & pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(X1,name_skA)),name_I)) => pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(X1,name_skA)),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_client_A_STEP_3)))),
+  inference(rectify,[],[f333])).
+fof(f393,plain,(
+  ! [X0,X1,X2] : ((pred_attacker(X2) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_A) & pred_attacker(X1) & pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A)) => pred_attacker(tuple_2(constr_ecb_enc_3(constr_tuple_2_get_0x30(constr_ecb_dec_2(X1,name_skB)),name_Nb(X0),name_B,constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_client_B_STEP_2)))),
+  inference(rectify,[],[f335])).
+fof(f394,plain,(
+  ! [X0,X1,X2,X3] : ((pred_attacker(X3) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(X3,constr_pkey(name_skS))),name_A) & pred_attacker(X1) & pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A) & pred_attacker(X2) & pred_eq(constr_ecb_dec_1(X2,name_skB),name_Nb(X0))) => pred_attacker(tuple_2(name_objective,constr_client_B_STEP_3)))),
+  inference(rectify,[],[f336])).
+fof(f395,plain,(
+  ! [X0,X1,X2] : ((pred_attacker(tuple_2(X2,X0)) & pred_table(tuple_keys(X0,X1))) => pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1)))),
+  inference(rectify,[],[f337])).
+fof(f396,plain,(
+  ! [X0,X1] : ((pred_attacker(tuple_2(X0,X1)) & name_A != X0 & name_B != X0) => pred_table(tuple_keys(X0,X1)))),
+  inference(rectify,[],[f338])).
+fof(f397,plain,(
+  ~pred_attacker(name_objective)),
+  inference(flattening,[],[f340])).
+fof(f406,plain,(
+  ! [X0] : (pred_attacker(constr_pkey(X0)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f362])).
+fof(f414,plain,(
+  ! [X0,X1,X2] : (pred_attacker(constr_ecb_enc_2(X0,X1,X2)) | (~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f367])).
+fof(f415,plain,(
+  ! [X0,X1,X2] : (pred_attacker(constr_ecb_enc_2(X0,X1,X2)) | ~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f414])).
+fof(f416,plain,(
+  ! [X0,X1] : (pred_attacker(constr_ecb_enc_1(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f368])).
+fof(f417,plain,(
+  ! [X0,X1] : (pred_attacker(constr_ecb_enc_1(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f416])).
+fof(f424,plain,(
+  ! [X0,X1] : (pred_attacker(constr_ecb_dec_1(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f372])).
+fof(f425,plain,(
+  ! [X0,X1] : (pred_attacker(constr_ecb_dec_1(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f424])).
+fof(f436,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_3(X0,X1,X2)) | (~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f380])).
+fof(f437,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_3(X0,X1,X2)) | ~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f436])).
+fof(f439,plain,(
+  ! [X0,X1,X2] : (pred_attacker(X1) | ~pred_attacker(tuple_3(X0,X1,X2)))),
+  inference(ennf_transformation,[],[f382])).
+fof(f441,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f384])).
+fof(f442,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f441])).
+fof(f443,plain,(
+  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f385])).
+fof(f444,plain,(
+  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f386])).
+fof(f449,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(constr_ecb_enc_2(name_Na(X0),name_A,constr_tuple_2_get_1(constr_checksign(X1,constr_pkey(name_skS)))),constr_client_A_STEP_2)) | (~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X1,constr_pkey(name_skS))),name_I)))),
+  inference(ennf_transformation,[],[f391])).
+fof(f450,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(constr_ecb_enc_2(name_Na(X0),name_A,constr_tuple_2_get_1(constr_checksign(X1,constr_pkey(name_skS)))),constr_client_A_STEP_2)) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X1,constr_pkey(name_skS))),name_I))),
+  inference(flattening,[],[f449])).
+fof(f451,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(X1,name_skA)),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_client_A_STEP_3)) | (~pred_attacker(X2) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_I) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_3_get_0x30(constr_ecb_dec_3(X1,name_skA)),name_Na(X0)) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(X1,name_skA)),name_I)))),
+  inference(ennf_transformation,[],[f392])).
+fof(f452,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(X1,name_skA)),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_client_A_STEP_3)) | ~pred_attacker(X2) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_I) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_3_get_0x30(constr_ecb_dec_3(X1,name_skA)),name_Na(X0)) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(X1,name_skA)),name_I))),
+  inference(flattening,[],[f451])).
+fof(f453,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_2(constr_ecb_enc_3(constr_tuple_2_get_0x30(constr_ecb_dec_2(X1,name_skB)),name_Nb(X0),name_B,constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_client_B_STEP_2)) | (~pred_attacker(X2) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_A) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A)))),
+  inference(ennf_transformation,[],[f393])).
+fof(f454,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_2(constr_ecb_enc_3(constr_tuple_2_get_0x30(constr_ecb_dec_2(X1,name_skB)),name_Nb(X0),name_B,constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_client_B_STEP_2)) | ~pred_attacker(X2) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_A) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A))),
+  inference(flattening,[],[f453])).
+fof(f455,plain,(
+  ! [X0,X1,X2,X3] : (pred_attacker(tuple_2(name_objective,constr_client_B_STEP_3)) | (~pred_attacker(X3) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X3,constr_pkey(name_skS))),name_A) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A) | ~pred_attacker(X2) | ~pred_eq(constr_ecb_dec_1(X2,name_skB),name_Nb(X0))))),
+  inference(ennf_transformation,[],[f394])).
+fof(f456,plain,(
+  ! [X0,X1,X2,X3] : (pred_attacker(tuple_2(name_objective,constr_client_B_STEP_3)) | ~pred_attacker(X3) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X3,constr_pkey(name_skS))),name_A) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A) | ~pred_attacker(X2) | ~pred_eq(constr_ecb_dec_1(X2,name_skB),name_Nb(X0)))),
+  inference(flattening,[],[f455])).
+fof(f457,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1)) | (~pred_attacker(tuple_2(X2,X0)) | ~pred_table(tuple_keys(X0,X1))))),
+  inference(ennf_transformation,[],[f395])).
+fof(f458,plain,(
+  ! [X0,X1,X2] : (pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1)) | ~pred_attacker(tuple_2(X2,X0)) | ~pred_table(tuple_keys(X0,X1)))),
+  inference(flattening,[],[f457])).
+fof(f459,plain,(
+  ! [X0,X1] : (pred_table(tuple_keys(X0,X1)) | (~pred_attacker(tuple_2(X0,X1)) | name_A = X0 | name_B = X0))),
+  inference(ennf_transformation,[],[f396])).
+fof(f460,plain,(
+  ! [X0,X1] : (pred_table(tuple_keys(X0,X1)) | ~pred_attacker(tuple_2(X0,X1)) | name_A = X0 | name_B = X0)),
+  inference(flattening,[],[f459])).
+fof(f687,plain,(
+  name_A != name_I),
+  inference(cnf_transformation,[],[f227])).
+fof(f693,plain,(
+  name_B != name_I),
+  inference(cnf_transformation,[],[f233])).
+fof(f716,plain,(
+  ( ! [X0,X1] : (constr_checksign(constr_sign(X1,X0),constr_pkey(X0)) = X1) )),
+  inference(cnf_transformation,[],[f342])).
+fof(f718,plain,(
+  ( ! [X2,X0,X3,X1] : (constr_ecb_dec_3(constr_ecb_enc_3(X1,X2,X3,constr_pkey(X0)),X0) = tuple_3(X1,X2,X3)) )),
+  inference(cnf_transformation,[],[f344])).
+fof(f719,plain,(
+  ( ! [X2,X0,X1] : (constr_ecb_dec_2(constr_ecb_enc_2(X1,X2,constr_pkey(X0)),X0) = tuple_2(X1,X2)) )),
+  inference(cnf_transformation,[],[f345])).
+fof(f720,plain,(
+  ( ! [X0,X1] : (constr_ecb_dec_1(constr_ecb_enc_1(X1,constr_pkey(X0)),X0) = X1) )),
+  inference(cnf_transformation,[],[f346])).
+fof(f722,plain,(
+  ( ! [X2,X0,X3,X1] : (constr_ecb_enc_3(X1,X2,X3,X0) = tuple_3(constr_ecb_enc_1(X1,X0),constr_ecb_enc_1(X2,X0),constr_ecb_enc_1(X3,X0))) )),
+  inference(cnf_transformation,[],[f348])).
+fof(f723,plain,(
+  ( ! [X2,X0,X1] : (constr_ecb_enc_2(X1,X2,X0) = tuple_2(constr_ecb_enc_1(X1,X0),constr_ecb_enc_1(X2,X0))) )),
+  inference(cnf_transformation,[],[f349])).
+fof(f724,plain,(
+  ( ! [X2,X0,X1] : (constr_tuple_3_get_2(tuple_3(X0,X1,X2)) = X2) )),
+  inference(cnf_transformation,[],[f350])).
+fof(f725,plain,(
+  ( ! [X2,X0,X1] : (constr_tuple_3_get_1(tuple_3(X0,X1,X2)) = X1) )),
+  inference(cnf_transformation,[],[f351])).
+fof(f726,plain,(
+  ( ! [X2,X0,X1] : (constr_tuple_3_get_0x30(tuple_3(X0,X1,X2)) = X0) )),
+  inference(cnf_transformation,[],[f352])).
+fof(f727,plain,(
+  ( ! [X0,X1] : (constr_tuple_2_get_1(tuple_2(X0,X1)) = X1) )),
+  inference(cnf_transformation,[],[f353])).
+fof(f728,plain,(
+  ( ! [X0,X1] : (constr_tuple_2_get_0x30(tuple_2(X0,X1)) = X0) )),
+  inference(cnf_transformation,[],[f354])).
+fof(f729,plain,(
+  ( ! [X0] : (pred_eq(X0,X0)) )),
+  inference(cnf_transformation,[],[f355])).
+fof(f737,plain,(
+  ( ! [X0] : (pred_attacker(constr_pkey(X0)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f406])).
+fof(f744,plain,(
+  ( ! [X2,X0,X1] : (pred_attacker(constr_ecb_enc_2(X0,X1,X2)) | ~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f415])).
+fof(f745,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_ecb_enc_1(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f417])).
+fof(f749,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_ecb_dec_1(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f425])).
+fof(f765,plain,(
+  pred_attacker(constr_CONST_0x30)),
+  inference(cnf_transformation,[],[f305])).
+fof(f771,plain,(
+  ( ! [X2,X0,X1] : (pred_attacker(tuple_3(X0,X1,X2)) | ~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f437])).
+fof(f773,plain,(
+  ( ! [X2,X0,X1] : (~pred_attacker(tuple_3(X0,X1,X2)) | pred_attacker(X1)) )),
+  inference(cnf_transformation,[],[f439])).
+fof(f775,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f442])).
+fof(f776,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f443])).
+fof(f777,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X1)) )),
+  inference(cnf_transformation,[],[f444])).
+fof(f781,plain,(
+  pred_attacker(name_I)),
+  inference(cnf_transformation,[],[f321])).
+fof(f783,plain,(
+  pred_attacker(name_A)),
+  inference(cnf_transformation,[],[f323])).
+fof(f785,plain,(
+  pred_table(tuple_keys(name_A,constr_pkey(name_skA)))),
+  inference(cnf_transformation,[],[f326])).
+fof(f787,plain,(
+  pred_attacker(tuple_2(constr_pkey(name_skA),constr_STEP_1))),
+  inference(cnf_transformation,[],[f328])).
+fof(f788,plain,(
+  pred_attacker(tuple_2(constr_pkey(name_skB),constr_STEP_2))),
+  inference(cnf_transformation,[],[f329])).
+fof(f791,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(constr_ecb_enc_2(name_Na(X0),name_A,constr_tuple_2_get_1(constr_checksign(X1,constr_pkey(name_skS)))),constr_client_A_STEP_2)) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X1,constr_pkey(name_skS))),name_I)) )),
+  inference(cnf_transformation,[],[f450])).
+fof(f792,plain,(
+  ( ! [X2,X0,X1] : (~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_I) | ~pred_attacker(X2) | pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(X1,name_skA)),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_client_A_STEP_3)) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_3_get_0x30(constr_ecb_dec_3(X1,name_skA)),name_Na(X0)) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(X1,name_skA)),name_I)) )),
+  inference(cnf_transformation,[],[f452])).
+fof(f794,plain,(
+  ( ! [X2,X0,X1] : (pred_attacker(tuple_2(constr_ecb_enc_3(constr_tuple_2_get_0x30(constr_ecb_dec_2(X1,name_skB)),name_Nb(X0),name_B,constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_client_B_STEP_2)) | ~pred_attacker(X2) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_A) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A)) )),
+  inference(cnf_transformation,[],[f454])).
+fof(f795,plain,(
+  ( ! [X2,X0,X3,X1] : (pred_attacker(tuple_2(name_objective,constr_client_B_STEP_3)) | ~pred_attacker(X3) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X3,constr_pkey(name_skS))),name_A) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A) | ~pred_attacker(X2) | ~pred_eq(constr_ecb_dec_1(X2,name_skB),name_Nb(X0))) )),
+  inference(cnf_transformation,[],[f456])).
+fof(f796,plain,(
+  ( ! [X2,X0,X1] : (~pred_table(tuple_keys(X0,X1)) | ~pred_attacker(tuple_2(X2,X0)) | pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1))) )),
+  inference(cnf_transformation,[],[f458])).
+fof(f797,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_table(tuple_keys(X0,X1)) | name_A = X0 | name_B = X0) )),
+  inference(cnf_transformation,[],[f460])).
+fof(f798,plain,(
+  ~pred_attacker(name_objective)),
+  inference(cnf_transformation,[],[f397])).
+fof(f800,plain,(
+  ( ! [X2,X0,X3,X1] : (constr_ecb_dec_3(tuple_3(constr_ecb_enc_1(X1,constr_pkey(X0)),constr_ecb_enc_1(X2,constr_pkey(X0)),constr_ecb_enc_1(X3,constr_pkey(X0))),X0) = tuple_3(X1,X2,X3)) )),
+  inference(definition_unfolding,[],[f718,f722])).
+fof(f801,plain,(
+  ( ! [X2,X0,X1] : (constr_ecb_dec_2(tuple_2(constr_ecb_enc_1(X1,constr_pkey(X0)),constr_ecb_enc_1(X2,constr_pkey(X0))),X0) = tuple_2(X1,X2)) )),
+  inference(definition_unfolding,[],[f719,f723])).
+fof(f804,plain,(
+  ( ! [X2,X0,X1] : (pred_attacker(tuple_2(constr_ecb_enc_1(X0,X2),constr_ecb_enc_1(X1,X2))) | ~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(definition_unfolding,[],[f744,f723])).
+fof(f805,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(tuple_2(constr_ecb_enc_1(name_Na(X0),constr_tuple_2_get_1(constr_checksign(X1,constr_pkey(name_skS)))),constr_ecb_enc_1(name_A,constr_tuple_2_get_1(constr_checksign(X1,constr_pkey(name_skS))))),constr_client_A_STEP_2)) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X1,constr_pkey(name_skS))),name_I)) )),
+  inference(definition_unfolding,[],[f791,f723])).
+fof(f806,plain,(
+  ( ! [X2,X0,X1] : (pred_attacker(tuple_2(tuple_3(constr_ecb_enc_1(constr_tuple_2_get_0x30(constr_ecb_dec_2(X1,name_skB)),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_ecb_enc_1(name_Nb(X0),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))),constr_ecb_enc_1(name_B,constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS))))),constr_client_B_STEP_2)) | ~pred_attacker(X2) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_A) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A)) )),
+  inference(definition_unfolding,[],[f794,f722])).
+fof(f808,plain,(
+  spl0_0 <=> ! [X0,X2] : (~pred_attacker(X2) | ~pred_eq(constr_ecb_dec_1(X2,name_skB),name_Nb(X0)))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
+fof(f809,plain,(
+  ( ! [X2,X0] : (~pred_eq(constr_ecb_dec_1(X2,name_skB),name_Nb(X0)) | ~pred_attacker(X2)) ) | ~spl0_0),
+  inference(avatar_component_clause,[],[f808])).
+fof(f811,plain,(
+  spl0_2 <=> ! [X1] : (~pred_attacker(X1) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
+fof(f812,plain,(
+  ( ! [X1] : (~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X1,name_skB)),name_A) | ~pred_attacker(X1)) ) | ~spl0_2),
+  inference(avatar_component_clause,[],[f811])).
+fof(f814,plain,(
+  spl0_4 <=> ! [X3] : (~pred_attacker(X3) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X3,constr_pkey(name_skS))),name_A))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_4])])).
+fof(f815,plain,(
+  ( ! [X3] : (~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X3,constr_pkey(name_skS))),name_A) | ~pred_attacker(X3)) ) | ~spl0_4),
+  inference(avatar_component_clause,[],[f814])).
+fof(f820,plain,(
+  spl0_6 <=> pred_attacker(tuple_2(name_objective,constr_client_B_STEP_3))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_6])])).
+fof(f821,plain,(
+  pred_attacker(tuple_2(name_objective,constr_client_B_STEP_3)) | ~spl0_6),
+  inference(avatar_component_clause,[],[f820])).
+fof(f822,plain,(
+  spl0_0 | spl0_2 | spl0_4 | spl0_6),
+  inference(avatar_split_clause,[],[f795,f820,f814,f811,f808])).
+fof(f826,plain,(
+  pred_attacker(constr_pkey(name_skA))),
+  inference(resolution,[],[f776,f787])).
+fof(f827,plain,(
+  pred_attacker(constr_pkey(name_skB))),
+  inference(resolution,[],[f776,f788])).
+fof(f846,plain,(
+  ( ! [X0,X1] : (~pred_attacker(constr_ecb_enc_1(X0,constr_pkey(X1))) | ~pred_attacker(X1) | pred_attacker(X0)) )),
+  inference(superposition,[],[f749,f720])).
+fof(f861,plain,(
+  ( ! [X0,X1] : (pred_table(tuple_keys(X0,X1)) | name_A = X0 | name_B = X0 | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(resolution,[],[f797,f775])).
+fof(f1015,plain,(
+  ( ! [X4,X3] : (~pred_eq(constr_tuple_2_get_1(tuple_2(X3,X4)),name_A) | ~pred_attacker(tuple_2(constr_ecb_enc_1(X3,constr_pkey(name_skB)),constr_ecb_enc_1(X4,constr_pkey(name_skB))))) ) | ~spl0_2),
+  inference(superposition,[],[f812,f801])).
+fof(f1016,plain,(
+  ( ! [X4,X3] : (~pred_attacker(tuple_2(constr_ecb_enc_1(X3,constr_pkey(name_skB)),constr_ecb_enc_1(X4,constr_pkey(name_skB)))) | ~pred_eq(X4,name_A)) ) | ~spl0_2),
+  inference(forward_demodulation,[],[f1015,f727])).
+fof(f1049,plain,(
+  spl0_50 <=> ! [X1] : ~pred_attacker(tuple_2(X1,name_A))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_50])])).
+fof(f1050,plain,(
+  ( ! [X1] : (~pred_attacker(tuple_2(X1,name_A))) ) | ~spl0_50),
+  inference(avatar_component_clause,[],[f1049])).
+fof(f1208,plain,(
+  ( ! [X0] : (~pred_attacker(name_A) | ~pred_attacker(X0)) ) | ~spl0_50),
+  inference(resolution,[],[f1050,f775])).
+fof(f1209,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl0_50),
+  inference(subsumption_resolution,[],[f1208,f783])).
+fof(f1211,plain,(
+  $false | ~spl0_50),
+  inference(resolution,[],[f1209,f765])).
+fof(f1289,plain,(
+  ~spl0_50),
+  inference(avatar_contradiction_clause,[],[f1211])).
+fof(f1295,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_2(X0,name_A)) | pred_attacker(tuple_2(constr_sign(tuple_2(name_A,constr_pkey(name_skA)),name_skS),constr_key_retrieval_server_STEP_1))) )),
+  inference(resolution,[],[f785,f796])).
+fof(f1300,plain,(
+  spl0_60 <=> pred_attacker(tuple_2(constr_sign(tuple_2(name_A,constr_pkey(name_skA)),name_skS),constr_key_retrieval_server_STEP_1))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_60])])).
+fof(f1301,plain,(
+  pred_attacker(tuple_2(constr_sign(tuple_2(name_A,constr_pkey(name_skA)),name_skS),constr_key_retrieval_server_STEP_1)) | ~spl0_60),
+  inference(avatar_component_clause,[],[f1300])).
+fof(f1302,plain,(
+  spl0_60 | spl0_50),
+  inference(avatar_split_clause,[],[f1295,f1049,f1300])).
+fof(f1613,plain,(
+  pred_attacker(constr_sign(tuple_2(name_A,constr_pkey(name_skA)),name_skS)) | ~spl0_60),
+  inference(resolution,[],[f1301,f776])).
+fof(f1647,plain,(
+  ( ! [X0,X1] : (~pred_eq(X0,name_A) | ~pred_attacker(constr_pkey(name_skB)) | ~pred_attacker(X0) | ~pred_attacker(X1)) ) | ~spl0_2),
+  inference(resolution,[],[f1016,f804])).
+fof(f1649,plain,(
+  ( ! [X0,X1] : (~pred_eq(X0,name_A) | ~pred_attacker(X0) | ~pred_attacker(X1)) ) | ~spl0_2),
+  inference(subsumption_resolution,[],[f1647,f827])).
+fof(f1651,plain,(
+  spl0_112 <=> ! [X1] : ~pred_attacker(X1)),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_112])])).
+fof(f1652,plain,(
+  ( ! [X1] : (~pred_attacker(X1)) ) | ~spl0_112),
+  inference(avatar_component_clause,[],[f1651])).
+fof(f1654,plain,(
+  spl0_114 <=> ! [X0] : (~pred_eq(X0,name_A) | ~pred_attacker(X0))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_114])])).
+fof(f1655,plain,(
+  ( ! [X0] : (~pred_eq(X0,name_A) | ~pred_attacker(X0)) ) | ~spl0_114),
+  inference(avatar_component_clause,[],[f1654])).
+fof(f1656,plain,(
+  spl0_112 | spl0_114 | ~spl0_2),
+  inference(avatar_split_clause,[],[f1649,f811,f1654,f1651])).
+fof(f1695,plain,(
+  ( ! [X2,X0,X1] : (name_A = X0 | name_B = X0 | ~pred_attacker(X1) | ~pred_attacker(X0) | ~pred_attacker(tuple_2(X2,X0)) | pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1))) )),
+  inference(resolution,[],[f861,f796])).
+fof(f1697,plain,(
+  ( ! [X2,X0,X1] : (~pred_attacker(tuple_2(X2,X0)) | name_B = X0 | ~pred_attacker(X1) | name_A = X0 | pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1))) )),
+  inference(subsumption_resolution,[],[f1695,f777])).
+fof(f1731,plain,(
+  spl0_124 <=> ! [X4] : (~pred_eq(X4,name_I) | ~pred_attacker(X4))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_124])])).
+fof(f1732,plain,(
+  ( ! [X4] : (~pred_eq(X4,name_I) | ~pred_attacker(X4)) ) | ~spl0_124),
+  inference(avatar_component_clause,[],[f1731])).
+fof(f1734,plain,(
+  spl0_126 <=> ! [X3,X2] : (~pred_eq(X2,name_Na(X3)) | ~pred_attacker(X2))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_126])])).
+fof(f1735,plain,(
+  ( ! [X2,X3] : (~pred_eq(X2,name_Na(X3)) | ~pred_attacker(X2)) ) | ~spl0_126),
+  inference(avatar_component_clause,[],[f1734])).
+fof(f1741,plain,(
+  spl0_130 <=> ! [X9] : (~pred_eq(X9,name_I) | ~pred_attacker(constr_ecb_enc_1(X9,constr_pkey(name_skA))))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_130])])).
+fof(f1742,plain,(
+  ( ! [X9] : (~pred_attacker(constr_ecb_enc_1(X9,constr_pkey(name_skA))) | ~pred_eq(X9,name_I)) ) | ~spl0_130),
+  inference(avatar_component_clause,[],[f1741])).
+fof(f1744,plain,(
+  spl0_132 <=> ! [X7,X8] : (~pred_eq(X7,name_Na(X8)) | ~pred_attacker(constr_ecb_enc_1(X7,constr_pkey(name_skA))))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_132])])).
+fof(f1745,plain,(
+  ( ! [X8,X7] : (~pred_attacker(constr_ecb_enc_1(X7,constr_pkey(name_skA))) | ~pred_eq(X7,name_Na(X8))) ) | ~spl0_132),
+  inference(avatar_component_clause,[],[f1744])).
+fof(f1824,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(tuple_2(constr_ecb_enc_1(name_Na(X1),constr_tuple_2_get_1(X0)),constr_ecb_enc_1(name_A,constr_tuple_2_get_1(X0))),constr_client_A_STEP_2)) | ~pred_attacker(constr_sign(X0,name_skS)) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(constr_sign(X0,name_skS),constr_pkey(name_skS))),name_I)) )),
+  inference(superposition,[],[f805,f716])).
+fof(f1825,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(tuple_2(constr_ecb_enc_1(name_Na(X1),constr_tuple_2_get_1(X0)),constr_ecb_enc_1(name_A,constr_tuple_2_get_1(X0))),constr_client_A_STEP_2)) | ~pred_eq(constr_tuple_2_get_0x30(X0),name_I) | ~pred_attacker(constr_sign(X0,name_skS))) )),
+  inference(forward_demodulation,[],[f1824,f716])).
+fof(f1872,plain,(
+  ~pred_attacker(name_I) | ~spl0_124),
+  inference(resolution,[],[f1732,f729])).
+fof(f1873,plain,(
+  $false | ~spl0_124),
+  inference(subsumption_resolution,[],[f1872,f781])).
+fof(f1874,plain,(
+  ~spl0_124),
+  inference(avatar_contradiction_clause,[],[f1873])).
+fof(f1881,plain,(
+  ( ! [X0] : (~pred_attacker(name_Na(X0))) ) | ~spl0_126),
+  inference(resolution,[],[f1735,f729])).
+fof(f1888,plain,(
+  ( ! [X4,X3] : (pred_attacker(tuple_2(constr_ecb_enc_1(name_Na(X4),constr_tuple_2_get_1(X3)),constr_ecb_enc_1(name_A,constr_tuple_2_get_1(X3)))) | ~pred_attacker(constr_sign(X3,name_skS)) | ~pred_eq(constr_tuple_2_get_0x30(X3),name_I)) )),
+  inference(resolution,[],[f1825,f776])).
+fof(f1974,plain,(
+  pred_attacker(name_objective) | ~spl0_6),
+  inference(resolution,[],[f821,f776])).
+fof(f1977,plain,(
+  $false | ~spl0_6),
+  inference(subsumption_resolution,[],[f1974,f798])).
+fof(f1978,plain,(
+  ~spl0_6),
+  inference(avatar_contradiction_clause,[],[f1977])).
+fof(f1980,plain,(
+  ( ! [X0,X1] : (~pred_attacker(constr_ecb_enc_1(X0,constr_pkey(name_skB))) | ~pred_eq(X0,name_Nb(X1))) ) | ~spl0_0),
+  inference(superposition,[],[f809,f720])).
+fof(f2044,plain,(
+  ( ! [X0,X1] : (~pred_eq(X0,name_Nb(X1)) | ~pred_attacker(constr_pkey(name_skB)) | ~pred_attacker(X0)) ) | ~spl0_0),
+  inference(resolution,[],[f1980,f745])).
+fof(f2045,plain,(
+  ( ! [X0,X1] : (~pred_eq(X0,name_Nb(X1)) | ~pred_attacker(X0)) ) | ~spl0_0),
+  inference(subsumption_resolution,[],[f2044,f827])).
+fof(f2068,plain,(
+  ( ! [X0] : (~pred_attacker(name_Nb(X0))) ) | ~spl0_0),
+  inference(resolution,[],[f2045,f729])).
+fof(f2151,plain,(
+  ( ! [X0] : (~pred_eq(X0,name_I) | ~pred_attacker(constr_pkey(name_skA)) | ~pred_attacker(X0)) ) | ~spl0_130),
+  inference(resolution,[],[f1742,f745])).
+fof(f2152,plain,(
+  ( ! [X0] : (~pred_eq(X0,name_I) | ~pred_attacker(X0)) ) | ~spl0_130),
+  inference(subsumption_resolution,[],[f2151,f826])).
+fof(f2153,plain,(
+  spl0_124 | ~spl0_130),
+  inference(avatar_split_clause,[],[f2152,f1741,f1731])).
+fof(f2414,plain,(
+  ( ! [X4,X3] : (pred_attacker(constr_ecb_enc_1(name_Na(X4),constr_tuple_2_get_1(X3))) | ~pred_eq(constr_tuple_2_get_0x30(X3),name_I) | ~pred_attacker(constr_sign(X3,name_skS))) )),
+  inference(resolution,[],[f1888,f776])).
+fof(f2456,plain,(
+  ( ! [X2,X0,X1] : (name_B = X0 | ~pred_attacker(X1) | name_A = X0 | pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1)) | ~pred_attacker(X0) | ~pred_attacker(X2)) )),
+  inference(resolution,[],[f1697,f775])).
+fof(f2475,plain,(
+  spl0_204 <=> ! [X1,X0] : (name_B = X0 | ~pred_attacker(X0) | pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1)) | name_A = X0 | ~pred_attacker(X1))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_204])])).
+fof(f2476,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(constr_sign(tuple_2(X0,X1),name_skS),constr_key_retrieval_server_STEP_1)) | ~pred_attacker(X0) | name_B = X0 | name_A = X0 | ~pred_attacker(X1)) ) | ~spl0_204),
+  inference(avatar_component_clause,[],[f2475])).
+fof(f2477,plain,(
+  spl0_112 | spl0_204),
+  inference(avatar_split_clause,[],[f2456,f2475,f1651])).
+fof(f2843,plain,(
+  $false | ~spl0_112),
+  inference(resolution,[],[f1652,f765])).
+fof(f2951,plain,(
+  ~spl0_112),
+  inference(avatar_contradiction_clause,[],[f2843])).
+fof(f2958,plain,(
+  ~pred_attacker(name_A) | ~spl0_114),
+  inference(resolution,[],[f1655,f729])).
+fof(f2959,plain,(
+  $false | ~spl0_114),
+  inference(subsumption_resolution,[],[f2958,f783])).
+fof(f2960,plain,(
+  ~spl0_114),
+  inference(avatar_contradiction_clause,[],[f2959])).
+fof(f3445,plain,(
+  ( ! [X8,X7] : (pred_attacker(constr_sign(tuple_2(X7,X8),name_skS)) | name_B = X7 | name_A = X7 | ~pred_attacker(X8) | ~pred_attacker(X7)) ) | ~spl0_204),
+  inference(resolution,[],[f2476,f776])).
+fof(f4453,plain,(
+  spl0_324 <=> ! [X1,X0] : (pred_attacker(constr_ecb_enc_1(name_Na(X0),X1)) | ~pred_attacker(X1))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_324])])).
+fof(f4454,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_ecb_enc_1(name_Na(X0),X1)) | ~pred_attacker(X1)) ) | ~spl0_324),
+  inference(avatar_component_clause,[],[f4453])).
+fof(f4493,plain,(
+  spl0_328 <=> ! [X13,X12] : (~pred_attacker(X12) | pred_attacker(constr_ecb_enc_1(name_Nb(X13),X12)))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_328])])).
+fof(f4494,plain,(
+  ( ! [X12,X13] : (pred_attacker(constr_ecb_enc_1(name_Nb(X13),X12)) | ~pred_attacker(X12)) ) | ~spl0_328),
+  inference(avatar_component_clause,[],[f4493])).
+fof(f4567,plain,(
+  spl0_330 <=> ! [X2] : (~pred_eq(X2,name_I) | ~pred_attacker(X2) | name_A = X2 | name_B = X2)),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_330])])).
+fof(f4568,plain,(
+  ( ! [X2] : (~pred_eq(X2,name_I) | ~pred_attacker(X2) | name_A = X2 | name_B = X2) ) | ~spl0_330),
+  inference(avatar_component_clause,[],[f4567])).
+fof(f4570,plain,(
+  spl0_332 <=> ! [X1,X0] : (pred_attacker(tuple_2(constr_ecb_enc_1(X0,X1),constr_client_A_STEP_3)) | ~pred_attacker(X1) | ~pred_attacker(constr_ecb_enc_1(X0,constr_pkey(name_skA))))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_332])])).
+fof(f4571,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(constr_ecb_enc_1(X0,X1),constr_client_A_STEP_3)) | ~pred_attacker(X1) | ~pred_attacker(constr_ecb_enc_1(X0,constr_pkey(name_skA)))) ) | ~spl0_332),
+  inference(avatar_component_clause,[],[f4570])).
+fof(f4645,plain,(
+  ( ! [X0,X1] : (~pred_attacker(constr_pkey(X0)) | ~pred_attacker(X0) | pred_attacker(name_Na(X1))) ) | ~spl0_324),
+  inference(resolution,[],[f4454,f846])).
+fof(f4656,plain,(
+  ( ! [X0] : (~pred_attacker(constr_pkey(X0)) | ~pred_attacker(X0)) ) | (~spl0_126 | ~spl0_324)),
+  inference(subsumption_resolution,[],[f4645,f1881])).
+fof(f4657,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | (~spl0_126 | ~spl0_324)),
+  inference(subsumption_resolution,[],[f4656,f737])).
+fof(f4658,plain,(
+  spl0_112 | ~spl0_126 | ~spl0_324),
+  inference(avatar_split_clause,[],[f4657,f4453,f1734,f1651])).
+fof(f5474,plain,(
+  ~pred_attacker(name_I) | name_A = name_I | name_B = name_I | ~spl0_330),
+  inference(resolution,[],[f4568,f729])).
+fof(f5475,plain,(
+  name_A = name_I | name_B = name_I | ~spl0_330),
+  inference(subsumption_resolution,[],[f5474,f781])).
+fof(f5476,plain,(
+  name_B = name_I | ~spl0_330),
+  inference(subsumption_resolution,[],[f5475,f687])).
+fof(f5477,plain,(
+  $false | ~spl0_330),
+  inference(subsumption_resolution,[],[f5476,f693])).
+fof(f5478,plain,(
+  ~spl0_330),
+  inference(avatar_contradiction_clause,[],[f5477])).
+fof(f6196,plain,(
+  ( ! [X0,X1] : (~pred_attacker(constr_pkey(X0)) | ~pred_attacker(X0) | pred_attacker(name_Nb(X1))) ) | ~spl0_328),
+  inference(resolution,[],[f4494,f846])).
+fof(f6210,plain,(
+  ( ! [X0] : (~pred_attacker(constr_pkey(X0)) | ~pred_attacker(X0)) ) | (~spl0_0 | ~spl0_328)),
+  inference(subsumption_resolution,[],[f6196,f2068])).
+fof(f6211,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | (~spl0_0 | ~spl0_328)),
+  inference(subsumption_resolution,[],[f6210,f737])).
+fof(f6212,plain,(
+  spl0_112 | ~spl0_0 | ~spl0_328),
+  inference(avatar_split_clause,[],[f6211,f4493,f808,f1651])).
+fof(f6264,plain,(
+  ( ! [X0,X1] : (~pred_eq(X0,name_Na(X1)) | ~pred_attacker(constr_pkey(name_skA)) | ~pred_attacker(X0)) ) | ~spl0_132),
+  inference(resolution,[],[f1745,f745])).
+fof(f6270,plain,(
+  ( ! [X0,X1] : (~pred_eq(X0,name_Na(X1)) | ~pred_attacker(X0)) ) | ~spl0_132),
+  inference(subsumption_resolution,[],[f6264,f826])).
+fof(f6271,plain,(
+  spl0_126 | ~spl0_132),
+  inference(avatar_split_clause,[],[f6270,f1744,f1734])).
+fof(f6327,plain,(
+  ( ! [X2,X0,X1] : (~pred_eq(constr_tuple_2_get_0x30(X0),name_I) | ~pred_attacker(constr_sign(X0,name_skS)) | pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(X1,name_skA)),constr_tuple_2_get_1(constr_checksign(constr_sign(X0,name_skS),constr_pkey(name_skS)))),constr_client_A_STEP_3)) | ~pred_attacker(X1) | ~pred_eq(constr_tuple_3_get_0x30(constr_ecb_dec_3(X1,name_skA)),name_Na(X2)) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(X1,name_skA)),name_I)) )),
+  inference(superposition,[],[f792,f716])).
+fof(f6328,plain,(
+  ( ! [X2,X0,X1] : (~pred_eq(constr_tuple_3_get_0x30(constr_ecb_dec_3(X1,name_skA)),name_Na(X2)) | ~pred_eq(constr_tuple_2_get_0x30(X0),name_I) | ~pred_attacker(constr_sign(X0,name_skS)) | ~pred_attacker(X1) | pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(X1,name_skA)),constr_tuple_2_get_1(X0)),constr_client_A_STEP_3)) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(X1,name_skA)),name_I)) )),
+  inference(forward_demodulation,[],[f6327,f716])).
+fof(f6332,plain,(
+  ( ! [X10,X8,X9] : (pred_attacker(tuple_3(constr_ecb_enc_1(constr_tuple_2_get_0x30(constr_ecb_dec_2(X9,name_skB)),constr_tuple_2_get_1(constr_checksign(X8,constr_pkey(name_skS)))),constr_ecb_enc_1(name_Nb(X10),constr_tuple_2_get_1(constr_checksign(X8,constr_pkey(name_skS)))),constr_ecb_enc_1(name_B,constr_tuple_2_get_1(constr_checksign(X8,constr_pkey(name_skS)))))) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X8,constr_pkey(name_skS))),name_A) | ~pred_attacker(X9) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X9,name_skB)),name_A) | ~pred_attacker(X8)) )),
+  inference(resolution,[],[f806,f776])).
+fof(f6350,plain,(
+  ( ! [X4,X2,X0,X3,X1] : (~pred_eq(constr_tuple_3_get_0x30(tuple_3(X0,X1,X2)),name_Na(X3)) | ~pred_eq(constr_tuple_2_get_0x30(X4),name_I) | ~pred_attacker(constr_sign(X4,name_skS)) | ~pred_attacker(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA)))) | pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA))),name_skA)),constr_tuple_2_get_1(X4)),constr_client_A_STEP_3)) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA))),name_skA)),name_I)) )),
+  inference(superposition,[],[f6328,f800])).
+fof(f6351,plain,(
+  ( ! [X4,X2,X0,X3,X1] : (~pred_eq(X0,name_Na(X3)) | ~pred_eq(constr_tuple_2_get_0x30(X4),name_I) | ~pred_attacker(constr_sign(X4,name_skS)) | ~pred_attacker(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA)))) | pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(constr_ecb_dec_3(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA))),name_skA)),constr_tuple_2_get_1(X4)),constr_client_A_STEP_3)) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA))),name_skA)),name_I)) )),
+  inference(forward_demodulation,[],[f6350,f726])).
+fof(f6352,plain,(
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_2(constr_ecb_enc_1(constr_tuple_3_get_1(tuple_3(X0,X1,X2)),constr_tuple_2_get_1(X4)),constr_client_A_STEP_3)) | ~pred_eq(X0,name_Na(X3)) | ~pred_eq(constr_tuple_2_get_0x30(X4),name_I) | ~pred_attacker(constr_sign(X4,name_skS)) | ~pred_attacker(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA)))) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA))),name_skA)),name_I)) )),
+  inference(forward_demodulation,[],[f6351,f800])).
+fof(f6353,plain,(
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_2(constr_ecb_enc_1(X1,constr_tuple_2_get_1(X4)),constr_client_A_STEP_3)) | ~pred_eq(X0,name_Na(X3)) | ~pred_eq(constr_tuple_2_get_0x30(X4),name_I) | ~pred_attacker(constr_sign(X4,name_skS)) | ~pred_attacker(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA)))) | ~pred_eq(constr_tuple_3_get_2(constr_ecb_dec_3(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA))),name_skA)),name_I)) )),
+  inference(forward_demodulation,[],[f6352,f725])).
+fof(f6354,plain,(
+  ( ! [X4,X2,X0,X3,X1] : (~pred_eq(constr_tuple_3_get_2(tuple_3(X0,X1,X2)),name_I) | pred_attacker(tuple_2(constr_ecb_enc_1(X1,constr_tuple_2_get_1(X4)),constr_client_A_STEP_3)) | ~pred_eq(X0,name_Na(X3)) | ~pred_eq(constr_tuple_2_get_0x30(X4),name_I) | ~pred_attacker(constr_sign(X4,name_skS)) | ~pred_attacker(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA))))) )),
+  inference(forward_demodulation,[],[f6353,f800])).
+fof(f6355,plain,(
+  ( ! [X4,X2,X0,X3,X1] : (~pred_attacker(tuple_3(constr_ecb_enc_1(X0,constr_pkey(name_skA)),constr_ecb_enc_1(X1,constr_pkey(name_skA)),constr_ecb_enc_1(X2,constr_pkey(name_skA)))) | pred_attacker(tuple_2(constr_ecb_enc_1(X1,constr_tuple_2_get_1(X4)),constr_client_A_STEP_3)) | ~pred_eq(X0,name_Na(X3)) | ~pred_eq(constr_tuple_2_get_0x30(X4),name_I) | ~pred_attacker(constr_sign(X4,name_skS)) | ~pred_eq(X2,name_I)) )),
+  inference(forward_demodulation,[],[f6354,f724])).
+fof(f6395,plain,(
+  ( ! [X4,X2,X3] : (~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_A) | ~pred_attacker(X3) | ~pred_eq(constr_tuple_2_get_1(constr_ecb_dec_2(X3,name_skB)),name_A) | ~pred_attacker(X2) | pred_attacker(constr_ecb_enc_1(name_Nb(X4),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS)))))) )),
+  inference(resolution,[],[f6332,f773])).
+fof(f6405,plain,(
+  spl0_500 <=> ! [X2,X4] : (~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_A) | pred_attacker(constr_ecb_enc_1(name_Nb(X4),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS))))) | ~pred_attacker(X2))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_500])])).
+fof(f6406,plain,(
+  ( ! [X4,X2] : (pred_attacker(constr_ecb_enc_1(name_Nb(X4),constr_tuple_2_get_1(constr_checksign(X2,constr_pkey(name_skS))))) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(X2,constr_pkey(name_skS))),name_A) | ~pred_attacker(X2)) ) | ~spl0_500),
+  inference(avatar_component_clause,[],[f6405])).
+fof(f6407,plain,(
+  spl0_2 | spl0_500),
+  inference(avatar_split_clause,[],[f6395,f6405,f811])).
+fof(f6569,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_ecb_enc_1(name_Nb(X1),constr_tuple_2_get_1(X0))) | ~pred_eq(constr_tuple_2_get_0x30(constr_checksign(constr_sign(X0,name_skS),constr_pkey(name_skS))),name_A) | ~pred_attacker(constr_sign(X0,name_skS))) ) | ~spl0_500),
+  inference(superposition,[],[f6406,f716])).
+fof(f6571,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_ecb_enc_1(name_Nb(X1),constr_tuple_2_get_1(X0))) | ~pred_eq(constr_tuple_2_get_0x30(X0),name_A) | ~pred_attacker(constr_sign(X0,name_skS))) ) | ~spl0_500),
+  inference(forward_demodulation,[],[f6569,f716])).
+fof(f7120,plain,(
+  ( ! [X6,X8,X7,X5,X9] : (pred_attacker(tuple_2(constr_ecb_enc_1(X5,constr_tuple_2_get_1(X6)),constr_client_A_STEP_3)) | ~pred_eq(X7,name_Na(X8)) | ~pred_eq(constr_tuple_2_get_0x30(X6),name_I) | ~pred_attacker(constr_sign(X6,name_skS)) | ~pred_eq(X9,name_I) | ~pred_attacker(constr_ecb_enc_1(X9,constr_pkey(name_skA))) | ~pred_attacker(constr_ecb_enc_1(X5,constr_pkey(name_skA))) | ~pred_attacker(constr_ecb_enc_1(X7,constr_pkey(name_skA)))) )),
+  inference(resolution,[],[f6355,f771])).
+fof(f7127,plain,(
+  spl0_550 <=> ! [X5,X6] : (pred_attacker(tuple_2(constr_ecb_enc_1(X5,constr_tuple_2_get_1(X6)),constr_client_A_STEP_3)) | ~pred_attacker(constr_ecb_enc_1(X5,constr_pkey(name_skA))) | ~pred_attacker(constr_sign(X6,name_skS)) | ~pred_eq(constr_tuple_2_get_0x30(X6),name_I))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_550])])).
+fof(f7128,plain,(
+  ( ! [X6,X5] : (pred_attacker(tuple_2(constr_ecb_enc_1(X5,constr_tuple_2_get_1(X6)),constr_client_A_STEP_3)) | ~pred_attacker(constr_ecb_enc_1(X5,constr_pkey(name_skA))) | ~pred_attacker(constr_sign(X6,name_skS)) | ~pred_eq(constr_tuple_2_get_0x30(X6),name_I)) ) | ~spl0_550),
+  inference(avatar_component_clause,[],[f7127])).
+fof(f7129,plain,(
+  spl0_130 | spl0_132 | spl0_550),
+  inference(avatar_split_clause,[],[f7120,f7127,f1744,f1741])).
+fof(f7530,plain,(
+  ( ! [X4,X5,X3] : (pred_attacker(constr_ecb_enc_1(name_Na(X5),X4)) | ~pred_eq(constr_tuple_2_get_0x30(tuple_2(X3,X4)),name_I) | ~pred_attacker(constr_sign(tuple_2(X3,X4),name_skS))) )),
+  inference(superposition,[],[f2414,f727])).
+fof(f7533,plain,(
+  ( ! [X4,X5,X3] : (~pred_attacker(constr_sign(tuple_2(X3,X4),name_skS)) | pred_attacker(constr_ecb_enc_1(name_Na(X5),X4)) | ~pred_eq(X3,name_I)) )),
+  inference(forward_demodulation,[],[f7530,f728])).
+fof(f7538,plain,(
+  ( ! [X4,X5,X3] : (pred_attacker(constr_ecb_enc_1(name_Nb(X5),X4)) | ~pred_eq(constr_tuple_2_get_0x30(tuple_2(X3,X4)),name_A) | ~pred_attacker(constr_sign(tuple_2(X3,X4),name_skS))) ) | ~spl0_500),
+  inference(superposition,[],[f6571,f727])).
+fof(f7541,plain,(
+  ( ! [X4,X5,X3] : (~pred_attacker(constr_sign(tuple_2(X3,X4),name_skS)) | pred_attacker(constr_ecb_enc_1(name_Nb(X5),X4)) | ~pred_eq(X3,name_A)) ) | ~spl0_500),
+  inference(forward_demodulation,[],[f7538,f728])).
+fof(f7600,plain,(
+  ( ! [X4,X5,X3] : (pred_attacker(tuple_2(constr_ecb_enc_1(X5,X4),constr_client_A_STEP_3)) | ~pred_attacker(constr_ecb_enc_1(X5,constr_pkey(name_skA))) | ~pred_attacker(constr_sign(tuple_2(X3,X4),name_skS)) | ~pred_eq(constr_tuple_2_get_0x30(tuple_2(X3,X4)),name_I)) ) | ~spl0_550),
+  inference(superposition,[],[f7128,f727])).
+fof(f7607,plain,(
+  ( ! [X4,X5,X3] : (~pred_attacker(constr_sign(tuple_2(X3,X4),name_skS)) | pred_attacker(tuple_2(constr_ecb_enc_1(X5,X4),constr_client_A_STEP_3)) | ~pred_attacker(constr_ecb_enc_1(X5,constr_pkey(name_skA))) | ~pred_eq(X3,name_I)) ) | ~spl0_550),
+  inference(forward_demodulation,[],[f7600,f728])).
+fof(f8858,plain,(
+  ( ! [X2,X0,X1] : (pred_attacker(constr_ecb_enc_1(name_Na(X0),X1)) | ~pred_eq(X2,name_I) | name_B = X2 | name_A = X2 | ~pred_attacker(X1) | ~pred_attacker(X2)) ) | ~spl0_204),
+  inference(resolution,[],[f7533,f3445])).
+fof(f8897,plain,(
+  ( ! [X21] : (pred_attacker(constr_ecb_enc_1(name_Nb(X21),constr_pkey(name_skA))) | ~pred_eq(name_A,name_A)) ) | (~spl0_60 | ~spl0_500)),
+  inference(resolution,[],[f7541,f1613])).
+fof(f8915,plain,(
+  ( ! [X21] : (pred_attacker(constr_ecb_enc_1(name_Nb(X21),constr_pkey(name_skA)))) ) | (~spl0_60 | ~spl0_500)),
+  inference(subsumption_resolution,[],[f8897,f729])).
+fof(f9059,plain,(
+  ( ! [X2,X0,X1] : (pred_attacker(tuple_2(constr_ecb_enc_1(X0,X1),constr_client_A_STEP_3)) | ~pred_attacker(constr_ecb_enc_1(X0,constr_pkey(name_skA))) | ~pred_eq(X2,name_I) | name_B = X2 | name_A = X2 | ~pred_attacker(X1) | ~pred_attacker(X2)) ) | (~spl0_204 | ~spl0_550)),
+  inference(resolution,[],[f7607,f3445])).
+fof(f9087,plain,(
+  spl0_330 | spl0_332 | ~spl0_204 | ~spl0_550),
+  inference(avatar_split_clause,[],[f9059,f7127,f2475,f4570,f4567])).
+fof(f11127,plain,(
+  ( ! [X8,X7] : (~pred_attacker(constr_ecb_enc_1(X8,constr_pkey(name_skA))) | ~pred_attacker(X7) | pred_attacker(constr_ecb_enc_1(X8,X7))) ) | ~spl0_332),
+  inference(resolution,[],[f4571,f776])).
+fof(f11148,plain,(
+  ( ! [X8,X7] : (~pred_attacker(X7) | pred_attacker(constr_ecb_enc_1(name_Nb(X8),X7))) ) | (~spl0_60 | ~spl0_332 | ~spl0_500)),
+  inference(resolution,[],[f11127,f8915])).
+fof(f11149,plain,(
+  spl0_328 | ~spl0_60 | ~spl0_332 | ~spl0_500),
+  inference(avatar_split_clause,[],[f11148,f6405,f4570,f1300,f4493])).
+fof(f11152,plain,(
+  ( ! [X0] : (~pred_attacker(constr_sign(X0,name_skS)) | ~pred_eq(constr_tuple_2_get_0x30(X0),name_A)) ) | ~spl0_4),
+  inference(superposition,[],[f815,f716])).
+fof(f11169,plain,(
+  ~pred_eq(constr_tuple_2_get_0x30(tuple_2(name_A,constr_pkey(name_skA))),name_A) | (~spl0_4 | ~spl0_60)),
+  inference(resolution,[],[f11152,f1613])).
+fof(f11196,plain,(
+  ~pred_eq(name_A,name_A) | (~spl0_4 | ~spl0_60)),
+  inference(forward_demodulation,[],[f11169,f728])).
+fof(f11197,plain,(
+  $false | (~spl0_4 | ~spl0_60)),
+  inference(subsumption_resolution,[],[f11196,f729])).
+fof(f11198,plain,(
+  ~spl0_4 | ~spl0_60),
+  inference(avatar_contradiction_clause,[],[f11197])).
+fof(f11224,plain,(
+  spl0_330 | spl0_324 | ~spl0_204),
+  inference(avatar_split_clause,[],[f8858,f2475,f4453,f4567])).
+fof(f11226,plain,(
+  $false),
+  inference(avatar_sat_refutation,[],[f822,f1289,f1302,f1656,f1874,f1978,f2153,f2477,f2951,f2960,f4658,f5478,f6212,f6271,f6407,f7129,f9087,f11149,f11198,f11224])).
+% SZS output end Proof for NSLPK-ECB-agree-A-to-B

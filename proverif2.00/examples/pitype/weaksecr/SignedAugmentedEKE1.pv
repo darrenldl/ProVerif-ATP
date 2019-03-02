@@ -1,0 +1,144 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Augmented EKE, Bellovin, Merritt,
+   Section 3 
+
+Note that this protocol uses the same key for shared-key encryption
+and for signatures...
+*)
+
+(* There is an attack if the adversary can distinguish a group element
+in G from a random bitstring. (The adversary decrypts the first message
+with h(P') for the guessed password P' and concludes that the guess is
+good if the result is an element of G.) *)
+(* set ignoreTypes = true. *)
+
+free c: channel.
+
+type host.
+type passwd.
+type nonce.
+type G.
+type exponent.
+type key.
+
+fun nonce_to_bitstring(nonce): bitstring [data, typeConverter].
+
+(* Diffie-Hellman *)
+
+const g: G.
+fun exp(G, exponent): G.
+equation forall x: exponent, y: exponent; exp(exp(g, x), y) = exp(exp(g, y), x).
+
+(* Symmetric encryption
+   One does not know whether decryption succeeds or not
+   For use with weak secrets *)
+
+fun enc(G, key): G.
+fun dec(G, key): G.
+equation forall x: G, y: key; dec(enc(x,y),y) = x.
+equation forall x: G, y: key; enc(dec(x,y),y) = x.
+
+(* Symmetric encryption
+   One knows whether decryption succeeds or not *)
+
+fun senc(bitstring, G): bitstring.
+reduc forall x: bitstring, y: G; sdec(senc(x,y),y) = x.
+
+(* Signature *)
+
+fun pk(passwd):key.
+fun sign(G, passwd): bitstring.
+reduc forall x: G, y: passwd; verif(sign(x,y), pk(y),x) = true.
+reduc forall x: G, y: passwd; getmess(sign(x,y)) = x.
+
+(* Host names *)
+
+const A, B: host.
+
+
+
+free PAB, PAA, PBB: passwd [private].
+weaksecret PAB.
+weaksecret PAA.
+weaksecret PBB.
+
+(* Initiator with identity hostA talking to responder with identity hostX *)
+
+let processA(hostA: host, hostX: host, P: passwd) = 
+	new RA: exponent;
+	out(c, (hostA, enc(exp(g,RA), pk(P))));
+	in(c, (m1: G, m2: bitstring));
+	let gRB = dec(m1, pk(P)) in
+	let K = exp(gRB, RA) in
+	let nonce_to_bitstring(challengeB) = sdec(m2, K) in
+	new challengeA: nonce;
+	out(c, senc((challengeA, challengeB), K));
+	in(c, m3: bitstring);
+	if nonce_to_bitstring(challengeA) = sdec(m3, K) then
+	out(c, senc(sign(K,P), K)).
+
+(* Responder with identity hostB talking to initiator with identity hostX *)
+
+let processB(hostB: host, hostX: host, P: passwd) =
+	in(c, (=hostX, m: G)); 
+	let gRA = dec(m, pk(P)) in
+	new RB: exponent;
+	let K = exp(gRA, RB) in
+	new challengeB: nonce;
+	out(c, (enc(exp(g, RB), pk(P)), senc(nonce_to_bitstring(challengeB), K)));
+	in(c, m4: bitstring);
+	let (challengeA: nonce, =challengeB) = sdec(m4, K) in
+	out(c, senc(nonce_to_bitstring(challengeA), K));
+	in(c, m5: bitstring);
+	let fr = sdec(m5, K) in
+	if verif(fr,pk(P),K) = true then
+	0.
+
+(* The code for A or B talking to other participants can be considered
+as part of the adversary, since it does not share secrets with the
+code for A or B talking to A or B. (The only secret is the password.)
+
+The code for A talking to A (and for B talking to B) could also be
+separated from the rest, since it does not share secrets with the code
+for A talking to B and for B talking to A.
+
+Here, I made the choice that A and B use the same password when A
+talks to B and when B talks to A. It would be easy to write the other
+option in which they use a different password in each direction. *)
+
+process 
+	(!processA(A, A, PAA)) |
+	(!processB(A, A, PAA)) |
+	(!processA(B, B, PBB)) |
+	(!processB(B, B, PBB)) |
+	(!processA(A, B, PAB)) |
+	(!processB(A, B, PAB)) |
+	(!processA(B, A, PAB)) |
+	(!processB(B, A, PAB))
+

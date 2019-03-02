@@ -1,0 +1,169 @@
+free c : channel.
+
+type host.
+type key.
+type pkey.
+type skey.
+type spkey.
+type sskey.
+
+fun key_to_bitstring(key) : bitstring[data, typeConverter].
+fun pk(skey) : pkey.
+fun encrypt(bitstring, pkey) : bitstring.
+
+reduc
+  forall x : bitstring, y : skey; decrypt(encrypt(x, pk(y)), y) = x.
+
+fun spk(sskey) : spkey.
+fun sign(bitstring, sskey) : bitstring.
+
+reduc
+  forall m : bitstring, k : sskey; getmess(sign(m, k)) = m.
+reduc
+  forall m : bitstring, k : sskey; checksign(sign(m, k), spk(k)) = m.
+
+fun sencrypt(bitstring, key) : bitstring.
+
+reduc
+  forall x : bitstring, y : key; sdecrypt(sencrypt(x, y), y) = x.
+
+not attacker(new sskA).
+not attacker(new skB).
+not attacker(new skS).
+
+free A : host.
+free B : host.
+
+table enc_keys(host, pkey).
+table sign_keys(host, spkey).
+
+free secretA : bitstring [private].
+free secretB : bitstring [private].
+
+query 
+  attacker(secretA);
+  attacker(secretB).
+
+event endBparam(host, host).
+event beginBparam(host, host).
+event endBkey(host, host, key).
+event beginBkey(host, host, key).
+
+query x : host, y : host;
+  inj-event(endBparam(x, y)) ==> inj-event(beginBparam(x, y)).
+query x : host, y : host, z : key;
+  inj-event(endBkey(x, y, z)) ==> inj-event(beginBkey(x, y, z)).
+
+let processInitiator(pkS : spkey, sskA : sskey, sskB : sskey) =
+  in(c, xA : host);
+  
+  if xA = A || xA = B then
+  let sskA = if xA = A then (sskA) else (sskB) in
+  let spkA = spk(sskA) in
+  in(c, (cert1 : bitstring, cert2 : bitstring));
+  let (=xA, =spkA) = checksign(cert1, pkS) in
+  let (h2 : host, pk2 : pkey) = checksign(cert2, pkS) in
+  event beginBparam(xA, h2);
+  new k : key;
+  event beginBkey(xA, h2, k);
+  out(c, (cert1, cert2, encrypt(sign(key_to_bitstring(k), sskA), pk2)));
+  
+  if h2 = B then
+  out(c, sencrypt(secretA, k));
+  0
+  .
+
+let processResponder(pkS : spkey, skA : skey, skB : skey) =
+  in(c, xB : host);
+  
+  if xB = A || xB = B then
+  let skB = if xB = A then (skA) else (skB) in
+  let pkB = pk(skB) in
+  in(c, (cert1 : bitstring, cert2 : bitstring, km : bitstring));
+  let (h1 : host, pk1 : spkey) = checksign(cert1, pkS) in
+  let (=xB, =pkB) = checksign(cert2, pkS) in
+  let ks = decrypt(km, skB) in
+  let key_to_bitstring(k) = checksign(ks, pk1) in
+  
+  if h1 = A then
+  event endBparam(h1, xB);
+  event endBkey(h1, xB, k);
+  out(c, sencrypt(secretB, k));
+  0
+  .
+
+let processS(skS : sskey) =
+  in(c, (h1 : host, h2 : host));
+  get sign_keys(=h1, pk1) in
+  get enc_keys(=h2, pk2) in
+  out(c, (sign((h1, pk1), skS), sign((h2, pk2), skS)));
+  0
+  .
+
+let process_signK =
+  in(c, (h : host, pk : spkey));
+  
+  if h <> A && h <> B then
+  insert sign_keys(h, pk);
+  0
+  .
+
+let process_encK =
+  in(c, (h : host, pk : pkey));
+  
+  if h <> A && h <> B then
+  insert enc_keys(h, pk);
+  0
+  .
+
+process
+  new sskA : sskey;
+  let spkA = spk(sskA) in
+  out(c, spkA);
+  insert sign_keys(A, spkA);
+  new skA : skey;
+  let pkA = pk(skA) in
+  out(c, pkA);
+  insert enc_keys(A, pkA);
+  new sskB : sskey;
+  let spkB = spk(sskB) in
+  out(c, spkB);
+  insert sign_keys(B, spkB);
+  new skB : skey;
+  let pkB = pk(skB) in
+  out(c, pkB);
+  insert enc_keys(B, pkB);
+  new skS : sskey;
+  let pkS = spk(skS) in
+  out(c, pkS);
+  (
+    ! (
+      processInitiator(pkS, sskA, sskB)
+    )
+  )
+  | (
+    (
+      ! (
+        processResponder(pkS, skA, skB)
+      )
+    )
+    | (
+      (
+        ! (
+          processS(skS)
+        )
+      )
+      | (
+        (
+          ! (
+            process_signK
+          )
+        )
+        | (
+          ! (
+            process_encK
+          )
+        )
+      )
+    )
+  )

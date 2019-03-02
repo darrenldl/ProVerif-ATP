@@ -1,0 +1,216 @@
+#!/bin/bash
+
+if [ -x ./xtime ]
+then
+    PROG=./xtime
+else
+    PROG=
+fi
+
+PROVERIF="$PROG ./proverif -test"
+
+if [ \( .$1 != .all \) -a \( .$1 != .secr-auth \) -a \( .$1 != .noninterf \) -a \( .$1 != .weak \) -a \( .$1 != .choice \) -a \( .$1 != .cv \) -a \( .$1 != .bugs \) -a \( .$1 != .jfk \) -a \( .$1 != .mailprot \) -a \( .$1 != .ffgg \) ]
+then
+	echo  Usage: test-type "<test-name>"
+	echo  where "<test-name>" can be all, secr-auth, noninterf, 
+	echo  weak, choice, bugs, jfk, mailprot, or ffgg.
+	exit 2
+fi
+
+mkdir -p tests
+
+output=$1-type`date '+%Y.%m.%d-%H_%M_%S'`
+
+(
+
+# Tests for secrecy and authentication (pi calculus)
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .secr-auth \) \) -a \( -d examples/pitype/secr-auth \) ]
+then
+
+echo
+echo SECRECY AND AUTHENTICATION TESTS
+echo
+
+cd examples/pitype/secr-auth
+(echo  "set keyCompromise = approx."; cat NeedhamSchroederSK.pv) > NeedhamSchroederSK-compapprox.pv
+(echo  "set keyCompromise = strict."; cat NeedhamSchroederSK.pv) > NeedhamSchroederSK-comp.pv
+(echo  "set keyCompromise = approx."; cat NeedhamSchroederSK-corr.pv) > NeedhamSchroederSK-corr-compapprox.pv
+(echo  "set keyCompromise = strict."; cat NeedhamSchroederSK-corr.pv) > NeedhamSchroederSK-corr-comp.pv
+cd ../../..
+
+
+for i in examples/pitype/secr-auth/*.pv 
+do
+    if [ -f $i ]
+    then
+	 echo PROTOCOL $i
+         $PROVERIF $i
+    fi
+done
+
+fi
+
+
+# Tests for non-interference (Oakland'04)
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .noninterf \) \) -a \( -d examples/pitype/noninterf \) ]
+then
+
+echo
+echo NON-INTERFERENCE TESTS
+echo
+
+for i in examples/pitype/noninterf/*.pv 
+do
+    if [ -f $i ]
+    then
+	 echo PROTOCOL $i
+         $PROVERIF $i
+    fi
+done
+
+fi
+
+# Tests for weak secrets
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .weak \) \) -a \( -d examples/pitype/weaksecr \) ]
+then
+
+echo
+echo WEAK SECRET TESTS
+echo
+
+for i in examples/pitype/weaksecr/*.pv 
+do
+    if [ -f $i ]
+    then
+	 echo PROTOCOL $i
+         $PROVERIF $i
+    fi
+done
+
+fi
+
+# Tests for choice (LICS'05 and others)
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .choice \) \) -a \( -d examples/pitype/choice \) ]
+then
+
+echo
+echo CHOICE TESTS
+echo
+
+for i in examples/pitype/choice/*.pv 
+do
+    if [ -f $i ]
+    then
+	 echo PROTOCOL $i
+         $PROVERIF $i
+    fi
+done
+
+fi
+
+# Tests for CryptoVerif compatibility
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .cv \) \) -a \( -d examples/cryptoverif \) ]
+then
+
+echo
+echo CRYPTOVERIF COMPATIBILITY TESTS
+echo
+
+for i in examples/cryptoverif/*.pcv 
+do
+    if [ -f $i ]
+    then
+	 echo PROTOCOL $i
+         $PROVERIF -lib cryptoverif $i
+    fi
+done
+
+fi
+
+
+# Tests for previous bugs
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .bugs \) \) -a \( -d examplesnd/pitype \) ]
+then
+
+echo
+echo "REGRESSION TESTS ON OLD BUGS"
+echo
+
+
+for i in examplesnd/pitype/* 
+do
+    if [ -f $i ]
+    then
+	 echo PROTOCOL $i
+         $PROVERIF -in pitype $i
+    fi
+done
+
+for i in examplesnd/pcv/* 
+do
+    if [ -f $i ]
+    then
+	 echo PROTOCOL $i
+         $PROVERIF -lib cryptoverif -in pitype $i
+    fi
+done
+
+fi
+
+# JFK
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .jfk \) \) -a \( -d examples/pitype/jfk \) ]
+then
+
+echo
+echo JFK TESTS
+echo
+
+cd examples/pitype/jfk
+./gen
+cd ../../..
+
+fi
+
+# Certified email protocol
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .mailprot \) \) -a \( -d examples/pitype/certified-mail-AbadiGlewHornePinkas \) ]
+then
+
+echo
+echo CERTIFIED EMAIL PROTOCOL TESTS
+echo
+
+cd examples/pitype/certified-mail-AbadiGlewHornePinkas/onefile
+./generate
+cd ../journalsas
+./generate
+cd ../../../..
+
+fi
+
+# FFGG
+
+if [ \( \( .$1 = .all \) -o \( .$1 = .ffgg \) \) -a \( -d examples/pitype/ffgg \) ]
+then
+
+echo
+echo FFGG TESTS
+echo
+
+cd examples/pitype/ffgg 
+./gen
+cd ../../..
+
+fi
+
+
+) > tests/$output 2>&1
+
+egrep \(TESTS\|PROTOCOL\|RESULT\|user\) tests/$output > tests/sum-$output

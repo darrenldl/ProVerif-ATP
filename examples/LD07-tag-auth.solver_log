@@ -1,0 +1,127 @@
+% Refutation found. Thanks to Tanya!
+% SZS status Theorem for LD07-tag-auth
+% SZS output start Proof for LD07-tag-auth
+fof(f83,axiom,(
+  pred_attacker(constr_CONST_0x30)),
+  file('LD07-tag-auth.p',unknown)).
+fof(f84,axiom,(
+  ! [X11,X12] : ((pred_attacker(X12) & pred_attacker(X11)) => pred_attacker(tuple_2(X11,X12)))),
+  file('LD07-tag-auth.p',unknown)).
+fof(f85,axiom,(
+  ! [X13,X14] : (pred_attacker(tuple_2(X13,X14)) => pred_attacker(X13))),
+  file('LD07-tag-auth.p',unknown)).
+fof(f92,axiom,(
+  ! [X23] : (pred_attacker(X23) => pred_attacker(tuple_2(constr_h(constr_xor(X23,constr_xor(name_k0x30,name_ki))),constr_T_STEP_1)))),
+  file('LD07-tag-auth.p',unknown)).
+fof(f93,axiom,(
+  ! [X24,X25] : ((pred_attacker(X25) & pred_attacker(tuple_2(X24,constr_h(constr_xor(X24,constr_xor(name_k0x30,name_ki)))))) => pred_attacker(tuple_2(name_objective,constr_T_STEP_2)))),
+  file('LD07-tag-auth.p',unknown)).
+fof(f94,conjecture,(
+  pred_attacker(name_objective)),
+  file('LD07-tag-auth.p',unknown)).
+fof(f95,negated_conjecture,(
+  ~pred_attacker(name_objective)),
+  inference(negated_conjecture,[],[f94])).
+fof(f102,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_2(X0,X1)))),
+  inference(rectify,[],[f84])).
+fof(f103,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
+  inference(rectify,[],[f85])).
+fof(f109,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_2(constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki))),constr_T_STEP_1)))),
+  inference(rectify,[],[f92])).
+fof(f110,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(tuple_2(X0,constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki)))))) => pred_attacker(tuple_2(name_objective,constr_T_STEP_2)))),
+  inference(rectify,[],[f93])).
+fof(f111,plain,(
+  ~pred_attacker(name_objective)),
+  inference(flattening,[],[f95])).
+fof(f117,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f102])).
+fof(f118,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f117])).
+fof(f119,plain,(
+  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f103])).
+fof(f125,plain,(
+  ! [X0] : (pred_attacker(tuple_2(constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki))),constr_T_STEP_1)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f109])).
+fof(f126,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | (~pred_attacker(X1) | ~pred_attacker(tuple_2(X0,constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki)))))))),
+  inference(ennf_transformation,[],[f110])).
+fof(f127,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~pred_attacker(X1) | ~pred_attacker(tuple_2(X0,constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki))))))),
+  inference(flattening,[],[f126])).
+fof(f209,plain,(
+  pred_attacker(constr_CONST_0x30)),
+  inference(cnf_transformation,[],[f83])).
+fof(f210,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f118])).
+fof(f211,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f119])).
+fof(f217,plain,(
+  ( ! [X0] : (pred_attacker(tuple_2(constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki))),constr_T_STEP_1)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f125])).
+fof(f218,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~pred_attacker(X1) | ~pred_attacker(tuple_2(X0,constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki)))))) )),
+  inference(cnf_transformation,[],[f127])).
+fof(f219,plain,(
+  ~pred_attacker(name_objective)),
+  inference(cnf_transformation,[],[f111])).
+fof(f221,plain,(
+  spl0_0 <=> ! [X0] : ~pred_attacker(tuple_2(X0,constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki)))))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
+fof(f222,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_2(X0,constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki)))))) ) | ~spl0_0),
+  inference(avatar_component_clause,[],[f221])).
+fof(f224,plain,(
+  spl0_2 <=> ! [X1] : ~pred_attacker(X1)),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
+fof(f225,plain,(
+  ( ! [X1] : (~pred_attacker(X1)) ) | ~spl0_2),
+  inference(avatar_component_clause,[],[f224])).
+fof(f230,plain,(
+  spl0_4 <=> pred_attacker(tuple_2(name_objective,constr_T_STEP_2))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_4])])).
+fof(f231,plain,(
+  pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~spl0_4),
+  inference(avatar_component_clause,[],[f230])).
+fof(f232,plain,(
+  spl0_0 | spl0_2 | spl0_4),
+  inference(avatar_split_clause,[],[f218,f230,f224,f221])).
+fof(f233,plain,(
+  $false | ~spl0_2),
+  inference(resolution,[],[f225,f209])).
+fof(f254,plain,(
+  ~spl0_2),
+  inference(avatar_contradiction_clause,[],[f233])).
+fof(f255,plain,(
+  pred_attacker(name_objective) | ~spl0_4),
+  inference(resolution,[],[f211,f231])).
+fof(f256,plain,(
+  $false | ~spl0_4),
+  inference(subsumption_resolution,[],[f255,f219])).
+fof(f257,plain,(
+  ~spl0_4),
+  inference(avatar_contradiction_clause,[],[f256])).
+fof(f277,plain,(
+  ( ! [X0] : (~pred_attacker(constr_h(constr_xor(X0,constr_xor(name_k0x30,name_ki)))) | ~pred_attacker(X0)) ) | ~spl0_0),
+  inference(resolution,[],[f222,f210])).
+fof(f332,plain,(
+  ( ! [X1] : (~pred_attacker(X1) | pred_attacker(constr_h(constr_xor(X1,constr_xor(name_k0x30,name_ki))))) )),
+  inference(resolution,[],[f217,f211])).
+fof(f338,plain,(
+  ( ! [X1] : (~pred_attacker(X1)) ) | ~spl0_0),
+  inference(subsumption_resolution,[],[f332,f277])).
+fof(f339,plain,(
+  spl0_2 | ~spl0_0),
+  inference(avatar_split_clause,[],[f338,f221,f224])).
+fof(f343,plain,(
+  $false),
+  inference(avatar_sat_refutation,[],[f232,f254,f257,f339])).
+% SZS output end Proof for LD07-tag-auth

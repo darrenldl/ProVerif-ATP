@@ -1,0 +1,150 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+(* Yahalom, Version of Burrows, Abadi, Needham, SRC039 
+
+The final round of key confirmation uses authenticated encryption
+(like the other messages). The correspondence property:
+query x:bitstring;
+	event inj:fullB(A, x) ==> inj:fullA(B, x).
+holds.
+*)
+
+
+param N.
+param N2.
+param N3.
+
+type nonce [large,fixed].
+type host [bounded].
+type key [fixed].
+type plaintext [bounded].
+type ciphertext [bounded].
+
+fun concat1(host, key, nonce, nonce):plaintext [data].
+fun concat2(host, key):plaintext [data].
+fun concat3(host, nonce, nonce):plaintext [data].
+
+equation forall y:host,z:key,t:nonce,u:nonce,y2:host,z2:key; concat1(y,z,t,u) <> concat2(y2,z2).
+equation forall y:host,z:key,t:nonce,u:nonce,y2:host,z2:nonce,t2:nonce; concat1(y,z,t,u) <> concat3(y2,z2,t2).
+equation forall y:host,z:key,y2:host,z2:nonce,t2:nonce; concat2(y,z) <> concat3(y2,z2,t2).
+
+fun nonceToPlaintext(nonce):plaintext [data].
+
+(* Shared-key encryption (IND-CPA + INT-CTXT Stream cipher) *)
+
+proba Penc.
+proba Pencctxt.
+
+expand IND_CPA_INT_CTXT_sym_enc(key, plaintext, ciphertext, enc, dec, injbot, Z, Penc, Pencctxt).
+
+(* The function Z returns for each bitstring, a bitstring
+   of the same length, consisting only of zeroes. *)
+const Zconcat1:plaintext.
+const Zconcat2:plaintext.
+const Zconcat3:plaintext.
+equation forall y:host,z:key,t:nonce,u:nonce; 
+	Z(concat1(y,z,t,u)) = Zconcat1.
+equation forall y:host,z:key; 
+	Z(concat2(y,z)) = Zconcat2.
+equation forall y:host,z:nonce,t:nonce; 
+	Z(concat3(y,z,t)) = Zconcat3.
+
+(* Queries *)
+
+channel c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, start, finish.
+const A : host.
+const B : host.
+fun acceptA(host):bitstring.
+fun acceptB(host):bitstring.
+
+event fullA(host, bitstring).
+event partA(host, bitstring).
+event fullB(host, bitstring).
+event partB(host, bitstring).
+
+query x:bitstring;
+	inj-event(partA(B, x)) ==> inj-event(partB(A, x)).
+query x:bitstring;
+	inj-event(fullB(A, x)) ==> inj-event(fullA(B, x)).
+
+let processA(Kas: key) =
+	in(start, ());
+        new Na: nonce;
+        out(c1, (A, Na));
+        in(c2, (cert1: ciphertext, cert2:ciphertext)); (* From server *)
+        let injbot(concat1(b, k, =Na, nb)) = dec(cert1, Kas) in
+	let e3 = enc(nonceToPlaintext(nb), k) in
+	event partA(b, (A, Na));
+	event fullA(b, (A, Na));
+	out(c3, (cert2, e3, acceptA(b))).
+
+let processB(Kbs: key) =
+        in(c4, (a: host, na: nonce));
+	new Nb: nonce;
+	let e4 = enc(concat3(a, na, Nb), Kbs) in
+	event partB(a, (a, na));
+	out(c5, (B, e4)); (* To server *)
+	in(c6, (cert2: ciphertext, m:ciphertext));
+	let injbot(concat2(=a, k)) = dec(cert2, Kbs) in
+	if injbot(nonceToPlaintext(Nb)) = dec(m, k) then
+	(* OK *)
+	event fullB(a, (a, na));
+	out(c11,acceptB(a)).
+
+table keys(host, key).
+
+let processK(Kas: key, Kbs: key) =
+	in(c7, (Khost: host, Kkey: key));
+	if Khost = A then insert keys(A,Kas) else
+	if Khost = B then insert keys(B,Kbs) else
+	insert keys(Khost,Kkey).
+
+let processS = 
+	in(c8, (h2: host, m: ciphertext));
+	get keys(=h2, kh2) in
+	let injbot(concat3(h1, n1, n2)) = dec(m, kh2) in
+	get keys(=h1, kh1) in
+	new k: key;
+	let e1 = enc(concat1(h2, k, n1, n2), kh1) in
+	let e2 = enc(concat2(h1, k), kh2) in
+	out(c9, (e1, e2)).
+
+process 
+	in(start, ());
+	new Kas: key;
+	new Kbs: key;
+	out(c10, ());
+	((! iA <= N processA(Kas)) |
+	 (! iB <= N processB(Kbs)) | 
+	 (! iS <= N processS) |
+	 (! iK <= N2 processK(Kas, Kbs)))
+
+(* EXPECTED
+All queries proved.
+1.130s (user 1.120s + system 0.010s), max rss 64336K
+END *)

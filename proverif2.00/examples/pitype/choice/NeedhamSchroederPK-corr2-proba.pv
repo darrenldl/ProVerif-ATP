@@ -1,0 +1,156 @@
+(*************************************************************
+ *                                                           *
+ *  Cryptographic protocol verifier                          *
+ *                                                           *
+ *  Bruno Blanchet, Vincent Cheval, and Marc Sylvestre       *
+ *                                                           *
+ *  Copyright (C) INRIA, CNRS 2000-2018                      *
+ *                                                           *
+ *************************************************************)
+
+(*
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details (in file LICENSE).
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*)
+free c:channel.
+(* 
+
+? -> A : pkB
+A -> B : { N_A, A }_pkB
+B -> S : (B,A)
+S -> B : { A, pkA }_sS
+B -> A : { N_A, N_B, pkB }_pkA
+A -> B : { N_B }_pkB
+
+*)
+
+set traceDisplay = long.
+
+type skey.
+type pkey.
+type host.
+type nonce.
+
+(* Probabilistic public key encryption *)
+
+type seed.
+fun pk(skey): pkey.
+fun internal_encrypt(bitstring, pkey, seed): bitstring.
+reduc forall x: bitstring, y: skey, r: seed; 
+        decrypt(internal_encrypt(x,pk(y),r),y) = x.
+letfun encrypt(x: bitstring, y:pkey) = new r: seed; internal_encrypt(x,y,r).
+
+(* Host names *)
+
+const hostA, hostB: host.
+
+(* Table host/keys *)
+
+table keys(host, pkey).
+
+(* Signatures *)
+
+fun sign(bitstring,skey):bitstring.
+reduc forall x:bitstring, y:skey; checksign(sign(x,y),pk(y)) = x.
+reduc forall x:bitstring, y:skey; getmess(sign(x,y)) = x.
+
+(* Probabilistic shared key encryption *)
+
+type sseed.
+fun internal_sencrypt(bitstring,nonce,sseed): bitstring.
+reduc forall x: bitstring, y: nonce, r: sseed; sdecrypt(internal_sencrypt(x,y,r),y) = x.
+letfun sencrypt(x: bitstring, y: nonce) = new r: sseed; internal_sencrypt(x,y,r).
+
+fun nonce2bitstring(nonce):bitstring [data,typeConverter].
+
+(* Secrecy assumptions *)
+
+not attacker(new skA).
+not attacker(new skB).
+not attacker(new skS).
+
+let processA(pkA:pkey, skA:skey, pkS:pkey, secretANa:bitstring, secretANb:bitstring) =  
+	(* Choose the other host *)
+	in(c,hostX:host);
+	(* Get the public key certificate for the other host *)
+	out(c, (hostA, hostX));
+	in(c, ms:bitstring);
+	let (pkX:pkey, =hostX) = checksign(ms,pkS) in
+        (* Message 1 *)
+	new Na:nonce; 
+        out(c, encrypt((Na, hostA), pkX));
+        in(c, m:bitstring); 
+        let (=Na, NX2:nonce, =hostX) = decrypt(m, skA) in
+        out(c, encrypt(nonce2bitstring(NX2), pkX));
+        (* OK *)
+	if hostX = hostB then
+	out(c, sencrypt(secretANa, Na));
+	out(c, sencrypt(secretANb, NX2)).
+
+let processB(pkB:pkey, skB:skey, pkS:pkey, secretBNa:bitstring, secretBNb:bitstring) =
+        (* Message 1 *)
+	in(c, m:bitstring); 
+	let (NY:nonce, hostY:host) = decrypt(m, skB) in
+	(* Get the public key certificate for the other host *)
+        out(c, (hostB, hostY));
+	in(c,ms:bitstring);
+        let (pkY:pkey,=hostY) = checksign(ms,pkS) in
+        (* Message 2 *)
+	new Nb:nonce;
+        (* Message 3 *)
+	out(c, encrypt((NY, Nb, hostB), pkY));
+	in(c, m3:bitstring);
+        if nonce2bitstring(Nb) = decrypt(m3, skB) then
+	(* OK *)
+        if hostY = hostA then
+	out(c, sencrypt(secretBNa, NY));
+	out(c, sencrypt(secretBNb, Nb)).
+
+let processK(pkA:pkey, pkB:pkey) =
+    in(c, (h:host, k:pkey));
+    if (h <> hostA) && (h <> hostB) then
+    insert keys(h,k).
+
+let processS(skS:skey) =  
+                in(c,m:bitstring); 
+	        let (a:host,b:host) = m in
+		get keys(=b, pkb) in
+                out(c,sign((pkb,b),skS)).
+
+process new skA:skey; let pkA = pk(skA) in
+        out(c, pkA);
+        new skB:skey; let pkB = pk(skB) in
+        out(c, pkB);
+	new skS:skey; let pkS = pk(skS) in
+	out(c, pkS);
+	insert keys(hostA, pkA);
+	insert keys(hostB, pkB);
+        ((!processK(pkA, pkB)) |
+	in(c, xANa:bitstring);
+	in(c, yANa:bitstring);
+	in(c, xANb:bitstring);
+	in(c, yANb:bitstring);
+	in(c, xBNa:bitstring);
+	in(c, yBNa:bitstring);
+	in(c, xBNb:bitstring);
+	in(c, yBNb:bitstring);
+	let secretANa = choice[xANa, yANa] in
+	let secretANb = choice[xANb, yANb] in
+	let secretBNa = choice[xBNa, yBNa] in
+	let secretBNb = choice[xBNb, yBNb] in
+	((!processA(pkA, skA, pkS, secretANa, secretANb)) | 
+	 (!processB(pkB, skB, pkS, secretBNa, secretBNb)) |
+	 (!processS(skS))))
