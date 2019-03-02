@@ -1,4 +1,6 @@
-# ProVerif-ATP - Combining ProVerif and Automated Theorem Provers for Security Protocol Verification
+# ProVerif-ATP
+
+#### Combining ProVerif and Automated Theorem Provers for Security Protocol Verification
 
 Authors : Di Long Li and Alwen Tiu, at The Australian National University
 
@@ -13,7 +15,6 @@ This project is part of our submission to CADE-27
 #### System binaries required
 
 - `wget` (optional)
-
   - The Makefile will try to download a copy of Vampire if the archive is not present. You can download the archive manually and place it in the repository root directory to skip this. See below for details.
 
 #### Compilers required
