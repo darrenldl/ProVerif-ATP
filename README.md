@@ -61,7 +61,7 @@ Simply type
 make install
 ```
 
-to build and install the software suite to `/usr/local/bin`
+to build and install the software suite to `/usr/local/bin/`
 
 #### Notes
 
