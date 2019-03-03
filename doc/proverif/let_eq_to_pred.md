@@ -55,6 +55,12 @@ clauses forall x:bitstring;
   eq(x, x).
 ```
 
+The specification function this is implemented in are
+
+- `Pitsyntax.add_eq_pred_decl` for defining the predicate eq
+
+- Pitsyntax.replace_let_eq_pat_match_with_if_eq` for the transformation described above
+
 ## Runnable example
 
 We included a runnable example in the `examples/` directory named `let_eq_to_pred.pv`. The file's formatting may look odd as it was reformatted by reexporting using the `-log-pv-only` flag, but this allows easier comparison with the modified version by using tools like `diff`.
@@ -173,10 +179,10 @@ query
 
 let A =
   in(c, msg : bitstring);
-  
+
   if eq(E1, tuple_2_get_0(split(msg))) then (
     let y : bitstring = tuple_2_get_0(tuple_2_get_1(split(msg))) in (
-      
+
       if eq(E2, tuple_2_get_1(tuple_2_get_1(split(msg)))) then (
         out(c, A1);
         0
@@ -195,10 +201,10 @@ let A =
 
 let B =
   in(c, msg : bitstring);
-  
+
   if eq(E1, d_2_get_0(msg)) then (
     let y : bitstring = d_2_get_0(d_2_get_1(msg)) in (
-      
+
       if eq(E2, d_2_get_1(d_2_get_1(msg))) then (
         out(c, B1);
         0
@@ -223,5 +229,3 @@ process
     B
   )
 ```
-
-
