@@ -111,11 +111,11 @@ fof(f347,plain,(
   inference(subsumption_resolution,[],[f343,f318])).
 % SZS output end Proof for DH
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 4989
-% Time elapsed: 0.014 s
+% Time elapsed: 0.015 s
 % ------------------------------
 ----  Runtime statistics ----
 clauses created: 170

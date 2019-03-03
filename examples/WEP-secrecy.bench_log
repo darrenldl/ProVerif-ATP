@@ -237,11 +237,11 @@ fof(f1171,plain,(
   inference(subsumption_resolution,[],[f1170,f239])).
 % SZS output end Proof for WEP-secrecy
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 6140
-% Time elapsed: 0.173 s
+% Time elapsed: 0.182 s
 % ------------------------------
 ----  Runtime statistics ----
 clauses created: 1030

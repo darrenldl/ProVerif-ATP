@@ -126,7 +126,7 @@ fof(f343,plain,(
   inference(avatar_sat_refutation,[],[f232,f254,f257,f339])).
 % SZS output end Proof for LD07-tag-auth
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 4989

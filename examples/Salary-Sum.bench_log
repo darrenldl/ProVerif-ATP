@@ -348,11 +348,11 @@ fof(f4359,plain,(
   inference(avatar_sat_refutation,[],[f969,f975,f1063,f1139,f1337,f4244,f4337,f4358])).
 % SZS output end Proof for Salary-Sum
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 9210
-% Time elapsed: 0.576 s
+% Time elapsed: 0.571 s
 % ------------------------------
 ----  Runtime statistics ----
 clauses created: 3737

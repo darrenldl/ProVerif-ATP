@@ -81,7 +81,7 @@ fof(f236,plain,(
   inference(avatar_sat_refutation,[],[f207,f210,f235])).
 % SZS output end Proof for OTYT06-reader-auth
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 4861

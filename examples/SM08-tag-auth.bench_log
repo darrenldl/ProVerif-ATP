@@ -243,11 +243,11 @@ fof(f33966,plain,(
   inference(avatar_sat_refutation,[],[f472,f477,f33965])).
 % SZS output end Proof for SM08-tag-auth
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 439566
-% Time elapsed: 81.026 s
+% Time elapsed: 84.684 s
 % ------------------------------
 ----  Runtime statistics ----
 clauses created: 33673

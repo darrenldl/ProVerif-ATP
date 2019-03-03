@@ -147,11 +147,11 @@ fof(f355,plain,(
   inference(avatar_sat_refutation,[],[f291,f315,f354])).
 % SZS output end Proof for Shamir-Rivest-Adleman-Three-Pass
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 4989
-% Time elapsed: 0.012 s
+% Time elapsed: 0.013 s
 % ------------------------------
 ----  Runtime statistics ----
 clauses created: 174

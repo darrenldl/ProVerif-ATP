@@ -219,11 +219,11 @@ fof(f990,plain,(
   inference(avatar_sat_refutation,[],[f427,f984,f989])).
 % SZS output end Proof for LAK06-tag-auth
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 5628
-% Time elapsed: 0.100 s
+% Time elapsed: 0.102 s
 % ------------------------------
 ----  Runtime statistics ----
 clauses created: 763

@@ -105,11 +105,11 @@ fof(f903,plain,(
   inference(avatar_sat_refutation,[],[f818,f826,f902])).
 % SZS output end Proof for NSLPK-modified-agree-A-to-B-secrecy
 % ------------------------------
-% Version: Vampire 4.2.2 (commit dc9d097 on 2019-03-01 13:38:54 +1100)
+% Version: Vampire 4.2.2 (commit c96757e on 2019-03-03 22:02:02 +1100)
 % Termination reason: Refutation
 
 % Memory used [KB]: 5245
-% Time elapsed: 0.032 s
+% Time elapsed: 0.034 s
 % ------------------------------
 ----  Runtime statistics ----
 clauses created: 449
