@@ -568,10 +568,10 @@ let rec process_tproc ctx (p : tprocess) =
 
   aux p
 
-let idents_to_string_with_brackets_if_not_empty ids =
+let idents_to_string_with_brackets_if_not_empty ?(prepend_space = true) ids =
   match ids with
   | [] -> ""
-  | l -> Printf.sprintf "[%s]" (idents_to_string l)
+  | l -> (if prepend_space then " " else "") ^ Printf.sprintf "[%s]" (idents_to_string l)
 
 let idents_to_string_with_parens_if_not_empty ids =
   match ids with
@@ -647,7 +647,7 @@ let tquery_to_string query =
        | [] -> ""
        | l -> Printf.sprintf " public_vars %s" (idents_to_string l)
       )
-      (" " ^ idents_to_string_with_brackets_if_not_empty options)
+      (idents_to_string_with_brackets_if_not_empty options)
 
 let nidecl_to_string (id, terms) =
   (ident_to_string id)
@@ -1002,9 +1002,7 @@ let rec process_tdecl ctx decl =
         push (Printf.sprintf "free %s : %s%s."
                 (ident_to_string id)
                 (ident_to_string ty)
-                (match options with
-                 | [] -> ""
-                 | l -> " " ^ idents_to_string_with_brackets_if_not_empty options)
+                (idents_to_string_with_brackets_if_not_empty options)
              )
       )
     | TClauses clauses -> (
