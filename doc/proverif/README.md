@@ -14,6 +14,8 @@
 
 - Added TPTP export module
 
-- Automatic abstract syntax tree modification in export mode
+- [Automatic abstract syntax tree modification in export mode](ast_mod.md)
 
-- Added `-log-pv` and `-log-pv-only` flags
+- Added a pretty printer for typed pi-calculus abstract syntax tree
+
+- Added inequality declaration between constants/free variables

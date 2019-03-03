@@ -1,5 +1,13 @@
 # Disabling of equation checking
 
+## Motivation
+
+In the original version of ProVerif where equation checking takes place, equations containing associative-commutative properties such as XOR cannot be used.
+
+While this makes sense as ProVerif's internal solver cannot handle those properties, we want to remove this unnecessary restriction when ProVerif is only used as a translator and leave all equations handling to the external automated theorem prover such as Vampire.
+
+## Experiment and modification
+
 In our experiments, we discovered value of type `Types.eq_info` is attached to each equation which changes the handling workflow in `TermsEq.buildblocks`. This value in the original version can be adjusted via attaching `linear` or `convergent` when specifying the equation, such as
 
 ```ocaml
@@ -65,8 +73,10 @@ The unification failures we noticed would cause such issue are as follows
       ... (* the rest of A would be missing in the TPTP export file *)
     ```
 
-We do not claim the above list to be exhaustive. We also note that for certain cases, using the `reductor` construct instead of `fun` and `equation` would resolve successfully, but it is not always obvious when to use which, and it requires manual examination of the TPTP output then modify the encoding as needed, defeating the core objective of automation.
+We do not claim the above list to be exhaustive.
 
-We overall worked around these issues using abstract syntax tree (AST) modificaitons which can be done mechanically. Due to time constraint, we did not investigate the possibility of modifiying any of the core procedures.
+We note that for certain cases, using the `reductor` construct instead of `fun` and `equation` would resolve successfully, but it is not always obvious when to use which, and it requires manual examination of the TPTP output then modify the encoding as needed, defeating the core objective of automation.
+
+We overall worked around these issues using abstract syntax tree (AST) modificaitons which are done automatically. Due to time constraint, we did not investigate the possibility of modifiying any of the core procedures.
 
 The AST modifications are detailed [here](ast_mod.md).
