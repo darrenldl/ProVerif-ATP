@@ -28,4 +28,6 @@
 
   - [Introduction of extra constants](add_extra_consts.md)
 
+  - [Replace if with equality checks with predicate](if_eq_to_pred.md) (implemented, but later dropped)
+
 - [Added a pretty printer for typed pi-calculus abstract syntax tree](pitprettyprint.md)

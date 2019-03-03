@@ -69,7 +69,7 @@ The unification failures we noticed would cause such issue are as follows
     
     let A =
       in(c, msg : bitstring);
-      if E = checksign(msg, pkS) then
+      let (=E, pkE : bitstring) = checksign(msg, pkS) in
       ... (* the rest of A would be missing in the TPTP export file *)
     ```
 
