@@ -37,7 +37,15 @@ OCaml packages are easiest to install via the use of the `opam` tool, which shou
 
   - `js_of_ocaml`
 
+  - `js_of_ocaml-ppx`
+
+  - `js_of_ocaml-lwt`
+
   - `lwt`
+
+  - `lwt_ppx`
+
+  - `menhir`
 
 - For ProVerif
 
