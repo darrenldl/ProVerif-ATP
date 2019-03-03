@@ -53,7 +53,7 @@ equation forall x0:bitstring, x1:bitstring;
 
 ## Runnable example
 
-We included a runnable example in this directory named `let_binding_flatten.pv`. The file is reformatted by using `-log-pv-only` flag thus may look odd, but allows easier comparison with the modified version by using tools like `diff`.
+We included a runnable example in the `examples` directory named `let_binding_flatten.pv`. The file's formatting may look odd as it was reformatted by reexporting using the `-log-pv-only` flag, but this allows easier comparison with the modified version by using tools like `diff`.
 
 The example contains usage of both nested tuple and nested data constructors.
 
@@ -213,5 +213,3 @@ process
     B
   )
 ```
-
-
