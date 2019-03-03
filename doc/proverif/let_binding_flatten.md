@@ -51,6 +51,12 @@ equation forall x0:bitstring, x1:bitstring;
   tuple_2_get_1((x0, x1)) = x1.
 ```
 
+## Implementation
+
+Above is implemented in
+
+- `Pitsyntax.flatten_let_bindings`
+
 ## Runnable example
 
 We included a runnable example in the `examples/` directory named `let_binding_flatten.pv`. The file's formatting may look odd as it was reformatted by reexporting using the `-log-pv-only` flag, but this allows easier comparison with the modified version by using tools like `diff`.

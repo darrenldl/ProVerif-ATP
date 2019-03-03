@@ -55,11 +55,13 @@ clauses forall x:bitstring;
   eq(x, x).
 ```
 
-The specification function this is implemented in are
+## Implementation
+
+Above is implemented in
 
 - `Pitsyntax.add_eq_pred_decl` for defining the predicate eq
 
-- Pitsyntax.replace_let_eq_pat_match_with_if_eq` for the transformation described above
+- `Pitsyntax.replace_let_eq_pat_match_with_if_eq` for the transformation described above
 
 ## Runnable example
 
