@@ -74,7 +74,7 @@ equation
   forall x : bitstring, y : bitstring; 
     split(concat(x, y)) = (x, y).
 
-fun d(bitstring, bitstring) : bitstring[data].
+fun d(bitstring, bitstring) : bitstring [data].
 
 query 
   attacker((A1, A2, B1, B2)).
@@ -123,7 +123,7 @@ clauses
   forall x : bitstring;
     eq(x, x).
 
-fun d(bitstring, bitstring) : bitstring[data].
+fun d(bitstring, bitstring) : bitstring [data].
 fun tuple_2_get_0(bitstring) : bitstring.
 
 equation

@@ -10,7 +10,7 @@ clauses
   forall x : bitstring;
     eq(x, x).
 
-fun d(bitstring, bitstring) : bitstring[data].
+fun d(bitstring, bitstring) : bitstring [data].
 fun tuple_2_get_0(bitstring) : bitstring.
 
 equation
