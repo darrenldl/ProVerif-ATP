@@ -60,5 +60,3 @@ $ diff CH07-tag-auth.pv.reprinted CH07-tag-auth.pv.processed
 >   out(c, ((r2_s1, left_s1), sess_1_STEP_2));
 >   out(c, (right_s1, sess_1_STEP_3));
 ```
-
-
