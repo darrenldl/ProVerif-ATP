@@ -1,0 +1,152 @@
+#!/bin/sh
+
+SRC="parsing_helper.mli parsing_helper.ml stringmap.mli stringmap.ml ptree.mli piptree.mli pitptree.mli pitprettyprint.ml out_pos.mli out_pos.ml arg_params.ml types.mli pitypes.mli param.mli param.ml parser.mli parser.ml lexer.ml pitparser.mli pitparser.ml pitlexer.ml pvqueue.mli pvqueue.ml terms.mli terms.ml termslinks.mli termslinks.ml display.mli display.ml termsEq.mli termsEq.ml reduction_helper.mli reduction_helper.ml evaluation_helper.mli evaluation_helper.ml history.mli history.ml pievent.mli pievent.ml weaksecr.mli weaksecr.ml noninterf.mli noninterf.ml selfun.mli selfun.ml rules.mli rules.ml syntax.mli syntax.ml tsyntax.mli tsyntax.ml piparser.mli piparser.ml pilexer.ml tptpout.mli tptpout.ml spassout.mli spassout.ml simplify.mli simplify.ml pisyntax.mli pisyntax.ml pitsyntax.mli pitsyntax.ml pitransl.mli pitransl.ml pitranslweak.mli pitranslweak.ml destructor.mli destructor.ml reduction.mli reduction.ml reduction_bipro.mli reduction_bipro.ml piauth.mli piauth.ml movenew.mli movenew.ml proswapper.mli proswapper.ml encode_queries.mli encode_queries.ml version.mli version.ml main.ml"
+
+SRCTOTEX="parsing_helper.cmx param.cmx piparser.cmx pilexer.cmx pitparser.cmx pitlexer.cmx fileprint.ml lexertotex.ml pitlexertotex.ml version.mli version.ml proveriftotex.ml"
+
+SRCTOTEXC="parsing_helper.cmo param.cmo piparser.cmo pilexer.cmo pitparser.cmo pitlexer.cmo fileprint.ml lexertotex.ml pitlexertotex.ml version.mli version.ml proveriftotex.ml"
+
+SRCINTERACT="parsing_helper.mli parsing_helper.ml stringmap.mli stringmap.ml ptree.mli pitptree.mli pitprettyprint.ml out_pos.mli out_pos.ml arg_params.ml types.mli pitypes.mli param.mli param.ml parser.mli parser.ml lexer.ml pitparser.mli pitparser.ml pitlexer.ml types.mli pitypes.mli pvqueue.mli pvqueue.ml terms.mli terms.ml termslinks.mli termslinks.ml display.mli display.ml termsEq.mli termsEq.ml reduction_helper.mli reduction_helper.ml evaluation_helper.mli evaluation_helper.ml simplify.mli simplify.ml history.mli history.ml pievent.mli pievent.ml pitsyntax.mli pitsyntax.ml destructor.mli destructor.ml display_interact.mli display_interact.ml menu_helper.mli menu_helper.ml reduction_interact.mli reduction_interact.ml menu_interact.mli menu_interact.ml version.mli version.ml main_interact.ml"
+
+if uname -a | egrep -q \(Cygwin\)\|\(MINGW\)
+then
+    EXEC=.exe
+else
+    EXEC=
+fi
+
+case X$1 in
+    Xocb.native )
+	cd src &&\
+	    ocamlbuild -use-ocamlfind -lib unix main.native &&\
+	    ocamlbuild -use-ocamlfind proveriftotex.native &&\
+	    cp _build/main.native ../proverif$EXEC &&\
+	    cp _build/proveriftotex.native ../proveriftotex$EXEC &&\
+	    rm -f main.native proveriftotex.native &&\
+	    ocamlbuild -use-ocamlfind main_interact.native &&\
+	    cp _build/main_interact.native ../proverif_interact$EXEC &&\
+	    rm -f main_interact.native
+	    cd .. ;;
+
+    Xocb.byte )
+	cd src &&\
+	    ocamlbuild -use-ocamlfind -lib unix main.byte &&\
+	    ocamlbuild -use-ocamlfind proveriftotex.byte &&\
+	    cp _build/main.byte ../proverif$EXEC &&\
+	    cp _build/proveriftotex.byte ../proveriftotex$EXEC &&\
+	    rm -f main.byte proveriftotex.byte &&\
+	    ocamlbuild -use-ocamlfind main_interact.byte &&\
+	    cp _build/main_interact.byte ../proverif_interact$EXEC &&\
+	    rm -f main_interact.byte
+	    cd .. ;;
+
+    Xocb.debug )
+	cd src &&\
+	    ocamlbuild -tag debug -use-ocamlfind -lib unix main.byte &&\
+	    ocamlbuild -tag debug -use-ocamlfind proveriftotex.byte &&\
+	    cp _build/main.byte ../proverif$EXEC &&\
+	    cp _build/proveriftotex.byte ../proveriftotex$EXEC &&\
+	    rm -f main.byte proveriftotex.byte &&\
+	    ocamlbuild -tag debug -use-ocamlfind main_interact.byte &&\
+	    cp _build/main_interact.byte ../proverif_interact$EXEC &&\
+	    rm -f main_interact.byte
+	    cd .. ;;
+
+    Xocb.profile )
+	cd src &&\
+	    ocamlbuild -use-ocamlfind -lib unix -lflag profileprim.o profileprim.o main.native &&\
+	    ocamlbuild -use-ocamlfind proveriftotex.native &&\
+	    cp _build/main.native ../proverif$EXEC &&\
+	    cp _build/proveriftotex.native ../proveriftotex$EXEC &&\
+	    rm -f main.native proveriftotex.native &&\
+	    ocamlbuild -use-ocamlfind main_interact.native &&\
+	    cp _build/main_interact.native ../proverif_interact$EXEC &&\
+	    rm -f main_interact.native
+	    cd .. ;;
+
+    Xprofile )
+	cd src &&\
+	    ocamlyacc parser.mly &&\
+	    ocamllex lexer.mll &&\
+	    ocamlyacc piparser.mly &&\
+	    ocamllex pilexer.mll &&\
+	    ocamlyacc pitparser.mly &&\
+	    ocamllex pitlexer.mll &&\
+	    ocamlopt -o ../proverif$EXEC unix.cmxa profileprim.c profile.mli profile.ml str.cmxa $SRC &&\
+	    ocamllex lexertotex.mll &&\
+	    ocamllex pitlexertotex.mll &&\
+	    ocamlopt -o ../proveriftotex$EXEC $SRCTOTEX ;;
+
+    Xnative | X )
+	cd src &&\
+	    ocamlyacc parser.mly &&\
+	    ocamllex lexer.mll &&\
+	    ocamlyacc piparser.mly &&\
+	    ocamllex pilexer.mll &&\
+	    ocamlyacc pitparser.mly &&\
+	    ocamllex pitlexer.mll &&\
+	    ocamlopt -o ../proverif$EXEC unix.cmxa str.cmxa $SRC &&\
+	    ocamllex lexertotex.mll &&\
+	    ocamllex pitlexertotex.mll &&\
+	    ocamlopt -o ../proveriftotex$EXEC $SRCTOTEX &&\
+	    ocamlfind ocamlopt -o ../proverif_interact$EXEC -package lablgtk2 -linkpkg unix.cmxa str.cmxa $SRCINTERACT;;
+
+    Xbyte )
+	cd src &&\
+	    ocamlyacc parser.mly &&\
+	    ocamllex lexer.mll &&\
+	    ocamlyacc piparser.mly &&\
+	    ocamllex pilexer.mll &&\
+	    ocamlyacc pitparser.mly &&\
+	    ocamllex pitlexer.mll &&\
+	    ocamlc -g -o ../proverif$EXEC unix.cma str.cma $SRC &&\
+	    ocamllex lexertotex.mll &&\
+	    ocamllex pitlexertotex.mll &&\
+	    ocamlc -g -o ../proveriftotex$EXEC $SRCTOTEXC &&\
+	    ocamlfind ocamlc -g -o ../proverif_interact$EXEC -package lablgtk2 -linkpkg unix.cma str.cma $SRCINTERACT ;;
+
+    Xdebug )
+	cd src &&\
+	    ocamlyacc parser.mly &&\
+	    ocamllex lexer.mll &&\
+	    ocamlyacc piparser.mly &&\
+	    ocamllex pilexer.mll &&\
+	    ocamlyacc pitparser.mly &&\
+	    ocamllex pitlexer.mll &&\
+	    ocamlc -g -o ../proverif$EXEC unix.cma str.cma $SRC &&\
+	    ocamllex lexertotex.mll &&\
+	    ocamllex pitlexertotex.mll &&\
+	    ocamlc -g -o ../proveriftotex$EXEC $SRCTOTEXC &&\
+	    ocamlfind ocamlc -g -o ../proverif_interact$EXEC -package lablgtk2 -linkpkg unix.cma str.cma $SRCINTERACT ;;
+
+    Xxtime )
+	cd src &&\
+	    if [ -f xtime.c ]
+	    then
+		gcc -o ../xtime xtime.c
+	    fi ;;
+
+    Xclean )
+	rm -f proveriftotex$EXEC
+	rm -f proverif$EXEC
+        rm -f proverif_interact$EXEC
+	rm -f src/*lexer.ml src/*lexertotex.ml src/*parser.ml src/*parser.mli src/*.cmx src/*.cmo src/*.cmi src/*.o
+	rm -rf src/_build ;;
+
+    Xinstall )
+	cp proverif$EXEC $2/bin/proverif$EXEC &&\
+	chmod +x $2/bin/proverif$EXEC &&\
+	cp proveriftotex$EXEC $2/bin/proveriftotex$EXEC &&\
+	chmod +x $2/bin/proveriftotex$EXEC &&\
+	mkdir -p $2/doc/proverif &&\
+	mkdir -p $2/share/proverif &&\
+	cp -r examples $2/doc/proverif/examples &&\
+	cp docs/manual-untyped.pdf README LICENSE $2/doc/proverif &&\
+	cp cryptoverif.pvl cssproverif.css $2/share/proverif &&\
+	cp -r emacs $2/share/proverif/emacs &&\
+	cp proverif_interact$EXEC $2/bin/proverif_interact$EXEC &&\
+	chmod +x $2/bin/proverif_interact$EXEC ;;
+
+    *)
+	echo Unknown option
+esac
