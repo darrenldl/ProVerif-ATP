@@ -230,15 +230,15 @@ fof(ax105, axiom,
 fof(ax106, axiom,
 ![VAR_V_138] : (pred_attacker(name_new0x2Dname(VAR_V_138)))).
 fof(ax107, axiom,
-![VAR_MSG_180X30] : ((pred_eq(constr_tuple_2_get_1(constr_tuple_2_get_1(constr_split(VAR_MSG_180X30))), constr_E2) & pred_eq(constr_tuple_2_get_0x30(constr_split(VAR_MSG_180X30)), constr_E1) & pred_attacker(VAR_MSG_180X30)) => pred_attacker(constr_A1))).
+![VAR_MSG_180X30] : ((pred_eq(constr_E2, constr_tuple_2_get_1(constr_tuple_2_get_1(constr_split(VAR_MSG_180X30)))) & pred_eq(constr_E1, constr_tuple_2_get_0x30(constr_split(VAR_MSG_180X30))) & pred_attacker(VAR_MSG_180X30)) => pred_attacker(constr_A1))).
 fof(ax108, axiom,
-![VAR_MSG_182] : ((pred_eq(constr_tuple_2_get_0x30(constr_split(VAR_MSG_182)), constr_E1) & pred_attacker(VAR_MSG_182)) => pred_attacker(constr_A2))).
+![VAR_MSG_182] : ((pred_eq(constr_E1, constr_tuple_2_get_0x30(constr_split(VAR_MSG_182))) & pred_attacker(VAR_MSG_182)) => pred_attacker(constr_A2))).
 fof(ax109, axiom,
 ![VAR_MSG_185] : (pred_attacker(VAR_MSG_185) => pred_attacker(constr_A2))).
 fof(ax110, axiom,
-![VAR_MSG_215] : ((pred_eq(constr_d_2_get_1(constr_d_2_get_1(VAR_MSG_215)), constr_E2) & pred_eq(constr_d_2_get_0x30(VAR_MSG_215), constr_E1) & pred_attacker(VAR_MSG_215)) => pred_attacker(constr_B1))).
+![VAR_MSG_215] : ((pred_eq(constr_E2, constr_d_2_get_1(constr_d_2_get_1(VAR_MSG_215))) & pred_eq(constr_E1, constr_d_2_get_0x30(VAR_MSG_215)) & pred_attacker(VAR_MSG_215)) => pred_attacker(constr_B1))).
 fof(ax111, axiom,
-![VAR_MSG_217] : ((pred_eq(constr_d_2_get_0x30(VAR_MSG_217), constr_E1) & pred_attacker(VAR_MSG_217)) => pred_attacker(constr_B2))).
+![VAR_MSG_217] : ((pred_eq(constr_E1, constr_d_2_get_0x30(VAR_MSG_217)) & pred_attacker(VAR_MSG_217)) => pred_attacker(constr_B2))).
 fof(ax112, axiom,
 ![VAR_MSG_220X30] : (pred_attacker(VAR_MSG_220X30) => pred_attacker(constr_B2))).
 fof(co0, conjecture,
