@@ -14,10 +14,18 @@
 
 - [Disabled equation checking when output is TPTP or SPASS](equation_check.md)
 
-- Added TPTP export module
+- [Added TPTP export module](tptp_export.md)
 
-- [Automatic abstract syntax tree modification in export mode](ast_mod.md)
+  - Added inequality declaration between constants/free variables in the module
 
-- Added a pretty printer for typed pi-calculus abstract syntax tree
+- Automatic abstract syntax tree modifications in export mode
 
-- Added inequality declaration between constants/free variables
+  - [Output tagging](output_tag.md)
+
+  - [Let binding flattening](let_binding_flatten.md)
+
+  - [Replace let binding with equality checks with predicate](let_eq_to_pred.md)
+
+  - [Introduction of extra constants](add_extra_consts.md)
+
+- [Added a pretty printer for typed pi-calculus abstract syntax tree](pitprettyprint.md)
