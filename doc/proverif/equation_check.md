@@ -1,0 +1,3 @@
+# Disabling of equation checking
+
+

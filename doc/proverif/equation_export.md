@@ -9,7 +9,9 @@ equation forall m:bitstring, k:bitstring;
 
 are not present in the exported SPASS file.
 
-We discovered, however, that the quations are readily available in the `Types.t_horn_state` struct, which is part of result produced by `Pitransl.transl` (see `pitransl.mli` for type signature). The `Types.t_horn_state` struct is named `horn_state` in `main.ml` and one of the struct passed to Spass export module.
+We discovered, however, that the quations are readily available in the `Types.t_horn_state` struct, which is part of result produced by `Pitransl.transl` (see `pitransl.mli` for type signature). `Pitransl.transl` is the function which translates from the applied pi-calculus to Horn clauses.
+
+The `Types.t_horn_state` struct is named `horn_state` in `main.ml` and is one of the struct passed to Spass export module.
 
 So overall, it was a matter of adding the missing functions for exporting equations stored in `horn_state` to SPASS format. The functions added are
 
