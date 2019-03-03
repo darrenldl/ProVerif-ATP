@@ -348,7 +348,7 @@ fof(ax164, axiom,
 fof(ax165, axiom,
 ![VAR_V_239] : (pred_attacker(name_new0x2Dname(VAR_V_239)))).
 fof(ax166, axiom,
-![VAR_ENC_A_KAB_T_293] : ((pred_eq(constr_tuple_3_get_0x30(constr_cbc_dec_3(VAR_ENC_A_KAB_T_293, name_Kbs)), name_A) & pred_attacker(VAR_ENC_A_KAB_T_293)) => pred_attacker(tuple_2(name_objective, constr_client_B_STEP_1)))).
+![VAR_ENC_A_KAB_T_293] : ((pred_eq(name_A, constr_tuple_3_get_0x30(constr_cbc_dec_3(VAR_ENC_A_KAB_T_293, name_Kbs))) & pred_attacker(VAR_ENC_A_KAB_T_293)) => pred_attacker(tuple_2(name_objective, constr_client_B_STEP_1)))).
 fof(ax167, axiom,
 ![VAR_0X40SID_357] : (pred_attacker(tuple_2(name_A, name_B)) => pred_attacker(tuple_2(constr_cbc_enc_4(name_B, name_Kab_54(VAR_0X40SID_357), name_T_55(VAR_0X40SID_357), constr_cbc_enc_3(name_A, name_Kab_54(VAR_0X40SID_357), name_T_55(VAR_0X40SID_357), name_Kbs), name_Kas), constr_server_S_STEP_2)))).
 fof(ax168, axiom,

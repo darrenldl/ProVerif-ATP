@@ -7,7 +7,7 @@ fun pkey(bitstring) : bitstring.
 
 table keys(bitstring, bitstring).
 
-fun assoc_pair(bitstring, bitstring) : bitstring[data].
+fun assoc_pair(bitstring, bitstring) : bitstring [data].
 
 equation
   forall x : bitstring, y : bitstring, z : bitstring; 

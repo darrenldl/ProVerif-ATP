@@ -10,7 +10,7 @@ equation
   forall m : bitstring, k : bitstring; 
     dec(enc(m, k), k) = m.
 
-fun succ(bitstring) : bitstring[data].
+fun succ(bitstring) : bitstring [data].
 fun cbc_enc_1(bitstring, bitstring) : bitstring.
 fun cbc_enc_2(bitstring, bitstring, bitstring) : bitstring.
 fun cbc_enc_3(bitstring, bitstring, bitstring, bitstring) : bitstring.

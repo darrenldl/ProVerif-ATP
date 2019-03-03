@@ -112,15 +112,15 @@ let client_A(skA : bitstring, pkS : bitstring) =
   out(c, ((A, I), client_A_STEP_1));
   in(c, sign_I_pkI : bitstring);
   
-  if eq(tuple_2_get_0(checksign(sign_I_pkI, pkS)), I) then
+  if eq(I, tuple_2_get_0(checksign(sign_I_pkI, pkS))) then
   let pkI : bitstring = tuple_2_get_1(checksign(sign_I_pkI, pkS)) in
   out(c, (ecb_enc_2(Na, A, pkI), client_A_STEP_2));
   in(c, ecb_enc_Na_Ni_I : bitstring);
   
-  if eq(tuple_3_get_0(ecb_dec_3(ecb_enc_Na_Ni_I, skA)), Na) then
+  if eq(Na, tuple_3_get_0(ecb_dec_3(ecb_enc_Na_Ni_I, skA))) then
   let Ni : bitstring = tuple_3_get_1(ecb_dec_3(ecb_enc_Na_Ni_I, skA)) in
   
-  if eq(tuple_3_get_2(ecb_dec_3(ecb_enc_Na_Ni_I, skA)), I) then
+  if eq(I, tuple_3_get_2(ecb_dec_3(ecb_enc_Na_Ni_I, skA))) then
   out(c, (ecb_enc_1(Ni, pkI), client_A_STEP_3));
   0.
 
@@ -133,16 +133,16 @@ let client_B(skB : bitstring, pkS : bitstring) =
   out(c, ((B, A), client_B_STEP_1));
   in(c, sign_A_pkA : bitstring);
   
-  if eq(tuple_2_get_0(checksign(sign_A_pkA, pkS)), A) then
+  if eq(A, tuple_2_get_0(checksign(sign_A_pkA, pkS))) then
   let pkA : bitstring = tuple_2_get_1(checksign(sign_A_pkA, pkS)) in
   in(c, ecb_enc_Na_A : bitstring);
   let Na : bitstring = tuple_2_get_0(ecb_dec_2(ecb_enc_Na_A, skB)) in
   
-  if eq(tuple_2_get_1(ecb_dec_2(ecb_enc_Na_A, skB)), A) then
+  if eq(A, tuple_2_get_1(ecb_dec_2(ecb_enc_Na_A, skB))) then
   out(c, (ecb_enc_3(Na, Nb, B, pkA), client_B_STEP_2));
   in(c, ecb_enc_Nb : bitstring);
   
-  if eq(ecb_dec_1(ecb_enc_Nb, skB), Nb) then
+  if eq(Nb, ecb_dec_1(ecb_enc_Nb, skB)) then
   out(c, (objective, client_B_STEP_3));
   0.
 

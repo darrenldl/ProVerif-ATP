@@ -58,7 +58,7 @@ equation
   forall m : bitstring, k : bitstring; 
     dec(enc(m, k), k) = m.
 
-fun succ(bitstring) : bitstring[data].
+fun succ(bitstring) : bitstring [data].
 fun cbc_enc_1(bitstring, bitstring) : bitstring.
 fun cbc_enc_2(bitstring, bitstring, bitstring) : bitstring.
 fun cbc_enc_3(bitstring, bitstring, bitstring, bitstring) : bitstring.
@@ -121,9 +121,9 @@ let client_A(Kas : bitstring) =
   out(c, ((A, B, Na), client_A_STEP_1));
   in(c, enc_Na_B_enc_Kab_A : bitstring);
   
-  if eq(tuple_4_get_0(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)), Na) then
+  if eq(Na, tuple_4_get_0(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas))) then
   
-  if eq(tuple_4_get_1(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)), B) then
+  if eq(B, tuple_4_get_1(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas))) then
   let Kab : bitstring = tuple_4_get_2(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
   let enc_Kab_A : bitstring = tuple_4_get_3(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
   out(c, (enc_Kab_A, client_A_STEP_2));
@@ -134,11 +134,11 @@ let client_A(Kas : bitstring) =
   in(c, enc_Kab_A' : bitstring);
   let Kab' : bitstring = tuple_2_get_0(cbc_dec_2(enc_Kab_A', Kas)) in
   
-  if eq(tuple_2_get_1(cbc_dec_2(enc_Kab_A', Kas)), A) then
+  if eq(A, tuple_2_get_1(cbc_dec_2(enc_Kab_A', Kas))) then
   out(c, (cbc_enc_1(Na', Kab'), client_A_STEP_4));
   in(c, enc_succ_Na' : bitstring);
   
-  if eq(cbc_dec_1(enc_succ_Na', Kab'), succ(Na')) then
+  if eq(succ(Na'), cbc_dec_1(enc_succ_Na', Kab')) then
   out(c, (objective, client_A_STEP_5));
   0.
 
@@ -149,11 +149,11 @@ let client_B(Kbs : bitstring) =
   in(c, enc_Kab_A : bitstring);
   let Kab : bitstring = tuple_2_get_0(cbc_dec_2(enc_Kab_A, Kbs)) in
   
-  if eq(tuple_2_get_1(cbc_dec_2(enc_Kab_A, Kbs)), A) then
+  if eq(A, tuple_2_get_1(cbc_dec_2(enc_Kab_A, Kbs))) then
   out(c, (cbc_enc_1(Nb, Kab), client_B_STEP_1));
   in(c, enc_succ_Nb : bitstring);
   
-  if eq(cbc_dec_1(enc_succ_Nb, Kab), succ(Nb)) then
+  if eq(succ(Nb), cbc_dec_1(enc_succ_Nb, Kab)) then
   0.
 
 const server_S_STEP_1 : bitstring.

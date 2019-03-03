@@ -90,7 +90,7 @@ let client_B(Kbs : bitstring) =
   new Nb : bitstring;
   in(c, enc_A_Kab_T : bitstring);
   
-  if eq(tuple_3_get_0(cbc_dec_3(enc_A_Kab_T, Kbs)), A) then
+  if eq(A, tuple_3_get_0(cbc_dec_3(enc_A_Kab_T, Kbs))) then
   let Kab : bitstring = tuple_3_get_1(cbc_dec_3(enc_A_Kab_T, Kbs)) in
   let T : bitstring = tuple_3_get_2(cbc_dec_3(enc_A_Kab_T, Kbs)) in
   out(c, (objective, client_B_STEP_1));
