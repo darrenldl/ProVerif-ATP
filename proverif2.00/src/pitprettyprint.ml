@@ -730,8 +730,10 @@ let tclause_to_string clause =
       (term_e_to_string r)
 
 let rec process_tdecl ctx decl =
-  let push = Print_context.push ctx in
-  let push_to_last_line = Print_context.push_to_last_line ctx in
+  let open Print_context in
+
+  let push = push ctx in
+  let push_to_last_line = push_to_last_line ctx in
 
   let set_struct_ty =
     Print_context.set_tdecl_struct_ty ctx
