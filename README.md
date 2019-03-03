@@ -6,78 +6,17 @@ Authors : [Di Long Li](https://github.com/darrenldl) and Alwen Tiu, at The Austr
 
 This project is part of our submission to CADE-27
 
-## Installation prerequisites
-
-#### Platform
-
-- The software suite was used largely on the Linux platform. While all components should compile on Windows and Mac, the Makefile and various bash scripts may not function as intended on those platforms.
-
-#### System binaries required
-
-- `wget` (optional)
-  - The Makefile will try to download a copy of Vampire if the archive is not present. You can download the archive manually and place it in the repository root directory to skip this. See below for details.
-
-#### Compilers required
-
-- OCaml compiler (for Narrator and ProVerif)
-
-- C++ compiler (for Vampire)
-
-#### OCaml packages required
-
-OCaml packages are easiest to install via the use of the `opam` tool, which should be available on most distros
-
-- For Narrator
-
-  - `dune`
-
-  - `mparser`
-
-  - `core_kernel`
-
-  - `js_of_ocaml`
-
-  - `js_of_ocaml-ppx`
-
-  - `js_of_ocaml-lwt`
-
-  - `lwt`
-
-  - `lwt_ppx`
-
-  - `menhir`
-
-- For ProVerif
-
-  - `ocamlfind`
-
-  - `ocamlbuild`
-
-  - `lablgtk`
-
-#### Notes
-
-- As per Vampire's [license](https://vprover.github.io/licence.html), we are not allowed to redistribute the sources of Vampire, thus we do not bundle it in this repository
-  - The Makefile will try to download the file automatically via the HTTPS URL if `4.2.2.tar.gz` is not present
-  - If you feel this is unsafe, you can download the archive manually [here](https://github.com/vprover/vampire/releases/tag/4.2.2), and rename it to `4.2.2.tar.gz` and place it in the repository root directory (where Makefile resides in)
-
 ## Installation
 
-Simply type
+The prerequisites and install command are documented [here](INSTALL.md)
 
-```bash
-make install
-```
+## Basic usage
 
-to build and install the software suite to `/usr/local/bin/`
+`pvatp protocol.pv`
 
-#### Notes
+where `protocol.pv` is the protocol specification in typed pi-calculus used by ProVerif
 
-- The installed files will appear as `/usr/local/bin/pvatp` (main executable) and `/usr/local/bin/pvatp_assets/` (files required by the main executable)
-
-- `pvatp` only accesses the copies of ProVerif and Vampire in `/usr/local/bin/pvatp_assets/`, so there is no need to remove prior installation of ProVerif or Vampire in your system
-
-- More generally, `pvatp` accesses t he `pvatp_assets/` folder at where it is stored, so you can relocate the files as long as both `pvatp` and `pvatp_assets/` reside in the same directory
+`examples/` directory contains the protocol specifications we used for our benchmark, and also other ones we created during the project
 
 ## Documentation
 
@@ -86,12 +25,6 @@ to build and install the software suite to `/usr/local/bin/`
 - `doc/proverif/` ([README](doc/proverif/README.md)) contains the documentations detailing the modifications we made in ProVerif
 
 - `narrator/doc/` (README) contains the documentations detailing architecture or Narrator
-
-## Usage
-
-`pvatp protocol.pv`
-
-where `protocol.pv` is the protocol specification in typed pi-calculus used by ProVerif
 
 ## Index and licenses
 
