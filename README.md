@@ -81,11 +81,11 @@ to build and install the software suite to `/usr/local/bin/`
 
 ## Documentation
 
-- `doc/pvatp/` contains the user manual and documentations detailing the architecture of ProVerif-ATP
+- `doc/pvatp/` (README) contains the user manual and documentations detailing the architecture of ProVerif-ATP
 
-- `doc/proverif/` contains the documentations detailing the modifications we made in ProVerif
+- `doc/proverif/` ([README](doc/proverif/README.md)) contains the documentations detailing the modifications we made in ProVerif
 
-- `narrator/doc/` contains the documentations detailing architecture or Narrator
+- `narrator/doc/` (README) contains the documentations detailing architecture or Narrator
 
 ## Usage
 
