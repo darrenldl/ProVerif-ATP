@@ -34,9 +34,9 @@ where `protocol.pv` is the protocol specification in typed pi-calculus used by P
 
 - `narrator/`
 
-  - This is part of the original work developed for this project (excluding `node_modules` subdirectory). Narrator provides the interface for viewing the knowledge graph and attack traces. The files (excluding `node_modules` subdirectory) are published under the MIT license.
+  - This is part of the original work developed for this project (excluding `node_modules/` subdirectory). Narrator provides the interface for viewing the knowledge graph and attack traces. The files (excluding `node_modules/` subdirectory) are published under the MIT license.
 
-  - The subdirectory `node_modules` contains downloaded copies of Javascript libraries. They are included in the repository for easier building and usage of the framework only. They are not part of our work, they are not modified by us, and are distrbuted under their respective original licenses.
+  - The subdirectory `node_modules/` contains downloaded copies of Javascript libraries. They are included in the repository for easier building and usage of the framework only. They are not part of our work, they are not modified by us, and are distrbuted under their respective original licenses.
 
 - `proverif2.00/`
 
@@ -49,4 +49,4 @@ where `protocol.pv` is the protocol specification in typed pi-calculus used by P
 
 ## Acknowledgement
 
-While the TPTP parser code in Narrator was independently developed from scratch according to the [TPTP syntax reference](http://tptp.cs.miami.edu/~tptp/TPTP/SyntaxBNF.html), [zipperposition](https://github.com/c-cube/zipperposition)'s TPTP parser code was used as reference during the final debugging phase.
+While the TPTP parser code in Narrator was independently developed from scratch according to the [TPTP syntax reference](http://tptp.cs.miami.edu/~tptp/TPTP/SyntaxBNF.html), [zipperposition](https://github.com/c-cube/zipperposition)'s TPTP parser code was used as reference during the final debugging phase
