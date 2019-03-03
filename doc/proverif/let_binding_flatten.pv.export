@@ -1,0 +1,101 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+fun d(bitstring, bitstring) : bitstring[data].
+fun tuple_2_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0((x0, x1)) = x0.
+
+fun tuple_2_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_1((x0, x1)) = x1.
+
+fun d_2_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    d_2_get_0(d(x0, x1)) = x0.
+
+fun d_2_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    d_2_get_1(d(x0, x1)) = x1.
+
+const A1 : bitstring.
+const A2 : bitstring.
+const B1 : bitstring.
+const B2 : bitstring.
+
+free c : channel.
+
+fun split(bitstring) : bitstring.
+fun concat(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    split(concat(x, y)) = (x, y).
+
+query 
+  attacker((A1, A2, B1, B2)).
+
+let A =
+  in(c, msg : bitstring);
+  let x : bitstring = tuple_2_get_0(split(msg)) in (
+    let y : bitstring = tuple_2_get_0(tuple_2_get_1(split(msg))) in (
+      let z : bitstring = tuple_2_get_1(tuple_2_get_1(split(msg))) in (
+        out(c, A1);
+        0
+      ) else (
+        out(c, A2);
+        0
+      )
+    ) else (
+      out(c, A2);
+      0
+    )
+  ) else (
+    out(c, A2);
+    0
+  ).
+
+let B =
+  in(c, msg : bitstring);
+  let x : bitstring = d_2_get_0(msg) in (
+    let y : bitstring = d_2_get_0(d_2_get_1(msg)) in (
+      let z : bitstring = d_2_get_1(d_2_get_1(msg)) in (
+        out(c, B1);
+        0
+      ) else (
+        out(c, B2);
+        0
+      )
+    ) else (
+      out(c, B2);
+      0
+    )
+  ) else (
+    out(c, B2);
+    0
+  ).
+
+process
+  (
+    A
+  )
+  | (
+    B
+  )

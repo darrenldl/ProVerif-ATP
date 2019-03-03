@@ -75,6 +75,8 @@ The unification failures we noticed would cause such issue are as follows
 
 We do not claim the above list to be exhaustive.
 
+As per ProVerif 2.00 manual, "Tuples are always of type bitstring", should the reader wonder whether `split` is specified correctly.
+
 We note that for certain cases, using the `reductor` construct instead of `fun` and `equation` would resolve successfully, but it is not always obvious when to use which, and it requires manual examination of the TPTP output then modify the encoding as needed, defeating the core objective of automation.
 
 We overall worked around these issues using abstract syntax tree (AST) modificaitons which are done automatically. Due to time constraint, we did not investigate the possibility of modifiying any of the core procedures.

@@ -6,6 +6,8 @@
 
 - However, we have taken care to ensure these modifications do not impact the original functionality of ProVerif, that is, if you invoke the modified ProVerif in a non-exporting mode, it should behave the same as the original version. Again, however, we cannot claim with full certainty this is the case - if you absolutely need the exact behaviour provided by the original version of ProVerif, we recommend you to use the original version directly.
 
+- We also note that the modifications right now assume the encoding uses only `bitstring` type, but the modifications should be extendable to accomodate other combinations of types.
+
 ## List
 
 - [Added missing equation export](equation_export.md)
