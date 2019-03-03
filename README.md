@@ -71,6 +71,14 @@ to build and install the software suite to `/usr/local/bin/`
 
 - More generally, `pvatp` accesses t he `pvatp_assets/` folder at where it is stored, so you can relocate the files as long as both `pvatp` and `pvatp_assets/` reside in the same directory
 
+## Documentation
+
+- `doc/pvatp/` contains the user manual and documentations detailing the architecture of ProVerif-ATP
+
+- `doc/proverif/` contains the documentations detailing the modifications we made in ProVerif
+
+- `narrator/doc/` contains the documentations detailing architecture or Narrator
+
 ## Usage
 
 `pvatp protocol.pv`
@@ -91,7 +99,8 @@ where `protocol.pv` is the protocol specification in typed pi-calculus used by P
 
 - `proverif2.00/`
 
-  - This is a modified copy of ProVerif version 2.00. We intend to submit the modifications to the original authors for integrations later on. We license our modifications using the exact same license (GPL) used by ProVerif 2.00.
+  - This is a modified copy of ProVerif version 2.00. We intend to submit the modifications to the original authors for integrations later on. We license our modifications using the [exact same GPL license](http://prosecco.gforge.inria.fr/personal/bblanche/proverif/LICENSEGPL) used by ProVerif 2.00.
+  - However, please note that this is not the final copy we intend to submit to the authors, as we are not completely certain if all modifications are actually safe, and we will need to discuss with the authors prior to submitting any patches etc.
 
 - `examples/`
 
