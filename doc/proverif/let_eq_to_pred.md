@@ -57,4 +57,171 @@ clauses forall x:bitstring;
 
 ## Runnable example
 
+We included a runnable example in the `examples/` directory named `let_eq_to_pred.pv`. The file's formatting may look odd as it was reformatted by reexporting using the `-log-pv-only` flag, but this allows easier comparison with the modified version by using tools like `diff`.
+
+Content of `let_eq_to_pred.pv`
+
+```ocaml
+free c : channel.
+
+const A1 : bitstring.
+const A2 : bitstring.
+const B1 : bitstring.
+const B2 : bitstring.
+const E1 : bitstring.
+const E2 : bitstring.
+
+fun split(bitstring) : bitstring.
+fun concat(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    split(concat(x, y)) = (x, y).
+
+fun d(bitstring, bitstring) : bitstring [data].
+
+query 
+  attacker((A1, A2, B1, B2)).
+
+let A =
+  in(c, msg : bitstring);
+  let (=E1, (y : bitstring, =E2)) = split(msg) in (
+    out(c, A1);
+    0
+  ) else (
+    out(c, A2);
+    0
+  ).
+
+let B =
+  in(c, msg : bitstring);
+  let d(=E1, d(y : bitstring, =E2)) = msg in (
+    out(c, B1);
+    0
+  ) else (
+    out(c, B2);
+    0
+  ).
+
+process
+  (
+    A
+  )
+  | (
+    B
+  )
+```
+
+Content of `let_eq_to_pred.pv.export` , produced by `proverif -in pitype -out tptp -log-pv -o let_eq_to_pred.p let_eq_to_pred.pv`
+
+```ocaml
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+fun d(bitstring, bitstring) : bitstring [data].
+fun tuple_2_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0((x0, x1)) = x0.
+
+fun tuple_2_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_1((x0, x1)) = x1.
+
+fun d_2_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    d_2_get_0(d(x0, x1)) = x0.
+
+fun d_2_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    d_2_get_1(d(x0, x1)) = x1.
+
+free c : channel.
+
+const A1 : bitstring.
+const A2 : bitstring.
+const B1 : bitstring.
+const B2 : bitstring.
+const E1 : bitstring.
+const E2 : bitstring.
+
+fun split(bitstring) : bitstring.
+fun concat(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    split(concat(x, y)) = (x, y).
+
+query 
+  attacker((A1, A2, B1, B2)).
+
+let A =
+  in(c, msg : bitstring);
+  
+  if eq(tuple_2_get_0(split(msg)), E1) then (
+    let y : bitstring = tuple_2_get_0(tuple_2_get_1(split(msg))) in (
+      
+      if eq(tuple_2_get_1(tuple_2_get_1(split(msg))), E2) then (
+        out(c, A1);
+        0
+      ) else (
+        out(c, A2);
+        0
+      )
+    ) else (
+      out(c, A2);
+      0
+    )
+  ) else (
+    out(c, A2);
+    0
+  ).
+
+let B =
+  in(c, msg : bitstring);
+  
+  if eq(d_2_get_0(msg), E1) then (
+    let y : bitstring = d_2_get_0(d_2_get_1(msg)) in (
+      
+      if eq(d_2_get_1(d_2_get_1(msg)), E2) then (
+        out(c, B1);
+        0
+      ) else (
+        out(c, B2);
+        0
+      )
+    ) else (
+      out(c, B2);
+      0
+    )
+  ) else (
+    out(c, B2);
+    0
+  ).
+
+process
+  (
+    A
+  )
+  | (
+    B
+  )
+```
+
 

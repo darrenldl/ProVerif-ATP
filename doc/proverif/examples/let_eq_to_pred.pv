@@ -1,0 +1,48 @@
+free c : channel.
+
+const A1 : bitstring.
+const A2 : bitstring.
+const B1 : bitstring.
+const B2 : bitstring.
+const E1 : bitstring.
+const E2 : bitstring.
+
+fun split(bitstring) : bitstring.
+fun concat(bitstring, bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    split(concat(x, y)) = (x, y).
+
+fun d(bitstring, bitstring) : bitstring [data].
+
+query 
+  attacker((A1, A2, B1, B2)).
+
+let A =
+  in(c, msg : bitstring);
+  let (=E1, (y : bitstring, =E2)) = split(msg) in (
+    out(c, A1);
+    0
+  ) else (
+    out(c, A2);
+    0
+  ).
+
+let B =
+  in(c, msg : bitstring);
+  let d(=E1, d(y : bitstring, =E2)) = msg in (
+    out(c, B1);
+    0
+  ) else (
+    out(c, B2);
+    0
+  ).
+
+process
+  (
+    A
+  )
+  | (
+    B
+  )
