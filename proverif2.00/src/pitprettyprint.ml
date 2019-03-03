@@ -339,8 +339,6 @@ let id_tys_to_string_with_parens_if_not_empty id_tys =
   | l -> Printf.sprintf "(%s)" (id_tys_to_string l)
 
 let rec process_tproc ctx (p : tprocess) =
-  let open Print_context in
-
   let push = Print_context.push ctx in
   let push_to_last_line = Print_context.push_to_last_line ctx in
 
@@ -732,10 +730,8 @@ let tclause_to_string clause =
       (term_e_to_string r)
 
 let rec process_tdecl ctx decl =
-  let open Print_context in
-
-  let push = push ctx in
-  let push_to_last_line = push_to_last_line ctx in
+  let push = Print_context.push ctx in
+  let push_to_last_line = Print_context.push_to_last_line ctx in
 
   let set_struct_ty =
     Print_context.set_tdecl_struct_ty ctx
