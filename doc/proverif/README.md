@@ -16,7 +16,7 @@
 
 - [Added TPTP export module](tptp_export.md)
 
-  - Added inequality declaration between constants/free variables in the module
+  - Also added inequality declaration between constants/free variables in the module, documented the same file
 
 - Automatic abstract syntax tree modifications in export mode
 
