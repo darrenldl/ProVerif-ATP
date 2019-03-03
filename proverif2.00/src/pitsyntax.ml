@@ -3529,8 +3529,8 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
     | POutput(ch_term, term, p) -> POutput (ch_term, term, aux p)
     | PLet (pat, term, p, p') -> (
         match pat with
-        | PPatEqual term' ->
-          PTest ((PPFunApp ((eq_pred_name, dummy_ext), [term; term']), dummy_ext), aux p, aux p')
+        | PPatEqual pat_term ->
+          PTest ((PPFunApp ((eq_pred_name, dummy_ext), [pat_term; term]), dummy_ext), aux p, aux p')
         | _ -> PLet (pat, term, aux p, aux p')
       )
     | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux p, aux q)
