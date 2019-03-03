@@ -1,6 +1,6 @@
 # Automatic abstract syntax tree modification
 
-We overall introduced 4 automatic abstract syntax tree (AST) transformations
+We overall introduced four automatic abstract syntax tree (AST) transformations
 
 - [Output tagging](output_tag.md)
 
