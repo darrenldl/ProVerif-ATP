@@ -26,7 +26,12 @@ The implementation is very straightforward. Suppose we have free variables/const
 
 ## Implementation
 
-- Above is implemented in
-  - `Tptpout.get_free_or_const_names` (for gathering the list of names)
+Above is implemented in
 
-  - `Tptpout.output_eqs_about_names_being_neq` (for iterating over the names and exporting inequalities of above form)
+- `Tptpout.get_free_or_const_names`
+
+  - For gathering the list of names
+
+- `Tptpout.output_eqs_about_names_being_neq`
+
+  - For iterating over the names and exporting inequalities of above form
