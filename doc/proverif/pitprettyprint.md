@@ -65,4 +65,8 @@ $ diff CH07-tag-auth.pv.reprinted CH07-tag-auth.pv.processed
 
 The pretty printer module is implemented in `pitprettyprint.ml` and `pitprettyprint.mli`
 
-The main functions are 
+The main functions are
+
+- `Pitprettyprint.tdecls_to_string`
+
+- `Pitprettyprint.tproc_to_string_with_indent`
