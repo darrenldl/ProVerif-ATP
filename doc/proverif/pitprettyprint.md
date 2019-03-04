@@ -70,3 +70,5 @@ The main functions are
 - `Pitprettyprint.tdecls_to_string`
 
 - `Pitprettyprint.tproc_to_string_with_indent`
+
+The module is largely copied from Narrator's implementation, but adapted to use ProVerif's internal type representation of the abstract syntax tree (Narrator uses its own type representation of the tree)

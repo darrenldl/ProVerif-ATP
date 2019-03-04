@@ -1,4 +1,4 @@
-# Using Narrator
+# Using Narrator in software
 
 In the current suite and in our project, we use the `pvatp` main executable to streamline the entire operation, however, Narrator is not heavily tied to `pvatp` and can be attached to other pieces of software quite easily.
 
@@ -53,4 +53,4 @@ A copy of the runtime files are stored as the `pvatp_assets/narrator/` folder
 
 At each run, `pvatp` simply copies the entire `narrator` folder to a temporary location (i.e. `/tmp/` on most Linux systems), replaces `file_strings.js` with variable declarations containing file content, then launches the default web browser with URL pointing to the HTML file (e.g. `file:///tmp/narrator/index.html`).
 
-If you would like to use Narrator in your software, you can follow above approach. `pvatp`'s source code (stored as `src/pvatp.py`) is very straightforward to examine as well.
+If you would like to use Narrator in your software, you can follow the above approach. `pvatp`'s source code (stored as `src/pvatp.py`) is very straightforward to examine as well.
