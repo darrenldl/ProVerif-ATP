@@ -28,7 +28,7 @@ vampire: makedir vampire_tar
 	cp vampire-4.2.2/vampire build/pvatp_assets/
 
 narrator: makedir
-	cd narrator; DEBUG=1 make
+	cd narrator; make
 	rm -rf build/pvatp_asssets/narrator/
 	mkdir -p build/pvatp_assets/narrator/
 	cp -r narrator/_build/default/src/* build/pvatp_assets/narrator/
