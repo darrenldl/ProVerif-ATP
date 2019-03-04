@@ -1558,6 +1558,89 @@ let propagate_variable_boundedness (m : node_graph) : node_graph =
   let ((), m) = Analyzed_graph.linear_traverse () (Full_traversal propagate_boundedness_to_children) m in
   m
 
+module Protocol_step = struct
+  type direction = Client_to_intruder | Intruder_to_client
+
+  type t = {
+    proc_name : string option;
+    direction : direction;
+    step_num : int;
+    expr : Analyzed_expr.expr;
+  }
+
+  let break_down_step_string (s : string) : string option * int option =
+    let rec aux (parts : string list) (proc_name_parts : string list) (n : int option) : string option * int option =
+      match parts with
+      | [] -> ((match List.rev proc_name_parts with
+          | [] -> None
+          | l -> Some (String.concat "_" l)),
+               n)
+      | "STEP" :: [n] -> aux [] proc_name_parts (int_of_string_opt n)
+      | x :: xs -> aux xs (x :: proc_name_parts) n
+    in
+    aux (String.split_on_char '_' s) [] None
+
+  let node_to_steps (node : node) : t list =
+    match node with
+      | Group -> []
+      | Data node ->
+        match node.classification with
+        | ProtocolStep -> (
+            let es = Analyzed_expr.(node.expr
+                                    |> strip_att
+                                    |> get_function_args) in
+            match es with
+            | [e1; e2] -> (match break_down_step_string (Analyzed_expr.expr_to_string e2) with
+                | None, Some step_num -> [{ proc_name = None;
+                                            step_num;
+                                            direction = Client_to_intruder;
+                                            expr = e1;
+                                          }]
+                | Some proc_name, Some step_num -> [{ proc_name = Some proc_name;
+                                                      step_num;
+                                                      direction = Client_to_intruder;
+                                                      expr = e1;
+                                                    }]
+                | _ -> []
+              )
+            | _ -> []
+          )
+        | InteractiveProtocolStep -> (
+            let (pre, e) = Analyzed_expr.(node.expr
+                                          |> strip_quant
+                                          |> split_on_impl
+                                          |> (function | None -> failwith "Unexpected None" | Some x -> x)
+                                          |> (fun (x, y) -> (strip_att x, strip_att y))
+                                         ) in
+            match Analyzed_expr.get_function_args e with
+            | [e1; e2] -> (match break_down_step_string (Analyzed_expr.expr_to_string e2) with
+                | None, Some step_num -> [{ proc_name = None;
+                                            step_num;
+                                            direction = Client_to_intruder;
+                                            expr = e1;
+                                          };
+                                          { proc_name = None;
+                                            step_num;
+                                            direction = Intruder_to_client;
+                                            expr = pre;
+                                          }]
+                | Some proc_name, Some step_num -> [{ proc_name = Some proc_name;
+                                                      step_num;
+                                                      direction = Client_to_intruder;
+                                                      expr = e1;
+                                                    };
+                                                    { proc_name = Some proc_name;
+                                                      step_num;
+                                                      direction = Intruder_to_client;
+                                                      expr = pre;
+                                                    }]
+                | _ -> []
+              )
+            | _ -> []
+          )
+        | _ -> []
+end
+
 let classify_negated_goal (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph =
@@ -1621,8 +1704,9 @@ let classify_goal (m : node_graph) : node_graph =
 let classify_protocol_step (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let check_tag (tag : string) : bool =
-    let last_char = String.get tag (String.length tag - 1) in
-    '0' <= last_char && last_char <= '9'
+    match Protocol_step.break_down_step_string tag with
+    | _, Some _ -> true
+    | _ -> false
   in
   let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph =
     let data = unwrap_data node in
@@ -2181,89 +2265,6 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) : node_gra
   (* |> compress_chains *)
   (* |> compress_rewrite_trees *)
   (* |> compress_knowledge_trees *)
-
-module Protocol_step = struct
-  type direction = Client_to_intruder | Intruder_to_client
-
-  type t = {
-    proc_name : string option;
-    direction : direction;
-    step_num : int;
-    expr : Analyzed_expr.expr;
-  }
-
-  let break_down_step_string (s : string) : string option * int option =
-    let rec aux (parts : string list) (proc_name_parts : string list) (n : int option) : string option * int option =
-      match parts with
-      | [] -> ((match List.rev proc_name_parts with
-          | [] -> None
-          | l -> Some (String.concat "_" l)),
-               n)
-      | "STEP" :: [n] -> aux [] proc_name_parts (int_of_string_opt n)
-      | x :: xs -> aux xs (x :: proc_name_parts) n
-    in
-    aux (String.split_on_char '_' s) [] None
-
-  let node_to_steps (node : node) : t list =
-    match node with
-      | Group -> []
-      | Data node ->
-        match node.classification with
-        | ProtocolStep -> (
-            let es = Analyzed_expr.(node.expr
-                                    |> strip_att
-                                    |> get_function_args) in
-            match es with
-            | [e1; e2] -> (match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some step_num -> [{ proc_name = None;
-                                            step_num;
-                                            direction = Client_to_intruder;
-                                            expr = e1;
-                                          }]
-                | Some proc_name, Some step_num -> [{ proc_name = Some proc_name;
-                                                      step_num;
-                                                      direction = Client_to_intruder;
-                                                      expr = e1;
-                                                    }]
-                | _ -> []
-              )
-            | _ -> []
-          )
-        | InteractiveProtocolStep -> (
-            let (pre, e) = Analyzed_expr.(node.expr
-                                          |> strip_quant
-                                          |> split_on_impl
-                                          |> (function | None -> failwith "Unexpected None" | Some x -> x)
-                                          |> (fun (x, y) -> (strip_att x, strip_att y))
-                                         ) in
-            match Analyzed_expr.get_function_args e with
-            | [e1; e2] -> (match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some step_num -> [{ proc_name = None;
-                                            step_num;
-                                            direction = Client_to_intruder;
-                                            expr = e1;
-                                          };
-                                          { proc_name = None;
-                                            step_num;
-                                            direction = Intruder_to_client;
-                                            expr = pre;
-                                          }]
-                | Some proc_name, Some step_num -> [{ proc_name = Some proc_name;
-                                                      step_num;
-                                                      direction = Client_to_intruder;
-                                                      expr = e1;
-                                                    };
-                                                    { proc_name = Some proc_name;
-                                                      step_num;
-                                                      direction = Intruder_to_client;
-                                                      expr = pre;
-                                                    }]
-                | _ -> []
-              )
-            | _ -> []
-          )
-        | _ -> []
-end
 
 let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list =
   let open Analyzed_graph in
