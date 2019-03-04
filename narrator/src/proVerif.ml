@@ -16,12 +16,14 @@ module Raw_expr = struct
 
   type binary_op =
     | Eq
+    | Neq
 
   let unary_op_to_string = function
     | Not -> "~"
 
   let binary_op_to_string = function
     | Eq -> "="
+    | Neq -> "<>"
 
   type expr =
     | Variable of ident
@@ -84,6 +86,7 @@ module Raw_expr = struct
       [
         [prefix "!" Not];
         [infix "=" Eq];
+        [infix "<>" Neq]
       ]
 
     let rec
