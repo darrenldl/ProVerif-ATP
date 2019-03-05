@@ -28,11 +28,19 @@ Above shows the CH07 specification as a message sequence chart, which is a commo
 
 At top left and top right, R and T denotes the RFID reader and the RFID tag respectively. The "k, ID" above them indicates they both share common secrets k, ID prior to the run (execution) of the protocol. k denotes a key and ID denotes an identifier (e.g. serial number).
 
-At the beginning, R generates a nonce (randomly generated number that is used only once) r1 then sends it to T. T generates a nonce r2, calculates $\tilde{g}$ and $ID2$
+At the beginning, R generates nonce (randomly generated number that is used only once) r1 then sends it to T
+
+T generates nonce r2, calculates g̃ and ID2, then sends r2 and left half of (ID2 ⊕ g̃) to R.
+
+R finds the ID of T in its database, calculates g̃ and ID2 in the same way, then sends the right half of (ID2 ⊕ g̃) to T
+
+It is implicit that each party verifies the received messages against the calculated ones, and only continue the protocol run if they match up
 
 #### CH07 encoding
 
 #### Using pvatp
+
+**Demo site** You can also access the Narrator interface presented below through [here](https://darrenldl.gitlab.io/narrator-ch07), it is the same as the one you get locally through pvatp
 
 invoke pvatp on the `.pv` file, pvatp handles everything onward automatically as seen by the following sample terminal output
 
@@ -63,7 +71,7 @@ Below shows the Narrator interface opened by pvatp
 
 ![narrator_init](narrator_init.png)
 
-**Demo site** You can also access the Narrator interface with CH07 files loaded through [here](https://darrenldl.gitlab.io/narrator-ch07), it is the same as the one you get locally through pvatp
+
 
 There are three major modes in Narrator which we will go through one at a time. This initial interface shows the Narrator's "Tagged ProVerif source + attack trace" mode, which displays a prettified and tagged version of the ProVerif source code on left, and the attack trace on bottom right panel.
 
