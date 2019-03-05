@@ -2,7 +2,9 @@ all: build
 	
 build:
 	dune build @js --profile dev
-	cp -r node_modules/ _build/default/src/
+	cp -r node_modules/        _build/default/src/
+	cp    html/file_strings.js _build/default/src/
+	cp    html/index.html      _build/default/src/
 ifneq ($(DEBUG), 1)
 	find _build/ -name "*.ml"       -type f -delete
 	find _build/ -name "*.mli"      -type f -delete
