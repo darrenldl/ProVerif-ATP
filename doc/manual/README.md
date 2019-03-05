@@ -14,7 +14,7 @@ Following shows an example that also demonstrates basic navigation in Narrator, 
 
 ## Example
 
-We pick CH07 as our example (stored as `examples/CH07-tag-auth.pv`)
+We pick CH07 as our example
 
 We first go through the specification and our encoding, then we'll use pvatp for our analysis
 
@@ -37,6 +37,51 @@ R finds the ID of T in its database, calculates g̃ and ID2 in the same way, the
 It is implicit that each party verifies the received messages against the calculated ones, and only continue the protocol run if they match up
 
 #### CH07 encoding
+
+We wish to demonstrate CH07 fails to uphold the authentication property of T guaranteed to R, specifically CH07 fails to uphold the aliveness property of T to R. This means a RFID reader can complete a run of the protocol believing to have been communicating with a legitimate tag, while no tags were present at all. This is also called an impersonation attack - the attacker can impersonate a tag and successfully convince the RFID reader so.
+
+We only show the most important parts here, the full version can be seen in `examples/CH07-tag-auth.pv`
+
+```ocaml
+free objective : bitstring [private].
+
+query attacker(objective).
+
+let R =
+  new r1:bitstring;
+  out(c, (QUERY, r1));                  (* 1. send r1 R -> T *)
+  in(c, (r2             : bitstring,
+         left_xor_ID2_g : bitstring));  (* 2. recv left(xor(ID2, g))
+                                           T -> R *)
+  let g     = h(xor(xor(r1, r2), k)) in
+  let ID2   = rotate(ID, g) in
+  let left  = split_L(xor(ID2, g)) in
+  let right = split_R(xor(ID2, g)) in
+  if left = left_xor_ID2_g then (
+    out(c, right);                      (* 3. send right(xor(ID2, g))
+                                           R -> T *)
+    (* authenticated, send out objective *)
+    out(c, objective)
+  ).
+
+(* simulate 1st session *)
+let sess_1 =
+  (* run R and T internally once and output all network traffic *)
+  new r1_s1:bitstring;
+  out(c, r1_s1);
+  new r2_s1:bitstring;
+  let g_s1     = h(xor(xor(r1_s1, r2_s1), k)) in
+  let ID2_s1   = rotate(ID, g_s1) in
+  let left_s1  = split_L(xor(ID2_s1, g_s1)) in
+  let right_s1 = split_R(xor(ID2_s1, g_s1)) in
+  out(c, (r2_s1, left_s1));
+  out(c, right_s1).
+
+process
+  sess_1 | R
+```
+
+
 
 #### Using pvatp
 
