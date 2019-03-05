@@ -49,20 +49,20 @@ $ pvatp CH07-tag-auth.pv
 
 ProVerif - Reprint
 Reprinted version of your file is stored as :
-    examples/CH07-tag-auth.pv.reprinted
+    CH07-tag-auth.pv.reprinted
 
 ProVerif - Translate to TPTP
 Note that certain syntactic modifications are required for the
 translation to work, they are done by ProVerif automatically
 
 The processed version of syntax tree is stored as :
-    examples/CH07-tag-auth.pv.processed
+    CH07-tag-auth.pv.processed
 The TPTP file is stored as :
-    examples/CH07-tag-auth.p
+    CH07-tag-auth.p
 
 Calling Vampire to solve the TPTP file
 The output of Vampire is stored as :
-    /home/darren/ProVerif-ATP/CH07-tag-auth.solver_log
+    /home/user/ProVerif-ATP/CH07-tag-auth.solver_log
 Generating Narrator interface of the output file
 Opening Narrator interface in browser
 ```
