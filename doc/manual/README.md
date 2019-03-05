@@ -20,6 +20,16 @@ We first go through the specification and our encoding, then we'll use pvatp for
 
 #### CH07 specification
 
+CH07 is a RFID protocol for mutual authentication between a reader and a tag
+
+![ch07_chart](ch07_chart.png)
+
+Above shows the CH07 specification as a message sequence chart, which is a commonly used informal notation for outlining the major protocol steps.
+
+At top left and top right, R and T denotes the RFID reader and the RFID tag respectively. The "k, ID" above them indicates they both share common secrets k, ID prior to the run (execution) of the protocol. k denotes a key and ID denotes an identifier (e.g. serial number).
+
+At the beginning, R generates a nonce (randomly generated number that is used only once) r1 then sends it to T. T generates a nonce r2, calculates $\tilde{g}$ and $ID2$
+
 #### CH07 encoding
 
 #### Using pvatp
