@@ -38,15 +38,55 @@ It is implicit that each party verifies the received messages against the calcul
 
 #### CH07 encoding
 
-We wish to demonstrate CH07 fails to uphold the authentication property of T guaranteed to R, specifically CH07 fails to uphold the aliveness property of T to R. This means a RFID reader can complete a run of the protocol believing to have been communicating with a legitimate tag, while no tags were present at all. This is also called an impersonation attack - the attacker can impersonate a tag and successfully convince the RFID reader so.
+We wish to demonstrate CH07 fails to uphold the authentication property of T guaranteed to R if attack has knowledge of a prior session, specifically CH07 fails to uphold the aliveness property of T to R. This means a RFID reader can complete a run of the protocol believing to have been communicating with a legitimate tag, while no tags were present at all. This is also called an impersonation attack - the attacker can impersonate a tag and successfully convince the RFID reader so.
 
-We only show the most important parts here, the full version can be seen in `examples/CH07-tag-auth.pv`
+We go through the encoding in individual parts here, see `examples/CH07-tag-auth.pv` for the full encoding file
+
+We first declare the basic primitives (e.g. XOR) and the shared secrets we saw (i.e. k, ID)
+
+```ocaml
+const ZERO : bitstring.
+
+const QUERY : bitstring.
+
+free c : channel.
+
+fun h(bitstring) : bitstring.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+(* associativity *)
+equation forall x:bitstring, y:bitstring, z:bitstring; xor(x, xor(y, z)) = xor(xor(x, y), z).
+
+(* commutativity *)
+equation forall x:bitstring, y:bitstring; xor(x, y) = xor(y, x).
+
+(* neutral element *)
+equation forall x:bitstring; xor(x, ZERO) = x.
+
+(* nilpotence *)
+equation forall x:bitstring; xor(x, x) = ZERO.
+
+fun rotate(bitstring, bitstring) : bitstring.
+
+fun split_L(bitstring) : bitstring.
+fun split_R(bitstring) : bitstring.
+
+free k  : bitstring [private].
+free ID : bitstring [private].
+```
+
+We then declare "flag" called objective, which only serves to indicate completion of R, and also challenge the attacker to obtain this flag via the `query` construct.
 
 ```ocaml
 free objective : bitstring [private].
 
 query attacker(objective).
+```
 
+We declare R, which is just a straightforward translation from the left side of the message sequence chart. However, we assume R already knows the ID of T, removing the look up step of T's ID in database, to simplify the encoding. Notice the use of objective at the end of R to indicate end of execution.
+
+```ocaml
 let R =
   new r1:bitstring;
   out(c, (QUERY, r1));                  (* 1. send r1 R -> T *)
@@ -63,7 +103,11 @@ let R =
     (* authenticated, send out objective *)
     out(c, objective)
   ).
+```
 
+Next we encode the prior session, which is just a self-contained simulation. We encoded it this way to avoid attacker interacting with a previous session, complicating the proof. While this technique works well for CH07 and related protocols with similar challenge response structure, it is not restricted to just RFID classes of protocols, and similar encoding can be done for other protocols following the template.
+
+```ocaml
 (* simulate 1st session *)
 let sess_1 =
   (* run R and T internally once and output all network traffic *)
@@ -76,18 +120,24 @@ let sess_1 =
   let right_s1 = split_R(xor(ID2_s1, g_s1)) in
   out(c, (r2_s1, left_s1));
   out(c, right_s1).
+```
 
+Finally we run both processes concurrently
+
+```ocaml
 process
   sess_1 | R
 ```
 
+Notice we did not encode T, as the attacker is supposed to fill in the role of it.
 
+Overall, the attacker has the information from a previous legitimate session (represented by process sess_1), a RFID reader to interact with (represented by process R), and asked to make R complete execution (i.e. impersonate T).
 
 #### Using pvatp
 
 **Demo site** You can also access the Narrator interface presented below through [here](https://darrenldl.gitlab.io/narrator-ch07), it is the same as the one you get locally through pvatp
 
-invoke pvatp on the `.pv` file, pvatp handles everything onward automatically as seen by the following sample terminal output
+To start, just invoke pvatp on the `.pv` file, pvatp handles everything onward automatically as seen by the following sample terminal output
 
 ```bash
 $ pvatp CH07-tag-auth.pv
@@ -115,8 +165,6 @@ Opening Narrator interface in browser
 Below shows the Narrator interface opened by pvatp
 
 ![narrator_init](narrator_init.png)
-
-
 
 There are three major modes in Narrator which we will go through one at a time. This initial interface shows the Narrator's "Tagged ProVerif source + attack trace" mode, which displays a prettified and tagged version of the ProVerif source code on left, and the attack trace on bottom right panel.
 
