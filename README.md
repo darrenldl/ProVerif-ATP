@@ -16,9 +16,13 @@ where `protocol.pv` is the protocol specification in typed pi-calculus used by P
 
 `examples/` directory contains the protocol specifications we used for our benchmark, and also other ones we created during the project
 
+See the [user manual](doc/manual/README.md) for more details and an example
+
 ## Documentation
 
-- `doc/pvatp/` ([README](doc/pvatp/README.md)) contains the user manual and documentations detailing the architecture of ProVerif-ATP
+- `doc/manual/` ([README](doc/manual/README.md)) contains the user manual
+
+- `doc/pvatp/` ([README](doc/pvatp/README.md)) contains the documentations detailing the architecture of ProVerif-ATP
 
 - `doc/proverif/` ([README](doc/proverif/README.md)) contains the documentations detailing the modifications we made in ProVerif
 

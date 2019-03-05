@@ -6,8 +6,9 @@ clean:
 	rm -rf build/
 
 install: all
-	sudo cp    build/pvatp        /usr/local/bin/
-	sudo cp -r build/pvatp_assets /usr/local/bin/
+	sudo cp     build/pvatp        /usr/local/bin/
+	sudo rm -rf                    /usr/local/bin/pvatp_assets/
+	sudo cp -r  build/pvatp_assets /usr/local/bin/
 
 makedir:
 	mkdir -p build
