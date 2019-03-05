@@ -162,7 +162,7 @@ Generating Narrator interface of the output file
 Opening Narrator interface in browser
 ```
 
-#### Narrator interface
+#### Interlude - Narrator interface overview
 
 Below shows the Narrator interface opened by pvatp
 
@@ -182,7 +182,19 @@ Finally we click "Show knowledge graph" which invokes the **Knowledge graph** mo
 
 ![Narrator knowledge graph](narrator_knowledge.png)
 
-The knowledge graph display is an interactive display where user may drag, zoom, select node etc. Recall from the attack trace shown in the attack trace mode (copied below)
+The knowledge graph display is an interactive display where user may drag, zoom, select node etc. Each node is classified and colour coded accordingly with one of the listed colours
+
+![Colour coding table](narrator_knowledge_colour.png)
+
+The classifications are detailed in the [complete guide on Narrator interface](narrator.md). We only focus on "protocol step" and "interactive protocol step" in this example.
+
+- Protocol step refers to an unconditional output step, such as step `R.1` (whatever the attacker does, R will send out the nonce r1)
+
+- Interactive protocol step refers to an output step which depends on one or more previous input steps, such as step `R.3 R -> I` which requires attacker to provide the right message at step `R.3 I -> R`
+
+#### Putting everything together
+
+Recall from the attack trace shown in the attack trace mode (copied below)
 
 ```ocaml
 1.    sess_1.1    sess_1 -> I : r1_s1
@@ -196,8 +208,12 @@ The knowledge graph display is an interactive display where user may drag, zoom,
 5.    R.3         R -> I : objective
 ```
 
-we know step 4 (or step `R.3 I -> R`, which indicates the input step prior to output step 3 in R) is when the attacker provides the message `tuple_2(X28,split_L(xor(rotate(ID,h(xor(xor(r1,X28),k))),h(xor(xor(r1,X28),k)))))` and obtains objective at step 4 (or step `R.3 R -> I`, which indicates the output step 3 in R).
+we know step 4 (or step `R.3 I -> R`, which indicates the input step prior to output step 3 in R) is when the attacker provides the message `tuple_2(X28,split_L(xor(rotate(ID,h(xor(xor(r1,X28),k))),h(xor(xor(r1,X28),k)))))` and obtains objective at step 4 (or step `R.3 R -> I`, which indicates the output step 3 in R), where `X28` is a variable (but represents a concrete value, more on that shortly).
 
-Narrator cannot resolve variables such as `X28` right now as it requires the ATP to explicitly state the unifiers used, but this is not readily available. Vampire 4.2.2 provides an experimental option `--proof_extra` which exports the unifiers used, but the unifiers are only available in its native output format, not in TPTP output mode.
+Now we wish to know how `tuple_2(X28,split_L(xor(rotate(ID,h(xor(xor(r1,X28),k))),h(xor(xor(r1,X28),k)))))` is constructed.
 
-Nevertheless
+Notice that this is part of the step `R.3`, and thus would appear as an interactive protocol step (dark red) in the knowledge graph.
+
+#### Limitations
+
+Narrator currently cannot resolve variables such as `X28` right now as it requires the ATP to explicitly state the unifiers used, but this is not ralways eadily available. Vampire 4.2.2 provides an experimental option `--proof_extra` which exports the unifiers used, but the unifiers are only available in its native output format, not in TPTP output mode.
