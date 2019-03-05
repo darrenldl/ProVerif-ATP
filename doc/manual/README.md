@@ -14,7 +14,17 @@ Following shows an example that also demonstrates basic navigation in Narrator, 
 
 ## Example
 
-We pick the CH07 example in the `examples/` folder and invoke pvatp on the `.pv` file, pvatp handles everything onward automatically as seen by the following sample terminal output
+We pick CH07 as our example (stored as `examples/CH07-tag-auth.pv`)
+
+We first go through the specification and our encoding, then we'll use pvatp for our analysis
+
+#### CH07 specification
+
+#### CH07 encoding
+
+#### Using pvatp
+
+invoke pvatp on the `.pv` file, pvatp handles everything onward automatically as seen by the following sample terminal output
 
 ```bash
 $ pvatp CH07-tag-auth.pv
@@ -43,7 +53,7 @@ Below shows the Narrator interface opened by pvatp
 
 ![narrator_init](narrator_init.png)
 
-**Demo site** You can also access the Narrator interface with CH07 files loaded through [here](...), it is the same as the one you get locally through pvatp
+**Demo site** You can also access the Narrator interface with CH07 files loaded through [here](https://darrenldl.gitlab.io/narrator-ch07), it is the same as the one you get locally through pvatp
 
 There are three major modes in Narrator which we will go through one at a time. This initial interface shows the Narrator's "Tagged ProVerif source + attack trace" mode, which displays a prettified and tagged version of the ProVerif source code on left, and the attack trace on bottom right panel.
 
@@ -73,4 +83,4 @@ The knowledge graph display is an interactive, zoomable display. Recall from the
 5.    R.3         R -> I : objective
 ```
 
-
+we know step 4 (or step `R.3 I -> R`, which indicates the input step prior to output step 3 in R) is when the attacker provides the message `tuple_2(X28,split_L(xor(rotate(ID,h(xor(xor(r1,X28),k))),h(xor(xor(r1,X28),k)))))` and obtains objective at step 4 (or step `R.3 R -> I`, which indicates the output step 3 in R).
