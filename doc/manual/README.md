@@ -214,14 +214,97 @@ Now we wish to know how `tuple_2(X28,split_L(xor(rotate(ID,h(xor(xor(r1,X28),k))
 
 Notice that this is part of the step `R.3`, which is an interactive step, and thus would appear as a dark red in the knowledge graph. In this example, there is only one dark red node, which is at the top right of the knowledge graph as shown below. The dark red node is selected and highlighted by a black border.
 
-![Find interactive step](narrator_find_red.png)**Side note about node graphics** Selecting a node populates the formula box on right immediately below the control panel, as well as the formula AST display on bottom right as shown above. Formulas involved in a refutation proof are usually very lengthy, thus we chose to display them this way. If you want them to appear on the node directly, select the nodes and click "Toggle label of selected node" or "Toggle label of selected node (skip layout calculation)". The former will take the space used by the formula text into account and rearrange the graph, the latter will just leave the nodes as they are in current positions (the text may be drawn over other nodes as a result).
+![Find interactive step](narrator_find_red.png)**Side note about node graphics** Selecting a node populates the formula box on right immediately below the control panel, as well as the formula abstract syntax tree (AST) display on bottom right as shown above. Formulas involved in a refutation proof are usually very lengthy, thus we chose to display them separately. If you want them to appear on the node directly, select the nodes and click "Toggle label of selected node" or "Toggle label of selected node (skip layout calculation)". The former will take the space used by the formula text into account and rearrange the graph, the latter will just leave the nodes as they are in current positions (the text may be drawn over other nodes as a result).
 
 We trace downward from the interactive protocol step until we see a green node that branches into two gray nodes.
 
 ![Two gray nodes](narrator_two_gray.png)
 
+This branching is introduced by Vampire's AVATAR architecture for utilising SAT or SMT solvers for improved capability. We click on the two gray nodes and we see their respective formulas
+
+```ocaml
+spl0_2 <=> ! [X0] : ~attacker(tuple_2(X0,split_L(xor(h(xor(k,xor(r1,X0))),rotate(ID,h(xor(k,xor(r1,X0))))))))
+
+spl0_0 <=> attacker(tuple_2(objective,R_STEP_3))
+```
+
+We can see `spl0_2` and `spl0_0` as "aliases" in this example as they are essentially a short name of the two full formulas. We notice the first formula (from the left gray node) carries the message we are interested in figuring how to construct, so we follow it and click on the green node following it shown below.
+
+![Follow green](narrator_follow_green.png)
+
+So obviously if we continue clicking on the connected formulas and observe how they are deconstructed and combined, and their origins, we can reason with what the attacker resembles. However, this is a very tedious process, thus we invoke Narrator's explanation mechanism to automate this for us. Simply click "Explain construction of chain" and the explanation text will appear in the bottom right display, replacing the formula AST.
+
+![Explanation](narrator_explanation.png)
+
+Below shows the full copy of the text, where `X0` is same as the `X28` in the attack trace.
+
+```ocaml
+From
+  step R.1
+  axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
+  axiom ! [X19,X20] : attacker(tuple_2(X19,X20)) => attacker(X20)
+attacker knows
+  r1
+                                           
+From
+  step sess_1.2
+  axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
+  axiom ! [X2,X3] : xor(X2,X3) = xor(X3,X2)
+attacker learns
+  r2_s1
+
+From
+  axiom ! [X8,X9] : (attacker(X9) & attacker(X8)) => attacker(xor(X8,X9))
+  r2_s1
+  r1
+attacker knows
+  xor(r1,r2_s1)
+                                           
+From
+  step sess_1.1
+  axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
+attacker learns
+  r1_s1
+
+From
+  axiom ! [X2,X3] : xor(X2,X3) = xor(X3,X2)
+  axiom ! [X4,X5,X6] : xor(X4,xor(X5,X6)) = xor(xor(X4,X5),X6)
+  axiom ! [X8,X9] : (attacker(X9) & attacker(X8)) => attacker(xor(X8,X9))
+  r1_s1
+  xor(r1,r2_s1)
+attacker knows
+  xor(r1,xor(r1_s1,r2_s1))
+                                           
+From
+  step sess_1.2
+  axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
+  axiom ! [X19,X20] : attacker(tuple_2(X19,X20)) => attacker(X20)
+  axiom ! [X2,X3] : xor(X2,X3) = xor(X3,X2)
+attacker learns
+  split_L(xor(h(xor(k,xor(r1_s1,r2_s1))),rotate(ID,h(xor(k,xor(r1_s1,r2_s1))))))
+
+Attacker rewrites
+  split_L(xor(h(xor(k,X2)),rotate(ID,h(xor(k,X2)))))
+to
+  split_L(xor(h(xor(k,xor(r1,X0))),rotate(ID,h(xor(k,xor(r1,X0))))))
+
+  xor(r1,X2)
+to
+  X0
+                                          
+From
+  axiom ! [X15,X16] : (attacker(X16) & attacker(X15)) => attacker(tuple_2(X15,X16))
+  split_L(xor(h(xor(k,xor(r1,X0))),rotate(ID,h(xor(k,xor(r1,X0))))))
+  X0
+attacker knows
+  tuple_2(X0,split_L(xor(h(xor(k,xor(r1,X0))),rotate(ID,h(xor(k,xor(r1,X0)))))))
+                                           
+```
+
 
 
 #### Limitations
 
-Narrator currently cannot resolve variables such as `X28` right now as it requires the ATP to explicitly state the unifiers used, but this is not ralways eadily available. Vampire 4.2.2 provides an experimental option `--proof_extra` which exports the unifiers used, but the unifiers are only available in its native output format, not in TPTP output mode.
+- Narrator currently cannot resolve variables (e.g. `X28`, `X0` above) right now as it requires the ATP to explicitly state the unifiers used, but this is not ralways eadily available. Vampire 4.2.2 provides an experimental option `--proof_extra` which exports the unifiers used, but the unifiers are only available in its native output format, not in TPTP output mode.
+
+- We have not implemented an explanation mechanism for deconstruction yet. Explanation of construction is useful to ascertain the message to send when the attack is about satisfying a challenge, but not useful when we want to figure out how a secret is leaked. Thus the counterpart is desirable, which we will introduce in a future version.
