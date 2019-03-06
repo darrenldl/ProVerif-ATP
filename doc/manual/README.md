@@ -236,37 +236,37 @@ So obviously if we continue clicking on the connected formulas and observe how t
 
 ![Explanation](narrator_explanation.png)
 
-Below shows the full copy of the text, where `X0` is same as the `X28` in the attack trace.
+Below shows the full copy of the text with numbering, where `X0` is same as the `X28` in the attack trace.
 
 ```ocaml
-From
+(1) From
   step R.1
   axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
   axiom ! [X19,X20] : attacker(tuple_2(X19,X20)) => attacker(X20)
 attacker knows
   r1
                                            
-From
+(2) From
   step sess_1.2
   axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
   axiom ! [X2,X3] : xor(X2,X3) = xor(X3,X2)
 attacker learns
   r2_s1
 
-From
+(3) From
   axiom ! [X8,X9] : (attacker(X9) & attacker(X8)) => attacker(xor(X8,X9))
   r2_s1
   r1
 attacker knows
   xor(r1,r2_s1)
                                            
-From
+(4) From
   step sess_1.1
   axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
 attacker learns
   r1_s1
 
-From
+(5) From
   axiom ! [X2,X3] : xor(X2,X3) = xor(X3,X2)
   axiom ! [X4,X5,X6] : xor(X4,xor(X5,X6)) = xor(xor(X4,X5),X6)
   axiom ! [X8,X9] : (attacker(X9) & attacker(X8)) => attacker(xor(X8,X9))
@@ -275,7 +275,7 @@ From
 attacker knows
   xor(r1,xor(r1_s1,r2_s1))
                                            
-From
+(6) From
   step sess_1.2
   axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
   axiom ! [X19,X20] : attacker(tuple_2(X19,X20)) => attacker(X20)
@@ -283,7 +283,7 @@ From
 attacker learns
   split_L(xor(h(xor(k,xor(r1_s1,r2_s1))),rotate(ID,h(xor(k,xor(r1_s1,r2_s1))))))
 
-Attacker rewrites
+(7) Attacker rewrites
   split_L(xor(h(xor(k,X2)),rotate(ID,h(xor(k,X2)))))
 to
   split_L(xor(h(xor(k,xor(r1,X0))),rotate(ID,h(xor(k,xor(r1,X0))))))
@@ -292,7 +292,7 @@ to
 to
   X0
                                           
-From
+(8) From
   axiom ! [X15,X16] : (attacker(X16) & attacker(X15)) => attacker(tuple_2(X15,X16))
   split_L(xor(h(xor(k,xor(r1,X0))),rotate(ID,h(xor(k,xor(r1,X0))))))
   X0
@@ -301,7 +301,26 @@ attacker knows
                                            
 ```
 
+Lastly, due to the current Narrator's limitations (mentioned in next section), we still need to some manual pattern matching to find out what `X0` is exactly.
 
+Going from bottom to top, we can trace the bindings
+
+```
+X0 = xor(r1, X2)                  from (7)
+X2 = xor(r1, X0)                  from (7)
+
+X2 = xor(r1_s1,r2_s1)             from (6) and (7)
+X0 = xor(r1,xor(r1_s1,r2_s1))     from (6) and (7),
+                                  or   (5) and (7)
+```
+
+Now we can conclude the message the attacker needs to provide to reader at step `R.3` to impersonate tag is
+
+```ocaml
+tuple_2(xor(r1,xor(r1_s1,r2_s1)),
+        split_L(xor(rotate(ID,h(xor(xor(r1,xor(r1,xor(r1_s1,r2_s1))),k))),
+                    h(xor(xor(r1,xor(r1,xor(r1_s1,r2_s1))),k)))))
+```
 
 #### Limitations
 
