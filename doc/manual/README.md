@@ -212,7 +212,13 @@ we know step 4 (or step `R.3 I -> R`, which indicates the input step prior to ou
 
 Now we wish to know how `tuple_2(X28,split_L(xor(rotate(ID,h(xor(xor(r1,X28),k))),h(xor(xor(r1,X28),k)))))` is constructed.
 
-Notice that this is part of the step `R.3`, which is an interactive step, and thus would appear as a dark red in the knowledge graph. In this example, there is only one dark red node, which is at the top right of the knowledge graph as shown below.
+Notice that this is part of the step `R.3`, which is an interactive step, and thus would appear as a dark red in the knowledge graph. In this example, there is only one dark red node, which is at the top right of the knowledge graph as shown below. The dark red node is selected and highlighted by a black border.
+
+![Find interactive step](narrator_find_red.png)**Side note about node graphics** Selecting a node populates the formula box on right immediately below the control panel, as well as the formula AST display on bottom right as shown above. Formulas involved in a refutation proof are usually very lengthy, thus we chose to display them this way. If you want them to appear on the node directly, select the nodes and click "Toggle label of selected node" or "Toggle label of selected node (skip layout calculation)". The former will take the space used by the formula text into account and rearrange the graph, the latter will just leave the nodes as they are in current positions (the text may be drawn over other nodes as a result).
+
+We trace downward from the interactive protocol step until we see a green node that branches into two gray nodes.
+
+![Two gray nodes](narrator_two_gray.png)
 
 
 
