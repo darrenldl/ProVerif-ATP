@@ -212,7 +212,9 @@ we know step 4 (or step `R.3 I -> R`, which indicates the input step prior to ou
 
 Now we wish to know how `tuple_2(X28,split_L(xor(rotate(ID,h(xor(xor(r1,X28),k))),h(xor(xor(r1,X28),k)))))` is constructed.
 
-Notice that this is part of the step `R.3`, and thus would appear as an interactive protocol step (dark red) in the knowledge graph.
+Notice that this is part of the step `R.3`, which is an interactive step, and thus would appear as a dark red in the knowledge graph. In this example, there is only one dark red node, which is at the top right of the knowledge graph as shown below.
+
+
 
 #### Limitations
 

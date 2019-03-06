@@ -49,6 +49,29 @@ See the [user manual](doc/manual/README.md) for more details and an example
 
   - This contains all the protocol specification and related files used in the benchmark
 
+## Versioning
+
+- We follow the semantic versioning scheme with the following specifics
+
+  - Right now
+
+    - Any change in our copy of ProVerif will result in increment of the version number of ProVerif-ATP (following the semantic versioning scheme's guidelines)
+
+    - Narrator's versioning is always same as ProVerif-ATP's versioning
+
+    - This means if there are changes in our copy of ProVerif, but not in Narrator, both ProVerif-ATP and Narrator's version numbers are still incremented
+
+  - In future after the modifications have been integrated into the official ProVerif distribution
+
+    - Narrator's versioning will still be always same as ProVerif-ATP's versioning
+
+- We tag each new version when the version is finalised and released
+
+## Changelog
+
+- All changes are logged under the same [changelog](CHANGELOG.md)
+  - Changes in different components are documented separately as different sections
+
 ## Acknowledgement
 
 While the TPTP parser code in Narrator was independently developed from scratch according to the [TPTP syntax reference](http://tptp.cs.miami.edu/~tptp/TPTP/SyntaxBNF.html), [zipperposition](https://github.com/c-cube/zipperposition)'s TPTP parser code was used as reference during the final debugging phase
