@@ -6,4 +6,10 @@
 
 ## Knowledge graph mode
 
-See [here](classification.md) for the classification colour coding list and description
+#### Classification colour coding
+
+See [here](classification.md)
+
+#### General interface
+
+
