@@ -149,9 +149,10 @@ let fun_set_fact = function
     Pred(p,l) ->
       add_pred p;
       List.iter fun_set_term l
-  | _ -> 
+  | _ ->
       (* TO DO implement translation of begin facts *)
-      Parsing_helper.user_error "translation of begin facts into the Spass input format not yet\nimplemented"
+      (* Parsing_helper.user_error "translation of begin facts into the Spass input format not yet\nimplemented" *)
+    ()
 
 let fun_set rules =
    List.iter (fun (hyp, concl, _, constra) ->
@@ -186,7 +187,11 @@ let output_fact filename = function
       output_pred_name filename p;
       if l != [] then 
 	output_term_list filename l
-  | Out _ -> Parsing_helper.internal_error "internal error output_fact"
+  | Out (t, l) ->
+    (* Parsing_helper.internal_error "internal error output_fact" *)
+    output_term filename t;
+    (* List.iter (fun (_, t) -> output_term filename t) l *)
+    ()
 
 let output_fact_list filename l =
       let start = ref true in

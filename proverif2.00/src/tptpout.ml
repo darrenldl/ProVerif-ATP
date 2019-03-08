@@ -89,7 +89,7 @@ let fact_to_str f =
   match f with
   | Pred(p, l) ->
     Printf.sprintf "%s%s" (pred_to_str p) (terms_to_str l)
-  | Out _ -> Parsing_helper.internal_error "internal error output_fact"
+  | Out _ -> Parsing_helper.user_error "translation of begin facts into the TPTP input format not yet\nimplemented"
 
 (* let body_to_str (hyp, concl, _, constra) =
  *   match hyp with
@@ -153,10 +153,10 @@ let constraint_to_str (c : Types.constraints) =
   | Neq(t1, t2) -> Printf.sprintf "%s != %s" (term_to_str t1) (term_to_str t2)
 
 let rule_to_str (hyp, concl, _, constra) =
-  let hyp = List.filter (function
-      | Pred _ -> true
-      | Out _ -> false) hyp
-  in
+  (* let hyp = List.filter (function
+   *     | Pred _ -> true
+   *     | Out _ -> false) hyp
+   * in *)
   let vars_facts = vars_in_facts (concl :: hyp) in
   let hyp =
     match constra with
