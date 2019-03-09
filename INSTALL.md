@@ -13,9 +13,13 @@
 
 #### Compilers required
 
-- OCaml compiler (for Narrator and ProVerif)
+- OCaml compiler >= 4.07.1 (for Narrator and ProVerif)
+
+  - You can switch to 4.07.1 by `opam switch 4.07.1`
 
 - C++ compiler (for Vampire)
+
+- Python >= 3.7.2 (for pvatp.py)
 
 #### OCaml packages required
 
