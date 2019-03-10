@@ -245,7 +245,7 @@ Below shows the full copy of the text with numbering, where `X0` is same as the 
   axiom ! [X19,X20] : attacker(tuple_2(X19,X20)) => attacker(X20)
 attacker knows
   r1
-                                           
+
 (2) From
   step sess_1.2
   axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
@@ -259,7 +259,7 @@ attacker learns
   r1
 attacker knows
   xor(r1,r2_s1)
-                                           
+
 (4) From
   step sess_1.1
   axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
@@ -274,7 +274,7 @@ attacker learns
   xor(r1,r2_s1)
 attacker knows
   xor(r1,xor(r1_s1,r2_s1))
-                                           
+
 (6) From
   step sess_1.2
   axiom ! [X17,X18] : attacker(tuple_2(X17,X18)) => attacker(X17)
@@ -291,14 +291,13 @@ to
   xor(r1,X2)
 to
   X0
-                                          
+
 (8) From
   axiom ! [X15,X16] : (attacker(X16) & attacker(X15)) => attacker(tuple_2(X15,X16))
   split_L(xor(h(xor(k,xor(r1,X0))),rotate(ID,h(xor(k,xor(r1,X0))))))
   X0
 attacker knows
   tuple_2(X0,split_L(xor(h(xor(k,xor(r1,X0))),rotate(ID,h(xor(k,xor(r1,X0)))))))
-                                           
 ```
 
 Lastly, due to the current Narrator's limitations (mentioned in next section), we still need to some manual pattern matching to find out what `X0` is exactly.
