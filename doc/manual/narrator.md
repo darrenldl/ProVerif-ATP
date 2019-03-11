@@ -24,6 +24,8 @@ Bottom right panel displays the attack trace
 
 ## Knowledge graph mode
 
+### Formula submode
+
 ![Knowledge graph mode](narrator_knowledge_mode.png)
 
 #### Classification colour coding
@@ -36,4 +38,12 @@ The left panel shows the knowledge graph representation of the attack of the pro
 
 Mid right panel shows the formula of the selected node, the bottom right panel shows the abstract syntax tree of the formula
 
+Bottom panel shows the explanation of the currently selected node
 
+### Explanation submode
+
+![Explanation mode](narrator_explanation_mode.png)
+
+#### Interface description
+
+The panels are same as above, but the bottom right panel displays the explanation instead of the formula AST
