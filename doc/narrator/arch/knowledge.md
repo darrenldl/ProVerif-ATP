@@ -22,4 +22,4 @@ fof(f460,plain,(
 
 By interpreting these source IDs as "parents", we can draw a directed acyclic graph very easily
 
-At this stage, we have a graphical representation of relationship between the formulas, but since we are interpreting this as an attack, we want to know what role each formula plays in forming the attack.
+At this stage, we have a graphical representation of relationship between the formulas, but since we are interpreting this as an attack, we want to know what role each formula plays in forming the attack. Narrator facilitiates this by classifying them automatically on a best-effort basis, this can be seen graphically by the colour coding of the nodes.
