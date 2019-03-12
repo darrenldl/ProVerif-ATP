@@ -1,8 +1,8 @@
 # Architecture of Narrator
 
-Following shows the core components in Narrator
+Following links to the architecture document of core components in Narrator
 
-- Knowledge graph
+- [Knowledge graph](arch/knowledge.md)
 
 - Attack trace extraction
 
