@@ -72,4 +72,8 @@ The classification algorithm uses a set of simple pattern based rules to infer t
 
 ## Rewrite conclusion
 
-In a successful refutation, 
+In a successful refutation, the conclusion is the false symbol (or contradiction)
+
+While this is the standard style, this is unintuitive to interpet as a knowledge graph, as our expected conclusion is the successful attack
+
+Narrator rewrites the conclusion of the knowledge graph while preserving the logical coherence
