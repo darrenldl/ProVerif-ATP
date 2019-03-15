@@ -6,4 +6,4 @@ Following links to the architecture document of core components in Narrator
 
 - [Attack trace extraction](attack_trace.md)
 
-- Explanation mechansim
+- [Explanation mechansim](explanation.md)
