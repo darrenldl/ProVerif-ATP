@@ -3572,17 +3572,26 @@ let pat_to_name (pat : tpattern) : string option =
   | PPatEqual _ -> None
 
 let lookup_pterm_type ((term : pterm)) (vb : string Binder.t) : string =
-  match term with
-  | PPIdent (id, _) -> Binder.find id vb
-  | PPFunApp ((id, _), _) -> Binder.find id vb
-  | PPTuple _ -> "bitstring"
-  | PPRestr ((id, _), _opts, (ty, _), _) -> ty
-  | PPTest _ -> failwith "Unexpected case"
-  | PPLet _ -> failwith "Unexpected case"
-  | PPLetFilter _ -> failwith "Unexpected case"
-  | PPEvent _ -> failwith "Unexpected case"
-  | PPInsert _ -> failwith "Unexpected case"
-  | PPGet _ -> failwith "Unexpected case"
+  let rec aux term vb =
+      match term with
+      | PPIdent (id, _) -> Binder.find id vb
+      | PPFunApp ((id, _), _) -> Binder.find id vb
+      | PPTuple _ -> "bitstring"
+      | PPRestr ((id, _), _opts, (ty, _), _) -> ty
+      | PPTest (_cond, (b1, _), _b2) -> aux b1 vb
+      | PPLet (pat, (v, _), (b1,_), b2) -> (
+          let vb = match pat_to_name pat with
+            | Some n -> Binder.add n (aux v vb) vb
+            | None -> vb
+          in
+          aux b1 vb
+        )
+      | PPLetFilter _ -> failwith "Unexpected case"
+      | PPEvent _ -> failwith "Unexpected case"
+      | PPInsert _ -> failwith "Unexpected case"
+      | PPGet _ -> failwith "Unexpected case"
+  in
+  aux term vb
 
 let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
   let eq_list = ref [] in
@@ -3604,6 +3613,15 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
     | POutput(ch_term, term, p) -> POutput (ch_term, term, aux vb kb p)
     | PLet (pat, (term, term_e), p, p') -> (
         match pat with
+        | PPatVar ((id, _), ty) -> (
+            let ty2 = lookup_pterm_type term vb in
+            let ty1 = match ty with
+              | Some (ty, _) -> ty
+              | None -> ty2
+            in
+            let vb = Binder.add id ty1 vb in
+            PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
+          )
         | PPatEqual (pat_term, pat_term_e) -> (
             let ty1 = lookup_pterm_type pat_term vb in
             let ty2 = lookup_pterm_type term vb in
