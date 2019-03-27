@@ -3283,15 +3283,17 @@ module Flatten_let_binding = struct
     constructor_type : constructor_type;
     size : int;
     index : int;
+    ty : string option;
   }
 
   let access_to_accessor_ident access =
-    let { constructor_type; size; index } = access in
+    let { constructor_type; size; index; ty } = access in
     let name = match constructor_type with
       | Constr_tuple -> "tuple"
       | Constr_fun f -> f
     in
-    Printf.sprintf "%s_%d_get_%d" name size index
+    Printf.sprintf "%s_%d_get_%d%s" name size index
+      (match ty with | Some x -> "_" ^ x | None -> "")
 
   type ctx = {
     mutable accesses : access list;
@@ -3312,8 +3314,8 @@ module Flatten_let_binding = struct
     | PPatFunApp ((f, _), l) -> FunApp (f, List.map of_pat l)
     | _ -> Leaf pat
 
-  let make_access constructor_type size index =
-    { constructor_type; size; index }
+  let make_access constructor_type size index ty =
+    { constructor_type; size; index; ty }
 
   let record_access (ctx : ctx) access : unit =
     ctx.accesses <- access :: ctx.accesses
@@ -3352,7 +3354,7 @@ module Flatten_let_binding = struct
     let rec aux acc (l : access list) =
       match l with
       | [] -> List.rev acc
-      | { constructor_type; size; index } as access :: xs ->
+      | { constructor_type; size; index; ty } as access :: xs ->
         let ident = access_to_accessor_ident access in
 
         let (equation_decl, accessor_decl) =
@@ -3403,6 +3405,17 @@ module Flatten_let_binding = struct
       []
       accesses
 
+  let type_of_t (t : t) : string option =
+    match t with
+    | Tuple _ -> Some "bitstring"
+    | FunApp _ -> Some "bitstring"
+    | Leaf x ->
+      match x with
+      | PPatVar (_, Some (ty,_)) -> Some ty
+      | PPatVar (_, None) -> None
+      | PPatEqual _ -> None
+      | _ -> failwith "Unexpected pattern"
+
   let flatten (ctx : ctx) (t : t) (term : pterm_e) (true_branch : tprocess) (false_branch : tprocess) : tprocess =
     let rec collect_let_bindings (accesses : access list) t : (access list * tpattern * pterm_e) list =
       match t with
@@ -3410,7 +3423,8 @@ module Flatten_let_binding = struct
         let size = List.length l in
         List.concat (
           List.mapi (fun index t ->
-              let access = make_access Constr_tuple size index in
+              let ty = type_of_t t in
+              let access = make_access Constr_tuple size index ty in
               record_access ctx access;
               collect_let_bindings (access :: accesses) t
             ) l
@@ -3419,7 +3433,8 @@ module Flatten_let_binding = struct
         let size = List.length l in
         List.concat (
           List.mapi (fun index t ->
-              let access = make_access (Constr_fun f) size index in
+              let ty = type_of_t t in
+              let access = make_access (Constr_fun f) size index ty in
               record_access ctx access;
               collect_let_bindings (access :: accesses) t
             ) l
