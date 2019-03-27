@@ -1,7 +1,0 @@
-lib: [
-  "_build/install/default/lib/narrator/META" {"META"}
-  "_build/install/default/lib/narrator/opam" {"opam"}
-]
-bin: [
-  "_build/install/default/bin/narrator" {"narrator"}
-]
