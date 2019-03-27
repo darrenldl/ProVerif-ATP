@@ -3682,15 +3682,21 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
       decl
   in
 
-  Binder.iter (fun k v ->
-      Printf.printf "var %s : %s\n" k v
-    )
-    global_vb;
+  (* Binder.iter (fun k v ->
+   *     Printf.printf "var %s : %s\n" k v
+   *   )
+   *   global_vb; *)
 
   let decl = List.map (fun decl ->
       match decl with
       | TPDef ((id, e), m, p) ->
-        TPDef ((id, e), m, aux global_vb global_kb p)
+        let vb = List.fold_left (fun vb ((id, _), (ty, _), _) ->
+            Binder.add id ty vb
+          )
+            global_vb
+            m
+        in
+        TPDef ((id, e), m, aux vb global_kb p)
       | _ -> decl
     ) decl
   in
