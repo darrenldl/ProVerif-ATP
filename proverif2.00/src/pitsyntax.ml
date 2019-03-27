@@ -3690,6 +3690,8 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
       !eq_list
   in
 
+  let eq_decl = List.sort_uniq compare eq_decl in
+
   let (type_decl, existing_ones) = List.fold_left (fun (type_decl, existing_ones) decl ->
       match decl with
       | TTypeDecl (ty, _) -> (decl :: type_decl, existing_ones)
