@@ -3341,10 +3341,14 @@ module Flatten_let_binding = struct
       assert (size > 0);
       aux [] (size - 1)
     in
-    let make_envdecl (size : int) : envdecl =
+    let make_envdecl (size : int) (return_var_index : int) (return_ty : string option) : envdecl =
+      let return_ty = match return_ty with | Some x -> x | None -> "" in
       let idents = arg_idents size in
-      List.map (fun ident ->
-          ((ident, dummy_ext), (bitstring, dummy_ext))
+      List.mapi (fun index ident ->
+          if index = return_var_index then
+            ((ident, dummy_ext), (return_ty, dummy_ext))
+          else
+            ((ident, dummy_ext), (bitstring, dummy_ext))
         ) idents
     in
     let make_arg_term_e_s (size : int) : term_e list =
@@ -3364,7 +3368,7 @@ module Flatten_let_binding = struct
             let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (bitstring, dummy_ext), []) in
 
             (* make tuple accessor equation declaration *)
-            let envdecl = make_envdecl size in
+            let envdecl = make_envdecl size index ty in
             let args = make_arg_term_e_s size in
             let left = (PFunApp ((ident, dummy_ext), [(PTuple args, dummy_ext)]), dummy_ext) in
             let right = (PIdent (arg_ident_at_index index, dummy_ext), dummy_ext) in
@@ -3375,7 +3379,7 @@ module Flatten_let_binding = struct
             let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (bitstring, dummy_ext), []) in
 
             (* make function accessor equation declaration *)
-            let envdecl = make_envdecl size in
+            let envdecl = make_envdecl size index ty in
             let args = make_arg_term_e_s size in
             let left = (PFunApp((ident, dummy_ext), [(PFunApp((f, dummy_ext), args), dummy_ext)]), dummy_ext) in
             let right = (PIdent (arg_ident_at_index index, dummy_ext), dummy_ext) in
