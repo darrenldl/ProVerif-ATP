@@ -3530,17 +3530,6 @@ let flatten_let_bindings (decl, p : tdecl list * tprocess) : tdecl list * tproce
 
   (move_to_front @ accessor_decls @ existing_ones, proc)
 
-let eq_pred_name = "eq"
-
-let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
-  let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [("bitstring", dummy_ext); ("bitstring", dummy_ext)], []) in
-  let eq_may_fail_env_decl = [(("x", dummy_ext), ("bitstring", dummy_ext), false)] in
-  let x = PIdent ("x", dummy_ext), dummy_ext in
-  let eq_clause = PFact (PFunApp ((eq_pred_name, dummy_ext), [x; x]), dummy_ext) in
-  let eq_clause_decl = TClauses [(eq_may_fail_env_decl, eq_clause)] in
-
-  (eq_pred_decl :: eq_clause_decl :: decl, p)
-
 let make_eq_pred_name (ty1 : string) (ty2 : string) : string =
   Printf.sprintf "eq_%s_%s" ty1 ty2
 
@@ -3596,7 +3585,8 @@ let lookup_pterm_type ((term : pterm)) (vb : string Binder.t) : string =
   | PPGet _ -> failwith "Unexpected case"
 
 let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
-  let rec aux (vb : string Binder.t) (kb : (string * string) Binder.t)(p : tprocess) : tprocess =
+  let eq_list = ref [] in
+  let rec aux (vb : string Binder.t) (kb : (string * string) Binder.t) (p : tprocess) : tprocess =
     match p with
     | PNil -> PNil
     | PPar (p1, p2) -> PPar (aux vb kb p1, aux vb kb p2)
@@ -3618,6 +3608,7 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
             let ty1 = lookup_pterm_type pat_term vb in
             let ty2 = lookup_pterm_type term vb in
             let eq_pred_name = make_eq_pred_name ty1 ty2 in
+            eq_list := (eq_pred_name, ty1, ty2) :: !eq_list;
             PTest ((PPFunApp ((eq_pred_name, dummy_ext), [(pat_term, pat_term_e); (term, term_e)]), dummy_ext), aux vb kb p, aux vb kb p')
           )
         | _ -> PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
@@ -3686,7 +3677,29 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
     ) decl
   in
 
-  (decl, aux global_vb global_kb p)
+  let eq_decl = List.fold_left (fun acc (eq_pred_name, ty1, ty2) ->
+      let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [(ty1, dummy_ext); (ty2, dummy_ext)], []) in
+      let eq_may_fail_env_decl = [(("x", dummy_ext), (ty1, dummy_ext), false); (("y", dummy_ext), (ty2, dummy_ext), false)] in
+      let x = PIdent ("x", dummy_ext), dummy_ext in
+      let y = PIdent ("y", dummy_ext), dummy_ext in
+      let eq_clause = PFact (PFunApp ((eq_pred_name, dummy_ext), [x; y]), dummy_ext) in
+      let eq_clause_decl = TClauses [(eq_may_fail_env_decl, eq_clause)] in
+      eq_pred_decl :: eq_clause_decl :: acc
+    )
+      []
+      !eq_list
+  in
+
+  (eq_decl @ decl, aux global_vb global_kb p)
+
+(* let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
+ *   let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [("bitstring", dummy_ext); ("bitstring", dummy_ext)], []) in
+ *   let eq_may_fail_env_decl = [(("x", dummy_ext), ("bitstring", dummy_ext), false)] in
+ *   let x = PIdent ("x", dummy_ext), dummy_ext in
+ *   let eq_clause = PFact (PFunApp ((eq_pred_name, dummy_ext), [x; x]), dummy_ext) in
+ *   let eq_clause_decl = TClauses [(eq_may_fail_env_decl, eq_clause)] in
+ * 
+ *   (eq_pred_decl :: eq_clause_decl :: decl, p) *)
 
 (* let replace_if_eq_with_if_eq_pred (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
  *   let rec aux (p : tprocess) : tprocess =
