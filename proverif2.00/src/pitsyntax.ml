@@ -3541,40 +3541,152 @@ let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
 
   (eq_pred_decl :: eq_clause_decl :: decl, p)
 
+let make_eq_pred_name (ty1 : string) (ty2 : string) : string =
+  Printf.sprintf "eq_%s_%s" ty1 ty2
+
+module Binder = Map.Make(struct
+    type t = string
+    let compare = compare
+  end)
+
+let update_vb_with_pat (pat : tpattern) (vb : string Binder.t) : string Binder.t =
+  let rec aux pat vb =
+    match pat with
+    | PPatVar ((id, _), ty) -> (
+        match ty with
+        | Some (ty, _) -> Binder.add id ty vb
+        | None -> vb
+      )
+    | PPatTuple l -> (
+        List.fold_left (fun vb pat ->
+            aux pat vb
+          )
+          vb
+          l
+      )
+    | PPatFunApp (_, l) -> (
+        List.fold_left (fun vb pat ->
+            aux pat vb
+          )
+          vb
+          l
+      )
+    | PPatEqual _ -> vb
+  in
+  aux pat vb
+
+let pat_to_name (pat : tpattern) : string option =
+  match pat with
+  | PPatVar ((id, _), ty) -> Some id
+  | PPatTuple l -> None
+  | PPatFunApp (_, l) -> None
+  | PPatEqual _ -> None
+
+let lookup_pterm_type ((term : pterm)) (vb : string Binder.t) : string =
+  match term with
+  | PPIdent (id, _) -> Binder.find id vb
+  | PPFunApp ((id, _), _) -> Binder.find id vb
+  | PPTuple _ -> "bitstring"
+  | PPRestr ((id, _), _opts, (ty, _), _) -> ty
+  | PPTest _ -> failwith "Unexpected case"
+  | PPLet _ -> failwith "Unexpected case"
+  | PPLetFilter _ -> failwith "Unexpected case"
+  | PPEvent _ -> failwith "Unexpected case"
+  | PPInsert _ -> failwith "Unexpected case"
+  | PPGet _ -> failwith "Unexpected case"
+
 let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
-  let rec aux (p : tprocess) : tprocess =
+  let rec aux (vb : string Binder.t) (kb : (string * string) Binder.t)(p : tprocess) : tprocess =
     match p with
     | PNil -> PNil
-    | PPar (p1, p2) -> PPar (aux p1, aux p2)
-    | PRepl p -> PRepl (aux p)
-    | PRestr (s, args, t, p) -> PRestr (s, args, t, aux p)
-    | PLetDef (s, args) -> PLetDef (s, args)
-    | PTest (cond, p1, p2) -> PTest(cond, aux p1, aux p2)
-    | PInput (ch_term, pat, p) -> PInput (ch_term, pat, aux p)
-    | POutput(ch_term, term, p) -> POutput (ch_term, term, aux p)
-    | PLet (pat, term, p, p') -> (
-        match pat with
-        | PPatEqual pat_term ->
-          PTest ((PPFunApp ((eq_pred_name, dummy_ext), [pat_term; term]), dummy_ext), aux p, aux p')
-        | _ -> PLet (pat, term, aux p, aux p')
+    | PPar (p1, p2) -> PPar (aux vb kb p1, aux vb kb p2)
+    | PRepl p -> PRepl (aux vb kb p)
+    | PRestr ((s, se), args, (t, te), p) -> (
+        let vb = Binder.add s t vb in
+        PRestr ((s, se), args, (t, te), aux vb kb p)
       )
-    | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux p, aux q)
-    | PEvent (id, l, env_args, p) -> PEvent (id, l, env_args, aux p)
-    | PPhase (n, p) -> PPhase (n, aux p)
-    | PBarrier (n, tag, p) -> PBarrier (n, tag, aux p)
-    | PInsert (id, l, p) -> PInsert (id, l, aux p)
-    | PGet (i, pat_list, cond_opt, p, elsep) -> PGet (i, pat_list, cond_opt, aux p, aux elsep)
+    | PLetDef (s, args) -> PLetDef (s, args)
+    | PTest (cond, p1, p2) -> PTest(cond, aux vb kb p1, aux vb kb p2)
+    | PInput (ch_term, pat, p) -> (
+        let vb = update_vb_with_pat pat vb in
+        PInput (ch_term, pat, aux vb kb p)
+      )
+    | POutput(ch_term, term, p) -> POutput (ch_term, term, aux vb kb p)
+    | PLet (pat, (term, term_e), p, p') -> (
+        match pat with
+        | PPatEqual (pat_term, pat_term_e) -> (
+            let ty1 = lookup_pterm_type pat_term vb in
+            let ty2 = lookup_pterm_type term vb in
+            let eq_pred_name = make_eq_pred_name ty1 ty2 in
+            PTest ((PPFunApp ((eq_pred_name, dummy_ext), [(pat_term, pat_term_e); (term, term_e)]), dummy_ext), aux vb kb p, aux vb kb p')
+          )
+        | _ -> PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
+      )
+    | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux vb kb p, aux vb kb q)
+    | PEvent (id, l, env_args, p) -> PEvent (id, l, env_args, aux vb kb p)
+    | PPhase (n, p) -> PPhase (n, aux vb kb p)
+    | PBarrier (n, tag, p) -> PBarrier (n, tag, aux vb kb p)
+    | PInsert (id, l, p) -> PInsert (id, l, aux vb kb p)
+    | PGet ((i, ie), pat_list, cond_opt, p, elsep) -> (
+        match pat_list with
+        | [p1; p2] ->
+          let (ty1, ty2) = Binder.find i kb in
+          let vb = match pat_to_name p1 with
+            | Some x -> Binder.add x ty1 vb
+            | None -> vb
+          in
+          let vb = match pat_to_name p2 with
+            | Some x -> Binder.add x ty2 vb
+            | None -> vb
+          in
+          PGet ((i, ie), pat_list, cond_opt, aux vb kb p, aux vb kb elsep)
+        | _ ->
+          PGet ((i, ie), pat_list, cond_opt, aux vb kb p, aux vb kb elsep)
+      )
   in
+
+  let global_vb = List.fold_left (fun binder decl ->
+      match decl with
+      | TConstDecl ((id, _), (ty, _), _opts) -> (
+          Binder.add id ty binder
+        )
+      | TFree ((id,_), (ty,_), _opts) -> (
+          Binder.add id ty binder
+        )
+      | TFunDecl ((id, _), _args, (ty, _), _opts) -> (
+          Binder.add id ty binder
+        )
+      | _ -> binder
+    )
+      Binder.empty
+      decl
+  in
+
+  let global_kb = List.fold_left (fun binder decl ->
+      match decl with
+      | TTableDecl ((id, _), [(ty1, _); (ty2, _)]) -> (
+          Binder.add id (ty1, ty2) binder
+        )
+      | _ -> binder
+    )
+      Binder.empty
+      decl
+  in
+
+  Binder.iter (fun k v ->
+      Printf.printf "var %s : %s\n" k v
+    )
+    global_vb;
 
   let decl = List.map (fun decl ->
       match decl with
       | TPDef ((id, e), m, p) ->
-        TPDef ((id, e), m, aux p)
+        TPDef ((id, e), m, aux global_vb global_kb p)
       | _ -> decl
     ) decl
   in
 
-  (decl, aux p)
+  (decl, aux global_vb global_kb p)
 
 (* let replace_if_eq_with_if_eq_pred (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
  *   let rec aux (p : tprocess) : tprocess =
