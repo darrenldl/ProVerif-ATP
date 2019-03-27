@@ -1,7 +1,11 @@
 (* type quantifier = Exists | Forall *)
 type quantifier = Tptp_ast.fof_quantifier
 
-type boundedness = Unsure | Free | Existential | Universal
+type boundedness =
+  | Unsure
+  | Free
+  | Existential
+  | Universal
 
 type identifier = string
 
