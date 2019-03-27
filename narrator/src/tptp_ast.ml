@@ -9,15 +9,13 @@ type decl =
   | Annotated_formula of annotated_formula
   | Include of string * string list
 
-and annotated_formula =
-  | Fof_annotated of fof_annotated
+and annotated_formula = Fof_annotated of fof_annotated
 
-and fof_annotated = {
-  name : string;
-  role : formula_role;
-  formula : fof_formula;
-  annotations : general_term option;
-}
+and fof_annotated =
+  { name : string
+  ; role : formula_role
+  ; formula : fof_formula
+  ; annotations : general_term option }
 
 and general_term =
   | GT_single of general_data
@@ -72,28 +70,26 @@ and binary_op =
   | Not_or
   | Not_and
 
-and unary_op =
-  | Not
+and unary_op = Not
 
-and fof_quantifier = [
-  | `Forall
-  | `Exists
-]
+and fof_quantifier =
+  [ `Forall
+  | `Exists ]
 
-and infix_op =
-  | Neq
+and infix_op = Neq
 
 let rec output_input oc v =
   match v with
-  | Include (name, fs) -> Printf.fprintf oc "include %s : %s" name (String.concat ", " fs)
+  | Include (name, fs) ->
+    Printf.fprintf oc "include %s : %s" name (String.concat ", " fs)
   | Annotated_formula f -> output_formula oc f
 
 and output_formula oc f =
-  match f with
-  | Fof_annotated f -> Printf.fprintf oc "fof(%a)" output_fof_annotated f
+  match f with Fof_annotated f ->
+    Printf.fprintf oc "fof(%a)" output_fof_annotated f
 
 and output_fof_annotated oc f =
-  let { name; _ } = f in
+  let {name; _} = f in
   Printf.fprintf oc "%s" name
 
 let string_to_formula_role s =
@@ -135,49 +131,42 @@ let formula_role_to_string r =
 
 let rec decl_to_string d =
   match d with
-  | Include (file, formulas) -> Printf.sprintf "include %s : %s." file (String.concat ", " formulas)
+  | Include (file, formulas) ->
+    Printf.sprintf "include %s : %s." file (String.concat ", " formulas)
   | Annotated_formula f -> annotated_formula_to_string f
 
 and annotated_formula_to_string f =
-  match f with
-  | Fof_annotated f -> Printf.sprintf "fof%s" (fof_annotated_to_string f)
+  match f with Fof_annotated f ->
+    Printf.sprintf "fof%s" (fof_annotated_to_string f)
 
 and fof_annotated_to_string f =
-  let { name; role; formula; annotations } = f in
-  Printf.sprintf "(%s, %s, %s%s)"
-    name
+  let {name; role; formula; annotations} = f in
+  Printf.sprintf "(%s, %s, %s%s)" name
     (formula_role_to_string role)
     (fof_formula_to_string formula)
-    (match annotations with
-     | None -> ""
-     | Some a -> ", " ^ (general_term_to_string a)
-    )
+    ( match annotations with
+      | None -> ""
+      | Some a -> ", " ^ general_term_to_string a )
 
 and fof_formula_to_string f =
   match f with
   | FOF_F_binary (op, l, r) ->
-    Printf.sprintf "(%s %s %s)"
-      (fof_formula_to_string l)
-      (binary_op_to_string op)
-      (fof_formula_to_string r)
+    Printf.sprintf "(%s %s %s)" (fof_formula_to_string l)
+      (binary_op_to_string op) (fof_formula_to_string r)
   | FOF_F_unary (op, f) ->
-    Printf.sprintf "%s %s"
-      (unary_op_to_string op)
-      (fof_formula_to_string f)
+    Printf.sprintf "%s %s" (unary_op_to_string op) (fof_formula_to_string f)
   | FOF_F_quantified (q, vars, f) ->
-    Printf.sprintf "%s [%s] : %s"
-      (quantifier_to_string q)
-      (String.concat ", " vars)
-      (fof_formula_to_string f)
-  | FOF_F_atomic t ->
-    fof_term_to_string t
+    Printf.sprintf "%s [%s] : %s" (quantifier_to_string q)
+      (String.concat ", " vars) (fof_formula_to_string f)
+  | FOF_F_atomic t -> fof_term_to_string t
 
 and fof_term_to_string t =
   match t with
   | FOF_T_var s -> s
   | FOF_T_const s -> s
   | FOF_T_fun_app (f, args) ->
-    Printf.sprintf "%s(%s)" f (String.concat ", " (List.map fof_term_to_string args))
+    Printf.sprintf "%s(%s)" f
+      (String.concat ", " (List.map fof_term_to_string args))
 
 and general_term_to_string t =
   match t with
@@ -194,7 +183,8 @@ and general_data_to_string d =
   match d with
   | GD_word s -> s
   | GD_fun (f, args) ->
-    Printf.sprintf "%s(%s)" f (String.concat ", " (List.map general_term_to_string args))
+    Printf.sprintf "%s(%s)" f
+      (String.concat ", " (List.map general_term_to_string args))
   | GD_var s -> s
   | GD_num s -> s
   | GD_dist_obj s -> s
@@ -211,11 +201,6 @@ and binary_op_to_string op =
   | Not_or -> "~|"
   | Not_and -> "~&"
 
-and unary_op_to_string op =
-  match op with
-  | Not -> "~"
+and unary_op_to_string op = match op with Not -> "~"
 
-and quantifier_to_string q =
-  match q with
-  | `Forall -> "!"
-  | `Exists -> "?"
+and quantifier_to_string q = match q with `Forall -> "!" | `Exists -> "?"

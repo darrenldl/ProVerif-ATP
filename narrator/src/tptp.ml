@@ -2,8 +2,8 @@ open Lexing
 
 let lexbuf_to_pos_str lexbuf =
   let pos = lexbuf.lex_curr_p in
-  Printf.sprintf "%s:%d:%d" pos.pos_fname
-    pos.pos_lnum (pos.pos_cnum - pos.pos_bol - 1)
+  Printf.sprintf "%s:%d:%d" pos.pos_fname pos.pos_lnum
+    (pos.pos_cnum - pos.pos_bol - 1)
 
 let parse_with_error lexbuf =
   try Ok (Tptp_parser.parse_decls Tptp_lexer.read lexbuf) with
