@@ -3341,8 +3341,7 @@ module Flatten_let_binding = struct
       assert (size > 0);
       aux [] (size - 1)
     in
-    let make_envdecl (size : int) (return_var_index : int) (return_ty : string option) : envdecl =
-      let return_ty = match return_ty with | Some x -> x | None -> "" in
+    let make_envdecl (size : int) (return_var_index : int) (return_ty : string) : envdecl =
       let idents = arg_idents size in
       List.mapi (fun index ident ->
           if index = return_var_index then
@@ -3361,11 +3360,13 @@ module Flatten_let_binding = struct
       | { constructor_type; size; index; ty } as access :: xs ->
         let ident = access_to_accessor_ident access in
 
+        let ty = match ty with | Some x -> x | None -> "bitstring" in
+
         let (equation_decl, accessor_decl) =
           match constructor_type with
           | Constr_tuple ->
             (* make tuple accessor declaration *)
-            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], ((match ty with | Some x -> x | None -> ""), dummy_ext), []) in
+            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (ty, dummy_ext), []) in
 
             (* make tuple accessor equation declaration *)
             let envdecl = make_envdecl size index ty in
@@ -3376,7 +3377,7 @@ module Flatten_let_binding = struct
             (equation_decl, accessor_decl)
           | Constr_fun f ->
             (* make function accessor declaration *)
-            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], ((match ty with | Some x -> x | None -> ""), dummy_ext), []) in
+            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (ty, dummy_ext), []) in
 
             (* make function accessor equation declaration *)
             let envdecl = make_envdecl size index ty in
