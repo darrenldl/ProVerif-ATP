@@ -3365,7 +3365,7 @@ module Flatten_let_binding = struct
           match constructor_type with
           | Constr_tuple ->
             (* make tuple accessor declaration *)
-            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (bitstring, dummy_ext), []) in
+            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], ((match ty with | Some x -> x | None -> ""), dummy_ext), []) in
 
             (* make tuple accessor equation declaration *)
             let envdecl = make_envdecl size index ty in
@@ -3376,7 +3376,7 @@ module Flatten_let_binding = struct
             (equation_decl, accessor_decl)
           | Constr_fun f ->
             (* make function accessor declaration *)
-            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (bitstring, dummy_ext), []) in
+            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], ((match ty with | Some x -> x | None -> ""), dummy_ext), []) in
 
             (* make function accessor equation declaration *)
             let envdecl = make_envdecl size index ty in
@@ -3391,10 +3391,14 @@ module Flatten_let_binding = struct
     in
     let accesses = List.sort_uniq (fun a b ->
         match compare a.constructor_type b.constructor_type with
-        | 0 -> if a.size = b.size then
-            compare a.index b.index
-          else
-            compare a.size b.size
+        | 0 -> (if a.ty = b.ty then (
+            if a.size = b.size then
+              compare a.index b.index
+            else
+              compare a.size b.size
+          ) else
+             compare a.ty b.ty
+          )
         | n -> n
       ) accesses
     in
@@ -3514,6 +3518,7 @@ let flatten_let_bindings (decl, p : tdecl list * tprocess) : tdecl list * tproce
   let (move_to_front, existing_ones) = List.fold_left (fun (move_to_front, existing_ones) decl ->
       match decl with
       | TFunDecl ((f,_), _, _, _) when List.mem f functions_accessed -> (decl :: move_to_front, existing_ones)
+      | TTypeDecl (ty, _) -> (decl :: move_to_front, existing_ones)
       | _ -> (move_to_front, decl :: existing_ones)
     )
       ([], [])
