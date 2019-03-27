@@ -3767,7 +3767,7 @@ let parse_file s =
     | Spass | Tptp -> (decl, proc)
                       |> (if !Arg_params.tag_out then tag_outputs else (fun x -> x))
                       |> flatten_let_bindings
-                      |> add_eq_pred_decl
+                      (* |> add_eq_pred_decl *)
                       |> replace_let_eq_pat_match_with_if_eq
                       (* |> replace_if_eq_with_if_eq_pred *)
                       |> introduce_extra_consts
