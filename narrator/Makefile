@@ -13,7 +13,7 @@ OCAMLFORMAT = ocamlformat \
 
 OCPINDENT = ocp-indent \
 	--inplace \
-	$(SRCFILES) \
+	$(SRCFILES)
 
 .PHONY: all
 all : bin doc
