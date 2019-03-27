@@ -3690,7 +3690,18 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
       !eq_list
   in
 
-  (eq_decl @ decl, aux global_vb global_kb p)
+  let (type_decl, existing_ones) = List.fold_left (fun (type_decl, existing_ones) decl ->
+      match decl with
+      | TTypeDecl (ty, _) -> (decl :: type_decl, existing_ones)
+      | _ -> (type_decl, decl :: existing_ones)
+    )
+      ([], [])
+      decl
+  in
+  let type_decl = List.rev type_decl in
+  let existing_ones = List.rev existing_ones in
+
+  (type_decl @ eq_decl @ existing_ones, aux global_vb global_kb p)
 
 (* let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
  *   let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [("bitstring", dummy_ext); ("bitstring", dummy_ext)], []) in
