@@ -1,6 +1,8 @@
-set ignoreTypes = false.
-
-free c : channel.
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
 
 type host.
 type nonce.
@@ -9,7 +11,57 @@ type skey.
 type spkey.
 type sskey.
 
-fun nonce_to_bitstring(nonce) : bitstring[data, typeConverter].
+pred eq_host_bitstring(host, bitstring).
+pred eq_nonce_bitstring(nonce, bitstring).
+
+clauses
+  forall x : host, y : bitstring;
+    eq_host_bitstring(x, y).
+clauses
+  forall x : nonce, y : bitstring;
+    eq_nonce_bitstring(x, y).
+
+fun tuple_2_get_0(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0((x0, x1)) = x0.
+
+fun tuple_2_get_1(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_1((x0, x1)) = x1.
+
+fun tuple_2_get_1_host(bitstring) : host.
+
+equation
+  forall x0 : bitstring, x1 : host; 
+    tuple_2_get_1_host((x0, x1)) = x1.
+
+fun tuple_2_get_0_nonce(bitstring) : nonce.
+
+equation
+  forall x0 : nonce, x1 : bitstring; 
+    tuple_2_get_0_nonce((x0, x1)) = x0.
+
+fun tuple_2_get_1_nonce(bitstring) : nonce.
+
+equation
+  forall x0 : bitstring, x1 : nonce; 
+    tuple_2_get_1_nonce((x0, x1)) = x1.
+
+fun tuple_2_get_0_pkey(bitstring) : pkey.
+
+equation
+  forall x0 : pkey, x1 : bitstring; 
+    tuple_2_get_0_pkey((x0, x1)) = x0.
+
+set ignoreTypes = false.
+
+free c : channel.
+
+fun nonce_to_bitstring(nonce) : bitstring [data, typeConverter].
 fun pk(skey) : pkey.
 fun encrypt(bitstring, pkey) : bitstring.
 
@@ -67,6 +119,12 @@ query x : host, y : host;
 query x1 : host, x2 : host, x3 : pkey, x4 : pkey, x5 : nonce, x6 : nonce;
   inj-event(endAfull(x1, x2, x3, x4, x5, x6)) ==> inj-event(beginAfull(x1, x2, x3, x4, x5, x6)).
 
+const processInitiator_STEP_1 : bitstring.
+const processInitiator_STEP_2 : bitstring.
+const processInitiator_STEP_3 : bitstring.
+const processInitiator_STEP_4 : bitstring.
+const processInitiator_STEP_5 : bitstring.
+
 let processInitiator(pkS : spkey, skA : skey, skB : skey) =
   in(c, (xA : host, hostX : host));
   
@@ -74,23 +132,31 @@ let processInitiator(pkS : spkey, skA : skey, skB : skey) =
   let skxA = if xA = A then (skA) else (skB) in
   let pkxA = pk(skxA) in
   event beginBparam(xA, hostX);
-  out(c, (xA, hostX));
+  out(c, ((xA, hostX), processInitiator_STEP_1));
   in(c, ms : bitstring);
-  let (pkX : pkey, =hostX) = checksign(ms, pkS) in
+  let pkX : pkey = tuple_2_get_0_pkey(checksign(ms, pkS)) in
+  
+  if eq_host_bitstring(hostX, tuple_2_get_1(checksign(ms, pkS))) then
   new Na : nonce;
-  out(c, encrypt((Na, xA), pkX));
+  out(c, (encrypt((Na, xA), pkX), processInitiator_STEP_2));
   in(c, m : bitstring);
-  let (=Na, NX2 : nonce) = decrypt(m, skxA) in
+  
+  if eq_nonce_bitstring(Na, tuple_2_get_0(decrypt(m, skxA))) then
+  let NX2 : nonce = tuple_2_get_1_nonce(decrypt(m, skxA)) in
   event beginBfull(xA, hostX, pkX, pkxA, Na, NX2);
-  out(c, encrypt(nonce_to_bitstring(NX2), pkX));
+  out(c, (encrypt(nonce_to_bitstring(NX2), pkX), processInitiator_STEP_3));
   
   if hostX = B || hostX = A then
   event endAparam(xA, hostX);
   event endAfull(xA, hostX, pkX, pkxA, Na, NX2);
-  out(c, sencrypt(secretANa, Na));
-  out(c, sencrypt(secretANb, NX2));
-  0
-  .
+  out(c, (sencrypt(secretANa, Na), processInitiator_STEP_4));
+  out(c, (sencrypt(secretANb, NX2), processInitiator_STEP_5));
+  0.
+
+const processResponder_STEP_1 : bitstring.
+const processResponder_STEP_2 : bitstring.
+const processResponder_STEP_3 : bitstring.
+const processResponder_STEP_4 : bitstring.
 
 let processResponder(pkS : spkey, skA : skey, skB : skey) =
   in(c, xB : host);
@@ -99,14 +165,17 @@ let processResponder(pkS : spkey, skA : skey, skB : skey) =
   let skxB = if xB = A then (skA) else (skB) in
   let pkxB = pk(skxB) in
   in(c, m : bitstring);
-  let (NY : nonce, hostY : host) = decrypt(m, skxB) in
+  let NY : nonce = tuple_2_get_0_nonce(decrypt(m, skxB)) in
+  let hostY : host = tuple_2_get_1_host(decrypt(m, skxB)) in
   event beginAparam(hostY, xB);
-  out(c, (xB, hostY));
+  out(c, ((xB, hostY), processResponder_STEP_1));
   in(c, ms : bitstring);
-  let (pkY : pkey, =hostY) = checksign(ms, pkS) in
+  let pkY : pkey = tuple_2_get_0_pkey(checksign(ms, pkS)) in
+  
+  if eq_host_bitstring(hostY, tuple_2_get_1(checksign(ms, pkS))) then
   new Nb : nonce;
   event beginAfull(hostY, xB, pkxB, pkY, NY, Nb);
-  out(c, encrypt((NY, Nb), pkY));
+  out(c, (encrypt((NY, Nb), pkY), processResponder_STEP_2));
   in(c, m3 : bitstring);
   
   if nonce_to_bitstring(Nb) = decrypt(m3, skB) then
@@ -114,38 +183,41 @@ let processResponder(pkS : spkey, skA : skey, skB : skey) =
   if hostY = A || hostY = B then
   event endBparam(hostY, xB);
   event endBfull(hostY, xB, pkxB, pkY, NY, Nb);
-  out(c, sencrypt(secretBNa, NY));
-  out(c, sencrypt(secretBNb, Nb));
-  0
-  .
+  out(c, (sencrypt(secretBNa, NY), processResponder_STEP_3));
+  out(c, (sencrypt(secretBNb, Nb), processResponder_STEP_4));
+  0.
+
+const processS_STEP_1 : bitstring.
 
 let processS(skS : sskey) =
   in(c, (a : host, b : host));
   get keys(=b, sb) in
-  out(c, sign((sb, b), skS));
-  0
-  .
+  out(c, (sign((sb, b), skS), processS_STEP_1));
+  0.
 
 let processK =
   in(c, (h : host, k : pkey));
   
   if h <> A && h <> B then
   insert keys(h, k);
-  0
-  .
+  0.
+
+const STEP_1 : bitstring.
+const STEP_2 : bitstring.
+const STEP_3 : bitstring.
 
 process
   new skA : skey;
   let pkA = pk(skA) in
-  out(c, pkA);
+  out(c, (pkA, STEP_1));
   insert keys(A, pkA);
   new skB : skey;
   let pkB = pk(skB) in
-  out(c, pkB);
+  out(c, (pkB, STEP_2));
   insert keys(B, pkB);
   new skS : sskey;
   let pkS = spk(skS) in
-  out(c, pkS);
+  out(c, (pkS, STEP_3));
   (
     ! (
       processInitiator(pkS, skA, skB)

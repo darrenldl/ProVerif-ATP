@@ -3283,15 +3283,17 @@ module Flatten_let_binding = struct
     constructor_type : constructor_type;
     size : int;
     index : int;
+    ty : string option;
   }
 
   let access_to_accessor_ident access =
-    let { constructor_type; size; index } = access in
+    let { constructor_type; size; index; ty } = access in
     let name = match constructor_type with
       | Constr_tuple -> "tuple"
       | Constr_fun f -> f
     in
-    Printf.sprintf "%s_%d_get_%d" name size index
+    Printf.sprintf "%s_%d_get_%d%s" name size index
+      (match ty with | Some x -> "_" ^ x | None -> "")
 
   type ctx = {
     mutable accesses : access list;
@@ -3312,8 +3314,8 @@ module Flatten_let_binding = struct
     | PPatFunApp ((f, _), l) -> FunApp (f, List.map of_pat l)
     | _ -> Leaf pat
 
-  let make_access constructor_type size index =
-    { constructor_type; size; index }
+  let make_access constructor_type size index ty =
+    { constructor_type; size; index; ty }
 
   let record_access (ctx : ctx) access : unit =
     ctx.accesses <- access :: ctx.accesses
@@ -3339,10 +3341,13 @@ module Flatten_let_binding = struct
       assert (size > 0);
       aux [] (size - 1)
     in
-    let make_envdecl (size : int) : envdecl =
+    let make_envdecl (size : int) (return_var_index : int) (return_ty : string) : envdecl =
       let idents = arg_idents size in
-      List.map (fun ident ->
-          ((ident, dummy_ext), (bitstring, dummy_ext))
+      List.mapi (fun index ident ->
+          if index = return_var_index then
+            ((ident, dummy_ext), (return_ty, dummy_ext))
+          else
+            ((ident, dummy_ext), (bitstring, dummy_ext))
         ) idents
     in
     let make_arg_term_e_s (size : int) : term_e list =
@@ -3352,17 +3357,19 @@ module Flatten_let_binding = struct
     let rec aux acc (l : access list) =
       match l with
       | [] -> List.rev acc
-      | { constructor_type; size; index } as access :: xs ->
+      | { constructor_type; size; index; ty } as access :: xs ->
         let ident = access_to_accessor_ident access in
+
+        let ty = match ty with | Some x -> x | None -> "bitstring" in
 
         let (equation_decl, accessor_decl) =
           match constructor_type with
           | Constr_tuple ->
             (* make tuple accessor declaration *)
-            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (bitstring, dummy_ext), []) in
+            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (ty, dummy_ext), []) in
 
             (* make tuple accessor equation declaration *)
-            let envdecl = make_envdecl size in
+            let envdecl = make_envdecl size index ty in
             let args = make_arg_term_e_s size in
             let left = (PFunApp ((ident, dummy_ext), [(PTuple args, dummy_ext)]), dummy_ext) in
             let right = (PIdent (arg_ident_at_index index, dummy_ext), dummy_ext) in
@@ -3370,10 +3377,10 @@ module Flatten_let_binding = struct
             (equation_decl, accessor_decl)
           | Constr_fun f ->
             (* make function accessor declaration *)
-            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (bitstring, dummy_ext), []) in
+            let accessor_decl = TFunDecl ((ident, dummy_ext), [(bitstring, dummy_ext)], (ty, dummy_ext), []) in
 
             (* make function accessor equation declaration *)
-            let envdecl = make_envdecl size in
+            let envdecl = make_envdecl size index ty in
             let args = make_arg_term_e_s size in
             let left = (PFunApp((ident, dummy_ext), [(PFunApp((f, dummy_ext), args), dummy_ext)]), dummy_ext) in
             let right = (PIdent (arg_ident_at_index index, dummy_ext), dummy_ext) in
@@ -3385,10 +3392,14 @@ module Flatten_let_binding = struct
     in
     let accesses = List.sort_uniq (fun a b ->
         match compare a.constructor_type b.constructor_type with
-        | 0 -> if a.size = b.size then
-            compare a.index b.index
-          else
-            compare a.size b.size
+        | 0 -> (if a.ty = b.ty then (
+            if a.size = b.size then
+              compare a.index b.index
+            else
+              compare a.size b.size
+          ) else
+             compare a.ty b.ty
+          )
         | n -> n
       ) accesses
     in
@@ -3403,6 +3414,17 @@ module Flatten_let_binding = struct
       []
       accesses
 
+  let type_of_t (t : t) : string option =
+    match t with
+    | Tuple _ -> Some "bitstring"
+    | FunApp _ -> Some "bitstring"
+    | Leaf x ->
+      match x with
+      | PPatVar (_, Some (ty,_)) -> Some ty
+      | PPatVar (_, None) -> None
+      | PPatEqual _ -> None
+      | _ -> failwith "Unexpected pattern"
+
   let flatten (ctx : ctx) (t : t) (term : pterm_e) (true_branch : tprocess) (false_branch : tprocess) : tprocess =
     let rec collect_let_bindings (accesses : access list) t : (access list * tpattern * pterm_e) list =
       match t with
@@ -3410,7 +3432,8 @@ module Flatten_let_binding = struct
         let size = List.length l in
         List.concat (
           List.mapi (fun index t ->
-              let access = make_access Constr_tuple size index in
+              let ty = type_of_t t in
+              let access = make_access Constr_tuple size index ty in
               record_access ctx access;
               collect_let_bindings (access :: accesses) t
             ) l
@@ -3419,7 +3442,8 @@ module Flatten_let_binding = struct
         let size = List.length l in
         List.concat (
           List.mapi (fun index t ->
-              let access = make_access (Constr_fun f) size index in
+              let ty = type_of_t t in
+              let access = make_access (Constr_fun f) size index ty in
               record_access ctx access;
               collect_let_bindings (access :: accesses) t
             ) l
@@ -3495,6 +3519,7 @@ let flatten_let_bindings (decl, p : tdecl list * tprocess) : tdecl list * tproce
   let (move_to_front, existing_ones) = List.fold_left (fun (move_to_front, existing_ones) decl ->
       match decl with
       | TFunDecl ((f,_), _, _, _) when List.mem f functions_accessed -> (decl :: move_to_front, existing_ones)
+      | TTypeDecl (ty, _) -> (decl :: move_to_front, existing_ones)
       | _ -> (move_to_front, decl :: existing_ones)
     )
       ([], [])
@@ -3505,51 +3530,213 @@ let flatten_let_bindings (decl, p : tdecl list * tprocess) : tdecl list * tproce
 
   (move_to_front @ accessor_decls @ existing_ones, proc)
 
-let eq_pred_name = "eq"
+let make_eq_pred_name (ty1 : string) (ty2 : string) : string =
+  Printf.sprintf "eq_%s_%s" ty1 ty2
 
-let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
-  let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [("bitstring", dummy_ext); ("bitstring", dummy_ext)], []) in
-  let eq_may_fail_env_decl = [(("x", dummy_ext), ("bitstring", dummy_ext), false)] in
-  let x = PIdent ("x", dummy_ext), dummy_ext in
-  let eq_clause = PFact (PFunApp ((eq_pred_name, dummy_ext), [x; x]), dummy_ext) in
-  let eq_clause_decl = TClauses [(eq_may_fail_env_decl, eq_clause)] in
+module Binder = Map.Make(struct
+    type t = string
+    let compare = compare
+  end)
 
-  (eq_pred_decl :: eq_clause_decl :: decl, p)
+let update_vb_with_pat (pat : tpattern) (vb : string Binder.t) : string Binder.t =
+  let rec aux pat vb =
+    match pat with
+    | PPatVar ((id, _), ty) -> (
+        match ty with
+        | Some (ty, _) -> Binder.add id ty vb
+        | None -> vb
+      )
+    | PPatTuple l -> (
+        List.fold_left (fun vb pat ->
+            aux pat vb
+          )
+          vb
+          l
+      )
+    | PPatFunApp (_, l) -> (
+        List.fold_left (fun vb pat ->
+            aux pat vb
+          )
+          vb
+          l
+      )
+    | PPatEqual _ -> vb
+  in
+  aux pat vb
+
+let pat_to_name (pat : tpattern) : string option =
+  match pat with
+  | PPatVar ((id, _), ty) -> Some id
+  | PPatTuple l -> None
+  | PPatFunApp (_, l) -> None
+  | PPatEqual _ -> None
+
+let lookup_pterm_type ((term : pterm)) (vb : string Binder.t) : string =
+  let rec aux term vb =
+      match term with
+      | PPIdent (id, _) -> Binder.find id vb
+      | PPFunApp ((id, _), _) -> Binder.find id vb
+      | PPTuple _ -> "bitstring"
+      | PPRestr ((id, _), _opts, (ty, _), _) -> ty
+      | PPTest (_cond, (b1, _), _b2) -> aux b1 vb
+      | PPLet (pat, (v, _), (b1,_), b2) -> (
+          let vb = match pat_to_name pat with
+            | Some n -> Binder.add n (aux v vb) vb
+            | None -> vb
+          in
+          aux b1 vb
+        )
+      | PPLetFilter _ -> failwith "Unexpected case"
+      | PPEvent _ -> failwith "Unexpected case"
+      | PPInsert _ -> failwith "Unexpected case"
+      | PPGet _ -> failwith "Unexpected case"
+  in
+  aux term vb
 
 let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
-  let rec aux (p : tprocess) : tprocess =
+  let eq_list = ref [] in
+  let rec aux (vb : string Binder.t) (kb : (string * string) Binder.t) (p : tprocess) : tprocess =
     match p with
     | PNil -> PNil
-    | PPar (p1, p2) -> PPar (aux p1, aux p2)
-    | PRepl p -> PRepl (aux p)
-    | PRestr (s, args, t, p) -> PRestr (s, args, t, aux p)
-    | PLetDef (s, args) -> PLetDef (s, args)
-    | PTest (cond, p1, p2) -> PTest(cond, aux p1, aux p2)
-    | PInput (ch_term, pat, p) -> PInput (ch_term, pat, aux p)
-    | POutput(ch_term, term, p) -> POutput (ch_term, term, aux p)
-    | PLet (pat, term, p, p') -> (
-        match pat with
-        | PPatEqual pat_term ->
-          PTest ((PPFunApp ((eq_pred_name, dummy_ext), [pat_term; term]), dummy_ext), aux p, aux p')
-        | _ -> PLet (pat, term, aux p, aux p')
+    | PPar (p1, p2) -> PPar (aux vb kb p1, aux vb kb p2)
+    | PRepl p -> PRepl (aux vb kb p)
+    | PRestr ((s, se), args, (t, te), p) -> (
+        let vb = Binder.add s t vb in
+        PRestr ((s, se), args, (t, te), aux vb kb p)
       )
-    | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux p, aux q)
-    | PEvent (id, l, env_args, p) -> PEvent (id, l, env_args, aux p)
-    | PPhase (n, p) -> PPhase (n, aux p)
-    | PBarrier (n, tag, p) -> PBarrier (n, tag, aux p)
-    | PInsert (id, l, p) -> PInsert (id, l, aux p)
-    | PGet (i, pat_list, cond_opt, p, elsep) -> PGet (i, pat_list, cond_opt, aux p, aux elsep)
+    | PLetDef (s, args) -> PLetDef (s, args)
+    | PTest (cond, p1, p2) -> PTest(cond, aux vb kb p1, aux vb kb p2)
+    | PInput (ch_term, pat, p) -> (
+        let vb = update_vb_with_pat pat vb in
+        PInput (ch_term, pat, aux vb kb p)
+      )
+    | POutput(ch_term, term, p) -> POutput (ch_term, term, aux vb kb p)
+    | PLet (pat, (term, term_e), p, p') -> (
+        match pat with
+        | PPatVar ((id, _), ty) -> (
+            let ty2 = lookup_pterm_type term vb in
+            let ty1 = match ty with
+              | Some (ty, _) -> ty
+              | None -> ty2
+            in
+            let vb = Binder.add id ty1 vb in
+            PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
+          )
+        | PPatEqual (pat_term, pat_term_e) -> (
+            let ty1 = lookup_pterm_type pat_term vb in
+            let ty2 = lookup_pterm_type term vb in
+            let eq_pred_name = make_eq_pred_name ty1 ty2 in
+            eq_list := (eq_pred_name, ty1, ty2) :: !eq_list;
+            PTest ((PPFunApp ((eq_pred_name, dummy_ext), [(pat_term, pat_term_e); (term, term_e)]), dummy_ext), aux vb kb p, aux vb kb p')
+          )
+        | _ -> PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
+      )
+    | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux vb kb p, aux vb kb q)
+    | PEvent (id, l, env_args, p) -> PEvent (id, l, env_args, aux vb kb p)
+    | PPhase (n, p) -> PPhase (n, aux vb kb p)
+    | PBarrier (n, tag, p) -> PBarrier (n, tag, aux vb kb p)
+    | PInsert (id, l, p) -> PInsert (id, l, aux vb kb p)
+    | PGet ((i, ie), pat_list, cond_opt, p, elsep) -> (
+        match pat_list with
+        | [p1; p2] ->
+          let (ty1, ty2) = Binder.find i kb in
+          let vb = match pat_to_name p1 with
+            | Some x -> Binder.add x ty1 vb
+            | None -> vb
+          in
+          let vb = match pat_to_name p2 with
+            | Some x -> Binder.add x ty2 vb
+            | None -> vb
+          in
+          PGet ((i, ie), pat_list, cond_opt, aux vb kb p, aux vb kb elsep)
+        | _ ->
+          PGet ((i, ie), pat_list, cond_opt, aux vb kb p, aux vb kb elsep)
+      )
   in
+
+  let global_vb = List.fold_left (fun binder decl ->
+      match decl with
+      | TConstDecl ((id, _), (ty, _), _opts) -> (
+          Binder.add id ty binder
+        )
+      | TFree ((id,_), (ty,_), _opts) -> (
+          Binder.add id ty binder
+        )
+      | TFunDecl ((id, _), _args, (ty, _), _opts) -> (
+          Binder.add id ty binder
+        )
+      | _ -> binder
+    )
+      Binder.empty
+      decl
+  in
+
+  let global_kb = List.fold_left (fun binder decl ->
+      match decl with
+      | TTableDecl ((id, _), [(ty1, _); (ty2, _)]) -> (
+          Binder.add id (ty1, ty2) binder
+        )
+      | _ -> binder
+    )
+      Binder.empty
+      decl
+  in
+
+  (* Binder.iter (fun k v ->
+   *     Printf.printf "var %s : %s\n" k v
+   *   )
+   *   global_vb; *)
 
   let decl = List.map (fun decl ->
       match decl with
       | TPDef ((id, e), m, p) ->
-        TPDef ((id, e), m, aux p)
+        let vb = List.fold_left (fun vb ((id, _), (ty, _), _) ->
+            Binder.add id ty vb
+          )
+            global_vb
+            m
+        in
+        TPDef ((id, e), m, aux vb global_kb p)
       | _ -> decl
     ) decl
   in
 
-  (decl, aux p)
+  let eq_decl = List.fold_left (fun acc (eq_pred_name, ty1, ty2) ->
+      let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [(ty1, dummy_ext); (ty2, dummy_ext)], []) in
+      let eq_may_fail_env_decl = [(("x", dummy_ext), (ty1, dummy_ext), false); (("y", dummy_ext), (ty2, dummy_ext), false)] in
+      let x = PIdent ("x", dummy_ext), dummy_ext in
+      let y = PIdent ("y", dummy_ext), dummy_ext in
+      let eq_clause = PFact (PFunApp ((eq_pred_name, dummy_ext), [x; y]), dummy_ext) in
+      let eq_clause_decl = TClauses [(eq_may_fail_env_decl, eq_clause)] in
+      eq_pred_decl :: eq_clause_decl :: acc
+    )
+      []
+      !eq_list
+  in
+
+  let eq_decl = List.sort_uniq compare eq_decl in
+
+  let (type_decl, existing_ones) = List.fold_left (fun (type_decl, existing_ones) decl ->
+      match decl with
+      | TTypeDecl (ty, _) -> (decl :: type_decl, existing_ones)
+      | _ -> (type_decl, decl :: existing_ones)
+    )
+      ([], [])
+      decl
+  in
+  let type_decl = List.rev type_decl in
+  let existing_ones = List.rev existing_ones in
+
+  (type_decl @ eq_decl @ existing_ones, aux global_vb global_kb p)
+
+(* let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
+ *   let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [("bitstring", dummy_ext); ("bitstring", dummy_ext)], []) in
+ *   let eq_may_fail_env_decl = [(("x", dummy_ext), ("bitstring", dummy_ext), false)] in
+ *   let x = PIdent ("x", dummy_ext), dummy_ext in
+ *   let eq_clause = PFact (PFunApp ((eq_pred_name, dummy_ext), [x; x]), dummy_ext) in
+ *   let eq_clause_decl = TClauses [(eq_may_fail_env_decl, eq_clause)] in
+ * 
+ *   (eq_pred_decl :: eq_clause_decl :: decl, p) *)
 
 (* let replace_if_eq_with_if_eq_pred (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
  *   let rec aux (p : tprocess) : tprocess =
@@ -3617,7 +3804,7 @@ let parse_file s =
     | Spass | Tptp -> (decl, proc)
                       |> (if !Arg_params.tag_out then tag_outputs else (fun x -> x))
                       |> flatten_let_bindings
-                      |> add_eq_pred_decl
+                      (* |> add_eq_pred_decl *)
                       |> replace_let_eq_pat_match_with_if_eq
                       (* |> replace_if_eq_with_if_eq_pred *)
                       |> introduce_extra_consts
