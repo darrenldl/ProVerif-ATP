@@ -1,0 +1,61 @@
+const CONST_0 : bitstring.
+const CONST_1 : bitstring.
+const CONST_2 : bitstring.
+const CONST_3 : bitstring.
+const CONST_4 : bitstring.
+
+pred eq(bitstring, bitstring).
+
+clauses
+  forall x : bitstring;
+    eq(x, x).
+
+free c : channel.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+const ZERO : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+fun crc(bitstring) : bitstring.
+fun concat(bitstring, bitstring) : bitstring.
+fun split(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    crc(xor(x, y)) = xor(crc(x), crc(y)).
+equation
+  forall u : bitstring, v : bitstring, x : bitstring, y : bitstring; 
+    concat(xor(u, x), xor(v, y)) = xor(concat(u, v), concat(x, y)).
+equation
+  forall x : bitstring, y : bitstring; 
+    split(concat(x, y)) = (x, y).
+
+query 
+  attacker(new b).
+
+const A_STEP_1 : bitstring.
+
+let A =
+  new a : bitstring;
+  new b : bitstring;
+  new k : bitstring;
+  let m1 = xor(a, k) in
+  let m2 = xor(b, k) in
+  out(c, ((a, m1, m2), A_STEP_1));
+  0.
+
+process
+  A

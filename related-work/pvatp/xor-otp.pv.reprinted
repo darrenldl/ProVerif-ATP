@@ -1,0 +1,47 @@
+free c : channel.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+const ZERO : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+fun crc(bitstring) : bitstring.
+fun concat(bitstring, bitstring) : bitstring.
+fun split(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    crc(xor(x, y)) = xor(crc(x), crc(y)).
+equation
+  forall u : bitstring, v : bitstring, x : bitstring, y : bitstring; 
+    concat(xor(u, x), xor(v, y)) = xor(concat(u, v), concat(x, y)).
+equation
+  forall x : bitstring, y : bitstring; 
+    split(concat(x, y)) = (x, y).
+
+query 
+  attacker(new b).
+
+let A =
+  new a : bitstring;
+  new b : bitstring;
+  new k : bitstring;
+  let m1 = xor(a, k) in
+  let m2 = xor(b, k) in
+  out(c, (a, m1, m2));
+  0.
+
+process
+  A

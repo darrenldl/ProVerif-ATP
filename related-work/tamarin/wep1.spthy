@@ -1,0 +1,30 @@
+theory wep1
+begin
+
+builtins: xor
+
+functions: crc/1,concat/2,split/1
+
+equations:
+  crc(x XOR y) = (crc(x) XOR crc(y)),
+  concat(u XOR x, v XOR y) = (concat(u,v) XOR concat(x,y)),
+  split(concat(x,y)) = pair(x,y)
+  
+
+rule Rule1:
+let
+  m1 = concat(~a, crc(~a)) XOR ~k
+  m2 = concat(~b, crc(~b)) XOR ~k
+in
+[ Fr(~a), Fr(~b), Fr(~k) ]
+--[ SecretMesg(~b)]-> 
+[ Out( <~a, m1, m2> ) ]
+
+// Message ~b should be secret.
+// This property is violated because of homomorphic property of
+// concat. 
+lemma secret_mesg: 
+  "All y #i. ( SecretMesg(y) @ #i ==> not( Ex #j. K(y) @ #j ) )"
+
+end  
+   
