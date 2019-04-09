@@ -1,0 +1,151 @@
+% Refutation found. Thanks to Tanya!
+% SZS status Theorem for simple
+% SZS output start Proof for simple
+fof(f46,axiom,(
+  ! [X0,X1] : constr_xor(constr_h(X0),constr_h(X1)) = constr_h(constr_xor(X0,X1))),
+  file('simple.p',unknown)).
+fof(f47,axiom,(
+  ! [X2] : constr_ZERO = constr_xor(X2,X2)),
+  file('simple.p',unknown)).
+fof(f48,axiom,(
+  ! [X3] : constr_xor(X3,constr_ZERO) = X3),
+  file('simple.p',unknown)).
+fof(f49,axiom,(
+  ! [X4,X5] : constr_xor(X4,X5) = constr_xor(X5,X4)),
+  file('simple.p',unknown)).
+fof(f50,axiom,(
+  ! [X6,X7,X8] : constr_xor(X6,constr_xor(X7,X8)) = constr_xor(constr_xor(X6,X7),X8)),
+  file('simple.p',unknown)).
+fof(f52,axiom,(
+  ! [X10,X11] : ((pred_attacker(X11) & pred_attacker(X10)) => pred_attacker(constr_xor(X10,X11)))),
+  file('simple.p',unknown)).
+fof(f54,axiom,(
+  ! [X12] : (pred_attacker(X12) => pred_attacker(constr_h(X12)))),
+  file('simple.p',unknown)).
+fof(f64,axiom,(
+  ! [X15,X16] : (pred_attacker(tuple_2(X15,X16)) => pred_attacker(X15))),
+  file('simple.p',unknown)).
+fof(f65,axiom,(
+  ! [X17,X18] : (pred_attacker(tuple_2(X17,X18)) => pred_attacker(X18))),
+  file('simple.p',unknown)).
+fof(f71,axiom,(
+  pred_attacker(tuple_2(tuple_2(name_a,constr_h(constr_xor(name_a,name_b))),constr_A_STEP_1))),
+  file('simple.p',unknown)).
+fof(f72,conjecture,(
+  pred_attacker(constr_h(name_b))),
+  file('simple.p',unknown)).
+fof(f73,negated_conjecture,(
+  ~pred_attacker(constr_h(name_b))),
+  inference(negated_conjecture,[],[f72])).
+fof(f74,plain,(
+  ! [X0] : constr_ZERO = constr_xor(X0,X0)),
+  inference(rectify,[],[f47])).
+fof(f75,plain,(
+  ! [X0] : constr_xor(X0,constr_ZERO) = X0),
+  inference(rectify,[],[f48])).
+fof(f76,plain,(
+  ! [X0,X1] : constr_xor(X0,X1) = constr_xor(X1,X0)),
+  inference(rectify,[],[f49])).
+fof(f77,plain,(
+  ! [X0,X1,X2] : constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2)),
+  inference(rectify,[],[f50])).
+fof(f79,plain,(
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_xor(X0,X1)))),
+  inference(rectify,[],[f52])).
+fof(f80,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(constr_h(X0)))),
+  inference(rectify,[],[f54])).
+fof(f82,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
+  inference(rectify,[],[f64])).
+fof(f83,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X1))),
+  inference(rectify,[],[f65])).
+fof(f88,plain,(
+  ~pred_attacker(constr_h(name_b))),
+  inference(flattening,[],[f73])).
+fof(f91,plain,(
+  ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  inference(ennf_transformation,[],[f79])).
+fof(f92,plain,(
+  ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  inference(flattening,[],[f91])).
+fof(f93,plain,(
+  ! [X0] : (pred_attacker(constr_h(X0)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f80])).
+fof(f96,plain,(
+  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f82])).
+fof(f97,plain,(
+  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_2(X0,X1)))),
+  inference(ennf_transformation,[],[f83])).
+fof(f147,plain,(
+  ( ! [X0,X1] : (constr_xor(constr_h(X0),constr_h(X1)) = constr_h(constr_xor(X0,X1))) )),
+  inference(cnf_transformation,[],[f46])).
+fof(f148,plain,(
+  ( ! [X0] : (constr_ZERO = constr_xor(X0,X0)) )),
+  inference(cnf_transformation,[],[f74])).
+fof(f149,plain,(
+  ( ! [X0] : (constr_xor(X0,constr_ZERO) = X0) )),
+  inference(cnf_transformation,[],[f75])).
+fof(f150,plain,(
+  ( ! [X0,X1] : (constr_xor(X0,X1) = constr_xor(X1,X0)) )),
+  inference(cnf_transformation,[],[f76])).
+fof(f151,plain,(
+  ( ! [X2,X0,X1] : (constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2)) )),
+  inference(cnf_transformation,[],[f77])).
+fof(f152,plain,(
+  ( ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f92])).
+fof(f154,plain,(
+  ( ! [X0] : (pred_attacker(constr_h(X0)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f93])).
+fof(f164,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f96])).
+fof(f165,plain,(
+  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X1)) )),
+  inference(cnf_transformation,[],[f97])).
+fof(f170,plain,(
+  pred_attacker(tuple_2(tuple_2(name_a,constr_h(constr_xor(name_a,name_b))),constr_A_STEP_1))),
+  inference(cnf_transformation,[],[f71])).
+fof(f171,plain,(
+  ~pred_attacker(constr_h(name_b))),
+  inference(cnf_transformation,[],[f88])).
+fof(f173,plain,(
+  ( ! [X1] : (constr_xor(constr_ZERO,X1) = X1) )),
+  inference(superposition,[],[f150,f149])).
+fof(f192,plain,(
+  pred_attacker(tuple_2(name_a,constr_h(constr_xor(name_a,name_b))))),
+  inference(resolution,[],[f170,f164])).
+fof(f193,plain,(
+  pred_attacker(constr_h(constr_xor(name_a,name_b)))),
+  inference(resolution,[],[f192,f165])).
+fof(f194,plain,(
+  pred_attacker(name_a)),
+  inference(resolution,[],[f192,f164])).
+fof(f199,plain,(
+  ( ! [X2,X1] : (pred_attacker(constr_h(constr_xor(X1,X2))) | ~pred_attacker(constr_h(X2)) | ~pred_attacker(constr_h(X1))) )),
+  inference(superposition,[],[f152,f147])).
+fof(f204,plain,(
+  ( ! [X0,X1] : (constr_xor(constr_ZERO,X1) = constr_xor(X0,constr_xor(X0,X1))) )),
+  inference(superposition,[],[f151,f148])).
+fof(f220,plain,(
+  ( ! [X0,X1] : (constr_xor(X0,constr_xor(X0,X1)) = X1) )),
+  inference(forward_demodulation,[],[f204,f173])).
+fof(f287,plain,(
+  ( ! [X6,X7] : (~pred_attacker(constr_h(constr_xor(X6,X7))) | pred_attacker(constr_h(X7)) | ~pred_attacker(constr_h(X6))) )),
+  inference(superposition,[],[f199,f220])).
+fof(f1414,plain,(
+  pred_attacker(constr_h(name_b)) | ~pred_attacker(constr_h(name_a))),
+  inference(resolution,[],[f287,f193])).
+fof(f1444,plain,(
+  ~pred_attacker(constr_h(name_a))),
+  inference(subsumption_resolution,[],[f1414,f171])).
+fof(f1448,plain,(
+  ~pred_attacker(name_a)),
+  inference(resolution,[],[f1444,f154])).
+fof(f1449,plain,(
+  $false),
+  inference(subsumption_resolution,[],[f1448,f194])).
+% SZS output end Proof for simple

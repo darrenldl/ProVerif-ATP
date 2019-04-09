@@ -1,0 +1,30 @@
+theory wep2
+begin
+
+builtins: xor
+
+functions: crc/1,concat/2,split/1
+
+equations:
+  crc(x XOR y) = (crc(x) XOR crc(y)),
+  concat(u XOR x, v XOR y) = (concat(u,v) XOR concat(x,y)),
+  split(concat(x,y)) = pair(x,y)
+  
+
+rule Rule1:
+let
+  m = concat(~b, crc(~b)) XOR ~k
+  check = concat(~a XOR ~b, crc(~a XOR ~b)) XOR ~k
+in 
+[ Fr(~a), Fr(~b), Fr(~k) ]
+--[ SecretMsg(check) ]-> 
+[ Out( <~a, m> ) ]
+
+// Attacker should not be able to forge a message. 
+// This property is violated because of homomorphic property of
+// crc. 
+lemma secret_mesg: 
+  "All y #i. ( SecretMesg(y) @ #i ==> not( Ex #j. K(y) @ #j ) )"
+
+end  
+   

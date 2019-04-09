@@ -1,0 +1,45 @@
+free c : channel.
+
+fun xor(bitstring, bitstring) : bitstring.
+
+const ZERO : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring, z : bitstring; 
+    xor(x, xor(y, z)) = xor(xor(x, y), z).
+equation
+  forall x : bitstring, y : bitstring; 
+    xor(x, y) = xor(y, x).
+equation
+  forall x : bitstring; 
+    xor(x, ZERO) = x.
+equation
+  forall x : bitstring; 
+    xor(x, x) = ZERO.
+
+fun h(bitstring) : bitstring.
+
+equation
+  forall x : bitstring, y : bitstring; 
+    h(xor(x, y)) = xor(h(x), h(y)).
+
+query 
+  attacker(h(new b)).
+
+let A =
+  new a : bitstring;
+  new b : bitstring;
+  out(c, (a, h(xor(a, b))));
+  0.
+
+let B =
+  in(c, (a' : bitstring, h_a_xor_b : bitstring));
+  0.
+
+process
+  (
+    A
+  )
+  | (
+    B
+  )
