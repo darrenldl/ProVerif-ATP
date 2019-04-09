@@ -1,63 +1,24 @@
-SRCFILES = src/*.ml src/*.mli
-
-CINAPSFILES = src/*.cinaps
-
-OCAMLFORMAT = ocamlformat \
-	--inplace \
-	--field-space loose \
-	--let-and sparse \
-	--let-open auto \
-	--type-decl sparse \
-	--sequence-style terminator \
-	$(SRCFILES) \
-
-OCPINDENT = ocp-indent \
-	--inplace \
-	$(SRCFILES)
-
-.PHONY: all
-all : bin doc
-
-.PHONY: bin
-bin :
-	dune build
-
-.PHONY: format
-format :
-	$(OCAMLFORMAT)
-	$(OCPINDENT)
-
-.PHONY: cinaps
-cinaps :
-	cinaps -i $(SRCFILES)
-	$(OCAMLFORMAT)
-	$(OCPINDENT)
-
-.PHONY: doc
-doc :
-	dune build @doc
-	rm -rf _doc/
-	cp -r _build/default/_doc .
-
-.PHONY: browse_doc
-browse_doc : doc
-	$$BROWSER _doc/_html/index.html
-
-.PHONY: test
-test :
-	dune runtest --force
-
-.PHONY: coverage
-coverage : clean
-	BISECT_ENABLE=YES dune runtest --force
-	bisect-ppx-report -I _build/default/ -html _coverage/ \
-		`find . -name 'bisect*.out'`
-
-.PHONY: browse_coverage
-browse_coverage : coverage
-	$$BROWSER _coverage/index.html
-
-.PHONY : clean
-clean :
-	rm -f `find . -name 'bisect*.out'`
-	dune clean
+all: build
+	
+build:
+	dune build @js --profile dev
+	cp -r node_modules/        _build/default/src/
+	cp    html/file_strings.js _build/default/src/
+	cp    html/index.html      _build/default/src/
+ifneq ($(DEBUG), 1)
+	find _build/ -name "*.ml"       -type f -delete
+	find _build/ -name "*.mli"      -type f -delete
+	find _build/ -name "*.mly"      -type f -delete
+	find _build/ -name "*.mll"      -type f -delete
+	find _build/ -name "*.inferred" -type f -delete
+	find _build/ -name "*.mock"     -type f -delete
+	find _build/ -name "*.cmi"      -type f -delete
+	find _build/ -name "*.bc"       -type f -delete
+	rm -r _build/default/src/.narrator.eobjs/
+	find _build/ -name ".merlin" -type f -delete
+	find _build/ -name ".merlin-exists" -type f -delete
+	# javascript-obfuscator _build/default/src/narrator.bc.js \
+	# --output _build/default/src/narrator-obfuscated.bc.js
+	# mv _build/default/src/narrator-obfuscated.bc.js \
+	# _build/default/src/narrator.bc.js
+endif
