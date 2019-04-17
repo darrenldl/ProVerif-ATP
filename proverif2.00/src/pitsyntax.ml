@@ -3185,15 +3185,17 @@ let reset() =
   rename_table := StringMap.empty;
   expansion_number := 0
 
-module Tag_output_ctx = struct
+module Tag_in_out_ctx = struct
   type t = {
     mutable decl : tdecl list;
+    mutable in_count : int;
     mutable out_count : int;
     mutable proc_name : string option;
   }
 
   let make (decl : tdecl list) : t =
     { decl;
+      in_count = 1;
       out_count = 1;
       proc_name = None;
     }
@@ -3209,17 +3211,33 @@ module Tag_output_ctx = struct
 
     let ext = dummy_ext in
     add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
+      add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
 
   let set_proc_name (ctx : t) (name : string) : unit =
     ctx.proc_name <- Some name;
+    ctx.in_count <- 1;
     ctx.out_count <- 1
 
   let clear_proc_name (ctx : t) : unit =
     ctx.proc_name <- None;
+    ctx.in_count <- 1;
     ctx.out_count <- 1
 
-  let gen_tag (ctx : t) : string =
-    let tag = Printf.sprintf "%sSTEP_%d"
+  let gen_in_tag (ctx : t) : string =
+    let tag = Printf.sprintf "%s_in_%d"
+        (match ctx.proc_name with
+         | None -> ""
+         | Some s -> Printf.sprintf "%s_" s)
+        ctx.in_count
+    in
+
+    add_const ctx tag;
+    ctx.in_count <- ctx.in_count + 1;
+
+    tag
+
+  let gen_out_tag (ctx : t) : string =
+    let tag = Printf.sprintf "%s_out_%d"
         (match ctx.proc_name with
          | None -> ""
          | Some s -> Printf.sprintf "%s_" s)
@@ -3232,8 +3250,8 @@ module Tag_output_ctx = struct
     tag
 end
 
-let tag_outputs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
-  let ctx = Tag_output_ctx.make decl in
+let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
+  let ctx = Tag_in_out_ctx.make decl in
 
   let rec aux (p : tprocess) : tprocess =
     match p with
@@ -3243,14 +3261,21 @@ let tag_outputs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
     | PRestr (s, args, t, p) -> PRestr (s, args, t, aux p)
     | PLetDef (s, args) -> PLetDef (s, args)
     | PTest (cond, p1, p2) -> PTest(cond, aux p1, aux p2)
-    | PInput (ch_term, pat, p) -> PInput (ch_term, pat, aux p)
+    | PInput (ch_term, pat, p) -> (
+        let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
+
+        let tag = (tag_str, dummy_ext) in
+        let tagged = PPatFunApp (tag, [pat]) in
+
+        PInput (ch_term, tagged, aux p)
+      )
     | POutput(ch_term, term, p) -> (
         let (_, e) = term in
 
-        let tag_str = Tag_output_ctx.gen_tag ctx in
+        let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
 
-        let tag = (PPIdent (tag_str, e), e) in
-        let tagged = PPTuple [term; tag] in
+        let tag = (tag_str, e) in
+        let tagged = PPFunApp (tag, [term]) in
 
         POutput(ch_term, (tagged, e), aux p)
       )
@@ -3263,7 +3288,7 @@ let tag_outputs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
     | PGet (i, pat_list, cond_opt, p, elsep) -> PGet (i, pat_list, cond_opt, aux p, aux elsep)
   in
   let decl = ctx.decl in
-  Tag_output_ctx.clear_decl ctx;
+  Tag_in_out_ctx.clear_decl ctx;
   List.iter
     (fun decl ->
        match decl with
