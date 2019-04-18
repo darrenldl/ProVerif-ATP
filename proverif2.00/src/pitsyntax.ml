@@ -3757,7 +3757,9 @@ module Tag_in_out_ctx = struct
 
     add_decl [(ty, dummy_ext)];
 
-    (PPFunApp ((f_name, e), [(term, e)]), e)
+    match term with
+    | PPTuple args -> (PPFunApp ((f_name, e), args), e)
+    | _ -> (PPFunApp ((f_name, e), [(term, e)]), e)
 end
 
 let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
