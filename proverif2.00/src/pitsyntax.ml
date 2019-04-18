@@ -3664,7 +3664,11 @@ module Tag_in_out_ctx = struct
 
     let ext = dummy_ext in
     add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
-      add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
+
+  let tag_out_term (ctx : t) (term : pterm) (vb : string Binder.t) : ptern =
+    let ty = lookup_pterm_type term vb in
+
+
 
   let set_proc_name (ctx : t) (name : string) : unit =
     ctx.proc_name <- Some name;
