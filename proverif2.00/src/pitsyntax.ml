@@ -3679,18 +3679,37 @@ module Tag_in_out_ctx = struct
     ctx.in_count <- 1;
     ctx.out_count <- 1
 
-  let gen_in_tag (ctx : t) : string =
-    let tag = Printf.sprintf "%s_in_%d"
-        (match ctx.proc_name with
-         | None -> ""
-         | Some s -> Printf.sprintf "%s_" s)
-        ctx.in_count
+  let tag_in_pat (ctx : t) (pat : tpattern) (vb : string Binder.t) : tpattern =
+    let gen_in_tag (ctx : t) : string =
+      let tag = Printf.sprintf "%s_in_%d"
+          (match ctx.proc_name with
+           | None -> ""
+           | Some s -> Printf.sprintf "%s_" s)
+          ctx.in_count
+      in
+
+      add_const ctx tag;
+      ctx.in_count <- ctx.in_count + 1;
+
+      tag
+    in
+    let f_name = gen_in_tag ctx in
+
+    let ty =
+      match pat with
+      | PPatVar (id, ty) -> (
+          match ty with
+          | None -> failwith "Expected pattern to be tagged with type"
+          | Some ty -> ty
+        )
+      | PPatTuple _ -> ("bitstring", dummy_ext)
+      | PPatFunApp ((id, _), _) -> (Binder.find id vb, dummy_ext)
+      | PPatEqual (term, _) -> (lookup_pterm_type term vb, dummy_ext)
     in
 
-    add_const ctx tag;
-    ctx.in_count <- ctx.in_count + 1;
+    add_decl ctx (TFunDecl ((f_name, dummy_ext), [ty], ("bitstring", dummy_ext), [("data", dummy_ext)]));
 
-    tag
+    (PPatFunApp ((f_name, dummy_ext), [pat]))
 
   let tag_out_term (ctx : t) (term_e : pterm_e) (vb : string Binder.t) : pterm_e =
     let gen_out_tag (ctx : t) : string =
@@ -3732,13 +3751,10 @@ let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
     | PTest (cond, p1, p2) -> PTest(cond, aux vb kb p1, aux vb kb p2)
     | PInput (ch_term, pat, p) -> (
         let vb = update_vb_with_pat pat vb in
-        (* let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
-         * 
-         * let tag = (tag_str, dummy_ext) in
-         * let tagged = PPatFunApp (tag, [pat]) in
-         * 
-         * PInput (ch_term, tagged, aux p) *)
-        PInput (ch_term, pat, aux vb kb p)
+
+        let tagged = Tag_in_out_ctx.tag_in_pat ctx pat vb in
+
+        PInput (ch_term, tagged, aux vb kb p)
       )
     | POutput(ch_term, term, p) -> (
         let tagged = Tag_in_out_ctx.tag_out_term ctx term vb in
