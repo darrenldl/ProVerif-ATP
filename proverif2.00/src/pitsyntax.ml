@@ -3705,7 +3705,7 @@ module Tag_in_out_ctx = struct
           | Some ty -> ty
         in
         add_decl [ty];
-        (PPatFunApp ((f_name, dummy_ext), [pat]))
+        PPatFunApp ((f_name, dummy_ext), [pat])
       )
     | PPatTuple pats -> (
         let tys = List.map (fun pat ->
