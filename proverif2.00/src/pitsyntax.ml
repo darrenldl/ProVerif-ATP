@@ -3681,14 +3681,13 @@ module Tag_in_out_ctx = struct
 
   let tag_in_pat (ctx : t) (pat : tpattern) (vb : string Binder.t) : tpattern =
     let gen_in_tag (ctx : t) : string =
-      let tag = Printf.sprintf "%s_in_%d"
+      let tag = Printf.sprintf "%sin_%d"
           (match ctx.proc_name with
            | None -> ""
            | Some s -> Printf.sprintf "%s_" s)
           ctx.in_count
       in
 
-      add_const ctx tag;
       ctx.in_count <- ctx.in_count + 1;
 
       tag
