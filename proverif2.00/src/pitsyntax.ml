@@ -3697,37 +3697,41 @@ module Tag_in_out_ctx = struct
       add_decl ctx (TFunDecl ((f_name, dummy_ext), args, ("bitstring", dummy_ext), [("data", dummy_ext)]));
     in
 
-    let new_pat =
-      match pat with
-      | PPatVar (id, ty) -> (
-          let ty =
-            match ty with
-            | None -> failwith "Expected pattern to be tagged with type"
-            | Some ty -> ty
-          in
-          add_decl [ty];
-          (PPatFunApp ((f_name, dummy_ext), [pat]))
-        )
-      | PPatTuple (_, tys) -> (
-          add_decl 
-          PPatFunApp (f_name, tys)
-        )
-
-    let ty =
-      match pat with
-      | PPatVar (id, ty) -> (
+    match pat with
+    | PPatVar (id, ty) -> (
+        let ty =
           match ty with
           | None -> failwith "Expected pattern to be tagged with type"
           | Some ty -> ty
-        )
-      | PPatTuple _ -> ("bitstring", dummy_ext)
-      | PPatFunApp ((id, _), _) -> (Binder.find id vb, dummy_ext)
-      | PPatEqual (term, _) -> (lookup_pterm_type term vb, dummy_ext)
-    in
-
-    add_decl ctx (TFunDecl ((f_name, dummy_ext), [ty], ("bitstring", dummy_ext), [("data", dummy_ext)]));
-
-    (PPatFunApp ((f_name, dummy_ext), [pat]))
+        in
+        add_decl [ty];
+        (PPatFunApp ((f_name, dummy_ext), [pat]))
+      )
+    | PPatTuple pats -> (
+        let tys = List.map (fun pat ->
+            match pat with
+            | PPatVar (_, ty) -> (match ty with
+                | None -> failwith "Expected pattern to be tagged with type"
+                | Some ty -> ty
+              )
+            | PPatTuple _ -> ("bitstring", dummy_ext)
+            | PPatFunApp ((id, _), _) -> (Binder.find id vb, dummy_ext)
+            | PPatEqual (term, _) -> (lookup_pterm_type term vb, dummy_ext)
+          ) pats
+        in
+        add_decl tys;
+        PPatFunApp ((f_name, dummy_ext), pats)
+      )
+    | PPatFunApp ((id, _), _) -> (
+        let ty = (Binder.find id vb, dummy_ext) in
+        add_decl [ty];
+        PPatFunApp ((f_name, dummy_ext), [pat])
+      )
+    | PPatEqual (term, _) -> (
+        let ty = (lookup_pterm_type term vb, dummy_ext) in
+        add_decl [ty];
+        PPatFunApp ((f_name, dummy_ext), [pat])
+      )
 
   let tag_out_term (ctx : t) (term_e : pterm_e) (vb : string Binder.t) : pterm_e =
     let gen_out_tag (ctx : t) : string =
