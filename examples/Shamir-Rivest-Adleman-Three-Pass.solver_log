@@ -1,148 +1,190 @@
 % Refutation found. Thanks to Tanya!
 % SZS status Theorem for Shamir-Rivest-Adleman-Three-Pass
 % SZS output start Proof for Shamir-Rivest-Adleman-Three-Pass
-fof(f92,axiom,(
+fof(f46,axiom,(
   ! [X0,X1] : constr_dec(constr_enc(X1,X0),X0) = X1),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f93,axiom,(
+fof(f47,axiom,(
   ! [X2,X3] : constr_comm_dec(constr_comm_enc(X3,X2),X2) = X3),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f98,axiom,(
-  ! [X7,X8] : ((pred_attacker(X8) & pred_attacker(X7)) => pred_attacker(constr_dec(X7,X8)))),
+fof(f51,axiom,(
+  ! [X6,X7] : ((pred_attacker(X7) & pred_attacker(X6)) => pred_attacker(constr_dec(X6,X7)))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f109,axiom,(
-  pred_attacker(constr_A_STEP_1)),
+fof(f58,axiom,(
+  pred_attacker(constr_CONST_0x30)),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f111,axiom,(
-  ! [X15,X16] : (pred_attacker(tuple_2(X15,X16)) => pred_attacker(X15))),
+fof(f66,axiom,(
+  ! [X19] : (pred_attacker(tuple_A_out_3(X19)) => pred_attacker(X19))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f118,axiom,(
-  pred_attacker(tuple_2(constr_comm_enc(name_m_9,name_Ka),constr_A_STEP_1))),
+fof(f68,axiom,(
+  ! [X21] : (pred_attacker(tuple_A_out_2(X21)) => pred_attacker(X21))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f119,axiom,(
-  ! [X25] : (pred_attacker(X25) => pred_attacker(tuple_2(constr_comm_dec(X25,name_Ka),constr_A_STEP_2)))),
+fof(f70,axiom,(
+  ! [X23] : (pred_attacker(tuple_A_out_1(X23)) => pred_attacker(X23))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f120,axiom,(
-  ! [X26] : (pred_attacker(X26) => pred_attacker(tuple_2(constr_enc(name_objective,name_m_9),constr_A_STEP_3)))),
+fof(f71,axiom,(
+  ! [X24] : (pred_attacker(X24) => pred_attacker(tuple_A_in_1(X24)))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f122,conjecture,(
+fof(f78,axiom,(
+  pred_attacker(tuple_A_out_1(constr_comm_enc(name_m_9,name_Ka)))),
+  file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
+fof(f79,axiom,(
+  ! [X32] : (pred_attacker(tuple_A_in_1(X32)) => pred_attacker(tuple_A_out_2(constr_comm_dec(X32,name_Ka))))),
+  file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
+fof(f80,axiom,(
+  ! [X33] : (pred_attacker(tuple_A_in_1(X33)) => pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))))),
+  file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
+fof(f82,conjecture,(
   pred_attacker(name_objective)),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
-fof(f123,negated_conjecture,(
+fof(f83,negated_conjecture,(
   ~pred_attacker(name_objective)),
-  inference(negated_conjecture,[],[f122])).
-fof(f124,plain,(
+  inference(negated_conjecture,[],[f82])).
+fof(f84,plain,(
   ! [X0,X1] : constr_comm_dec(constr_comm_enc(X1,X0),X0) = X1),
-  inference(rectify,[],[f93])).
-fof(f127,plain,(
+  inference(rectify,[],[f47])).
+fof(f86,plain,(
   ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_dec(X0,X1)))),
-  inference(rectify,[],[f98])).
-fof(f131,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
-  inference(rectify,[],[f111])).
-fof(f137,plain,(
-  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_2(constr_comm_dec(X0,name_Ka),constr_A_STEP_2)))),
-  inference(rectify,[],[f119])).
-fof(f138,plain,(
-  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_2(constr_enc(name_objective,name_m_9),constr_A_STEP_3)))),
-  inference(rectify,[],[f120])).
-fof(f140,plain,(
+  inference(rectify,[],[f51])).
+fof(f96,plain,(
+  ! [X0] : (pred_attacker(tuple_A_out_3(X0)) => pred_attacker(X0))),
+  inference(rectify,[],[f66])).
+fof(f98,plain,(
+  ! [X0] : (pred_attacker(tuple_A_out_2(X0)) => pred_attacker(X0))),
+  inference(rectify,[],[f68])).
+fof(f100,plain,(
+  ! [X0] : (pred_attacker(tuple_A_out_1(X0)) => pred_attacker(X0))),
+  inference(rectify,[],[f70])).
+fof(f101,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_A_in_1(X0)))),
+  inference(rectify,[],[f71])).
+fof(f107,plain,(
+  ! [X0] : (pred_attacker(tuple_A_in_1(X0)) => pred_attacker(tuple_A_out_2(constr_comm_dec(X0,name_Ka))))),
+  inference(rectify,[],[f79])).
+fof(f108,plain,(
+  ! [X0] : (pred_attacker(tuple_A_in_1(X0)) => pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))))),
+  inference(rectify,[],[f80])).
+fof(f110,plain,(
   ~pred_attacker(name_objective)),
-  inference(flattening,[],[f123])).
-fof(f145,plain,(
+  inference(flattening,[],[f83])).
+fof(f114,plain,(
   ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
-  inference(ennf_transformation,[],[f127])).
-fof(f146,plain,(
+  inference(ennf_transformation,[],[f86])).
+fof(f115,plain,(
   ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
-  inference(flattening,[],[f145])).
-fof(f153,plain,(
-  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
-  inference(ennf_transformation,[],[f131])).
-fof(f159,plain,(
-  ! [X0] : (pred_attacker(tuple_2(constr_comm_dec(X0,name_Ka),constr_A_STEP_2)) | ~pred_attacker(X0))),
-  inference(ennf_transformation,[],[f137])).
-fof(f160,plain,(
-  ! [X0] : (pred_attacker(tuple_2(constr_enc(name_objective,name_m_9),constr_A_STEP_3)) | ~pred_attacker(X0))),
-  inference(ennf_transformation,[],[f138])).
-fof(f253,plain,(
+  inference(flattening,[],[f114])).
+fof(f127,plain,(
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_3(X0)))),
+  inference(ennf_transformation,[],[f96])).
+fof(f129,plain,(
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_2(X0)))),
+  inference(ennf_transformation,[],[f98])).
+fof(f131,plain,(
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_1(X0)))),
+  inference(ennf_transformation,[],[f100])).
+fof(f132,plain,(
+  ! [X0] : (pred_attacker(tuple_A_in_1(X0)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f101])).
+fof(f138,plain,(
+  ! [X0] : (pred_attacker(tuple_A_out_2(constr_comm_dec(X0,name_Ka))) | ~pred_attacker(tuple_A_in_1(X0)))),
+  inference(ennf_transformation,[],[f107])).
+fof(f139,plain,(
+  ! [X0] : (pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))) | ~pred_attacker(tuple_A_in_1(X0)))),
+  inference(ennf_transformation,[],[f108])).
+fof(f186,plain,(
   ( ! [X0,X1] : (constr_dec(constr_enc(X1,X0),X0) = X1) )),
-  inference(cnf_transformation,[],[f92])).
-fof(f254,plain,(
+  inference(cnf_transformation,[],[f46])).
+fof(f187,plain,(
   ( ! [X0,X1] : (constr_comm_dec(constr_comm_enc(X1,X0),X0) = X1) )),
-  inference(cnf_transformation,[],[f124])).
-fof(f258,plain,(
+  inference(cnf_transformation,[],[f84])).
+fof(f191,plain,(
   ( ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f146])).
-fof(f269,plain,(
-  pred_attacker(constr_A_STEP_1)),
-  inference(cnf_transformation,[],[f109])).
-fof(f271,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f153])).
-fof(f277,plain,(
-  pred_attacker(tuple_2(constr_comm_enc(name_m_9,name_Ka),constr_A_STEP_1))),
-  inference(cnf_transformation,[],[f118])).
-fof(f278,plain,(
-  ( ! [X0] : (pred_attacker(tuple_2(constr_comm_dec(X0,name_Ka),constr_A_STEP_2)) | ~pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f159])).
-fof(f279,plain,(
-  ( ! [X0] : (pred_attacker(tuple_2(constr_enc(name_objective,name_m_9),constr_A_STEP_3)) | ~pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f160])).
-fof(f281,plain,(
+  inference(cnf_transformation,[],[f115])).
+fof(f198,plain,(
+  pred_attacker(constr_CONST_0x30)),
+  inference(cnf_transformation,[],[f58])).
+fof(f206,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_A_out_3(X0)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f127])).
+fof(f208,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_A_out_2(X0)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f129])).
+fof(f210,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_A_out_1(X0)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f131])).
+fof(f211,plain,(
+  ( ! [X0] : (pred_attacker(tuple_A_in_1(X0)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f132])).
+fof(f217,plain,(
+  pred_attacker(tuple_A_out_1(constr_comm_enc(name_m_9,name_Ka)))),
+  inference(cnf_transformation,[],[f78])).
+fof(f218,plain,(
+  ( ! [X0] : (pred_attacker(tuple_A_out_2(constr_comm_dec(X0,name_Ka))) | ~pred_attacker(tuple_A_in_1(X0))) )),
+  inference(cnf_transformation,[],[f138])).
+fof(f219,plain,(
+  ( ! [X0] : (pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))) | ~pred_attacker(tuple_A_in_1(X0))) )),
+  inference(cnf_transformation,[],[f139])).
+fof(f221,plain,(
   ~pred_attacker(name_objective)),
-  inference(cnf_transformation,[],[f140])).
-fof(f283,plain,(
-  spl0_0 <=> ! [X0] : ~pred_attacker(X0)),
+  inference(cnf_transformation,[],[f110])).
+fof(f223,plain,(
+  spl0_0 <=> ! [X0] : ~pred_attacker(tuple_A_in_1(X0))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
-fof(f284,plain,(
-  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl0_0),
-  inference(avatar_component_clause,[],[f283])).
-fof(f289,plain,(
-  spl0_2 <=> pred_attacker(tuple_2(constr_enc(name_objective,name_m_9),constr_A_STEP_3))),
+fof(f224,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_A_in_1(X0))) ) | ~spl0_0),
+  inference(avatar_component_clause,[],[f223])).
+fof(f229,plain,(
+  spl0_2 <=> pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9)))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
-fof(f290,plain,(
-  pred_attacker(tuple_2(constr_enc(name_objective,name_m_9),constr_A_STEP_3)) | ~spl0_2),
-  inference(avatar_component_clause,[],[f289])).
-fof(f291,plain,(
+fof(f230,plain,(
+  pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))) | ~spl0_2),
+  inference(avatar_component_clause,[],[f229])).
+fof(f231,plain,(
   spl0_0 | spl0_2),
-  inference(avatar_split_clause,[],[f279,f289,f283])).
-fof(f293,plain,(
+  inference(avatar_split_clause,[],[f219,f229,f223])).
+fof(f239,plain,(
   pred_attacker(constr_comm_enc(name_m_9,name_Ka))),
-  inference(resolution,[],[f277,f271])).
-fof(f295,plain,(
+  inference(resolution,[],[f217,f210])).
+fof(f240,plain,(
   pred_attacker(constr_enc(name_objective,name_m_9)) | ~spl0_2),
-  inference(resolution,[],[f290,f271])).
-fof(f298,plain,(
+  inference(resolution,[],[f230,f206])).
+fof(f243,plain,(
   ( ! [X0,X1] : (~pred_attacker(constr_enc(X0,X1)) | ~pred_attacker(X1) | pred_attacker(X0)) )),
-  inference(superposition,[],[f258,f253])).
-fof(f303,plain,(
-  ( ! [X1] : (pred_attacker(constr_comm_dec(X1,name_Ka)) | ~pred_attacker(X1)) )),
-  inference(resolution,[],[f278,f271])).
-fof(f307,plain,(
-  ( ! [X0] : (~pred_attacker(constr_comm_enc(X0,name_Ka)) | pred_attacker(X0)) )),
-  inference(superposition,[],[f303,f254])).
-fof(f308,plain,(
-  pred_attacker(name_m_9)),
-  inference(resolution,[],[f307,f293])).
-fof(f310,plain,(
+  inference(superposition,[],[f191,f186])).
+fof(f246,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_A_in_1(constr_comm_enc(X0,name_Ka))) | pred_attacker(tuple_A_out_2(X0))) )),
+  inference(superposition,[],[f218,f187])).
+fof(f249,plain,(
   ~pred_attacker(name_m_9) | pred_attacker(name_objective) | ~spl0_2),
-  inference(resolution,[],[f298,f295])).
-fof(f313,plain,(
-  pred_attacker(name_objective) | ~spl0_2),
-  inference(subsumption_resolution,[],[f310,f308])).
-fof(f314,plain,(
+  inference(resolution,[],[f243,f240])).
+fof(f252,plain,(
+  ~pred_attacker(name_m_9) | ~spl0_2),
+  inference(subsumption_resolution,[],[f249,f221])).
+fof(f258,plain,(
+  ( ! [X0] : (~pred_attacker(constr_comm_enc(X0,name_Ka)) | pred_attacker(tuple_A_out_2(X0))) )),
+  inference(resolution,[],[f246,f211])).
+fof(f260,plain,(
+  pred_attacker(tuple_A_out_2(name_m_9))),
+  inference(resolution,[],[f258,f239])).
+fof(f262,plain,(
+  pred_attacker(name_m_9)),
+  inference(resolution,[],[f260,f208])).
+fof(f263,plain,(
   $false | ~spl0_2),
-  inference(subsumption_resolution,[],[f313,f281])).
-fof(f315,plain,(
+  inference(subsumption_resolution,[],[f262,f252])).
+fof(f264,plain,(
   ~spl0_2),
-  inference(avatar_contradiction_clause,[],[f314])).
-fof(f316,plain,(
+  inference(avatar_contradiction_clause,[],[f263])).
+fof(f265,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl0_0),
+  inference(resolution,[],[f224,f211])).
+fof(f266,plain,(
   $false | ~spl0_0),
-  inference(resolution,[],[f284,f269])).
-fof(f354,plain,(
+  inference(resolution,[],[f265,f198])).
+fof(f304,plain,(
   ~spl0_0),
-  inference(avatar_contradiction_clause,[],[f316])).
-fof(f355,plain,(
+  inference(avatar_contradiction_clause,[],[f266])).
+fof(f305,plain,(
   $false),
-  inference(avatar_sat_refutation,[],[f291,f315,f354])).
+  inference(avatar_sat_refutation,[],[f231,f264,f304])).
 % SZS output end Proof for Shamir-Rivest-Adleman-Three-Pass

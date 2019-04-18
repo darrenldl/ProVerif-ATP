@@ -24,334 +24,272 @@ constr_CONST_0x30 != constr_CONST_3).
 fof(ax3, axiom,
 constr_CONST_0x30 != constr_CONST_4).
 fof(ax4, axiom,
-constr_CONST_0x30 != constr_client_B_STEP_1).
-fof(ax5, axiom,
-constr_CONST_0x30 != constr_server_S_STEP_1).
-fof(ax6, axiom,
-constr_CONST_0x30 != constr_server_S_STEP_2).
-fof(ax7, axiom,
 constr_CONST_0x30 != name_A).
-fof(ax8, axiom,
+fof(ax5, axiom,
 constr_CONST_0x30 != name_B).
-fof(ax9, axiom,
+fof(ax6, axiom,
 constr_CONST_0x30 != name_I).
-fof(ax10, axiom,
+fof(ax7, axiom,
 constr_CONST_0x30 != name_Kas).
-fof(ax11, axiom,
+fof(ax8, axiom,
 constr_CONST_0x30 != name_Kbs).
-fof(ax12, axiom,
+fof(ax9, axiom,
 constr_CONST_0x30 != name_c).
-fof(ax13, axiom,
+fof(ax10, axiom,
 constr_CONST_0x30 != name_objective).
-fof(ax14, axiom,
+fof(ax11, axiom,
 constr_CONST_1 != constr_CONST_2).
-fof(ax15, axiom,
+fof(ax12, axiom,
 constr_CONST_1 != constr_CONST_3).
-fof(ax16, axiom,
+fof(ax13, axiom,
 constr_CONST_1 != constr_CONST_4).
-fof(ax17, axiom,
-constr_CONST_1 != constr_client_B_STEP_1).
-fof(ax18, axiom,
-constr_CONST_1 != constr_server_S_STEP_1).
-fof(ax19, axiom,
-constr_CONST_1 != constr_server_S_STEP_2).
-fof(ax20, axiom,
+fof(ax14, axiom,
 constr_CONST_1 != name_A).
-fof(ax21, axiom,
+fof(ax15, axiom,
 constr_CONST_1 != name_B).
-fof(ax22, axiom,
+fof(ax16, axiom,
 constr_CONST_1 != name_I).
-fof(ax23, axiom,
+fof(ax17, axiom,
 constr_CONST_1 != name_Kas).
-fof(ax24, axiom,
+fof(ax18, axiom,
 constr_CONST_1 != name_Kbs).
-fof(ax25, axiom,
+fof(ax19, axiom,
 constr_CONST_1 != name_c).
-fof(ax26, axiom,
+fof(ax20, axiom,
 constr_CONST_1 != name_objective).
-fof(ax27, axiom,
+fof(ax21, axiom,
 constr_CONST_2 != constr_CONST_3).
-fof(ax28, axiom,
+fof(ax22, axiom,
 constr_CONST_2 != constr_CONST_4).
-fof(ax29, axiom,
-constr_CONST_2 != constr_client_B_STEP_1).
-fof(ax30, axiom,
-constr_CONST_2 != constr_server_S_STEP_1).
-fof(ax31, axiom,
-constr_CONST_2 != constr_server_S_STEP_2).
-fof(ax32, axiom,
+fof(ax23, axiom,
 constr_CONST_2 != name_A).
-fof(ax33, axiom,
+fof(ax24, axiom,
 constr_CONST_2 != name_B).
-fof(ax34, axiom,
+fof(ax25, axiom,
 constr_CONST_2 != name_I).
-fof(ax35, axiom,
+fof(ax26, axiom,
 constr_CONST_2 != name_Kas).
-fof(ax36, axiom,
+fof(ax27, axiom,
 constr_CONST_2 != name_Kbs).
-fof(ax37, axiom,
+fof(ax28, axiom,
 constr_CONST_2 != name_c).
-fof(ax38, axiom,
+fof(ax29, axiom,
 constr_CONST_2 != name_objective).
-fof(ax39, axiom,
+fof(ax30, axiom,
 constr_CONST_3 != constr_CONST_4).
-fof(ax40, axiom,
-constr_CONST_3 != constr_client_B_STEP_1).
-fof(ax41, axiom,
-constr_CONST_3 != constr_server_S_STEP_1).
-fof(ax42, axiom,
-constr_CONST_3 != constr_server_S_STEP_2).
-fof(ax43, axiom,
+fof(ax31, axiom,
 constr_CONST_3 != name_A).
-fof(ax44, axiom,
+fof(ax32, axiom,
 constr_CONST_3 != name_B).
-fof(ax45, axiom,
+fof(ax33, axiom,
 constr_CONST_3 != name_I).
-fof(ax46, axiom,
+fof(ax34, axiom,
 constr_CONST_3 != name_Kas).
-fof(ax47, axiom,
+fof(ax35, axiom,
 constr_CONST_3 != name_Kbs).
-fof(ax48, axiom,
+fof(ax36, axiom,
 constr_CONST_3 != name_c).
-fof(ax49, axiom,
+fof(ax37, axiom,
 constr_CONST_3 != name_objective).
-fof(ax50, axiom,
-constr_CONST_4 != constr_client_B_STEP_1).
-fof(ax51, axiom,
-constr_CONST_4 != constr_server_S_STEP_1).
-fof(ax52, axiom,
-constr_CONST_4 != constr_server_S_STEP_2).
-fof(ax53, axiom,
+fof(ax38, axiom,
 constr_CONST_4 != name_A).
-fof(ax54, axiom,
+fof(ax39, axiom,
 constr_CONST_4 != name_B).
-fof(ax55, axiom,
+fof(ax40, axiom,
 constr_CONST_4 != name_I).
-fof(ax56, axiom,
+fof(ax41, axiom,
 constr_CONST_4 != name_Kas).
-fof(ax57, axiom,
+fof(ax42, axiom,
 constr_CONST_4 != name_Kbs).
-fof(ax58, axiom,
+fof(ax43, axiom,
 constr_CONST_4 != name_c).
-fof(ax59, axiom,
+fof(ax44, axiom,
 constr_CONST_4 != name_objective).
-fof(ax60, axiom,
-constr_client_B_STEP_1 != constr_server_S_STEP_1).
-fof(ax61, axiom,
-constr_client_B_STEP_1 != constr_server_S_STEP_2).
-fof(ax62, axiom,
-constr_client_B_STEP_1 != name_A).
-fof(ax63, axiom,
-constr_client_B_STEP_1 != name_B).
-fof(ax64, axiom,
-constr_client_B_STEP_1 != name_I).
-fof(ax65, axiom,
-constr_client_B_STEP_1 != name_Kas).
-fof(ax66, axiom,
-constr_client_B_STEP_1 != name_Kbs).
-fof(ax67, axiom,
-constr_client_B_STEP_1 != name_c).
-fof(ax68, axiom,
-constr_client_B_STEP_1 != name_objective).
-fof(ax69, axiom,
-constr_server_S_STEP_1 != constr_server_S_STEP_2).
-fof(ax70, axiom,
-constr_server_S_STEP_1 != name_A).
-fof(ax71, axiom,
-constr_server_S_STEP_1 != name_B).
-fof(ax72, axiom,
-constr_server_S_STEP_1 != name_I).
-fof(ax73, axiom,
-constr_server_S_STEP_1 != name_Kas).
-fof(ax74, axiom,
-constr_server_S_STEP_1 != name_Kbs).
-fof(ax75, axiom,
-constr_server_S_STEP_1 != name_c).
-fof(ax76, axiom,
-constr_server_S_STEP_1 != name_objective).
-fof(ax77, axiom,
-constr_server_S_STEP_2 != name_A).
-fof(ax78, axiom,
-constr_server_S_STEP_2 != name_B).
-fof(ax79, axiom,
-constr_server_S_STEP_2 != name_I).
-fof(ax80, axiom,
-constr_server_S_STEP_2 != name_Kas).
-fof(ax81, axiom,
-constr_server_S_STEP_2 != name_Kbs).
-fof(ax82, axiom,
-constr_server_S_STEP_2 != name_c).
-fof(ax83, axiom,
-constr_server_S_STEP_2 != name_objective).
-fof(ax84, axiom,
+fof(ax45, axiom,
 name_A != name_B).
-fof(ax85, axiom,
+fof(ax46, axiom,
 name_A != name_I).
-fof(ax86, axiom,
+fof(ax47, axiom,
 name_A != name_Kas).
-fof(ax87, axiom,
+fof(ax48, axiom,
 name_A != name_Kbs).
-fof(ax88, axiom,
+fof(ax49, axiom,
 name_A != name_c).
-fof(ax89, axiom,
+fof(ax50, axiom,
 name_A != name_objective).
-fof(ax90, axiom,
+fof(ax51, axiom,
 name_B != name_I).
-fof(ax91, axiom,
+fof(ax52, axiom,
 name_B != name_Kas).
-fof(ax92, axiom,
+fof(ax53, axiom,
 name_B != name_Kbs).
-fof(ax93, axiom,
+fof(ax54, axiom,
 name_B != name_c).
-fof(ax94, axiom,
+fof(ax55, axiom,
 name_B != name_objective).
-fof(ax95, axiom,
+fof(ax56, axiom,
 name_I != name_Kas).
-fof(ax96, axiom,
+fof(ax57, axiom,
 name_I != name_Kbs).
-fof(ax97, axiom,
+fof(ax58, axiom,
 name_I != name_c).
-fof(ax98, axiom,
+fof(ax59, axiom,
 name_I != name_objective).
-fof(ax99, axiom,
+fof(ax60, axiom,
 name_Kas != name_Kbs).
-fof(ax100, axiom,
+fof(ax61, axiom,
 name_Kas != name_c).
-fof(ax101, axiom,
+fof(ax62, axiom,
 name_Kas != name_objective).
-fof(ax102, axiom,
+fof(ax63, axiom,
 name_Kbs != name_c).
-fof(ax103, axiom,
+fof(ax64, axiom,
 name_Kbs != name_objective).
-fof(ax104, axiom,
+fof(ax65, axiom,
 name_c != name_objective).
-fof(ax105, axiom,
+fof(ax66, axiom,
 ![VAR_K_50X30, VAR_X0X30_46, VAR_X1_47, VAR_X2_48, VAR_X3_49] : (constr_cbc_dec_4(constr_cbc_enc_4(VAR_X0X30_46, VAR_X1_47, VAR_X2_48, VAR_X3_49, VAR_K_50X30), VAR_K_50X30) = tuple_4(VAR_X0X30_46, VAR_X1_47, VAR_X2_48, VAR_X3_49))).
-fof(ax106, axiom,
+fof(ax67, axiom,
 ![VAR_K_45, VAR_X0X30_42, VAR_X1_43, VAR_X2_44] : (constr_cbc_dec_3(constr_cbc_enc_3(VAR_X0X30_42, VAR_X1_43, VAR_X2_44, VAR_K_45), VAR_K_45) = tuple_3(VAR_X0X30_42, VAR_X1_43, VAR_X2_44))).
-fof(ax107, axiom,
+fof(ax68, axiom,
 ![VAR_K_41, VAR_X0X30_39, VAR_X1_40X30] : (constr_cbc_dec_2(constr_cbc_enc_2(VAR_X0X30_39, VAR_X1_40X30, VAR_K_41), VAR_K_41) = tuple_2(VAR_X0X30_39, VAR_X1_40X30))).
-fof(ax108, axiom,
+fof(ax69, axiom,
 ![VAR_K_38, VAR_X0X30_37] : (constr_cbc_dec_1(constr_cbc_enc_1(VAR_X0X30_37, VAR_K_38), VAR_K_38) = VAR_X0X30_37)).
-fof(ax109, axiom,
+fof(ax70, axiom,
 ![VAR_K_36, VAR_X0X30_32, VAR_X1_33, VAR_X2_34, VAR_X3_35] : (constr_cbc_4_get_3_prefixes(constr_cbc_enc_4(VAR_X0X30_32, VAR_X1_33, VAR_X2_34, VAR_X3_35, VAR_K_36)) = constr_cbc_enc_3(VAR_X0X30_32, VAR_X1_33, VAR_X2_34, VAR_K_36))).
-fof(ax110, axiom,
+fof(ax71, axiom,
 ![VAR_K_31, VAR_X0X30_27, VAR_X1_28, VAR_X2_29, VAR_X3_30X30] : (constr_cbc_4_get_2_prefixes(constr_cbc_enc_4(VAR_X0X30_27, VAR_X1_28, VAR_X2_29, VAR_X3_30X30, VAR_K_31)) = constr_cbc_enc_2(VAR_X0X30_27, VAR_X1_28, VAR_K_31))).
-fof(ax111, axiom,
+fof(ax72, axiom,
 ![VAR_K_26, VAR_X0X30_23, VAR_X1_24, VAR_X2_25, VAR_X3_0X30] : (constr_cbc_4_get_1_prefixes(constr_cbc_enc_4(VAR_X0X30_23, VAR_X1_24, VAR_X2_25, VAR_X3_0X30, VAR_K_26)) = constr_cbc_enc_1(VAR_X0X30_23, VAR_K_26))).
-fof(ax112, axiom,
+fof(ax73, axiom,
 ![VAR_K_22, VAR_X0X30_19, VAR_X1_20X30, VAR_X2_21] : (constr_cbc_3_get_2_prefixes(constr_cbc_enc_3(VAR_X0X30_19, VAR_X1_20X30, VAR_X2_21, VAR_K_22)) = constr_cbc_enc_2(VAR_X0X30_19, VAR_X1_20X30, VAR_K_22))).
-fof(ax113, axiom,
+fof(ax74, axiom,
 ![VAR_K_18, VAR_X0X30_15, VAR_X1_16, VAR_X2_17] : (constr_cbc_3_get_1_prefixes(constr_cbc_enc_3(VAR_X0X30_15, VAR_X1_16, VAR_X2_17, VAR_K_18)) = constr_cbc_enc_1(VAR_X0X30_15, VAR_K_18))).
-fof(ax114, axiom,
+fof(ax75, axiom,
 ![VAR_K_0X30, VAR_X0X30_13, VAR_X1_14] : (constr_cbc_2_get_1_prefixes(constr_cbc_enc_2(VAR_X0X30_13, VAR_X1_14, VAR_K_0X30)) = constr_cbc_enc_1(VAR_X0X30_13, VAR_K_0X30))).
-fof(ax115, axiom,
-![VAR_X0X30_10X30, VAR_X1_11, VAR_X2_12] : (constr_tuple_3_get_2(tuple_3(VAR_X0X30_10X30, VAR_X1_11, VAR_X2_12)) = VAR_X2_12)).
-fof(ax116, axiom,
-![VAR_X0X30_7, VAR_X1_8, VAR_X2_9] : (constr_tuple_3_get_1(tuple_3(VAR_X0X30_7, VAR_X1_8, VAR_X2_9)) = VAR_X1_8)).
-fof(ax117, axiom,
+fof(ax76, axiom,
+![VAR_X0X30_10X30, VAR_X1_11, VAR_X2_12] : (constr_tuple_3_get_2_bitstring(tuple_3(VAR_X0X30_10X30, VAR_X1_11, VAR_X2_12)) = VAR_X2_12)).
+fof(ax77, axiom,
+![VAR_X0X30_7, VAR_X1_8, VAR_X2_9] : (constr_tuple_3_get_1_bitstring(tuple_3(VAR_X0X30_7, VAR_X1_8, VAR_X2_9)) = VAR_X1_8)).
+fof(ax78, axiom,
 ![VAR_X0X30_0X30, VAR_X1_0X30, VAR_X2_0X30] : (constr_tuple_3_get_0x30(tuple_3(VAR_X0X30_0X30, VAR_X1_0X30, VAR_X2_0X30)) = VAR_X0X30_0X30)).
-fof(ax118, axiom,
-![VAR_X_67] : (pred_eq(VAR_X_67, VAR_X_67))).
-fof(ax119, axiom,
-![VAR_V_73] : (pred_attacker(VAR_V_73) => pred_attacker(constr_tuple_3_get_2(VAR_V_73)))).
-fof(ax120, axiom,
-![VAR_V_75] : (pred_attacker(VAR_V_75) => pred_attacker(constr_tuple_3_get_1(VAR_V_75)))).
-fof(ax121, axiom,
-![VAR_V_77] : (pred_attacker(VAR_V_77) => pred_attacker(constr_tuple_3_get_0x30(VAR_V_77)))).
-fof(ax122, axiom,
+fof(ax79, axiom,
+![VAR_X_67, VAR_Y_68] : (pred_eq_bitstring_bitstring(VAR_X_67, VAR_Y_68))).
+fof(ax80, axiom,
+![VAR_V_74] : (pred_attacker(VAR_V_74) => pred_attacker(constr_tuple_3_get_2_bitstring(VAR_V_74)))).
+fof(ax81, axiom,
+![VAR_V_76] : (pred_attacker(VAR_V_76) => pred_attacker(constr_tuple_3_get_1_bitstring(VAR_V_76)))).
+fof(ax82, axiom,
+![VAR_V_78] : (pred_attacker(VAR_V_78) => pred_attacker(constr_tuple_3_get_0x30(VAR_V_78)))).
+fof(ax83, axiom,
 pred_attacker(tuple_true)).
-fof(ax123, axiom,
-pred_attacker(constr_server_S_STEP_2)).
-fof(ax124, axiom,
-pred_attacker(constr_server_S_STEP_1)).
-fof(ax125, axiom,
+fof(ax84, axiom,
+![VAR_V_80X30] : (pred_attacker(VAR_V_80X30) => pred_attacker(tuple_server_S_out_2(VAR_V_80X30)))).
+fof(ax85, axiom,
+![VAR_V_83] : (pred_attacker(tuple_server_S_out_2(VAR_V_83)) => pred_attacker(VAR_V_83))).
+fof(ax86, axiom,
+![VAR_V_86] : (pred_attacker(VAR_V_86) => pred_attacker(tuple_server_S_out_1(VAR_V_86)))).
+fof(ax87, axiom,
+![VAR_V_89] : (pred_attacker(tuple_server_S_out_1(VAR_V_89)) => pred_attacker(VAR_V_89))).
+fof(ax88, axiom,
+![VAR_V_93, VAR_V_94] : ((pred_attacker(VAR_V_93) & pred_attacker(VAR_V_94)) => pred_attacker(tuple_server_S_in_1(VAR_V_93, VAR_V_94)))).
+fof(ax89, axiom,
+![VAR_V_10X301, VAR_V_10X302] : (pred_attacker(tuple_server_S_in_1(VAR_V_10X301, VAR_V_10X302)) => pred_attacker(VAR_V_10X301))).
+fof(ax90, axiom,
+![VAR_V_10X304, VAR_V_10X305] : (pred_attacker(tuple_server_S_in_1(VAR_V_10X304, VAR_V_10X305)) => pred_attacker(VAR_V_10X305))).
+fof(ax91, axiom,
 pred_attacker(tuple_false)).
-fof(ax126, axiom,
-pred_attacker(constr_client_B_STEP_1)).
-fof(ax127, axiom,
-![VAR_V_84, VAR_V_85, VAR_V_86, VAR_V_87, VAR_V_88] : ((pred_attacker(VAR_V_84) & pred_attacker(VAR_V_85) & pred_attacker(VAR_V_86) & pred_attacker(VAR_V_87) & pred_attacker(VAR_V_88)) => pred_attacker(constr_cbc_enc_4(VAR_V_84, VAR_V_85, VAR_V_86, VAR_V_87, VAR_V_88)))).
-fof(ax128, axiom,
-![VAR_V_93, VAR_V_94, VAR_V_95, VAR_V_96] : ((pred_attacker(VAR_V_93) & pred_attacker(VAR_V_94) & pred_attacker(VAR_V_95) & pred_attacker(VAR_V_96)) => pred_attacker(constr_cbc_enc_3(VAR_V_93, VAR_V_94, VAR_V_95, VAR_V_96)))).
-fof(ax129, axiom,
-![VAR_V_10X300X30, VAR_V_10X301, VAR_V_10X302] : ((pred_attacker(VAR_V_10X300X30) & pred_attacker(VAR_V_10X301) & pred_attacker(VAR_V_10X302)) => pred_attacker(constr_cbc_enc_2(VAR_V_10X300X30, VAR_V_10X301, VAR_V_10X302)))).
-fof(ax130, axiom,
-![VAR_V_10X305, VAR_V_10X306] : ((pred_attacker(VAR_V_10X305) & pred_attacker(VAR_V_10X306)) => pred_attacker(constr_cbc_enc_1(VAR_V_10X305, VAR_V_10X306)))).
-fof(ax131, axiom,
-![VAR_V_10X309, VAR_V_110X30] : ((pred_attacker(VAR_V_10X309) & pred_attacker(VAR_V_110X30)) => pred_attacker(constr_cbc_dec_4(VAR_V_10X309, VAR_V_110X30)))).
-fof(ax132, axiom,
-![VAR_V_113, VAR_V_114] : ((pred_attacker(VAR_V_113) & pred_attacker(VAR_V_114)) => pred_attacker(constr_cbc_dec_3(VAR_V_113, VAR_V_114)))).
-fof(ax133, axiom,
-![VAR_V_117, VAR_V_118] : ((pred_attacker(VAR_V_117) & pred_attacker(VAR_V_118)) => pred_attacker(constr_cbc_dec_2(VAR_V_117, VAR_V_118)))).
-fof(ax134, axiom,
-![VAR_V_121, VAR_V_122] : ((pred_attacker(VAR_V_121) & pred_attacker(VAR_V_122)) => pred_attacker(constr_cbc_dec_1(VAR_V_121, VAR_V_122)))).
-fof(ax135, axiom,
-![VAR_V_124] : (pred_attacker(VAR_V_124) => pred_attacker(constr_cbc_4_get_3_prefixes(VAR_V_124)))).
-fof(ax136, axiom,
-![VAR_V_126] : (pred_attacker(VAR_V_126) => pred_attacker(constr_cbc_4_get_2_prefixes(VAR_V_126)))).
-fof(ax137, axiom,
-![VAR_V_128] : (pred_attacker(VAR_V_128) => pred_attacker(constr_cbc_4_get_1_prefixes(VAR_V_128)))).
-fof(ax138, axiom,
-![VAR_V_130X30] : (pred_attacker(VAR_V_130X30) => pred_attacker(constr_cbc_3_get_2_prefixes(VAR_V_130X30)))).
-fof(ax139, axiom,
-![VAR_V_132] : (pred_attacker(VAR_V_132) => pred_attacker(constr_cbc_3_get_1_prefixes(VAR_V_132)))).
-fof(ax140, axiom,
-![VAR_V_134] : (pred_attacker(VAR_V_134) => pred_attacker(constr_cbc_2_get_1_prefixes(VAR_V_134)))).
-fof(ax141, axiom,
+fof(ax92, axiom,
+![VAR_V_10X309] : (pred_attacker(VAR_V_10X309) => pred_attacker(tuple_client_B_out_1(VAR_V_10X309)))).
+fof(ax93, axiom,
+![VAR_V_112] : (pred_attacker(tuple_client_B_out_1(VAR_V_112)) => pred_attacker(VAR_V_112))).
+fof(ax94, axiom,
+![VAR_V_115] : (pred_attacker(VAR_V_115) => pred_attacker(tuple_client_B_in_1(VAR_V_115)))).
+fof(ax95, axiom,
+![VAR_V_118] : (pred_attacker(tuple_client_B_in_1(VAR_V_118)) => pred_attacker(VAR_V_118))).
+fof(ax96, axiom,
+![VAR_V_125, VAR_V_126, VAR_V_127, VAR_V_128, VAR_V_129] : ((pred_attacker(VAR_V_125) & pred_attacker(VAR_V_126) & pred_attacker(VAR_V_127) & pred_attacker(VAR_V_128) & pred_attacker(VAR_V_129)) => pred_attacker(constr_cbc_enc_4(VAR_V_125, VAR_V_126, VAR_V_127, VAR_V_128, VAR_V_129)))).
+fof(ax97, axiom,
+![VAR_V_134, VAR_V_135, VAR_V_136, VAR_V_137] : ((pred_attacker(VAR_V_134) & pred_attacker(VAR_V_135) & pred_attacker(VAR_V_136) & pred_attacker(VAR_V_137)) => pred_attacker(constr_cbc_enc_3(VAR_V_134, VAR_V_135, VAR_V_136, VAR_V_137)))).
+fof(ax98, axiom,
+![VAR_V_141, VAR_V_142, VAR_V_143] : ((pred_attacker(VAR_V_141) & pred_attacker(VAR_V_142) & pred_attacker(VAR_V_143)) => pred_attacker(constr_cbc_enc_2(VAR_V_141, VAR_V_142, VAR_V_143)))).
+fof(ax99, axiom,
+![VAR_V_146, VAR_V_147] : ((pred_attacker(VAR_V_146) & pred_attacker(VAR_V_147)) => pred_attacker(constr_cbc_enc_1(VAR_V_146, VAR_V_147)))).
+fof(ax100, axiom,
+![VAR_V_150X30, VAR_V_151] : ((pred_attacker(VAR_V_150X30) & pred_attacker(VAR_V_151)) => pred_attacker(constr_cbc_dec_4(VAR_V_150X30, VAR_V_151)))).
+fof(ax101, axiom,
+![VAR_V_154, VAR_V_155] : ((pred_attacker(VAR_V_154) & pred_attacker(VAR_V_155)) => pred_attacker(constr_cbc_dec_3(VAR_V_154, VAR_V_155)))).
+fof(ax102, axiom,
+![VAR_V_158, VAR_V_159] : ((pred_attacker(VAR_V_158) & pred_attacker(VAR_V_159)) => pred_attacker(constr_cbc_dec_2(VAR_V_158, VAR_V_159)))).
+fof(ax103, axiom,
+![VAR_V_162, VAR_V_163] : ((pred_attacker(VAR_V_162) & pred_attacker(VAR_V_163)) => pred_attacker(constr_cbc_dec_1(VAR_V_162, VAR_V_163)))).
+fof(ax104, axiom,
+![VAR_V_165] : (pred_attacker(VAR_V_165) => pred_attacker(constr_cbc_4_get_3_prefixes(VAR_V_165)))).
+fof(ax105, axiom,
+![VAR_V_167] : (pred_attacker(VAR_V_167) => pred_attacker(constr_cbc_4_get_2_prefixes(VAR_V_167)))).
+fof(ax106, axiom,
+![VAR_V_169] : (pred_attacker(VAR_V_169) => pred_attacker(constr_cbc_4_get_1_prefixes(VAR_V_169)))).
+fof(ax107, axiom,
+![VAR_V_171] : (pred_attacker(VAR_V_171) => pred_attacker(constr_cbc_3_get_2_prefixes(VAR_V_171)))).
+fof(ax108, axiom,
+![VAR_V_173] : (pred_attacker(VAR_V_173) => pred_attacker(constr_cbc_3_get_1_prefixes(VAR_V_173)))).
+fof(ax109, axiom,
+![VAR_V_175] : (pred_attacker(VAR_V_175) => pred_attacker(constr_cbc_2_get_1_prefixes(VAR_V_175)))).
+fof(ax110, axiom,
 pred_attacker(constr_CONST_4)).
-fof(ax142, axiom,
+fof(ax111, axiom,
 pred_attacker(constr_CONST_3)).
-fof(ax143, axiom,
+fof(ax112, axiom,
 pred_attacker(constr_CONST_2)).
-fof(ax144, axiom,
+fof(ax113, axiom,
 pred_attacker(constr_CONST_1)).
-fof(ax145, axiom,
+fof(ax114, axiom,
 pred_attacker(constr_CONST_0x30)).
-fof(ax146, axiom,
-![VAR_V_143, VAR_V_144, VAR_V_145, VAR_V_146] : ((pred_attacker(VAR_V_143) & pred_attacker(VAR_V_144) & pred_attacker(VAR_V_145) & pred_attacker(VAR_V_146)) => pred_attacker(tuple_4(VAR_V_143, VAR_V_144, VAR_V_145, VAR_V_146)))).
-fof(ax147, axiom,
-![VAR_V_167, VAR_V_168, VAR_V_169, VAR_V_170X30] : (pred_attacker(tuple_4(VAR_V_167, VAR_V_168, VAR_V_169, VAR_V_170X30)) => pred_attacker(VAR_V_167))).
-fof(ax148, axiom,
-![VAR_V_172, VAR_V_173, VAR_V_174, VAR_V_175] : (pred_attacker(tuple_4(VAR_V_172, VAR_V_173, VAR_V_174, VAR_V_175)) => pred_attacker(VAR_V_173))).
-fof(ax149, axiom,
-![VAR_V_177, VAR_V_178, VAR_V_179, VAR_V_180X30] : (pred_attacker(tuple_4(VAR_V_177, VAR_V_178, VAR_V_179, VAR_V_180X30)) => pred_attacker(VAR_V_179))).
-fof(ax150, axiom,
-![VAR_V_182, VAR_V_183, VAR_V_184, VAR_V_185] : (pred_attacker(tuple_4(VAR_V_182, VAR_V_183, VAR_V_184, VAR_V_185)) => pred_attacker(VAR_V_185))).
-fof(ax151, axiom,
-![VAR_V_190X30, VAR_V_191, VAR_V_192] : ((pred_attacker(VAR_V_190X30) & pred_attacker(VAR_V_191) & pred_attacker(VAR_V_192)) => pred_attacker(tuple_3(VAR_V_190X30, VAR_V_191, VAR_V_192)))).
-fof(ax152, axiom,
-![VAR_V_20X305, VAR_V_20X306, VAR_V_20X307] : (pred_attacker(tuple_3(VAR_V_20X305, VAR_V_20X306, VAR_V_20X307)) => pred_attacker(VAR_V_20X305))).
-fof(ax153, axiom,
-![VAR_V_20X309, VAR_V_210X30, VAR_V_211] : (pred_attacker(tuple_3(VAR_V_20X309, VAR_V_210X30, VAR_V_211)) => pred_attacker(VAR_V_210X30))).
-fof(ax154, axiom,
-![VAR_V_213, VAR_V_214, VAR_V_215] : (pred_attacker(tuple_3(VAR_V_213, VAR_V_214, VAR_V_215)) => pred_attacker(VAR_V_215))).
-fof(ax155, axiom,
-![VAR_V_219, VAR_V_220X30] : ((pred_attacker(VAR_V_219) & pred_attacker(VAR_V_220X30)) => pred_attacker(tuple_2(VAR_V_219, VAR_V_220X30)))).
-fof(ax156, axiom,
-![VAR_V_227, VAR_V_228] : (pred_attacker(tuple_2(VAR_V_227, VAR_V_228)) => pred_attacker(VAR_V_227))).
-fof(ax157, axiom,
-![VAR_V_230X30, VAR_V_231] : (pred_attacker(tuple_2(VAR_V_230X30, VAR_V_231)) => pred_attacker(VAR_V_231))).
-fof(ax158, axiom,
-![VAR_V_233, VAR_V_234] : ((pred_mess(VAR_V_234, VAR_V_233) & pred_attacker(VAR_V_234)) => pred_attacker(VAR_V_233))).
-fof(ax159, axiom,
-![VAR_V_235, VAR_V_236] : ((pred_attacker(VAR_V_236) & pred_attacker(VAR_V_235)) => pred_mess(VAR_V_236, VAR_V_235))).
-fof(ax160, axiom,
+fof(ax115, axiom,
+![VAR_V_184, VAR_V_185, VAR_V_186, VAR_V_187] : ((pred_attacker(VAR_V_184) & pred_attacker(VAR_V_185) & pred_attacker(VAR_V_186) & pred_attacker(VAR_V_187)) => pred_attacker(tuple_4(VAR_V_184, VAR_V_185, VAR_V_186, VAR_V_187)))).
+fof(ax116, axiom,
+![VAR_V_20X308, VAR_V_20X309, VAR_V_210X30, VAR_V_211] : (pred_attacker(tuple_4(VAR_V_20X308, VAR_V_20X309, VAR_V_210X30, VAR_V_211)) => pred_attacker(VAR_V_20X308))).
+fof(ax117, axiom,
+![VAR_V_213, VAR_V_214, VAR_V_215, VAR_V_216] : (pred_attacker(tuple_4(VAR_V_213, VAR_V_214, VAR_V_215, VAR_V_216)) => pred_attacker(VAR_V_214))).
+fof(ax118, axiom,
+![VAR_V_218, VAR_V_219, VAR_V_220X30, VAR_V_221] : (pred_attacker(tuple_4(VAR_V_218, VAR_V_219, VAR_V_220X30, VAR_V_221)) => pred_attacker(VAR_V_220X30))).
+fof(ax119, axiom,
+![VAR_V_223, VAR_V_224, VAR_V_225, VAR_V_226] : (pred_attacker(tuple_4(VAR_V_223, VAR_V_224, VAR_V_225, VAR_V_226)) => pred_attacker(VAR_V_226))).
+fof(ax120, axiom,
+![VAR_V_231, VAR_V_232, VAR_V_233] : ((pred_attacker(VAR_V_231) & pred_attacker(VAR_V_232) & pred_attacker(VAR_V_233)) => pred_attacker(tuple_3(VAR_V_231, VAR_V_232, VAR_V_233)))).
+fof(ax121, axiom,
+![VAR_V_246, VAR_V_247, VAR_V_248] : (pred_attacker(tuple_3(VAR_V_246, VAR_V_247, VAR_V_248)) => pred_attacker(VAR_V_246))).
+fof(ax122, axiom,
+![VAR_V_250X30, VAR_V_251, VAR_V_252] : (pred_attacker(tuple_3(VAR_V_250X30, VAR_V_251, VAR_V_252)) => pred_attacker(VAR_V_251))).
+fof(ax123, axiom,
+![VAR_V_254, VAR_V_255, VAR_V_256] : (pred_attacker(tuple_3(VAR_V_254, VAR_V_255, VAR_V_256)) => pred_attacker(VAR_V_256))).
+fof(ax124, axiom,
+![VAR_V_260X30, VAR_V_261] : ((pred_attacker(VAR_V_260X30) & pred_attacker(VAR_V_261)) => pred_attacker(tuple_2(VAR_V_260X30, VAR_V_261)))).
+fof(ax125, axiom,
+![VAR_V_268, VAR_V_269] : (pred_attacker(tuple_2(VAR_V_268, VAR_V_269)) => pred_attacker(VAR_V_268))).
+fof(ax126, axiom,
+![VAR_V_271, VAR_V_272] : (pred_attacker(tuple_2(VAR_V_271, VAR_V_272)) => pred_attacker(VAR_V_272))).
+fof(ax127, axiom,
+![VAR_V_274, VAR_V_275] : ((pred_mess(VAR_V_275, VAR_V_274) & pred_attacker(VAR_V_275)) => pred_attacker(VAR_V_274))).
+fof(ax128, axiom,
+![VAR_V_276, VAR_V_277] : ((pred_attacker(VAR_V_277) & pred_attacker(VAR_V_276)) => pred_mess(VAR_V_277, VAR_V_276))).
+fof(ax129, axiom,
 pred_attacker(name_c)).
-fof(ax161, axiom,
+fof(ax130, axiom,
 pred_attacker(name_I)).
-fof(ax162, axiom,
+fof(ax131, axiom,
 pred_attacker(name_B)).
-fof(ax163, axiom,
+fof(ax132, axiom,
 pred_attacker(name_A)).
-fof(ax164, axiom,
-![VAR_V_238] : (pred_equal(VAR_V_238, VAR_V_238))).
-fof(ax165, axiom,
-![VAR_V_239] : (pred_attacker(name_new0x2Dname(VAR_V_239)))).
-fof(ax166, axiom,
-![VAR_ENC_A_KAB_T_293] : ((pred_eq(name_A, constr_tuple_3_get_0x30(constr_cbc_dec_3(VAR_ENC_A_KAB_T_293, name_Kbs))) & pred_attacker(VAR_ENC_A_KAB_T_293)) => pred_attacker(tuple_2(name_objective, constr_client_B_STEP_1)))).
-fof(ax167, axiom,
-![VAR_0X40SID_357] : (pred_attacker(tuple_2(name_A, name_B)) => pred_attacker(tuple_2(constr_cbc_enc_4(name_B, name_Kab_54(VAR_0X40SID_357), name_T_55(VAR_0X40SID_357), constr_cbc_enc_3(name_A, name_Kab_54(VAR_0X40SID_357), name_T_55(VAR_0X40SID_357), name_Kbs), name_Kas), constr_server_S_STEP_2)))).
-fof(ax168, axiom,
-![VAR_0X40SID_537] : (pred_attacker(tuple_2(name_B, name_A)) => pred_attacker(tuple_2(constr_cbc_enc_4(name_A, name_Kab_54(VAR_0X40SID_537), name_T_55(VAR_0X40SID_537), constr_cbc_enc_3(name_B, name_Kab_54(VAR_0X40SID_537), name_T_55(VAR_0X40SID_537), name_Kas), name_Kbs), constr_server_S_STEP_1)))).
+fof(ax133, axiom,
+![VAR_V_279] : (pred_equal(VAR_V_279, VAR_V_279))).
+fof(ax134, axiom,
+![VAR_V_280X30] : (pred_attacker(name_new0x2Dname(VAR_V_280X30)))).
+fof(ax135, axiom,
+![VAR_ENC_A_KAB_T_330X30] : ((pred_eq_bitstring_bitstring(name_A, constr_tuple_3_get_0x30(constr_cbc_dec_3(VAR_ENC_A_KAB_T_330X30, name_Kbs))) & pred_attacker(tuple_client_B_in_1(VAR_ENC_A_KAB_T_330X30))) => pred_attacker(tuple_client_B_out_1(name_objective)))).
+fof(ax136, axiom,
+![VAR_0X40SID_388] : (pred_attacker(tuple_server_S_in_1(name_A, name_B)) => pred_attacker(tuple_server_S_out_2(constr_cbc_enc_4(name_B, name_Kab_54(VAR_0X40SID_388), name_T_55(VAR_0X40SID_388), constr_cbc_enc_3(name_A, name_Kab_54(VAR_0X40SID_388), name_T_55(VAR_0X40SID_388), name_Kbs), name_Kas))))).
+fof(ax137, axiom,
+![VAR_0X40SID_562] : (pred_attacker(tuple_server_S_in_1(name_B, name_A)) => pred_attacker(tuple_server_S_out_1(constr_cbc_enc_4(name_A, name_Kab_54(VAR_0X40SID_562), name_T_55(VAR_0X40SID_562), constr_cbc_enc_3(name_B, name_Kab_54(VAR_0X40SID_562), name_T_55(VAR_0X40SID_562), name_Kas), name_Kbs))))).
 fof(co0, conjecture,
 pred_attacker(name_objective)).

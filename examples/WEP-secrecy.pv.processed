@@ -4,12 +4,6 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 free c : channel.
 
 fun xor(bitstring, bitstring) : bitstring.
@@ -56,17 +50,18 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const enc_oracle_STEP_1 : bitstring.
+fun enc_oracle_in_1(bitstring) : bitstring [data].
+fun enc_oracle_out_1(bitstring, bitstring) : bitstring [data].
 
 let enc_oracle =
-  in(c, M : bitstring);
-  out(c, ((v, xor(concat(M, C(M)), RC4(v, Kab))), enc_oracle_STEP_1));
+  in(c, enc_oracle_in_1(M : bitstring));
+  out(c, enc_oracle_out_1(v, xor(concat(M, C(M)), RC4(v, Kab))));
   0.
 
-const B_STEP_1 : bitstring.
+fun B_out_1(bitstring, bitstring) : bitstring [data].
 
 let B =
-  out(c, ((v, xor(concat(objective, C(objective)), RC4(v, Kab))), B_STEP_1));
+  out(c, B_out_1(v, xor(concat(objective, C(objective)), RC4(v, Kab))));
   0.
 
 process

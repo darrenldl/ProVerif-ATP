@@ -4,12 +4,6 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 free c : channel.
 
 const ZERO : bitstring.
@@ -37,31 +31,32 @@ free objective_R : bitstring [private].
 query 
   attacker(objective_R).
 
-const R_STEP_1 : bitstring.
-const R_STEP_2 : bitstring.
-const R_STEP_3 : bitstring.
+fun R_out_1(bitstring) : bitstring [data].
+fun R_in_1(bitstring, bitstring) : bitstring [data].
+fun R_out_2(bitstring) : bitstring [data].
+fun R_out_3(bitstring) : bitstring [data].
 
 let R =
   new r0 : bitstring;
-  out(c, (r0, R_STEP_1));
-  in(c, (r1_in : bitstring, h_res : bitstring));
+  out(c, R_out_1(r0));
+  in(c, R_in_1(r1_in : bitstring, h_res : bitstring));
   
   if h_res = h(xor(xor(r0, r1_in), k)) then
-  out(c, (h(xor(xor(h_res, k), r0)), R_STEP_2));
-  out(c, (objective_R, R_STEP_3));
+  out(c, R_out_2(h(xor(xor(h_res, k), r0))));
+  out(c, R_out_3(objective_R));
   0.
 
-const knowledge_from_1st_round_STEP_1 : bitstring.
-const knowledge_from_1st_round_STEP_2 : bitstring.
-const knowledge_from_1st_round_STEP_3 : bitstring.
+fun knowledge_from_1st_round_out_1(bitstring) : bitstring [data].
+fun knowledge_from_1st_round_out_2(bitstring, bitstring) : bitstring [data].
+fun knowledge_from_1st_round_out_3(bitstring) : bitstring [data].
 
 let knowledge_from_1st_round =
   new r0_from_1st : bitstring;
   new r1_from_1st : bitstring;
-  out(c, (r0_from_1st, knowledge_from_1st_round_STEP_1));
+  out(c, knowledge_from_1st_round_out_1(r0_from_1st));
   let h_res = h(xor(xor(r0_from_1st, r1_from_1st), k)) in
-  out(c, ((r1_from_1st, h_res), knowledge_from_1st_round_STEP_2));
-  out(c, (h(xor(xor(h_res, k), r0_from_1st)), knowledge_from_1st_round_STEP_3));
+  out(c, knowledge_from_1st_round_out_2(r1_from_1st, h_res));
+  out(c, knowledge_from_1st_round_out_3(h(xor(xor(h_res, k), r0_from_1st))));
   0.
 
 process

@@ -4,12 +4,6 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 free c : channel.
 free objective : bitstring [private].
 free k0 : bitstring [private].
@@ -37,18 +31,20 @@ fun h(bitstring) : bitstring.
 query 
   attacker(objective).
 
-const T_STEP_1 : bitstring.
-const T_STEP_2 : bitstring.
+fun T_in_1(bitstring) : bitstring [data].
+fun T_out_1(bitstring) : bitstring [data].
+fun T_in_2(bitstring, bitstring) : bitstring [data].
+fun T_out_2(bitstring) : bitstring [data].
 
 let T =
   let alpha = xor(k0, ki) in
-  in(c, r : bitstring);
-  out(c, (h(xor(r, alpha)), T_STEP_1));
-  in(c, (a : bitstring, b : bitstring));
+  in(c, T_in_1(r : bitstring));
+  out(c, T_out_1(h(xor(r, alpha))));
+  in(c, T_in_2(a : bitstring, b : bitstring));
   
   if b = h(xor(a, alpha)) then
   let alpha_prime = xor(alpha, a) in
-  out(c, (objective, T_STEP_2));
+  out(c, T_out_2(objective));
   0.
 
 process
