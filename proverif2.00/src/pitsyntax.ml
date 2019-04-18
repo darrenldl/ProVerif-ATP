@@ -3502,6 +3502,23 @@ let lookup_pterm_type ((term : pterm)) (vb : string Binder.t) : string =
   in
   aux term vb
 
+let get_global_vb (decl : Pitptree.tdecl list) : string Binder.t =
+  List.fold_left (fun binder decl ->
+      match decl with
+      | TConstDecl ((id, _), (ty, _), _opts) -> (
+          Binder.add id ty binder
+        )
+      | TFree ((id,_), (ty,_), _opts) -> (
+          Binder.add id ty binder
+        )
+      | TFunDecl ((id, _), _args, (ty, _), _opts) -> (
+          Binder.add id ty binder
+        )
+      | _ -> binder
+    )
+    Binder.empty
+    decl
+
 let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
   let eq_list = ref [] in
   let rec aux (vb : string Binder.t) (kb : (string * string) Binder.t) (p : tprocess) : tprocess =
@@ -3563,22 +3580,7 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
       )
   in
 
-  let global_vb = List.fold_left (fun binder decl ->
-      match decl with
-      | TConstDecl ((id, _), (ty, _), _opts) -> (
-          Binder.add id ty binder
-        )
-      | TFree ((id,_), (ty,_), _opts) -> (
-          Binder.add id ty binder
-        )
-      | TFunDecl ((id, _), _args, (ty, _), _opts) -> (
-          Binder.add id ty binder
-        )
-      | _ -> binder
-    )
-      Binder.empty
-      decl
-  in
+  let global_vb = get_global_vb decl in
 
   let global_kb = List.fold_left (fun binder decl ->
       match decl with
@@ -3665,11 +3667,6 @@ module Tag_in_out_ctx = struct
     let ext = dummy_ext in
     add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
 
-  let tag_out_term (ctx : t) (term : pterm) (vb : string Binder.t) : ptern =
-    let ty = lookup_pterm_type term vb in
-
-
-
   let set_proc_name (ctx : t) (name : string) : unit =
     ctx.proc_name <- Some name;
     ctx.in_count <- 1;
@@ -3705,10 +3702,23 @@ module Tag_in_out_ctx = struct
     ctx.out_count <- ctx.out_count + 1;
 
     tag
+
+  let tag_out_term (ctx : t) (term_e : pterm_e) (vb : string Binder.t) : pterm_e =
+    let (term, e) = term_e in
+
+    let f_name = gen_out_tag ctx in
+
+    let ty = lookup_pterm_type term vb in
+
+    add_decl ctx (TFunDecl ((f_name, dummy_ext), [(ty, dummy_ext)], ("bitstring", dummy_ext), [("data", dummy_ext)]));
+
+    (PPFunApp ((f_name, e), [(term, e)]), e)
 end
 
 let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
   let ctx = Tag_in_out_ctx.make decl in
+
+  let vb = get_global_vb decl in
 
   let rec aux (p : tprocess) : tprocess =
     match p with
@@ -3727,14 +3737,9 @@ let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
         PInput (ch_term, tagged, aux p)
       )
     | POutput(ch_term, term, p) -> (
-        let (_, e) = term in
+        let tagged = Tag_in_out_ctx.tag_out_term ctx term vb in
 
-        let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
-
-        let tag = (tag_str, e) in
-        let tagged = PPFunApp (tag, [term]) in
-
-        POutput(ch_term, (tagged, e), aux p)
+        POutput(ch_term, tagged, aux p)
       )
     | PLet (pat, t, p, p') -> PLet (pat, t, aux p, aux p')
     | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux p, aux q)
