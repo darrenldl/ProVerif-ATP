@@ -3692,20 +3692,19 @@ module Tag_in_out_ctx = struct
 
     tag
 
-  let gen_out_tag (ctx : t) : string =
-    let tag = Printf.sprintf "%s_out_%d"
-        (match ctx.proc_name with
-         | None -> ""
-         | Some s -> Printf.sprintf "%s_" s)
-        ctx.out_count
-    in
-
-    add_const ctx tag;
-    ctx.out_count <- ctx.out_count + 1;
-
-    tag
-
   let tag_out_term (ctx : t) (term_e : pterm_e) (vb : string Binder.t) : pterm_e =
+    let gen_out_tag (ctx : t) : string =
+      let tag = Printf.sprintf "%sout_%d"
+          (match ctx.proc_name with
+           | None -> ""
+           | Some s -> Printf.sprintf "%s_" s)
+          ctx.out_count
+      in
+
+      ctx.out_count <- ctx.out_count + 1;
+
+      tag
+    in
     let (term, e) = term_e in
 
     let f_name = gen_out_tag ctx in
