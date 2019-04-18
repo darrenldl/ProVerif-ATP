@@ -3729,12 +3729,13 @@ let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
     | PLetDef (s, args) -> PLetDef (s, args)
     | PTest (cond, p1, p2) -> PTest(cond, aux p1, aux p2)
     | PInput (ch_term, pat, p) -> (
-        let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
-
-        let tag = (tag_str, dummy_ext) in
-        let tagged = PPatFunApp (tag, [pat]) in
-
-        PInput (ch_term, tagged, aux p)
+        (* let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
+         * 
+         * let tag = (tag_str, dummy_ext) in
+         * let tagged = PPatFunApp (tag, [pat]) in
+         * 
+         * PInput (ch_term, tagged, aux p) *)
+        PInput (ch_term, pat, p)
       )
     | POutput(ch_term, term, p) -> (
         let tagged = Tag_in_out_ctx.tag_out_term ctx term vb in
@@ -3755,12 +3756,12 @@ let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
     (fun decl ->
        match decl with
        | TPDef ((id, e), m, p) -> (
-           Tag_output_ctx.set_proc_name ctx id;
-           Tag_output_ctx.add_decl ctx (TPDef((id, e), m, aux p))
+           Tag_in_out_ctx.set_proc_name ctx id;
+           Tag_in_out_ctx.add_decl ctx (TPDef((id, e), m, aux p))
          )
-       | _ -> Tag_output_ctx.add_decl ctx decl
+       | _ -> Tag_in_out_ctx.add_decl ctx decl
     ) decl;
-  Tag_output_ctx.clear_proc_name ctx;
+  Tag_in_out_ctx.clear_proc_name ctx;
   (List.rev ctx.decl, aux p)
 
 (* let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
