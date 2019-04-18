@@ -3808,12 +3808,8 @@ let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
             let vb = Binder.add id ty1 vb in
             PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
           )
-        | PPatEqual (pat_term, pat_term_e) -> (
-            let ty1 = lookup_pterm_type pat_term vb in
-            let ty2 = lookup_pterm_type term vb in
-            let eq_pred_name = make_eq_pred_name ty1 ty2 in
-            PTest ((PPFunApp ((eq_pred_name, dummy_ext), [(pat_term, pat_term_e); (term, term_e)]), dummy_ext), aux vb kb p, aux vb kb p')
-          )
+        | PPatEqual (pat_term, pat_term_e) ->
+          PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
         | _ -> PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
       )
     | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux vb kb p, aux vb kb q)
