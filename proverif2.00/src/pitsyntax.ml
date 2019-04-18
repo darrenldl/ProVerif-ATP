@@ -3185,122 +3185,6 @@ let reset() =
   rename_table := StringMap.empty;
   expansion_number := 0
 
-module Tag_in_out_ctx = struct
-  type t = {
-    mutable decl : tdecl list;
-    mutable in_count : int;
-    mutable out_count : int;
-    mutable proc_name : string option;
-  }
-
-  let make (decl : tdecl list) : t =
-    { decl;
-      in_count = 1;
-      out_count = 1;
-      proc_name = None;
-    }
-
-  let add_decl (ctx : t) (d : tdecl) : unit =
-    ctx.decl <- d :: ctx.decl
-
-  let clear_decl (ctx : t) : unit =
-    ctx.decl <- []
-
-  let add_const (ctx : t) (c : string) : unit =
-    let open Parsing_helper in
-
-    let ext = dummy_ext in
-    add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
-      add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
-
-  let set_proc_name (ctx : t) (name : string) : unit =
-    ctx.proc_name <- Some name;
-    ctx.in_count <- 1;
-    ctx.out_count <- 1
-
-  let clear_proc_name (ctx : t) : unit =
-    ctx.proc_name <- None;
-    ctx.in_count <- 1;
-    ctx.out_count <- 1
-
-  let gen_in_tag (ctx : t) : string =
-    let tag = Printf.sprintf "%s_in_%d"
-        (match ctx.proc_name with
-         | None -> ""
-         | Some s -> Printf.sprintf "%s_" s)
-        ctx.in_count
-    in
-
-    add_const ctx tag;
-    ctx.in_count <- ctx.in_count + 1;
-
-    tag
-
-  let gen_out_tag (ctx : t) : string =
-    let tag = Printf.sprintf "%s_out_%d"
-        (match ctx.proc_name with
-         | None -> ""
-         | Some s -> Printf.sprintf "%s_" s)
-        ctx.out_count
-    in
-
-    add_const ctx tag;
-    ctx.out_count <- ctx.out_count + 1;
-
-    tag
-end
-
-let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
-  let ctx = Tag_in_out_ctx.make decl in
-
-  let rec aux (p : tprocess) : tprocess =
-    match p with
-    | PNil -> PNil
-    | PPar (p1, p2) -> PPar (aux p1, aux p2)
-    | PRepl p -> PRepl (aux p)
-    | PRestr (s, args, t, p) -> PRestr (s, args, t, aux p)
-    | PLetDef (s, args) -> PLetDef (s, args)
-    | PTest (cond, p1, p2) -> PTest(cond, aux p1, aux p2)
-    | PInput (ch_term, pat, p) -> (
-        let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
-
-        let tag = (tag_str, dummy_ext) in
-        let tagged = PPatFunApp (tag, [pat]) in
-
-        PInput (ch_term, tagged, aux p)
-      )
-    | POutput(ch_term, term, p) -> (
-        let (_, e) = term in
-
-        let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
-
-        let tag = (tag_str, e) in
-        let tagged = PPFunApp (tag, [term]) in
-
-        POutput(ch_term, (tagged, e), aux p)
-      )
-    | PLet (pat, t, p, p') -> PLet (pat, t, aux p, aux p')
-    | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux p, aux q)
-    | PEvent (id, l, env_args, p) -> PEvent (id, l, env_args, aux p)
-    | PPhase (n, p) -> PPhase (n, aux p)
-    | PBarrier (n, tag, p) -> PBarrier (n, tag, aux p)
-    | PInsert (id, l, p) -> PInsert (id, l, aux p)
-    | PGet (i, pat_list, cond_opt, p, elsep) -> PGet (i, pat_list, cond_opt, aux p, aux elsep)
-  in
-  let decl = ctx.decl in
-  Tag_in_out_ctx.clear_decl ctx;
-  List.iter
-    (fun decl ->
-       match decl with
-       | TPDef ((id, e), m, p) -> (
-           Tag_output_ctx.set_proc_name ctx id;
-           Tag_output_ctx.add_decl ctx (TPDef((id, e), m, aux p))
-         )
-       | _ -> Tag_output_ctx.add_decl ctx decl
-    ) decl;
-  Tag_output_ctx.clear_proc_name ctx;
-  (List.rev ctx.decl, aux p)
-
 module Flatten_let_binding = struct
   type constructor_type = Constr_tuple | Constr_fun of string
 
@@ -3753,6 +3637,122 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
   let existing_ones = List.rev existing_ones in
 
   (type_decl @ eq_decl @ existing_ones, aux global_vb global_kb p)
+
+module Tag_in_out_ctx = struct
+  type t = {
+    mutable decl : tdecl list;
+    mutable in_count : int;
+    mutable out_count : int;
+    mutable proc_name : string option;
+  }
+
+  let make (decl : tdecl list) : t =
+    { decl;
+      in_count = 1;
+      out_count = 1;
+      proc_name = None;
+    }
+
+  let add_decl (ctx : t) (d : tdecl) : unit =
+    ctx.decl <- d :: ctx.decl
+
+  let clear_decl (ctx : t) : unit =
+    ctx.decl <- []
+
+  let add_const (ctx : t) (c : string) : unit =
+    let open Parsing_helper in
+
+    let ext = dummy_ext in
+    add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
+      add_decl ctx (TConstDecl ((c, ext), ("bitstring", ext), []))
+
+  let set_proc_name (ctx : t) (name : string) : unit =
+    ctx.proc_name <- Some name;
+    ctx.in_count <- 1;
+    ctx.out_count <- 1
+
+  let clear_proc_name (ctx : t) : unit =
+    ctx.proc_name <- None;
+    ctx.in_count <- 1;
+    ctx.out_count <- 1
+
+  let gen_in_tag (ctx : t) : string =
+    let tag = Printf.sprintf "%s_in_%d"
+        (match ctx.proc_name with
+         | None -> ""
+         | Some s -> Printf.sprintf "%s_" s)
+        ctx.in_count
+    in
+
+    add_const ctx tag;
+    ctx.in_count <- ctx.in_count + 1;
+
+    tag
+
+  let gen_out_tag (ctx : t) : string =
+    let tag = Printf.sprintf "%s_out_%d"
+        (match ctx.proc_name with
+         | None -> ""
+         | Some s -> Printf.sprintf "%s_" s)
+        ctx.out_count
+    in
+
+    add_const ctx tag;
+    ctx.out_count <- ctx.out_count + 1;
+
+    tag
+end
+
+let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
+  let ctx = Tag_in_out_ctx.make decl in
+
+  let rec aux (p : tprocess) : tprocess =
+    match p with
+    | PNil -> PNil
+    | PPar (p1, p2) -> PPar (aux p1, aux p2)
+    | PRepl p -> PRepl (aux p)
+    | PRestr (s, args, t, p) -> PRestr (s, args, t, aux p)
+    | PLetDef (s, args) -> PLetDef (s, args)
+    | PTest (cond, p1, p2) -> PTest(cond, aux p1, aux p2)
+    | PInput (ch_term, pat, p) -> (
+        let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
+
+        let tag = (tag_str, dummy_ext) in
+        let tagged = PPatFunApp (tag, [pat]) in
+
+        PInput (ch_term, tagged, aux p)
+      )
+    | POutput(ch_term, term, p) -> (
+        let (_, e) = term in
+
+        let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
+
+        let tag = (tag_str, e) in
+        let tagged = PPFunApp (tag, [term]) in
+
+        POutput(ch_term, (tagged, e), aux p)
+      )
+    | PLet (pat, t, p, p') -> PLet (pat, t, aux p, aux p')
+    | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux p, aux q)
+    | PEvent (id, l, env_args, p) -> PEvent (id, l, env_args, aux p)
+    | PPhase (n, p) -> PPhase (n, aux p)
+    | PBarrier (n, tag, p) -> PBarrier (n, tag, aux p)
+    | PInsert (id, l, p) -> PInsert (id, l, aux p)
+    | PGet (i, pat_list, cond_opt, p, elsep) -> PGet (i, pat_list, cond_opt, aux p, aux elsep)
+  in
+  let decl = ctx.decl in
+  Tag_in_out_ctx.clear_decl ctx;
+  List.iter
+    (fun decl ->
+       match decl with
+       | TPDef ((id, e), m, p) -> (
+           Tag_output_ctx.set_proc_name ctx id;
+           Tag_output_ctx.add_decl ctx (TPDef((id, e), m, aux p))
+         )
+       | _ -> Tag_output_ctx.add_decl ctx decl
+    ) decl;
+  Tag_output_ctx.clear_proc_name ctx;
+  (List.rev ctx.decl, aux p)
 
 (* let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
  *   let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [("bitstring", dummy_ext); ("bitstring", dummy_ext)], []) in
