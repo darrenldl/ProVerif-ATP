@@ -3473,6 +3473,13 @@ let update_vb_with_pat (pat : tpattern) (vb : string Binder.t) : string Binder.t
   in
   aux pat vb
 
+(* let update_vb_with_pterm (term : pterm) (vb : string Binder.t) : string Binder.t =
+ *   let rec aux term vb =
+ *     match term with
+ *     | PPIdent (id, _) -> 
+ *   in
+ *   aux term vb *)
+
 let pat_to_name (pat : tpattern) : string option =
   match pat with
   | PPatVar ((id, _), ty) -> Some id
@@ -3557,6 +3564,15 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
               | None -> ty2
             in
             let vb = Binder.add id ty1 vb in
+            PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
+          )
+        | PPatTuple pats
+        | PPatFunApp (_, pats) -> (
+            let ty = lookup_pterm_type pat_term vb in
+            let vb = List.fold_left (fun ty ->
+              )
+
+            in
             PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
           )
         | PPatEqual (pat_term, pat_term_e) -> (
@@ -3752,6 +3768,21 @@ module Tag_in_out_ctx = struct
     let add_decl args =
       add_decl ctx (TFunDecl ((f_name, dummy_ext), args, ("bitstring", dummy_ext), [("data", dummy_ext)]));
     in
+
+    Printf.printf "id : %s\n" (match term with
+     | PPIdent (id, _) -> id
+     | PPFunApp ((id, _), _) -> id
+     | PPTuple _ -> "bitstring"
+     | PPRestr ((id, _), _opts, (ty, _), _) -> id
+     | PPTest (_cond, (b1, _), _b2) -> "condition"
+     | PPLet (pat, (v, _), (b1,_), b2) -> (
+         "let"
+       )
+     | PPLetFilter _ -> "let filter"
+     | PPEvent _ -> "event"
+     | PPInsert _ -> "insert"
+     | PPGet _ -> "get"
+    );
 
     let ty = lookup_pterm_type term vb in
 
