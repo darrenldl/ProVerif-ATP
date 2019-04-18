@@ -3749,10 +3749,13 @@ module Tag_in_out_ctx = struct
     let (term, e) = term_e in
 
     let f_name = gen_out_tag ctx in
+    let add_decl args =
+      add_decl ctx (TFunDecl ((f_name, dummy_ext), args, ("bitstring", dummy_ext), [("data", dummy_ext)]));
+    in
 
     let ty = lookup_pterm_type term vb in
 
-    add_decl ctx (TFunDecl ((f_name, dummy_ext), [(ty, dummy_ext)], ("bitstring", dummy_ext), [("data", dummy_ext)]));
+    add_decl [(ty, dummy_ext)];
 
     (PPFunApp ((f_name, e), [(term, e)]), e)
 end
