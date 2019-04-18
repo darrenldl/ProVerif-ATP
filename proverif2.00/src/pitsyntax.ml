@@ -3693,6 +3693,25 @@ module Tag_in_out_ctx = struct
       tag
     in
     let f_name = gen_in_tag ctx in
+    let add_decl args =
+      add_decl ctx (TFunDecl ((f_name, dummy_ext), args, ("bitstring", dummy_ext), [("data", dummy_ext)]));
+    in
+
+    let new_pat =
+      match pat with
+      | PPatVar (id, ty) -> (
+          let ty =
+            match ty with
+            | None -> failwith "Expected pattern to be tagged with type"
+            | Some ty -> ty
+          in
+          add_decl [ty];
+          (PPatFunApp ((f_name, dummy_ext), [pat]))
+        )
+      | PPatTuple (_, tys) -> (
+          add_decl 
+          PPatFunApp (f_name, tys)
+        )
 
     let ty =
       match pat with
