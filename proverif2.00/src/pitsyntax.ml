@@ -3755,11 +3755,20 @@ module Tag_in_out_ctx = struct
 
     let ty = lookup_pterm_type term vb in
 
-    add_decl [(ty, dummy_ext)];
-
     match term with
-    | PPTuple args -> (PPFunApp ((f_name, e), args), e)
-    | _ -> (PPFunApp ((f_name, e), [(term, e)]), e)
+    | PPTuple args -> (
+        let tys = List.map (fun (arg, e) ->
+            lookup_pterm_type arg vb, dummy_ext
+          ) args
+        in
+        add_decl tys;
+        (PPFunApp ((f_name, e), args), e)
+      )
+    | _ -> (
+      add_decl [(ty, dummy_ext)];
+
+      (PPFunApp ((f_name, e), [(term, e)]), e)
+    )
 end
 
 let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
