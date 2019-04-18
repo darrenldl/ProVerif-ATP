@@ -3519,6 +3519,17 @@ let get_global_vb (decl : Pitptree.tdecl list) : string Binder.t =
     Binder.empty
     decl
 
+let get_global_kb (decl : Pitptree.tdecl list) : (string * string) Binder.t =
+  List.fold_left (fun binder decl ->
+      match decl with
+      | TTableDecl ((id, _), [(ty1, _); (ty2, _)]) -> (
+          Binder.add id (ty1, ty2) binder
+        )
+      | _ -> binder
+    )
+    Binder.empty
+    decl
+
 let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
   let eq_list = ref [] in
   let rec aux (vb : string Binder.t) (kb : (string * string) Binder.t) (p : tprocess) : tprocess =
@@ -3582,16 +3593,7 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
 
   let global_vb = get_global_vb decl in
 
-  let global_kb = List.fold_left (fun binder decl ->
-      match decl with
-      | TTableDecl ((id, _), [(ty1, _); (ty2, _)]) -> (
-          Binder.add id (ty1, ty2) binder
-        )
-      | _ -> binder
-    )
-      Binder.empty
-      decl
-  in
+  let global_kb = get_global_kb decl in
 
   (* Binder.iter (fun k v ->
    *     Printf.printf "var %s : %s\n" k v
@@ -3718,51 +3720,97 @@ end
 let tag_in_outs (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
   let ctx = Tag_in_out_ctx.make decl in
 
-  let vb = get_global_vb decl in
-
-  let rec aux (p : tprocess) : tprocess =
+  let rec aux (vb : string Binder.t) (kb : (string * string) Binder.t) (p : tprocess) : tprocess =
     match p with
     | PNil -> PNil
-    | PPar (p1, p2) -> PPar (aux p1, aux p2)
-    | PRepl p -> PRepl (aux p)
-    | PRestr (s, args, t, p) -> PRestr (s, args, t, aux p)
+    | PPar (p1, p2) -> PPar (aux vb kb p1, aux vb kb p2)
+    | PRepl p -> PRepl (aux vb kb p)
+    | PRestr ((s, se), args, (t, te), p) -> (
+        let vb = Binder.add s t vb in
+        PRestr ((s, se), args, (t, te), aux vb kb p)
+      )
     | PLetDef (s, args) -> PLetDef (s, args)
-    | PTest (cond, p1, p2) -> PTest(cond, aux p1, aux p2)
+    | PTest (cond, p1, p2) -> PTest(cond, aux vb kb p1, aux vb kb p2)
     | PInput (ch_term, pat, p) -> (
+        let vb = update_vb_with_pat pat vb in
         (* let tag_str = Tag_in_out_ctx.gen_out_tag ctx in
          * 
          * let tag = (tag_str, dummy_ext) in
          * let tagged = PPatFunApp (tag, [pat]) in
          * 
          * PInput (ch_term, tagged, aux p) *)
-        PInput (ch_term, pat, p)
+        PInput (ch_term, pat, aux vb kb p)
       )
     | POutput(ch_term, term, p) -> (
         let tagged = Tag_in_out_ctx.tag_out_term ctx term vb in
 
-        POutput(ch_term, tagged, aux p)
+        POutput(ch_term, tagged, aux vb kb p)
       )
-    | PLet (pat, t, p, p') -> PLet (pat, t, aux p, aux p')
-    | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux p, aux q)
-    | PEvent (id, l, env_args, p) -> PEvent (id, l, env_args, aux p)
-    | PPhase (n, p) -> PPhase (n, aux p)
-    | PBarrier (n, tag, p) -> PBarrier (n, tag, aux p)
-    | PInsert (id, l, p) -> PInsert (id, l, aux p)
-    | PGet (i, pat_list, cond_opt, p, elsep) -> PGet (i, pat_list, cond_opt, aux p, aux elsep)
+    | PLet (pat, (term, term_e), p, p') -> (
+        match pat with
+        | PPatVar ((id, _), ty) -> (
+            let ty2 = lookup_pterm_type term vb in
+            let ty1 = match ty with
+              | Some (ty, _) -> ty
+              | None -> ty2
+            in
+            let vb = Binder.add id ty1 vb in
+            PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
+          )
+        | PPatEqual (pat_term, pat_term_e) -> (
+            let ty1 = lookup_pterm_type pat_term vb in
+            let ty2 = lookup_pterm_type term vb in
+            let eq_pred_name = make_eq_pred_name ty1 ty2 in
+            PTest ((PPFunApp ((eq_pred_name, dummy_ext), [(pat_term, pat_term_e); (term, term_e)]), dummy_ext), aux vb kb p, aux vb kb p')
+          )
+        | _ -> PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
+      )
+    | PLetFilter (identlist, fact, p, q) -> PLetFilter (identlist, fact, aux vb kb p, aux vb kb q)
+    | PEvent (id, l, env_args, p) -> PEvent (id, l, env_args, aux vb kb p)
+    | PPhase (n, p) -> PPhase (n, aux vb kb p)
+    | PBarrier (n, tag, p) -> PBarrier (n, tag, aux vb kb p)
+    | PInsert (id, l, p) -> PInsert (id, l, aux vb kb p)
+    | PGet ((i, ie), pat_list, cond_opt, p, elsep) -> (
+        match pat_list with
+        | [p1; p2] ->
+          let (ty1, ty2) = Binder.find i kb in
+          let vb = match pat_to_name p1 with
+            | Some x -> Binder.add x ty1 vb
+            | None -> vb
+          in
+          let vb = match pat_to_name p2 with
+            | Some x -> Binder.add x ty2 vb
+            | None -> vb
+          in
+          PGet ((i, ie), pat_list, cond_opt, aux vb kb p, aux vb kb elsep)
+        | _ ->
+          PGet ((i, ie), pat_list, cond_opt, aux vb kb p, aux vb kb elsep)
+      )
   in
+
+  let global_vb = get_global_vb decl in
+
+  let global_kb = get_global_kb decl in
+
   let decl = ctx.decl in
   Tag_in_out_ctx.clear_decl ctx;
   List.iter
     (fun decl ->
        match decl with
        | TPDef ((id, e), m, p) -> (
+           let vb = List.fold_left (fun vb ((id, _), (ty, _), _) ->
+               Binder.add id ty vb
+             )
+               global_vb
+               m
+           in
            Tag_in_out_ctx.set_proc_name ctx id;
-           Tag_in_out_ctx.add_decl ctx (TPDef((id, e), m, aux p))
+           Tag_in_out_ctx.add_decl ctx (TPDef((id, e), m, aux vb global_kb p))
          )
        | _ -> Tag_in_out_ctx.add_decl ctx decl
     ) decl;
   Tag_in_out_ctx.clear_proc_name ctx;
-  (List.rev ctx.decl, aux p)
+  (List.rev ctx.decl, aux global_vb global_kb p)
 
 (* let add_eq_pred_decl (decl, p : tdecl list * tprocess) : tdecl list * tprocess =
  *   let eq_pred_decl = TPredDecl ((eq_pred_name, dummy_ext), [("bitstring", dummy_ext); ("bitstring", dummy_ext)], []) in
@@ -3837,7 +3885,7 @@ let parse_file s =
   let (decl, proc, second_proc) = parse_with_lib s in
   let (decl, proc) = match !Arg_params.out_kind with
     | Spass | Tptp -> (decl, proc)
-                      |> (if !Arg_params.tag_out then tag_outputs else (fun x -> x))
+                      |> (if !Arg_params.tag_out then tag_in_outs else (fun x -> x))
                       |> flatten_let_bindings
                       (* |> add_eq_pred_decl *)
                       |> replace_let_eq_pat_match_with_if_eq
