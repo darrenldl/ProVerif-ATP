@@ -3487,7 +3487,7 @@ let pat_to_name (pat : tpattern) : string option =
   | PPatFunApp (_, l) -> None
   | PPatEqual _ -> None
 
-let lookup_pterm_type ((term : pterm)) (vb : string Binder.t) : string =
+let lookup_pterm_type (term : pterm) (vb : string Binder.t) : string =
   let rec aux term vb =
       match term with
       | PPIdent (id, _) -> Binder.find id vb
