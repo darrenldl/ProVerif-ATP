@@ -12,7 +12,7 @@ echo "Solving ""$f".pv
 
 proverif -in pitype -log-pv-only "$f".pv >/dev/null
 mv "$f".pv.export "$f".pv.reprinted
-proverif -in pitype -out tptp -tag-out -log-pv -o "$f".p "$f".pv >/dev/null
+proverif -in pitype -out tptp -tag-in-out -log-pv -o "$f".p "$f".pv >/dev/null
 mv "$f".pv.export "$f".pv.processed
 
 vampire -t "$time"s -m $[total_mem_in_MB-500] "$f".p -p tptp -stat none > "$f".solver_log
