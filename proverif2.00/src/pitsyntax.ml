@@ -3955,7 +3955,7 @@ let parse_file s =
   let (decl, proc) = match !Arg_params.out_kind with
     | Spass | Tptp -> (decl, proc)
                       |> flatten_let_bindings
-                      |> (if !Arg_params.tag_out then tag_in_outs else (fun x -> x))
+                      |> (if !Arg_params.tag_in_out then tag_in_outs else (fun x -> x))
                       (* |> add_eq_pred_decl *)
                       |> replace_let_eq_pat_match_with_if_eq
                       (* |> replace_if_eq_with_if_eq_pred *)

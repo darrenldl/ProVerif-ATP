@@ -758,7 +758,7 @@ let _ =
         "<format> \t\tchoose the input format (horn, horntype, spass, pi, pitype)";
       "-out", Arg.String(fun s -> Arg_params.out_kind := up_out s),
         "<format> \tchoose the output format (solve, spass, tptp)";
-      "-tag-out", Arg.Unit (fun () -> Arg_params.tag_out := true),
+      "-tag-out", Arg.Unit (fun () -> Arg_params.tag_in_out := true),
       "\t\ttag output messages";
       "-log-pv", Arg.Unit (fun () -> Arg_params.log_pv := true),
       "\t\tsave the ProVerif AST actually used after potential processing as infile.export";
