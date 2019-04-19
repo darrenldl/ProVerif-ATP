@@ -28,9 +28,11 @@ free idC : bitstring.
 free idS : bitstring.
 
 fun enc(bitstring, bitstring) : bitstring.
+fun dec(bitstring, bitstring) : bitstring.
 
-reduc
-  forall x : bitstring, y : bitstring; dec(enc(x, y), y) = x.
+equation
+  forall m : bitstring, k : bitstring; 
+    dec(enc(m, k), k) = m.
 
 fun h(bitstring, bitstring) : bitstring.
 fun xor(bitstring, bitstring) : bitstring.

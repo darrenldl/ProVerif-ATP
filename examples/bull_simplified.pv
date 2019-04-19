@@ -29,7 +29,9 @@ free idS : bitstring.
 
 (* Symmetric key crpyotgraphy*)
 fun enc(bitstring, bitstring): bitstring.
-reduc forall x: bitstring, y: bitstring; dec(enc(x,y), y) = x.
+fun dec(bitstring, bitstring) : bitstring.
+equation forall m: bitstring, k: bitstring;
+  dec(enc(m, k), k) = m.
 
 fun h(bitstring, bitstring) : bitstring.
 
