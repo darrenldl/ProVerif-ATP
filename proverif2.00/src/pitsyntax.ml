@@ -3760,21 +3760,6 @@ module Tag_in_out_ctx = struct
       add_decl ctx (TFunDecl ((f_name, dummy_ext), args, ("bitstring", dummy_ext), [("data", dummy_ext)]));
     in
 
-    Printf.printf "id : %s\n" (match term with
-     | PPIdent (id, _) -> id
-     | PPFunApp ((id, _), _) -> id
-     | PPTuple _ -> "bitstring"
-     | PPRestr ((id, _), _opts, (ty, _), _) -> id
-     | PPTest (_cond, (b1, _), _b2) -> "condition"
-     | PPLet (pat, (v, _), (b1,_), b2) -> (
-         "let"
-       )
-     | PPLetFilter _ -> "let filter"
-     | PPEvent _ -> "event"
-     | PPInsert _ -> "insert"
-     | PPGet _ -> "get"
-    );
-
     let ty = lookup_pterm_type term vb in
 
     match term with
