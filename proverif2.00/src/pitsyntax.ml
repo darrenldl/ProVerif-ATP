@@ -3566,15 +3566,6 @@ let replace_let_eq_pat_match_with_if_eq (decl, p : tdecl list * tprocess) : tdec
             let vb = Binder.add id ty1 vb in
             PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
           )
-        | PPatTuple pats
-        | PPatFunApp (_, pats) -> (
-            let ty = lookup_pterm_type pat_term vb in
-            let vb = List.fold_left (fun ty ->
-              )
-
-            in
-            PLet (pat, (term, term_e), aux vb kb p, aux vb kb p')
-          )
         | PPatEqual (pat_term, pat_term_e) -> (
             let ty1 = lookup_pterm_type pat_term vb in
             let ty2 = lookup_pterm_type term vb in
@@ -3963,8 +3954,8 @@ let parse_file s =
   let (decl, proc, second_proc) = parse_with_lib s in
   let (decl, proc) = match !Arg_params.out_kind with
     | Spass | Tptp -> (decl, proc)
-                      |> (if !Arg_params.tag_out then tag_in_outs else (fun x -> x))
                       |> flatten_let_bindings
+                      |> (if !Arg_params.tag_out then tag_in_outs else (fun x -> x))
                       (* |> add_eq_pred_decl *)
                       |> replace_let_eq_pat_match_with_if_eq
                       (* |> replace_if_eq_with_if_eq_pred *)
