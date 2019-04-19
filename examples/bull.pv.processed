@@ -4,12 +4,6 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 free c : channel.
 free Kas : bitstring [private].
 free Kbs : bitstring [private].
@@ -72,31 +66,34 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const client_A_STEP_1 : bitstring.
-const client_A_STEP_2 : bitstring.
+fun client_A_out_1(bitstring) : bitstring [data].
+fun client_A_in_1(bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun client_A_out_2(bitstring) : bitstring [data].
 
 let client_A =
   new Na : bitstring;
   let Xa = (h(con3(A, B, Na), Kas), (A, B, Na)) in
-  out(c, (Xa, client_A_STEP_1));
-  in(c, (=A, =B, Kab_xor_h_Na_Kas : bitstring, enc_A_B_Na_Kab : bitstring));
+  out(c, client_A_out_1(Xa));
+  in(c, client_A_in_1(=A, =B, Kab_xor_h_Na_Kas : bitstring, enc_A_B_Na_Kab : bitstring));
   let Kab = xor(Kab_xor_h_Na_Kas, h(Na, Kas)) in
   
   if dec(enc_A_B_Na_Kab, Kab) = con3(A, B, Na) then
-  out(c, (enc(objective, Kab), client_A_STEP_2));
+  out(c, client_A_out_2(enc(objective, Kab)));
   0.
 
-const client_B_STEP_1 : bitstring.
-const client_B_STEP_2 : bitstring.
+fun client_B_in_1(bitstring, bitstring) : bitstring [data].
+fun client_B_out_1(bitstring) : bitstring [data].
+fun client_B_in_2(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun client_B_out_2(bitstring, bitstring, bitstring, bitstring) : bitstring [data].
 
 let client_B =
-  in(c, (h_A_B_Na_Kas : bitstring, (=A, =B, Na : bitstring)));
+  in(c, client_B_in_1(h_A_B_Na_Kas : bitstring, (=A, =B, Na : bitstring)));
   new Nb : bitstring;
   let Xa = (h_A_B_Na_Kas, (A, B, Na)) in
   let Xa_con = con4(h_A_B_Na_Kas, A, B, Na) in
   let Xb = (h(con4(B, C, Nb, Xa_con), Kbs), (B, C, Nb, Xa)) in
-  out(c, (Xb, client_B_STEP_1));
-  in(c, (=A, =B, Kab_xor_h_Na_Kas : bitstring, enc_A_B_Na_Kab : bitstring, =B, =A, Kab_xor_h_Nb_Kbs : bitstring, enc_B_A_Nb_Kab : bitstring, =B, =C, Kbc_xor_h_Nb_Kbs : bitstring, enc_B_C_Nb_Kbc : bitstring));
+  out(c, client_B_out_1(Xb));
+  in(c, client_B_in_2(=A, =B, Kab_xor_h_Na_Kas : bitstring, enc_A_B_Na_Kab : bitstring, =B, =A, Kab_xor_h_Nb_Kbs : bitstring, enc_B_A_Nb_Kab : bitstring, =B, =C, Kbc_xor_h_Nb_Kbs : bitstring, enc_B_C_Nb_Kbc : bitstring));
   let Kbc = xor(Kbc_xor_h_Nb_Kbs, h(Nb, Kbs)) in
   let Kab = xor(Kab_xor_h_Nb_Kbs, h(Nb, Kbs)) in
   
@@ -105,40 +102,43 @@ let client_B =
   if dec(enc_B_A_Nb_Kab, Kab) = con3(B, A, Nb) then
   
   if dec(enc_B_C_Nb_Kbc, Kbc) = con3(B, C, Nb) then
-  out(c, ((A, B, Kab_xor_h_Na_Kas, enc_A_B_Na_Kab), client_B_STEP_2));
+  out(c, client_B_out_2(A, B, Kab_xor_h_Na_Kas, enc_A_B_Na_Kab));
   0.
 
-const client_C_STEP_1 : bitstring.
-const client_C_STEP_2 : bitstring.
-const client_C_STEP_3 : bitstring.
-const client_C_STEP_4 : bitstring.
+fun client_C_in_1(bitstring, bitstring) : bitstring [data].
+fun client_C_out_1(bitstring) : bitstring [data].
+fun client_C_out_2(bitstring) : bitstring [data].
+fun client_C_in_2(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun client_C_out_3(bitstring) : bitstring [data].
+fun client_C_out_4(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
 
 let client_C =
-  in(c, (h_B_C_Nb_Xa_Kbs : bitstring, (=B, =C, Nb : bitstring, (h_A_B_Na_Kas : bitstring, (=A, =B, Na : bitstring)))));
+  in(c, client_C_in_1(h_B_C_Nb_Xa_Kbs : bitstring, (=B, =C, Nb : bitstring, (h_A_B_Na_Kas : bitstring, (=A, =B, Na : bitstring)))));
   new Nc : bitstring;
-  out(c, (Nc, client_C_STEP_1));
+  out(c, client_C_out_1(Nc));
   let Xa = (h_A_B_Na_Kas, (A, B, Na)) in
   let Xa_con = con4(h_A_B_Na_Kas, A, B, Na) in
   let Xb = (h_B_C_Nb_Xa_Kbs, (B, C, Nb, Xa)) in
   let Xb_con = con5(h_B_C_Nb_Xa_Kbs, B, C, Nb, Xa_con) in
   let Xc = (h(con4(C, S, Nc, Xb_con), Kcs), (C, S, Nc, Xb)) in
-  out(c, (Xc, client_C_STEP_2));
-  in(c, (=A, =B, Kab_xor_h_Na_Kas : bitstring, enc_A_B_Na_Kab : bitstring, =B, =A, Kab_xor_h_Nb_Kbs : bitstring, enc_B_A_Nb_Kab : bitstring, =B, =C, Kbc_xor_h_Nb_Kbs : bitstring, enc_B_C_Nb_Kbc : bitstring, =C, =B, Kbc_xor_h_Nc_Kcs : bitstring, enc_C_B_Nc_Kbc : bitstring));
+  out(c, client_C_out_2(Xc));
+  in(c, client_C_in_2(=A, =B, Kab_xor_h_Na_Kas : bitstring, enc_A_B_Na_Kab : bitstring, =B, =A, Kab_xor_h_Nb_Kbs : bitstring, enc_B_A_Nb_Kab : bitstring, =B, =C, Kbc_xor_h_Nb_Kbs : bitstring, enc_B_C_Nb_Kbc : bitstring, =C, =B, Kbc_xor_h_Nc_Kcs : bitstring, enc_C_B_Nc_Kbc : bitstring));
   let Kbc = xor(Kbc_xor_h_Nc_Kcs, h(Nc, Kcs)) in
-  out(c, (Kbc, client_C_STEP_3));
+  out(c, client_C_out_3(Kbc));
   
   if dec(enc_B_C_Nb_Kbc, Kbc) = con3(B, C, Nb) then
   
   if dec(enc_C_B_Nc_Kbc, Kbc) = con3(C, B, Nc) then
-  out(c, ((A, B, Kab_xor_h_Na_Kas, enc_A_B_Na_Kab, B, A, Kab_xor_h_Nb_Kbs, enc_B_A_Nb_Kab, B, C, Kbc_xor_h_Nb_Kbs, enc_B_C_Nb_Kbc), client_C_STEP_4));
+  out(c, client_C_out_4(A, B, Kab_xor_h_Na_Kas, enc_A_B_Na_Kab, B, A, Kab_xor_h_Nb_Kbs, enc_B_A_Nb_Kab, B, C, Kbc_xor_h_Nb_Kbs, enc_B_C_Nb_Kbc));
   0.
 
-const server_S_STEP_1 : bitstring.
+fun server_S_in_1(bitstring, bitstring) : bitstring [data].
+fun server_S_out_1(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
 
 let server_S =
   new Kab : bitstring;
   new Kbc : bitstring;
-  in(c, (h_C_S_Nc_Xb_Kcs : bitstring, (=C, =S, Nc : bitstring, (h_B_C_Nb_Xa_Kbs : bitstring, (=B, =C, Nb : bitstring, (h_A_B_Na_Kas : bitstring, (=A, =B, Na : bitstring)))))));
+  in(c, server_S_in_1(h_C_S_Nc_Xb_Kcs : bitstring, (=C, =S, Nc : bitstring, (h_B_C_Nb_Xa_Kbs : bitstring, (=B, =C, Nb : bitstring, (h_A_B_Na_Kas : bitstring, (=A, =B, Na : bitstring)))))));
   
   if h_C_S_Nc_Xb_Kcs = h(con4(C, S, Nc, con5(h_B_C_Nb_Xa_Kbs, B, C, Nb, con4(h_A_B_Na_Kas, A, B, Na))), Kcs) then
   let Xa = (h_A_B_Na_Kas, (A, B, Na)) in
@@ -147,7 +147,7 @@ let server_S =
   let Xb_con = con5(h_B_C_Nb_Xa_Kbs, B, C, Nb, Xa_con) in
   let Xc = (h_C_S_Nc_Xb_Kcs, (C, S, Nc, Xb)) in
   let Xc_con = con5(h_C_S_Nc_Xb_Kcs, C, S, Nc, Xb_con) in
-  out(c, ((A, B, xor(Kab, h(Na, Kas)), enc(con3(A, B, Na), Kab), B, A, xor(Kab, h(Nb, Kbs)), enc(con3(B, A, Nb), Kab), B, C, xor(Kbc, h(Nb, Kbs)), enc(con3(B, C, Nb), Kbc), C, B, xor(Kbc, h(Nc, Kcs)), enc(con3(C, B, Nc), Kbc)), server_S_STEP_1));
+  out(c, server_S_out_1(A, B, xor(Kab, h(Na, Kas)), enc(con3(A, B, Na), Kab), B, A, xor(Kab, h(Nb, Kbs)), enc(con3(B, A, Nb), Kab), B, C, xor(Kbc, h(Nb, Kbs)), enc(con3(B, C, Nb), Kbc), C, B, xor(Kbc, h(Nc, Kcs)), enc(con3(C, B, Nc), Kbc)));
   0.
 
 process

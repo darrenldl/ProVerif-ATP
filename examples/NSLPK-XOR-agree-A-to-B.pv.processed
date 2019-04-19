@@ -4,11 +4,11 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
+pred eq_bitstring_bitstring(bitstring, bitstring).
 
 clauses
-  forall x : bitstring;
-    eq(x, x).
+  forall x : bitstring, y : bitstring;
+    eq_bitstring_bitstring(x, y).
 
 fun tuple_2_get_0(bitstring) : bitstring.
 
@@ -21,6 +21,18 @@ fun tuple_2_get_1(bitstring) : bitstring.
 equation
   forall x0 : bitstring, x1 : bitstring; 
     tuple_2_get_1((x0, x1)) = x1.
+
+fun tuple_2_get_0_bitstring(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0_bitstring((x0, x1)) = x0.
+
+fun tuple_2_get_1_bitstring(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_1_bitstring((x0, x1)) = x1.
 
 free c : channel.
 free A : bitstring.
@@ -78,66 +90,74 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const client_A_STEP_1 : bitstring.
-const client_A_STEP_2 : bitstring.
-const client_A_STEP_3 : bitstring.
+fun client_A_out_1(bitstring, bitstring) : bitstring [data].
+fun client_A_in_1(bitstring) : bitstring [data].
+fun client_A_out_2(bitstring) : bitstring [data].
+fun client_A_in_2(bitstring) : bitstring [data].
+fun client_A_out_3(bitstring) : bitstring [data].
 
 let client_A(skA : bitstring, pkS : bitstring) =
   new Na : bitstring;
-  out(c, ((A, I), client_A_STEP_1));
-  in(c, sign_I_pkI : bitstring);
+  out(c, client_A_out_1(A, I));
+  in(c, client_A_in_1(sign_I_pkI : bitstring));
   
-  if eq(tuple_2_get_0(checksign(sign_I_pkI, pkS)), I) then
-  let pkI : bitstring = tuple_2_get_1(checksign(sign_I_pkI, pkS)) in
-  out(c, (aenc((Na, A), pkI), client_A_STEP_2));
-  in(c, aenc_Na_xor_I_Ni : bitstring);
-  let Na_xor_I : bitstring = tuple_2_get_0(adec(aenc_Na_xor_I_Ni, skA)) in
-  let Ni : bitstring = tuple_2_get_1(adec(aenc_Na_xor_I_Ni, skA)) in
+  if eq_bitstring_bitstring(I, tuple_2_get_0(checksign(sign_I_pkI, pkS))) then
+  let pkI : bitstring = tuple_2_get_1_bitstring(checksign(sign_I_pkI, pkS)) in
+  out(c, client_A_out_2(aenc((Na, A), pkI)));
+  in(c, client_A_in_2(aenc_Na_xor_I_Ni : bitstring));
+  let Na_xor_I : bitstring = tuple_2_get_0_bitstring(adec(aenc_Na_xor_I_Ni, skA)) in
+  let Ni : bitstring = tuple_2_get_1_bitstring(adec(aenc_Na_xor_I_Ni, skA)) in
   
-  if eq(xor(Na_xor_I, Na), I) then
-  out(c, (aenc(Ni, pkI), client_A_STEP_3));
+  if eq_bitstring_bitstring(I, xor(Na_xor_I, Na)) then
+  out(c, client_A_out_3(aenc(Ni, pkI)));
   0.
 
-const client_B_STEP_1 : bitstring.
-const client_B_STEP_2 : bitstring.
-const client_B_STEP_3 : bitstring.
+fun client_B_out_1(bitstring, bitstring) : bitstring [data].
+fun client_B_in_1(bitstring) : bitstring [data].
+fun client_B_in_2(bitstring) : bitstring [data].
+fun client_B_out_2(bitstring) : bitstring [data].
+fun client_B_in_3(bitstring) : bitstring [data].
+fun client_B_out_3(bitstring) : bitstring [data].
 
 let client_B(skB : bitstring, pkS : bitstring) =
   new Nb : bitstring;
-  out(c, ((B, A), client_B_STEP_1));
-  in(c, sign_A_pkA : bitstring);
+  out(c, client_B_out_1(B, A));
+  in(c, client_B_in_1(sign_A_pkA : bitstring));
   
-  if eq(tuple_2_get_0(checksign(sign_A_pkA, pkS)), A) then
-  let pkA : bitstring = tuple_2_get_1(checksign(sign_A_pkA, pkS)) in
-  in(c, aenc_Na_A : bitstring);
-  let Na : bitstring = tuple_2_get_0(adec(aenc_Na_A, skB)) in
+  if eq_bitstring_bitstring(A, tuple_2_get_0(checksign(sign_A_pkA, pkS))) then
+  let pkA : bitstring = tuple_2_get_1_bitstring(checksign(sign_A_pkA, pkS)) in
+  in(c, client_B_in_2(aenc_Na_A : bitstring));
+  let Na : bitstring = tuple_2_get_0_bitstring(adec(aenc_Na_A, skB)) in
   
-  if eq(tuple_2_get_1(adec(aenc_Na_A, skB)), A) then
-  out(c, (aenc((xor(Na, B), Nb), pkA), client_B_STEP_2));
-  in(c, aenc_Nb : bitstring);
+  if eq_bitstring_bitstring(A, tuple_2_get_1(adec(aenc_Na_A, skB))) then
+  out(c, client_B_out_2(aenc((xor(Na, B), Nb), pkA)));
+  in(c, client_B_in_3(aenc_Nb : bitstring));
   
-  if eq(adec(aenc_Nb, skB), Nb) then
-  out(c, (objective, client_B_STEP_3));
+  if eq_bitstring_bitstring(Nb, adec(aenc_Nb, skB)) then
+  out(c, client_B_out_3(objective));
   0.
 
-const key_retrieval_server_STEP_1 : bitstring.
+fun key_retrieval_server_in_1(bitstring, bitstring) : bitstring [data].
+fun key_retrieval_server_out_1(bitstring) : bitstring [data].
 
 let key_retrieval_server(skS : bitstring) =
-  in(c, (src : bitstring, dst : bitstring));
+  in(c, key_retrieval_server_in_1(src : bitstring, dst : bitstring));
   get keys(=dst, pkDst) in
-  out(c, (sign((dst, pkDst), skS), key_retrieval_server_STEP_1));
+  out(c, key_retrieval_server_out_1(sign((dst, pkDst), skS)));
   0.
 
+fun key_register_server_in_1(bitstring, bitstring) : bitstring [data].
+
 let key_register_server =
-  in(c, (host : bitstring, pk : bitstring));
+  in(c, key_register_server_in_1(host : bitstring, pk : bitstring));
   
   if host <> A && host <> B then
   insert keys(host, pk);
   0.
 
-const STEP_1 : bitstring.
-const STEP_2 : bitstring.
-const STEP_3 : bitstring.
+fun out_1(bitstring) : bitstring [data].
+fun out_2(bitstring) : bitstring [data].
+fun out_3(bitstring) : bitstring [data].
 
 process
   new skA : bitstring;
@@ -148,9 +168,9 @@ process
   let pkS = pkey(skS) in
   insert keys(A, pkA);
   insert keys(B, pkB);
-  out(c, (pkA, STEP_1));
-  out(c, (pkB, STEP_2));
-  out(c, (pkS, STEP_3));
+  out(c, out_1(pkA));
+  out(c, out_2(pkB));
+  out(c, out_3(pkS));
   (
     ! (
       client_A(skA, pkS)

@@ -4,17 +4,11 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
+pred eq_bitstring_bitstring(bitstring, bitstring).
 
 clauses
-  forall x : bitstring;
-    eq(x, x).
-
-fun tuple_2_get_0(bitstring) : bitstring.
-
-equation
-  forall x0 : bitstring, x1 : bitstring; 
-    tuple_2_get_0((x0, x1)) = x0.
+  forall x : bitstring, y : bitstring;
+    eq_bitstring_bitstring(x, y).
 
 fun tuple_2_get_1(bitstring) : bitstring.
 
@@ -34,24 +28,30 @@ equation
   forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
     tuple_4_get_1((x0, x1, x2, x3)) = x1.
 
-fun tuple_4_get_2(bitstring) : bitstring.
+fun tuple_2_get_0_bitstring(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0_bitstring((x0, x1)) = x0.
+
+fun tuple_4_get_2_bitstring(bitstring) : bitstring.
 
 equation
   forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
-    tuple_4_get_2((x0, x1, x2, x3)) = x2.
+    tuple_4_get_2_bitstring((x0, x1, x2, x3)) = x2.
 
-fun tuple_4_get_3(bitstring) : bitstring.
+fun tuple_4_get_3_bitstring(bitstring) : bitstring.
 
 equation
   forall x0 : bitstring, x1 : bitstring, x2 : bitstring, x3 : bitstring; 
-    tuple_4_get_3((x0, x1, x2, x3)) = x3.
+    tuple_4_get_3_bitstring((x0, x1, x2, x3)) = x3.
 
 free c : channel.
 free A : bitstring.
 free B : bitstring.
 free I : bitstring.
 
-fun succ(bitstring) : bitstring[data].
+fun succ(bitstring) : bitstring [data].
 fun cbc_enc_1(bitstring, bitstring) : bitstring.
 fun cbc_enc_2(bitstring, bitstring, bitstring) : bitstring.
 fun cbc_enc_3(bitstring, bitstring, bitstring, bitstring) : bitstring.
@@ -101,46 +101,51 @@ equation
 query 
   attacker(new Kab).
 
-const client_A_STEP_1 : bitstring.
-const client_A_STEP_2 : bitstring.
-const client_A_STEP_3 : bitstring.
+fun client_A_out_1(bitstring, bitstring, bitstring) : bitstring [data].
+fun client_A_in_1(bitstring) : bitstring [data].
+fun client_A_out_2(bitstring) : bitstring [data].
+fun client_A_in_2(bitstring) : bitstring [data].
+fun client_A_out_3(bitstring) : bitstring [data].
 
 let client_A(Kas : bitstring) =
   new Na : bitstring;
-  out(c, ((A, B, Na), client_A_STEP_1));
-  in(c, enc_Na_B_enc_Kab_A : bitstring);
+  out(c, client_A_out_1(A, B, Na));
+  in(c, client_A_in_1(enc_Na_B_enc_Kab_A : bitstring));
   
-  if eq(tuple_4_get_0(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)), Na) then
+  if eq_bitstring_bitstring(Na, tuple_4_get_0(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas))) then
   
-  if eq(tuple_4_get_1(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)), B) then
-  let Kab : bitstring = tuple_4_get_2(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
-  let enc_Kab_A : bitstring = tuple_4_get_3(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
-  out(c, (enc_Kab_A, client_A_STEP_2));
-  in(c, enc_Nb : bitstring);
+  if eq_bitstring_bitstring(B, tuple_4_get_1(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas))) then
+  let Kab : bitstring = tuple_4_get_2_bitstring(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
+  let enc_Kab_A : bitstring = tuple_4_get_3_bitstring(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
+  out(c, client_A_out_2(enc_Kab_A));
+  in(c, client_A_in_2(enc_Nb : bitstring));
   let Nb = cbc_dec_1(enc_Nb, Kab) in
-  out(c, (cbc_enc_1(succ(Nb), Kab), client_A_STEP_3));
+  out(c, client_A_out_3(cbc_enc_1(succ(Nb), Kab)));
   0.
 
-const client_B_STEP_1 : bitstring.
+fun client_B_in_1(bitstring) : bitstring [data].
+fun client_B_out_1(bitstring) : bitstring [data].
+fun client_B_in_2(bitstring) : bitstring [data].
 
 let client_B(Kbs : bitstring) =
   new Nb : bitstring;
-  in(c, enc_Kab_A : bitstring);
-  let Kab : bitstring = tuple_2_get_0(cbc_dec_2(enc_Kab_A, Kbs)) in
+  in(c, client_B_in_1(enc_Kab_A : bitstring));
+  let Kab : bitstring = tuple_2_get_0_bitstring(cbc_dec_2(enc_Kab_A, Kbs)) in
   
-  if eq(tuple_2_get_1(cbc_dec_2(enc_Kab_A, Kbs)), A) then
-  out(c, (cbc_enc_1(Nb, Kab), client_B_STEP_1));
-  in(c, enc_succ_Nb : bitstring);
+  if eq_bitstring_bitstring(A, tuple_2_get_1(cbc_dec_2(enc_Kab_A, Kbs))) then
+  out(c, client_B_out_1(cbc_enc_1(Nb, Kab)));
+  in(c, client_B_in_2(enc_succ_Nb : bitstring));
   
-  if eq(cbc_dec_1(enc_succ_Nb, Kab), succ(Nb)) then
+  if eq_bitstring_bitstring(succ(Nb), cbc_dec_1(enc_succ_Nb, Kab)) then
   0.
 
-const server_S_STEP_1 : bitstring.
+fun server_S_in_1(bitstring, bitstring, bitstring) : bitstring [data].
+fun server_S_out_1(bitstring) : bitstring [data].
 
 let server_S(Kas : bitstring, Kbs : bitstring) =
   new Kab : bitstring;
-  in(c, (A : bitstring, B : bitstring, Na : bitstring));
-  out(c, (cbc_enc_4(Na, B, Kab, cbc_enc_2(Kab, A, Kbs), Kas), server_S_STEP_1));
+  in(c, server_S_in_1(A : bitstring, B : bitstring, Na : bitstring));
+  out(c, server_S_out_1(cbc_enc_4(Na, B, Kab, cbc_enc_2(Kab, A, Kbs), Kas)));
   0.
 
 process

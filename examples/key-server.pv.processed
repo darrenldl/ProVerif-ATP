@@ -4,23 +4,23 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
+pred eq_bitstring_bitstring(bitstring, bitstring).
 
 clauses
-  forall x : bitstring;
-    eq(x, x).
-
-fun tuple_2_get_0(bitstring) : bitstring.
-
-equation
-  forall x0 : bitstring, x1 : bitstring; 
-    tuple_2_get_0((x0, x1)) = x0.
+  forall x : bitstring, y : bitstring;
+    eq_bitstring_bitstring(x, y).
 
 fun tuple_2_get_1(bitstring) : bitstring.
 
 equation
   forall x0 : bitstring, x1 : bitstring; 
     tuple_2_get_1((x0, x1)) = x1.
+
+fun tuple_2_get_0_bitstring(bitstring) : bitstring.
+
+equation
+  forall x0 : bitstring, x1 : bitstring; 
+    tuple_2_get_0_bitstring((x0, x1)) = x0.
 
 free c : channel.
 
@@ -71,36 +71,41 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const client_A_STEP_1 : bitstring.
-const client_A_STEP_2 : bitstring.
+fun client_A_in_1(bitstring) : bitstring [data].
+fun client_A_out_1(bitstring, bitstring) : bitstring [data].
+fun client_A_in_2(bitstring) : bitstring [data].
+fun client_A_out_2(bitstring) : bitstring [data].
 
 let client_A(skA : bitstring, pkS : bitstring) =
   let pkA = pkey(skA) in
-  in(c, T : bitstring);
-  out(c, ((A, T), client_A_STEP_1));
-  in(c, sign_pkT_T : bitstring);
-  let pkT : bitstring = tuple_2_get_0(checksign(sign_pkT_T, pkS)) in
+  in(c, client_A_in_1(T : bitstring));
+  out(c, client_A_out_1(A, T));
+  in(c, client_A_in_2(sign_pkT_T : bitstring));
+  let pkT : bitstring = tuple_2_get_0_bitstring(checksign(sign_pkT_T, pkS)) in
   
-  if eq(tuple_2_get_1(checksign(sign_pkT_T, pkS)), T) then
-  out(c, (aenc(objective, pkT), client_A_STEP_2));
+  if eq_bitstring_bitstring(T, tuple_2_get_1(checksign(sign_pkT_T, pkS))) then
+  out(c, client_A_out_2(aenc(objective, pkT)));
   0.
 
-const key_retrieval_server_STEP_1 : bitstring.
+fun key_retrieval_server_in_1(bitstring, bitstring) : bitstring [data].
+fun key_retrieval_server_out_1(bitstring) : bitstring [data].
 
 let key_retrieval_server(skS : bitstring) =
-  in(c, (src : bitstring, dst : bitstring));
+  in(c, key_retrieval_server_in_1(src : bitstring, dst : bitstring));
   get keys(=dst, pkDst) in
-  out(c, (sign((pkDst, dst), skS), key_retrieval_server_STEP_1));
+  out(c, key_retrieval_server_out_1(sign((pkDst, dst), skS)));
   0.
 
+fun key_register_server_in_1(bitstring, bitstring) : bitstring [data].
+
 let key_register_server =
-  in(c, (h : bitstring, pkH : bitstring));
+  in(c, key_register_server_in_1(h : bitstring, pkH : bitstring));
   
   if h <> A then
   insert keys(h, pkH);
   0.
 
-const STEP_1 : bitstring.
+fun out_1(bitstring) : bitstring [data].
 
 process
   new skS : bitstring;
@@ -108,7 +113,7 @@ process
   let pkS = pkey(skS) in
   let pkA = pkey(skA) in
   insert keys(A, pkA);
-  out(c, (pkS, STEP_1));
+  out(c, out_1(pkS));
   (
     ! (
       client_A(skA, pkS)

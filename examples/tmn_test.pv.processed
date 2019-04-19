@@ -4,12 +4,6 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 free c : channel.
 free A : bitstring.
 free B : bitstring.
@@ -68,32 +62,34 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const session_i_STEP_1 : bitstring.
-const session_i_STEP_2 : bitstring.
-const session_i_STEP_3 : bitstring.
-const session_i_STEP_4 : bitstring.
-const session_i_STEP_5 : bitstring.
+fun session_i_out_1(bitstring, bitstring) : bitstring [data].
+fun session_i_out_2(bitstring) : bitstring [data].
+fun session_i_out_3(bitstring, bitstring) : bitstring [data].
+fun session_i_out_4(bitstring, bitstring) : bitstring [data].
+fun session_i_out_5(bitstring) : bitstring [data].
 
 let session_i(pkS : bitstring) =
   new Ka : bitstring;
   new Kb : bitstring;
-  out(c, ((B, pk_enc(Ka, pkS)), session_i_STEP_1));
-  out(c, (A, session_i_STEP_2));
-  out(c, ((A, pk_enc(Kb, pkS)), session_i_STEP_3));
-  out(c, ((B, xor(Kb, Ka)), session_i_STEP_4));
-  out(c, (enc(objective, Kb), session_i_STEP_5));
+  out(c, session_i_out_1(B, pk_enc(Ka, pkS)));
+  out(c, session_i_out_2(A));
+  out(c, session_i_out_3(A, pk_enc(Kb, pkS)));
+  out(c, session_i_out_4(B, xor(Kb, Ka)));
+  out(c, session_i_out_5(enc(objective, Kb)));
   0.
 
-const server_S_STEP_1 : bitstring.
-const server_S_STEP_2 : bitstring.
+fun server_S_in_1(bitstring, bitstring) : bitstring [data].
+fun server_S_out_1(bitstring) : bitstring [data].
+fun server_S_in_2(bitstring, bitstring) : bitstring [data].
+fun server_S_out_2(bitstring) : bitstring [data].
 
 let server_S(skS : bitstring, pkS : bitstring) =
-  in(c, (=B, enc_Ka_pkS : bitstring));
+  in(c, server_S_in_1(=B, enc_Ka_pkS : bitstring));
   let Ka = pk_dec(enc_Ka_pkS, skS) in
-  out(c, (A, server_S_STEP_1));
-  in(c, (=A, enc_Kb_pkS : bitstring));
+  out(c, server_S_out_1(A));
+  in(c, server_S_in_2(=A, enc_Kb_pkS : bitstring));
   let Kb = pk_dec(enc_Kb_pkS, skS) in
-  out(c, (xor(Kb, Ka), server_S_STEP_2));
+  out(c, server_S_out_2(xor(Kb, Ka)));
   0.
 
 process

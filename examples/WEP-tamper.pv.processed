@@ -4,23 +4,17 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
-fun tuple_2_get_0(bitstring) : bitstring.
+fun tuple_2_get_0_bitstring(bitstring) : bitstring.
 
 equation
   forall x0 : bitstring, x1 : bitstring; 
-    tuple_2_get_0((x0, x1)) = x0.
+    tuple_2_get_0_bitstring((x0, x1)) = x0.
 
-fun tuple_2_get_1(bitstring) : bitstring.
+fun tuple_2_get_1_bitstring(bitstring) : bitstring.
 
 equation
   forall x0 : bitstring, x1 : bitstring; 
-    tuple_2_get_1((x0, x1)) = x1.
+    tuple_2_get_1_bitstring((x0, x1)) = x1.
 
 free c : channel.
 
@@ -69,22 +63,23 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const A_STEP_1 : bitstring.
+fun A_out_1(bitstring, bitstring) : bitstring [data].
 
 let A =
-  out(c, ((v, xor(concat(M, C(M)), RC4(v, Kab))), A_STEP_1));
+  out(c, A_out_1(v, xor(concat(M, C(M)), RC4(v, Kab))));
   0.
 
-const B_STEP_1 : bitstring.
+fun B_in_1(bitstring, bitstring) : bitstring [data].
+fun B_out_1(bitstring) : bitstring [data].
 
 let B =
-  in(c, (=v, M_CM_xor_RC4_v_Kab : bitstring));
+  in(c, B_in_1(=v, M_CM_xor_RC4_v_Kab : bitstring));
   let M_CM = xor(M_CM_xor_RC4_v_Kab, RC4(v, Kab)) in
-  let inM : bitstring = tuple_2_get_0(split(M_CM)) in
-  let CM : bitstring = tuple_2_get_1(split(M_CM)) in
+  let inM : bitstring = tuple_2_get_0_bitstring(split(M_CM)) in
+  let CM : bitstring = tuple_2_get_1_bitstring(split(M_CM)) in
   
   if C(inM) = CM && inM <> M then
-  out(c, (objective, B_STEP_1));
+  out(c, B_out_1(objective));
   0.
 
 process

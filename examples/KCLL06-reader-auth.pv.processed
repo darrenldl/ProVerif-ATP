@@ -4,12 +4,6 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 free PIN1 : bitstring [private].
 free PIN2 : bitstring [private].
 free EPC : bitstring [private].
@@ -73,49 +67,52 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const T_STEP_1 : bitstring.
-const T_STEP_2 : bitstring.
-const T_STEP_3 : bitstring.
+fun T_in_1(bitstring) : bitstring [data].
+fun T_out_1(bitstring) : bitstring [data].
+fun T_in_2(bitstring, bitstring) : bitstring [data].
+fun T_out_2(bitstring) : bitstring [data].
+fun T_in_3(bitstring) : bitstring [data].
+fun T_out_3(bitstring) : bitstring [data].
 
 let T =
-  in(c, =QUERY_REQ);
+  in(c, T_in_1(=QUERY_REQ));
   new r1 : bitstring;
   let M1 = xor(r1, PIN1) in
-  out(c, (M1, T_STEP_1));
-  in(c, (ACK_M1 : bitstring, r2 : bitstring));
+  out(c, T_out_1(M1));
+  in(c, T_in_2(ACK_M1 : bitstring, r2 : bitstring));
   
   if ACK_M1 = ACK(M1) then
   let M2 = xor(xor(r2, PIN2), r1) in
   let M3 = f(M2) in
   let T = concat(ZERO, concat(r1, concat(M2, M3))) in
   let E = xor(add(T, S), EPC) in
-  out(c, (E, T_STEP_2));
-  in(c, PIN_xor_f_r2_xor_PIN2_xor_r1 : bitstring);
+  out(c, T_out_2(E));
+  in(c, T_in_3(PIN_xor_f_r2_xor_PIN2_xor_r1 : bitstring));
   let f_r2_xor_PIN2_xor_r1 = xor(PIN_xor_f_r2_xor_PIN2_xor_r1, PIN1) in
   
   if f_r2_xor_PIN2_xor_r1 = f(xor(r2, xor(PIN2, r1))) then
-  out(c, (objective, T_STEP_3));
+  out(c, T_out_3(objective));
   0.
 
-const knowledge_from_1st_round_STEP_1 : bitstring.
-const knowledge_from_1st_round_STEP_2 : bitstring.
-const knowledge_from_1st_round_STEP_3 : bitstring.
-const knowledge_from_1st_round_STEP_4 : bitstring.
-const knowledge_from_1st_round_STEP_5 : bitstring.
+fun knowledge_from_1st_round_out_1(bitstring) : bitstring [data].
+fun knowledge_from_1st_round_out_2(bitstring) : bitstring [data].
+fun knowledge_from_1st_round_out_3(bitstring) : bitstring [data].
+fun knowledge_from_1st_round_out_4(bitstring) : bitstring [data].
+fun knowledge_from_1st_round_out_5(bitstring) : bitstring [data].
 
 let knowledge_from_1st_round =
   new r1_from_1st_round : bitstring;
-  out(c, (QUERY_REQ, knowledge_from_1st_round_STEP_1));
-  out(c, (xor(r1_from_1st_round, PIN1), knowledge_from_1st_round_STEP_2));
+  out(c, knowledge_from_1st_round_out_1(QUERY_REQ));
+  out(c, knowledge_from_1st_round_out_2(xor(r1_from_1st_round, PIN1)));
   new r2_from_1st_round : bitstring;
   let M1 = xor(r1_from_1st_round, PIN1) in
-  out(c, (ACK(M1), knowledge_from_1st_round_STEP_3));
+  out(c, knowledge_from_1st_round_out_3(ACK(M1)));
   let M2 = xor(xor(r2_from_1st_round, PIN2), r1_from_1st_round) in
   let M3 = f(M2) in
   let T = concat(ZERO, concat(r1_from_1st_round, concat(M2, M3))) in
   let E = xor(add(T, S), EPC) in
-  out(c, (E, knowledge_from_1st_round_STEP_4));
-  out(c, (xor(PIN1, f(xor(r2_from_1st_round, xor(PIN2, r1_from_1st_round)))), knowledge_from_1st_round_STEP_5));
+  out(c, knowledge_from_1st_round_out_4(E));
+  out(c, knowledge_from_1st_round_out_5(xor(PIN1, f(xor(r2_from_1st_round, xor(PIN2, r1_from_1st_round))))));
   0.
 
 process
