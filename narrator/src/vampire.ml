@@ -1549,13 +1549,15 @@ module Protocol_step = struct
             match es with
             | [e1; e2] -> (
                 match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some step_num ->
+                | None, Some in_out, Some step_num ->
                   [ { proc_name = None
+                    ; in_out
                     ; step_num
                     ; direction = Client_to_intruder
                     ; expr = e1 } ]
-                | Some proc_name, Some step_num ->
+                | Some proc_name, Some in_out, Some step_num ->
                   [ { proc_name = Some proc_name
+                    ; in_out
                     ; step_num
                     ; direction = Client_to_intruder
                     ; expr = e1 } ]
@@ -1571,21 +1573,25 @@ module Protocol_step = struct
             match Analyzed_expr.get_function_args e with
             | [e1; e2] -> (
                 match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some step_num ->
+                | None, Some in_out, Some step_num ->
                   [ { proc_name = None
+                    ; in_out
                     ; step_num
                     ; direction = Client_to_intruder
                     ; expr = e1 }
                   ; { proc_name = None
+                    ; in_out
                     ; step_num
                     ; direction = Intruder_to_client
                     ; expr = pre } ]
-                | Some proc_name, Some step_num ->
+                | Some proc_name, Some in_out, Some step_num ->
                   [ { proc_name = Some proc_name
+                    ; in_out
                     ; step_num
                     ; direction = Client_to_intruder
                     ; expr = e1 }
                   ; { proc_name = Some proc_name
+                    ; in_out
                     ; step_num
                     ; direction = Intruder_to_client
                     ; expr = pre } ]
@@ -1648,7 +1654,7 @@ let classify_protocol_step (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let check_tag (tag : string) : bool =
     match Protocol_step.break_down_step_string tag with
-    | _, Some _ -> true
+    | _, Some _, Some _ -> true
     | _ -> false
   in
   let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
@@ -1661,21 +1667,27 @@ let classify_protocol_step (m : node_graph) : node_graph =
           let classification =
             match data.expr with
             | Function
-                ("attacker", [Function ("tuple_2", [_; Variable (Free, tag)])])
-              when check_tag tag ->
-              ProtocolStep
+                ("attacker", [Function (name, _)]) ->
+              (match Protocol_step.break_down_step_string name with
+               | _, Some _, Some _ -> ProtocolStep
+               | _ -> data.classification)
             | Quantified
                 ( _
                 , _
                 , BinaryOp
                     ( Imply
-                    , _
                     , Function
                         ( "attacker"
-                        , [Function ("tuple_2", [_; Variable (Free, tag)])] ) )
+                        , [Function (name_1, _)])
+                    , Function
+                        ( "attacker"
+                        , [Function (name_2, _)] ) )
                 )
-              when check_tag tag ->
-              InteractiveProtocolStep
+              ->
+              (match Protocol_step.break_down_step_string name_1, Protocol_step.break_down_step_string name_2 with
+               | (_, Some _, Some _), (_, Some _, Some _) -> InteractiveProtocolStep
+               | _ -> data.classification
+              )
             | _ -> data.classification
           in
           let data = {data with classification} in
