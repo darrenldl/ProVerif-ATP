@@ -2174,13 +2174,15 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
   let open Analyzed_graph in
   let check_tag (tag : string) : bool =
     match Protocol_step.break_down_step_string tag with
-    | _, Some _ -> true
+    | _, Some _, Some _ -> true
     | _ -> false
   in
   let reformat_tag (tag : string) : string =
     match Protocol_step.break_down_step_string tag with
-    | Some p, Some n -> Printf.sprintf "%s.%d" p n
-    | None, Some n -> Printf.sprintf "GLOBAL.%d" n
+    | Some p, Some In, Some n -> Printf.sprintf "%s.in.%d" p n
+    | Some p, Some Out, Some n -> Printf.sprintf "%s.out.%d" p n
+    | None, Some In, Some n -> Printf.sprintf "GLOBAL.in.%d" n
+    | None, Some Out, Some n -> Printf.sprintf "GLOBAL.out.%d" n
     | _ -> failwith "Unexpected case"
   in
   let rec aux (id : id) (m : node_graph) : info_source list =
