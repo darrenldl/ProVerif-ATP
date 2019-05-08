@@ -1543,25 +1543,17 @@ module Protocol_step = struct
     | Data node -> (
         match node.classification with
         | ProtocolStep -> (
-            let es =
-              Analyzed_expr.(node.expr |> strip_att |> get_function_args)
-            in
-            match es with
-            | [e1; e2] -> (
-                match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some in_out, Some step_num ->
-                  [ { proc_name = None
+            match Analyzed_expr.(node.expr |> strip_att) with
+            | Function (name, [expr]) -> (
+                match break_down_step_string name with
+                | proc_name, Some in_out, Some step_num ->
+                  [ { proc_name
                     ; in_out
                     ; step_num
                     ; direction = Client_to_intruder
-                    ; expr = e1 } ]
-                | Some proc_name, Some in_out, Some step_num ->
-                  [ { proc_name = Some proc_name
-                    ; in_out
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 } ]
-                | _ -> [] )
+                    ; expr } ]
+                | _ -> []
+              )
             | _ -> [] )
         | InteractiveProtocolStep -> (
             let pre, e =
