@@ -1512,25 +1512,30 @@ module Protocol_step = struct
     | Client_to_intruder
     | Intruder_to_client
 
+  type in_out = In | Out
+
   type t =
     { proc_name : string option
+    ; in_out : in_out
     ; direction : direction
     ; step_num : int
     ; expr : Analyzed_expr.expr }
 
-  let break_down_step_string (s : string) : string option * int option =
-    let rec aux (parts : string list) (proc_name_parts : string list)
-        (n : int option) : string option * int option =
+  let break_down_step_string (s : string) : string option * in_out option * int option =
+    let rec aux (parts : string list) (proc_name_parts : string list) (in_out : in_out option)
+        (n : int option) : string option * in_out option * int option =
       match parts with
       | [] ->
         ( ( match List.rev proc_name_parts with
               | [] -> None
               | l -> Some (String.concat "_" l) )
-        , n )
-      | ["STEP"; n] -> aux [] proc_name_parts (int_of_string_opt n)
-      | x :: xs -> aux xs (x :: proc_name_parts) n
+          , in_out
+          , n )
+      | ["out"; n] -> aux [] proc_name_parts (Some Out) (int_of_string_opt n)
+      | ["in"; n] -> aux [] proc_name_parts (Some In) (int_of_string_opt n)
+      | x :: xs -> aux xs (x :: proc_name_parts) in_out n
     in
-    aux (String.split_on_char '_' s) [] None
+    aux (String.split_on_char '_' s) [] None None
 
   let node_to_steps (node : node) : t list =
     match node with
