@@ -36,5 +36,7 @@
         ))
 
 (ocamllex tptp_lexer)
+(ocamllex pv_lexer)
 
-(menhir (modules tptp_parser))
+(menhir (modules tptp_parser)
+        (modules pv_parser))
