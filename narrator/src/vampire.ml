@@ -1512,80 +1512,57 @@ module Protocol_step = struct
     | Client_to_intruder
     | Intruder_to_client
 
+  type in_out = In | Out
+
   type t =
     { proc_name : string option
+    ; in_out : in_out
     ; direction : direction
     ; step_num : int
     ; expr : Analyzed_expr.expr }
 
-  let break_down_step_string (s : string) : string option * int option =
-    let rec aux (parts : string list) (proc_name_parts : string list)
-        (n : int option) : string option * int option =
+  let break_down_step_string (s : string) : string option * in_out option * int option =
+    let rec aux (parts : string list) (proc_name_parts : string list) (in_out : in_out option)
+        (n : int option) : string option * in_out option * int option =
       match parts with
       | [] ->
         ( ( match List.rev proc_name_parts with
               | [] -> None
               | l -> Some (String.concat "_" l) )
-        , n )
-      | ["STEP"; n] -> aux [] proc_name_parts (int_of_string_opt n)
-      | x :: xs -> aux xs (x :: proc_name_parts) n
+          , in_out
+          , n )
+      | ["out"; n] -> aux [] proc_name_parts (Some Out) (int_of_string_opt n)
+      | ["in"; n] -> aux [] proc_name_parts (Some In) (int_of_string_opt n)
+      | x :: xs -> aux xs (x :: proc_name_parts) in_out n
     in
-    aux (String.split_on_char '_' s) [] None
+    aux (String.split_on_char '_' s) [] None None
 
   let node_to_steps (node : node) : t list =
+    let expr_to_steps e =
+      match Analyzed_expr.(e |> strip_att) with
+      | Function (name, [expr]) -> (
+          match break_down_step_string name with
+          | proc_name, Some in_out, Some step_num ->
+            [ { proc_name
+              ; in_out
+              ; step_num
+              ; direction = Client_to_intruder
+              ; expr } ]
+          | _ -> []
+        )
+      | _ -> []
+    in
     match node with
     | Group -> []
     | Data node -> (
         match node.classification with
-        | ProtocolStep -> (
-            let es =
-              Analyzed_expr.(node.expr |> strip_att |> get_function_args)
-            in
-            match es with
-            | [e1; e2] -> (
-                match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some step_num ->
-                  [ { proc_name = None
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 } ]
-                | Some proc_name, Some step_num ->
-                  [ { proc_name = Some proc_name
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 } ]
-                | _ -> [] )
-            | _ -> [] )
+        | ProtocolStep -> expr_to_steps node.expr
         | InteractiveProtocolStep -> (
-            let pre, e =
-              let open Analyzed_expr in
-              node.expr |> strip_quant |> split_on_impl
-              |> (function None -> failwith "Unexpected None" | Some x -> x)
-              |> fun (x, y) -> (strip_att x, strip_att y)
-            in
-            match Analyzed_expr.get_function_args e with
-            | [e1; e2] -> (
-                match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some step_num ->
-                  [ { proc_name = None
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 }
-                  ; { proc_name = None
-                    ; step_num
-                    ; direction = Intruder_to_client
-                    ; expr = pre } ]
-                | Some proc_name, Some step_num ->
-                  [ { proc_name = Some proc_name
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 }
-                  ; { proc_name = Some proc_name
-                    ; step_num
-                    ; direction = Intruder_to_client
-                    ; expr = pre } ]
-                | _ -> [] )
-            | _ -> [] )
+            let open Analyzed_expr in
+            node.expr |> strip_quant |> split_on_impl
+            |> (function None -> failwith "Unexpected None" | Some x -> x)
+            |> fun (pre, e) -> expr_to_steps pre @ expr_to_steps e
+          )
         | _ -> [] )
 end
 
@@ -1643,7 +1620,7 @@ let classify_protocol_step (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let check_tag (tag : string) : bool =
     match Protocol_step.break_down_step_string tag with
-    | _, Some _ -> true
+    | _, Some _, Some _ -> true
     | _ -> false
   in
   let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
@@ -1656,21 +1633,27 @@ let classify_protocol_step (m : node_graph) : node_graph =
           let classification =
             match data.expr with
             | Function
-                ("attacker", [Function ("tuple_2", [_; Variable (Free, tag)])])
-              when check_tag tag ->
-              ProtocolStep
+                ("attacker", [Function (name, _)]) ->
+              (match Protocol_step.break_down_step_string name with
+               | _, Some _, Some _ -> ProtocolStep
+               | _ -> data.classification)
             | Quantified
                 ( _
                 , _
                 , BinaryOp
                     ( Imply
-                    , _
                     , Function
                         ( "attacker"
-                        , [Function ("tuple_2", [_; Variable (Free, tag)])] ) )
+                        , [Function (name_1, _)])
+                    , Function
+                        ( "attacker"
+                        , [Function (name_2, _)] ) )
                 )
-              when check_tag tag ->
-              InteractiveProtocolStep
+              ->
+              (match Protocol_step.break_down_step_string name_1, Protocol_step.break_down_step_string name_2 with
+               | (_, Some _, Some _), (_, Some _, Some _) -> InteractiveProtocolStep
+               | _ -> data.classification
+              )
             | _ -> data.classification
           in
           let data = {data with classification} in
@@ -2157,13 +2140,15 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
   let open Analyzed_graph in
   let check_tag (tag : string) : bool =
     match Protocol_step.break_down_step_string tag with
-    | _, Some _ -> true
+    | _, Some _, Some _ -> true
     | _ -> false
   in
   let reformat_tag (tag : string) : string =
     match Protocol_step.break_down_step_string tag with
-    | Some p, Some n -> Printf.sprintf "%s.%d" p n
-    | None, Some n -> Printf.sprintf "GLOBAL.%d" n
+    | Some p, Some In, Some n -> Printf.sprintf "%s.in.%d" p n
+    | Some p, Some Out, Some n -> Printf.sprintf "%s.out.%d" p n
+    | None, Some In, Some n -> Printf.sprintf "GLOBAL.in.%d" n
+    | None, Some Out, Some n -> Printf.sprintf "GLOBAL.out.%d" n
     | _ -> failwith "Unexpected case"
   in
   let rec aux (id : id) (m : node_graph) : info_source list =
