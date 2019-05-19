@@ -1,6 +1,6 @@
 SRCFILES = src/*.ml*
 
-CINAPSFILES = src/*.cinaps
+# CINAPSFILES = src/*.cinaps
 
 OCAMLFORMAT = ocamlformat \
 	--inplace \
@@ -10,12 +10,12 @@ OCAMLFORMAT = ocamlformat \
 	--type-decl sparse \
 	--sequence-style terminator \
 	$(SRCFILES) \
-	$(CINAPSFILES)
+	# $(CINAPSFILES)
 
 OCPINDENT = ocp-indent \
 	--inplace \
 	$(SRCFILES) \
-	$(CINAPSFILES)
+	# $(CINAPSFILES)
 
 .PHONY: all
 all: build
