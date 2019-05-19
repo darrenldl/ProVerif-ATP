@@ -1,4 +1,5 @@
-SRCFILES = src/*.ml*
+SRCFILES = src/*.ml \
+	src/*.mli
 
 # CINAPSFILES = src/*.cinaps
 
