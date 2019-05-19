@@ -85,7 +85,7 @@ rule read =
   | "weaksecret"     { WEAKSECRET }
   | "yield"          { YIELD }
 
-  | '0'        { NULL_PROC }
+  | '0'              { NULL_PROC }
 
   (* Symbols *)
   | '('        { LEFT_PAREN }
