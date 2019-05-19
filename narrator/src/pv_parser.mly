@@ -73,3 +73,8 @@
 
 %token PARALLEL
 %token REPLICATE
+
+%%
+
+parse_decls:
+  | l = list(decl)
