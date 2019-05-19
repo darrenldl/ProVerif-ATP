@@ -8,8 +8,8 @@ let lexbuf_to_pos_str lexbuf =
 let parse_with_error lexbuf =
   try Ok (Tptp_parser.parse_decls Tptp_lexer.read lexbuf) with
   | Tptp_lexer.SyntaxError msg ->
-    Error (Printf.sprintf "%s: %s" (lexbuf_to_pos_str lexbuf) msg)
+      Error (Printf.sprintf "%s: %s" (lexbuf_to_pos_str lexbuf) msg)
   | Tptp_parser.Error ->
-    Error (Printf.sprintf "%s: syntax error" (lexbuf_to_pos_str lexbuf))
+      Error (Printf.sprintf "%s: syntax error" (lexbuf_to_pos_str lexbuf))
   | Tptp_ast.ErrorWithMsg s ->
-    Error (Printf.sprintf "%s: %s" (lexbuf_to_pos_str lexbuf) s)
+      Error (Printf.sprintf "%s: %s" (lexbuf_to_pos_str lexbuf) s)

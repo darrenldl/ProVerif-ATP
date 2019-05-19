@@ -66,7 +66,7 @@ module type S = sig
   val unwrap_data : node -> data
 
   val add_node :
-    write_mode
+       write_mode
     -> id
     -> node
     -> ?parents:id list
@@ -145,7 +145,7 @@ module type S = sig
   val get_label_visibility : id -> t -> bool
 
   val refresh_node_graphics :
-    height:int
+       height:int
     -> ?redo_layout:bool
     -> ?label_affect_dag:bool
     -> Dagre.t Js_of_ocaml.Js.t
@@ -155,7 +155,7 @@ module type S = sig
     -> t
 
   val plot :
-    height:int
+       height:int
     -> ?show_label:bool
     -> ?label_affect_dag:bool
     -> Dagre.t Js_of_ocaml.Js.t option
@@ -170,16 +170,16 @@ struct
   include B
 
   module IdMap = Map.Make (struct
-      type t = id
+    type t = id
 
-      let compare = compare
-    end)
+    let compare = compare
+  end)
 
   module IdSet = Set.Make (struct
-      type t = id
+    type t = id
 
-      let compare = compare
-    end)
+    let compare = compare
+  end)
 
   type group_type =
     | BFS
@@ -266,35 +266,44 @@ struct
     val find_with_default : id -> 'a -> 'a IdMap.t -> 'a
   end = struct
     let map_with_ids ~(ids : id list) (f : 'a -> 'a) (m : 'a IdMap.t) :
-      'a IdMap.t =
+        'a IdMap.t =
       let rec aux ids f m =
         match ids with
-        | [] -> m
+        | [] ->
+            m
         | x :: xs -> (
-            match IdMap.find_opt x m with
-            | None -> aux xs f m
-            | Some d -> aux xs f (IdMap.add x (f d) m) )
+          match IdMap.find_opt x m with
+          | None ->
+              aux xs f m
+          | Some d ->
+              aux xs f (IdMap.add x (f d) m) )
       in
       aux ids f m
 
     let add_single_to_bucket ~(bucket_id : id) ~(data : 'a)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       match IdMap.find_opt bucket_id m with
-      | None -> IdMap.add bucket_id [data] m
-      | Some l -> IdMap.add bucket_id (List.sort_uniq compare (data :: l)) m
+      | None ->
+          IdMap.add bucket_id [data] m
+      | Some l ->
+          IdMap.add bucket_id (List.sort_uniq compare (data :: l)) m
 
     let add_list_to_bucket ~(bucket_id : id) ~(data : 'a list)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       match IdMap.find_opt bucket_id m with
-      | None -> IdMap.add bucket_id (List.sort_uniq compare data) m
-      | Some l -> IdMap.add bucket_id (List.sort_uniq compare (data @ l)) m
+      | None ->
+          IdMap.add bucket_id (List.sort_uniq compare data) m
+      | Some l ->
+          IdMap.add bucket_id (List.sort_uniq compare (data @ l)) m
 
     let add_single_to_buckets ~(bucket_ids : id list) ~(data : 'a)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let rec aux ids data m =
         match ids with
-        | [] -> m
-        | x :: xs -> aux xs data (add_single_to_bucket ~bucket_id:x ~data m)
+        | [] ->
+            m
+        | x :: xs ->
+            aux xs data (add_single_to_bucket ~bucket_id:x ~data m)
       in
       aux bucket_ids data m
 
@@ -302,8 +311,10 @@ struct
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let rec aux ids data m =
         match ids with
-        | [] -> m
-        | x :: xs -> aux xs data (add_list_to_bucket ~bucket_id:x ~data m)
+        | [] ->
+            m
+        | x :: xs ->
+            aux xs data (add_list_to_bucket ~bucket_id:x ~data m)
       in
       aux bucket_ids data m
 
@@ -311,30 +322,38 @@ struct
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let filter l = List.filter (fun x -> x <> data) l in
       match IdMap.find_opt bucket_id m with
-      | None -> m
-      | Some d -> IdMap.add bucket_id (filter d) m
+      | None ->
+          m
+      | Some d ->
+          IdMap.add bucket_id (filter d) m
 
     let remove_list_from_bucket ~(data : 'a list) ~(bucket_id : id)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let filter l = List.filter (fun x -> not (List.mem x data)) l in
       match IdMap.find_opt bucket_id m with
-      | None -> m
-      | Some d -> IdMap.add bucket_id (filter d) m
+      | None ->
+          m
+      | Some d ->
+          IdMap.add bucket_id (filter d) m
 
     let remove_single_from_buckets ~(data : 'a) ?(bucket_ids : id list option)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let filter l = List.filter (fun x -> x <> data) l in
       match bucket_ids with
-      | None -> IdMap.map filter m
-      | Some l -> map_with_ids ~ids:l filter m
+      | None ->
+          IdMap.map filter m
+      | Some l ->
+          map_with_ids ~ids:l filter m
 
     let remove_list_from_buckets ~(data : 'a list)
         ?(bucket_ids : id list option) (m : 'a list IdMap.t) : 'a list IdMap.t
-      =
+        =
       let filter l = List.filter (fun x -> not (List.mem x data)) l in
       match bucket_ids with
-      | None -> IdMap.map filter m
-      | Some l -> map_with_ids ~ids:l filter m
+      | None ->
+          IdMap.map filter m
+      | Some l ->
+          map_with_ids ~ids:l filter m
 
     let id_list (m : 'a IdMap.t) : id list =
       let bindings = IdMap.bindings m in
@@ -346,13 +365,15 @@ struct
 
     let gen_id (m : t) : id =
       match IdMap.max_binding_opt m.node_store with
-      | None -> B.first_id
-      | Some (id, _) -> B.next_id id
+      | None ->
+          B.first_id
+      | Some (id, _) ->
+          B.next_id id
 
     let is_visible (id : id) (m : t) : bool = IdMap.find id m.node_visibility
 
     let add_to_map_if_missing (id : id) (v : 'a) (m : 'a IdMap.t) : 'a IdMap.t
-      =
+        =
       match IdMap.find_opt id m with None -> IdMap.add id v m | Some _ -> m
 
     let raise_exn_if_missing ?(msg : string = "Entry is missing in map")
@@ -367,16 +388,17 @@ struct
       if visible then IdMap.find id m else failwith "Node is not visible"
 
     let look_up_opt_respect_vis (id : id) (m : 'a IdMap.t) (main : t) :
-      'a option =
+        'a option =
       let visible = find_with_default id true main.node_visibility in
       if visible then IdMap.find_opt id m else None
 
     let filter_invisible_ids (ids : id list) (m : t) : id list =
       let rec aux ids acc =
         match ids with
-        | [] -> List.rev acc
+        | [] ->
+            List.rev acc
         | x :: xs ->
-          aux xs (if IdMap.find x m.node_visibility then x :: acc else acc)
+            aux xs (if IdMap.find x m.node_visibility then x :: acc else acc)
       in
       aux ids []
   end
@@ -407,8 +429,10 @@ struct
 
   let unwrap_data (node : node) : data =
     match node with
-    | Data data -> data
-    | Group -> failwith "Expected data node"
+    | Data data ->
+        data
+    | Group ->
+        failwith "Expected data node"
 
   let append_parents_children_linkage ~(id : id) ~(parents : id list option)
       ~(children : id list option) (m : t) : t =
@@ -470,10 +494,11 @@ struct
     let group_lookup = group_lookup |> IdMap.remove id in
     let group_members_lookup =
       match group with
-      | None -> group_members_lookup
+      | None ->
+          group_members_lookup
       | Some group ->
-        group_members_lookup
-        |> remove_single_from_bucket ~data:id ~bucket_id:group
+          group_members_lookup
+          |> remove_single_from_bucket ~data:id ~bucket_id:group
     in
     remove_parents_children_linkage ~id
       {m with node_store; group_lookup; group_members_lookup}
@@ -494,36 +519,45 @@ struct
         ; group_lookup
         ; group_members_lookup
         ; node_visibility
-        ; label_visibility; _ } =
+        ; label_visibility
+        ; _ } =
       m
     in
     let node_store =
       match node with
       | None ->
-        raise_exn_if_missing id node_store
-          ~msg:"Node is missing in node store"
-      | Some node -> IdMap.add id node node_store
+          raise_exn_if_missing id node_store
+            ~msg:"Node is missing in node store"
+      | Some node ->
+          IdMap.add id node node_store
     in
     let group_lookup =
       match group with
-      | None -> group_lookup
-      | Some group -> IdMap.add id group group_lookup
+      | None ->
+          group_lookup
+      | Some group ->
+          IdMap.add id group group_lookup
     in
     let node_visibility =
       match node_visible with
-      | None -> add_to_map_if_missing id true node_visibility
-      | Some v -> IdMap.add id v node_visibility
+      | None ->
+          add_to_map_if_missing id true node_visibility
+      | Some v ->
+          IdMap.add id v node_visibility
     in
     let label_visibility =
       match label_visible with
-      | None -> add_to_map_if_missing id false label_visibility
-      | Some v -> IdMap.add id v label_visibility
+      | None ->
+          add_to_map_if_missing id false label_visibility
+      | Some v ->
+          IdMap.add id v label_visibility
     in
     let group_members_lookup =
       match group with
-      | None -> group_members_lookup
+      | None ->
+          group_members_lookup
       | Some group ->
-        add_single_to_bucket ~bucket_id:group ~data:id group_members_lookup
+          add_single_to_bucket ~bucket_id:group ~data:id group_members_lookup
     in
     let m =
       { m with
@@ -534,20 +568,21 @@ struct
       ; label_visibility }
     in
     match write_mode with
-    | Append -> append_parents_children_linkage ~id ~parents ~children m
+    | Append ->
+        append_parents_children_linkage ~id ~parents ~children m
     | Overwrite ->
-      let remove_parents_linkage =
-        match parents with None -> false | Some _ -> true
-      in
-      let remove_children_linkage =
-        match children with None -> false | Some _ -> true
-      in
-      m
-      (* deal with removing existing links first *)
-      |> remove_parents_children_linkage ~remove_parents_linkage
-        ~remove_children_linkage ~id
-      (* now deal with adding the new links *)
-      |> append_parents_children_linkage ~id ~parents ~children
+        let remove_parents_linkage =
+          match parents with None -> false | Some _ -> true
+        in
+        let remove_children_linkage =
+          match children with None -> false | Some _ -> true
+        in
+        m
+        (* deal with removing existing links first *)
+        |> remove_parents_children_linkage ~remove_parents_linkage
+             ~remove_children_linkage ~id
+        (* now deal with adding the new links *)
+        |> append_parents_children_linkage ~id ~parents ~children
 
   let add_node (write_mode : write_mode) (id : id) (node : node)
       ?(parents : id list option) ?(children : id list option)
@@ -567,8 +602,10 @@ struct
       (records : node_record list) (m : t) : t =
     let rec aux records m =
       match records with
-      | [] -> m
-      | x :: xs -> aux xs (add_node_via_record write_mode x m)
+      | [] ->
+          m
+      | x :: xs ->
+          aux xs (add_node_via_record write_mode x m)
     in
     aux records m
 
@@ -590,9 +627,11 @@ struct
          (fun x -> x <> None)
          (List.map
             (fun id ->
-               match find_node_opt id m with
-               | None -> None
-               | Some n -> Some (id, n) )
+              match find_node_opt id m with
+              | None ->
+                  None
+              | Some n ->
+                  Some (id, n) )
             ids))
 
   let find_group (id : id) (m : t) : id =
@@ -626,24 +665,28 @@ struct
 
   let linear_traverse_internal ~(respect_visibility : bool)
       ?(ids : id list option) (ctx : 'a) (f : 'a traversal_function) (m : t) :
-    'a * t =
+      'a * t =
     let rec aux look_up_opt ids ctx f m =
       match ids with
-      | [] -> (ctx, m)
+      | [] ->
+          (ctx, m)
       | x :: xs -> (
-          match look_up_opt x m.node_store m with
-          | None -> aux look_up_opt xs ctx f m
-          | Some n ->
+        match look_up_opt x m.node_store m with
+        | None ->
+            aux look_up_opt xs ctx f m
+        | Some n ->
             let terminate, new_ctx, new_m =
               match f with
               | Full_traversal f ->
-                let new_ctx, new_m = f ctx x n m in
-                (false, new_ctx, new_m)
-              | Partial_traversal f -> f ctx x n m
-              | Full_traversal_pure f -> (false, f ctx x n m, m)
+                  let new_ctx, new_m = f ctx x n m in
+                  (false, new_ctx, new_m)
+              | Partial_traversal f ->
+                  f ctx x n m
+              | Full_traversal_pure f ->
+                  (false, f ctx x n m, m)
               | Partial_traversal_pure f ->
-                let term, new_ctx = f ctx x n m in
-                (term, new_ctx, m)
+                  let term, new_ctx = f ctx x n m in
+                  (term, new_ctx, m)
             in
             if terminate then (new_ctx, new_m)
             else aux look_up_opt xs new_ctx f new_m )
@@ -660,44 +703,49 @@ struct
   let linear_traverse ?(ids : id list option) (ctx : 'a)
       (f : 'a traversal_function) (m : t) : 'a * t =
     match ids with
-    | None -> linear_traverse_internal ~respect_visibility:true ctx f m
+    | None ->
+        linear_traverse_internal ~respect_visibility:true ctx f m
     | Some ids ->
-      linear_traverse_internal ~respect_visibility:true ~ids ctx f m
+        linear_traverse_internal ~respect_visibility:true ~ids ctx f m
 
   let linear_traverse_ignore_vis ?(ids : id list option) (ctx : 'a)
       (f : 'a traversal_function) (m : t) : 'a * t =
     match ids with
-    | None -> linear_traverse_internal ~respect_visibility:false ctx f m
+    | None ->
+        linear_traverse_internal ~respect_visibility:false ctx f m
     | Some ids ->
-      linear_traverse_internal ~respect_visibility:false ~ids ctx f m
+        linear_traverse_internal ~respect_visibility:false ~ids ctx f m
 
   let linear_traverse_rev ?(ids : id list option) (ctx : 'a)
       (f : 'a traversal_function) (m : t) : 'a * t =
     match ids with
-    | None -> linear_traverse ctx f m
+    | None ->
+        linear_traverse ctx f m
     | Some ids ->
-      let ids = List.rev ids in
-      linear_traverse ~ids ctx f m
+        let ids = List.rev ids in
+        linear_traverse ~ids ctx f m
 
   let linear_traverse_rev_ignore_vis ?(ids : id list option) (ctx : 'a)
       (f : 'a traversal_function) (m : t) : 'a * t =
     match ids with
-    | None -> linear_traverse_ignore_vis ctx f m
+    | None ->
+        linear_traverse_ignore_vis ctx f m
     | Some ids ->
-      let ids = List.rev ids in
-      linear_traverse_ignore_vis ~ids ctx f m
+        let ids = List.rev ids in
+        linear_traverse_ignore_vis ~ids ctx f m
 
   let bfs_traverse_internal ~(respect_visibility : bool) (id : id) (ctx : 'a)
       (direction : bfs_traversal_direction) (f : 'a traversal_function) (m : t)
-    : 'a * t =
+      : 'a * t =
     let rec add_to_queue ids queue visited =
       match ids with
-      | [] -> ()
+      | [] ->
+          ()
       | x :: xs ->
-        if not (IdSet.mem x !visited) then (
-          Queue.push x queue;
-          visited := IdSet.add x !visited );
-        add_to_queue xs queue visited
+          if not (IdSet.mem x !visited) then (
+            Queue.push x queue;
+            visited := IdSet.add x !visited );
+          add_to_queue xs queue visited
     in
     let look_up_opt =
       if respect_visibility then Helpers.look_up_opt_respect_vis
@@ -712,30 +760,35 @@ struct
     while Queue.length queue > 0 do
       let id = Queue.pop queue in
       match look_up_opt id !m.node_store !m with
-      | None -> ()
+      | None ->
+          ()
       | Some cur ->
-        (* executes operation *)
-        let terminate, new_ctx, new_m =
-          match f with
-          | Full_traversal f ->
-            let new_ctx, new_m = f !ctx id cur !m in
-            (false, new_ctx, new_m)
-          | Partial_traversal f -> f !ctx id cur !m
-          | Full_traversal_pure f -> (false, f !ctx id cur !m, !m)
-          | Partial_traversal_pure f ->
-            let term, new_ctx = f !ctx id cur !m in
-            (term, new_ctx, !m)
-        in
-        m := new_m;
-        ctx := new_ctx;
-        if terminate then Queue.clear queue
-        else
-          let ids =
-            match direction with
-            | Top_to_bottom -> IdMap.find id !m.children_lookup
-            | Bottom_to_top -> IdMap.find id !m.parents_lookup
+          (* executes operation *)
+          let terminate, new_ctx, new_m =
+            match f with
+            | Full_traversal f ->
+                let new_ctx, new_m = f !ctx id cur !m in
+                (false, new_ctx, new_m)
+            | Partial_traversal f ->
+                f !ctx id cur !m
+            | Full_traversal_pure f ->
+                (false, f !ctx id cur !m, !m)
+            | Partial_traversal_pure f ->
+                let term, new_ctx = f !ctx id cur !m in
+                (term, new_ctx, !m)
           in
-          add_to_queue ids queue visited
+          m := new_m;
+          ctx := new_ctx;
+          if terminate then Queue.clear queue
+          else
+            let ids =
+              match direction with
+              | Top_to_bottom ->
+                  IdMap.find id !m.children_lookup
+              | Bottom_to_top ->
+                  IdMap.find id !m.parents_lookup
+            in
+            add_to_queue ids queue visited
     done;
     (!ctx, !m)
 
@@ -745,12 +798,12 @@ struct
 
   let bfs_traverse_ignore_vis (id : id) (ctx : 'a)
       (direction : bfs_traversal_direction) (f : 'a traversal_function) (m : t)
-    : 'a * t =
+      : 'a * t =
     bfs_traverse_internal ~respect_visibility:false id ctx direction f m
 
   let bfs_traverse_rev (id : id) (ctx : 'a)
       (direction : bfs_traversal_direction) (f : 'a traversal_function) (m : t)
-    : 'a * t =
+      : 'a * t =
     let record_ids acc id _node _m = id :: acc in
     let ids, m =
       bfs_traverse id [] direction (Full_traversal_pure record_ids) m
@@ -760,7 +813,7 @@ struct
 
   let bfs_traverse_rev_ignore_vis (id : id) (ctx : 'a)
       (direction : bfs_traversal_direction) (f : 'a traversal_function) (m : t)
-    : 'a * t =
+      : 'a * t =
     let record_ids acc id _node _m = id :: acc in
     let ids, m =
       bfs_traverse_ignore_vis id [] direction (Full_traversal_pure record_ids)
@@ -786,25 +839,27 @@ struct
     {m with node_visibility}
 
   let update_list_node_visibility (ids : id list) (visibility : bool) (m : t) :
-    t =
+      t =
     let rec aux ids visibility m =
       match ids with
-      | [] -> m
+      | [] ->
+          m
       | x :: xs ->
-        aux xs visibility (update_single_node_visibility x visibility m)
+          aux xs visibility (update_single_node_visibility x visibility m)
     in
     aux ids visibility m
 
   let restore_node_visibility ?(ids : id list option) ~(old_m : t) (m : t) : t
-    =
+      =
     let rec aux ids old_m m =
       match ids with
-      | [] -> m
+      | [] ->
+          m
       | x :: xs ->
-        let visibility =
-          Helpers.find_with_default x false old_m.node_visibility
-        in
-        aux xs old_m (update_single_node_visibility x visibility m)
+          let visibility =
+            Helpers.find_with_default x false old_m.node_visibility
+          in
+          aux xs old_m (update_single_node_visibility x visibility m)
     in
     let ids =
       match ids with None -> Helpers.id_list m.node_store | Some l -> l
@@ -827,7 +882,7 @@ struct
       linear_traverse None
         (Partial_traversal_pure
            (fun _acc id node m ->
-              if pred id node m then (true, Some id) else (false, None) ))
+             if pred id node m then (true, Some id) else (false, None) ))
         m
     in
     res
@@ -835,19 +890,23 @@ struct
   let find_root_opt (root_type : root_type) (m : t) : id option =
     let pred =
       match root_type with
-      | Top -> fun id _node m -> find_parents id m = []
-      | Bottom -> fun id _node m -> find_children id m = []
+      | Top ->
+          fun id _node m -> find_parents id m = []
+      | Bottom ->
+          fun id _node m -> find_children id m = []
     in
     filter_first_opt pred m
 
   let find_root (root_type : root_type) (m : t) : id =
     match find_root_opt root_type m with
-    | Some x -> x
-    | None -> failwith "No root found"
+    | Some x ->
+        x
+    | None ->
+        failwith "No root found"
 
   let diff (root_type : root_type) (m1 : t) (m2 : t) : t * t =
     let same (id1 : id) (n1 : node) (m1 : t) (id2 : id) (n2 : node) (m2 : t) :
-      bool =
+        bool =
       let n1_children_ids = find_children id1 m1 in
       let n2_children_ids = find_children id2 m2 in
       let n1_children = find_nodes n1_children_ids m1 in
@@ -862,7 +921,7 @@ struct
       in
       List.fold_left
         (fun res ((id1, n1), (id2, n2)) ->
-           res && label id1 n1 m1 = label id2 n2 m2 )
+          res && label id1 n1 m1 = label id2 n2 m2 )
         true combined
     in
     let rec remove_common (id1 : id) (n1 : node) (m1 : t) (id2 : id)
@@ -881,19 +940,23 @@ struct
         in
         List.fold_left
           (fun (m1, m2) ((id1, n1), (id2, n2)) ->
-             remove_common id1 n1 m1 id2 n2 m2 )
+            remove_common id1 n1 m1 id2 n2 m2 )
           (m1, m2) combined
       else (m1, m2)
     in
     let id1 =
       match find_root_opt root_type m1 with
-      | None -> failwith "No root for n1"
-      | Some x -> x
+      | None ->
+          failwith "No root for n1"
+      | Some x ->
+          x
     in
     let id2 =
       match find_root_opt root_type m2 with
-      | None -> failwith "No root for n2"
-      | Some x -> x
+      | None ->
+          failwith "No root for n2"
+      | Some x ->
+          x
     in
     let res =
       remove_common id1 (find_node id1 m1) m1 id2 (find_node id2 m2) m2
@@ -922,28 +985,28 @@ struct
       linear_traverse_ignore_vis ~ids:common_ids []
         (Full_traversal_pure
            (fun acc id prev_node _ ->
-              let different =
-                (check_content && prev_node <> IdMap.find id cur.node_store)
-                || check_label_visibility
-                   && IdMap.find id prev.label_visibility
-                      <> IdMap.find id cur.label_visibility
-                || check_node_visibility
-                   && IdMap.find id prev.node_visibility
-                      <> IdMap.find id cur.node_visibility
-                || check_group
-                   && IdMap.find_opt id prev.group_lookup
-                      <> IdMap.find_opt id cur.group_lookup
-                || check_group_members
-                   && IdMap.find_opt id prev.group_members_lookup
-                      <> IdMap.find_opt id cur.group_members_lookup
-                || check_children
-                   && IdMap.find id prev.children_lookup
-                      <> IdMap.find id cur.children_lookup
-                || check_parents
-                   && IdMap.find id prev.parents_lookup
-                      <> IdMap.find id cur.parents_lookup
-              in
-              if different then id :: acc else acc ))
+             let different =
+               (check_content && prev_node <> IdMap.find id cur.node_store)
+               || check_label_visibility
+                  && IdMap.find id prev.label_visibility
+                     <> IdMap.find id cur.label_visibility
+               || check_node_visibility
+                  && IdMap.find id prev.node_visibility
+                     <> IdMap.find id cur.node_visibility
+               || check_group
+                  && IdMap.find_opt id prev.group_lookup
+                     <> IdMap.find_opt id cur.group_lookup
+               || check_group_members
+                  && IdMap.find_opt id prev.group_members_lookup
+                     <> IdMap.find_opt id cur.group_members_lookup
+               || check_children
+                  && IdMap.find id prev.children_lookup
+                     <> IdMap.find id cur.children_lookup
+               || check_parents
+                  && IdMap.find id prev.parents_lookup
+                     <> IdMap.find id cur.parents_lookup
+             in
+             if different then id :: acc else acc ))
         prev
     in
     (* move new invisible nodes to changed_ids if needed *)
@@ -952,9 +1015,9 @@ struct
         linear_traverse_ignore_vis ~ids:changed_ids (removed_ids, [])
           (Full_traversal_pure
              (fun (removed_ids, changed_ids) id _ cur ->
-                let visible = IdMap.find id cur.node_visibility in
-                if visible then (removed_ids, id :: changed_ids)
-                else (id :: removed_ids, changed_ids) ))
+               let visible = IdMap.find id cur.node_visibility in
+               if visible then (removed_ids, id :: changed_ids)
+               else (id :: removed_ids, changed_ids) ))
           cur
         |> Misc_utils.unwrap_tuple_0
       else (removed_ids, changed_ids)
@@ -972,65 +1035,67 @@ struct
     let group_id = Helpers.gen_id m in
     (* quit if only one node or list is empty *)
     match ids with
-    | [] | [_] -> m
+    | [] | [_] ->
+        m
     | _ ->
-      let id_set = IdSet.of_list ids in
-      (* add nodes to the new group *)
-      let (), m =
-        linear_traverse ~ids ()
-          (Full_traversal
-             (fun () id _node m ->
-                let { group_lookup
-                    ; group_members_lookup
-                    ; children_lookup
-                    ; parents_lookup; _ } =
-                  m
-                in
-                let group_lookup = IdMap.add id group_id group_lookup in
-                let group_members_lookup =
-                  Helpers.add_single_to_bucket ~bucket_id:group_id ~data:id
-                    group_members_lookup
-                in
-                (* let parents              = IdMap.find id parents_lookup in
+        let id_set = IdSet.of_list ids in
+        (* add nodes to the new group *)
+        let (), m =
+          linear_traverse ~ids ()
+            (Full_traversal
+               (fun () id _node m ->
+                 let { group_lookup
+                     ; group_members_lookup
+                     ; children_lookup
+                     ; parents_lookup
+                     ; _ } =
+                   m
+                 in
+                 let group_lookup = IdMap.add id group_id group_lookup in
+                 let group_members_lookup =
+                   Helpers.add_single_to_bucket ~bucket_id:group_id ~data:id
+                     group_members_lookup
+                 in
+                 (* let parents              = IdMap.find id parents_lookup in
                  * let children_lookup      =
                  *   Helpers.add_single_to_buckets ~bucket_ids:parents ~data:id children_lookup in *)
-                ( ()
-                , { m with
-                    group_lookup
-                  ; group_members_lookup
-                  ; children_lookup
-                  ; parents_lookup } ) ))
-          m
-      in
-      (* collect parents and children *)
-      let (parents, children), _ =
-        linear_traverse ~ids ([], [])
-          (Full_traversal_pure
-             (fun (parents_acc, children_acc) id _node m ->
-                let parents = find_parents id m in
-                let children = find_children id m in
-                let parents_acc =
-                  List.filter (fun x -> not (IdSet.mem x id_set)) parents
-                  :: parents_acc
-                in
-                let children_acc =
-                  List.filter (fun x -> not (IdSet.mem x id_set)) children
-                  :: children_acc
-                in
-                (parents_acc, children_acc) ))
-          m
-      in
-      let parents = List.concat parents in
-      let children = List.concat children in
-      m
-      (* add group node *)
-      |> add_node Append group_id Group ~parents ~children
-      (* add group type *)
-      |> add_group_type group_id group_type
-      (* mark group members invisible *)
-      |> update_list_node_visibility ids false
-      (* mark group visible *)
-      |> update_single_node_visibility group_id true
+                 ( ()
+                 , { m with
+                     group_lookup
+                   ; group_members_lookup
+                   ; children_lookup
+                   ; parents_lookup } ) ))
+            m
+        in
+        (* collect parents and children *)
+        let (parents, children), _ =
+          linear_traverse ~ids ([], [])
+            (Full_traversal_pure
+               (fun (parents_acc, children_acc) id _node m ->
+                 let parents = find_parents id m in
+                 let children = find_children id m in
+                 let parents_acc =
+                   List.filter (fun x -> not (IdSet.mem x id_set)) parents
+                   :: parents_acc
+                 in
+                 let children_acc =
+                   List.filter (fun x -> not (IdSet.mem x id_set)) children
+                   :: children_acc
+                 in
+                 (parents_acc, children_acc) ))
+            m
+        in
+        let parents = List.concat parents in
+        let children = List.concat children in
+        m
+        (* add group node *)
+        |> add_node Append group_id Group ~parents ~children
+        (* add group type *)
+        |> add_group_type group_id group_type
+        (* mark group members invisible *)
+        |> update_list_node_visibility ids false
+        (* mark group visible *)
+        |> update_single_node_visibility group_id true
 
   let compress_list (ids : id list) (m : t) : t = compress_internal List ids m
 
@@ -1039,8 +1104,10 @@ struct
     (* quit if the node itself is a leaf *)
     let is_leaf =
       match direction with
-      | Bottom_to_top -> find_parents id m = []
-      | Top_to_bottom -> find_children id m = []
+      | Bottom_to_top ->
+          find_parents id m = []
+      | Top_to_bottom ->
+          find_children id m = []
     in
     if is_leaf then m
     else
@@ -1049,20 +1116,24 @@ struct
         bfs_traverse id [] direction
           (Full_traversal
              (fun acc id _node m ->
-                let is_group = IdMap.mem id m.group_members_lookup in
-                let acc =
-                  if is_group then id :: acc
-                  else
-                    let leaves =
-                      match direction with
-                      | Bottom_to_top -> find_parents id m
-                      | Top_to_bottom -> find_children id m
-                    in
-                    match leaves with
-                    | [] -> if compress_leaf then id :: acc else acc
-                    | _ -> id :: acc
-                in
-                (acc, m) ))
+               let is_group = IdMap.mem id m.group_members_lookup in
+               let acc =
+                 if is_group then id :: acc
+                 else
+                   let leaves =
+                     match direction with
+                     | Bottom_to_top ->
+                         find_parents id m
+                     | Top_to_bottom ->
+                         find_children id m
+                   in
+                   match leaves with
+                   | [] ->
+                       if compress_leaf then id :: acc else acc
+                   | _ ->
+                       id :: acc
+               in
+               (acc, m) ))
           m
       in
       let ids = id :: ids in
@@ -1070,10 +1141,11 @@ struct
 
   let recompress (id : id) (direction : bfs_traversal_direction) (m : t) : t =
     match IdMap.find_opt id m.group_lookup with
-    | None -> m
+    | None ->
+        m
     | Some group_id -> (
-        match IdMap.find group_id m.group_type_lookup with
-        | BFS ->
+      match IdMap.find group_id m.group_type_lookup with
+      | BFS ->
           (* make a snapshot first *)
           let m = take_snapshot group_id m in
           let group_members = IdMap.find group_id m.group_members_lookup in
@@ -1082,15 +1154,15 @@ struct
             linear_traverse ~ids:group_members []
               (Full_traversal_pure
                  (fun acc id _node m ->
-                    let ids, _ =
-                      bfs_traverse id [] direction
-                        (Full_traversal_pure
-                           (fun acc id _node m ->
-                              if IdMap.mem id m.group_lookup then id :: acc
-                              else acc ))
-                        m
-                    in
-                    ids :: acc ))
+                   let ids, _ =
+                     bfs_traverse id [] direction
+                       (Full_traversal_pure
+                          (fun acc id _node m ->
+                            if IdMap.mem id m.group_lookup then id :: acc
+                            else acc ))
+                       m
+                   in
+                   ids :: acc ))
               m
           in
           let ids = List.sort_uniq compare (List.concat ids) in
@@ -1099,7 +1171,7 @@ struct
           |> update_single_node_visibility group_id true
           (* hide all nodes in member trees *)
           |> update_list_node_visibility ids false
-        | List ->
+      | List ->
           let group_members = IdMap.find group_id m.group_members_lookup in
           m
           (* make group node visible *)
@@ -1109,32 +1181,33 @@ struct
 
   let decompress (id : id) (direction : bfs_traversal_direction) (m : t) : t =
     match IdMap.find_opt id m.group_members_lookup with
-    | None -> m
+    | None ->
+        m
     | Some members -> (
-        (* check if there was a snapshot taken *)
-        match IdMap.find_opt id m.snapshots with
-        | None ->
+      (* check if there was a snapshot taken *)
+      match IdMap.find_opt id m.snapshots with
+      | None ->
           m
           (* mark members visibile *)
           |> update_list_node_visibility members true
           (* mark group invisible *)
           |> update_single_node_visibility id false
-        | Some old_m ->
+      | Some old_m ->
           let group_members = IdMap.find id m.group_members_lookup in
           (* collect ids of all nodes in member trees *)
           let ids, m =
             linear_traverse_ignore_vis ~ids:group_members []
               (Full_traversal_pure
                  (fun acc id _node m ->
-                    let ids, _ =
-                      bfs_traverse_ignore_vis id [] direction
-                        (Full_traversal_pure
-                           (fun acc id _node m ->
-                              if IdMap.mem id m.group_lookup then id :: acc
-                              else acc ))
-                        m
-                    in
-                    ids :: acc ))
+                   let ids, _ =
+                     bfs_traverse_ignore_vis id [] direction
+                       (Full_traversal_pure
+                          (fun acc id _node m ->
+                            if IdMap.mem id m.group_lookup then id :: acc
+                            else acc ))
+                       m
+                   in
+                   ids :: acc ))
               m
           in
           let ids = List.sort_uniq compare (List.concat ids) in
@@ -1150,7 +1223,7 @@ struct
     List.map (fun (_, node) -> node) (IdMap.bindings m.node_store)
 
   let update_single_label_visibility (id : id) (visibility : bool) (m : t) : t
-    =
+      =
     let {label_visibility; _} = m in
     let label_visibility = IdMap.add id visibility label_visibility in
     {m with label_visibility}
@@ -1159,9 +1232,10 @@ struct
       (m : t) : t =
     let rec aux ids visibility m =
       match ids with
-      | [] -> m
+      | [] ->
+          m
       | x :: xs ->
-        aux xs visibility (update_single_label_visibility x visibility m)
+          aux xs visibility (update_single_label_visibility x visibility m)
     in
     let ids =
       match ids with None -> Helpers.id_list m.node_store | Some ids -> ids
@@ -1190,9 +1264,9 @@ struct
       let edges = edges_of_node id cur in
       List.iter
         (fun (id_src, id_dst) ->
-           let id_src_str = id_to_string id_src in
-           let id_dst_str = id_to_string id_dst in
-           Dagre.set_edge dagre ~source:id_src_str ~target:id_dst_str )
+          let id_src_str = id_to_string id_src in
+          let id_dst_str = id_to_string id_dst in
+          Dagre.set_edge dagre ~source:id_src_str ~target:id_dst_str )
         edges
     in
     let sync_dagre_xy_to_table () (id : id) (_node : node) (_m : t) : unit =
@@ -1219,10 +1293,10 @@ struct
     let add_edges_to_cy (edges : (id * id) list) : unit =
       List.iter
         (fun (id_src, id_dst) ->
-           let id_src_str = id_to_string id_src in
-           let id_dst_str = id_to_string id_dst in
-           let id = Printf.sprintf "%s_%s" id_src_str id_dst_str in
-           Cytoscape.add_edge cy ~id ~source:id_src_str ~target:id_dst_str )
+          let id_src_str = id_to_string id_src in
+          let id_dst_str = id_to_string id_dst in
+          let id = Printf.sprintf "%s_%s" id_src_str id_dst_str in
+          Cytoscape.add_edge cy ~id ~source:id_src_str ~target:id_dst_str )
         edges
     in
     let sync_node_xy_to_cy () (id : id) (_node : node) (_m : t) : unit =
@@ -1242,63 +1316,63 @@ struct
       |> (fun m -> Cytoscape.start_batch cy; m)
       (* remove removed, changed nodes from Dagre and Cy *)
       |> linear_traverse_ignore_vis ~ids:removed_nodes ()
-        (Full_traversal_pure remove_node)
+           (Full_traversal_pure remove_node)
       |> Misc_utils.unwrap_tuple_1
       |> linear_traverse_ignore_vis ~ids:changed_nodes ()
-        (Full_traversal_pure remove_node)
+           (Full_traversal_pure remove_node)
       |> Misc_utils.unwrap_tuple_1
       |> (fun m ->
-          if label_affect_dag then (
-            m
-            (* add changed, new nodes to Dagre *)
-            |> linear_traverse ~ids:changed_nodes ()
-              (Full_traversal_pure add_node_to_dagre)
-            |> Misc_utils.unwrap_tuple_1
-            |> linear_traverse ~ids:new_nodes ()
-              (Full_traversal_pure add_node_to_dagre)
-            |> Misc_utils.unwrap_tuple_1
-            (* add edges of changed, new nodes to dagre *)
-            |> linear_traverse ~ids:changed_nodes ()
-              (Full_traversal_pure add_node_edges_to_dagre)
-            |> Misc_utils.unwrap_tuple_1
-            |> linear_traverse ~ids:new_nodes ()
-              (Full_traversal_pure add_node_edges_to_dagre)
-            |> Misc_utils.unwrap_tuple_1
-            (* ask Dagre to compute the layout *)
-            |> fun m -> Dagre.layout dagre; m )
-          else m )
+           if label_affect_dag then (
+             m
+             (* add changed, new nodes to Dagre *)
+             |> linear_traverse ~ids:changed_nodes ()
+                  (Full_traversal_pure add_node_to_dagre)
+             |> Misc_utils.unwrap_tuple_1
+             |> linear_traverse ~ids:new_nodes ()
+                  (Full_traversal_pure add_node_to_dagre)
+             |> Misc_utils.unwrap_tuple_1
+             (* add edges of changed, new nodes to dagre *)
+             |> linear_traverse ~ids:changed_nodes ()
+                  (Full_traversal_pure add_node_edges_to_dagre)
+             |> Misc_utils.unwrap_tuple_1
+             |> linear_traverse ~ids:new_nodes ()
+                  (Full_traversal_pure add_node_edges_to_dagre)
+             |> Misc_utils.unwrap_tuple_1
+             (* ask Dagre to compute the layout *)
+             |> fun m -> Dagre.layout dagre; m )
+           else m )
       (* sync x, y of all nodes from Dagre to map  *)
       |> linear_traverse ~ids:all_cur_ids ()
-        (Full_traversal_pure sync_dagre_xy_to_table)
+           (Full_traversal_pure sync_dagre_xy_to_table)
       |> Misc_utils.unwrap_tuple_1
       (* add changed, new nodes to Cy *)
       |> linear_traverse ~ids:changed_nodes ()
-        (Full_traversal_pure add_node_to_cy)
+           (Full_traversal_pure add_node_to_cy)
       |> Misc_utils.unwrap_tuple_1
       |> linear_traverse ~ids:new_nodes () (Full_traversal_pure add_node_to_cy)
       |> Misc_utils.unwrap_tuple_1
       (* set node attributes in cy*)
       |> linear_traverse ~ids:changed_nodes ()
-        (Full_traversal_pure set_node_attributes_cy)
+           (Full_traversal_pure set_node_attributes_cy)
       |> Misc_utils.unwrap_tuple_1
       |> linear_traverse ~ids:new_nodes ()
-        (Full_traversal_pure set_node_attributes_cy)
+           (Full_traversal_pure set_node_attributes_cy)
       |> Misc_utils.unwrap_tuple_1
       (* add edges of changed, new nodes to Cy *)
       |> (fun m ->
-          let edges =
-            List.concat
-              (List.map (fun id -> edges_of_node id m) changed_nodes)
-            @ List.concat (List.map (fun id -> edges_of_node id m) new_nodes)
-          in
-          let edges = List.sort_uniq compare edges in
-          add_edges_to_cy edges; m )
+           let edges =
+             List.concat
+               (List.map (fun id -> edges_of_node id m) changed_nodes)
+             @ List.concat (List.map (fun id -> edges_of_node id m) new_nodes)
+           in
+           let edges = List.sort_uniq compare edges in
+           add_edges_to_cy edges; m )
       (* |> linear_traverse            ~ids:changed_nodes () (Full_traversal_pure add_node_edges_to_cy) |> Misc_utils.unwrap_tuple_1 *)
       (* |> linear_traverse            ~ids:new_nodes     () (Full_traversal_pure add_node_edges_to_cy) |> Misc_utils.unwrap_tuple_1 *)
 
       (* update positions of all nodes in Cy *)
       |> linear_traverse ~ids:all_cur_ids ()
-        (Full_traversal_pure sync_node_xy_to_cy)
+           (Full_traversal_pure sync_node_xy_to_cy)
       |> Misc_utils.unwrap_tuple_1
       |> fun m -> Cytoscape.end_batch cy; Cytoscape.style_update cy; m )
     else
@@ -1306,10 +1380,10 @@ struct
       |> (fun m -> Cytoscape.start_batch cy; m)
       (* set node attributes in cy*)
       |> linear_traverse ~ids:changed_nodes ()
-        (Full_traversal_pure set_node_attributes_cy)
+           (Full_traversal_pure set_node_attributes_cy)
       |> Misc_utils.unwrap_tuple_1
       |> linear_traverse ~ids:new_nodes ()
-        (Full_traversal_pure set_node_attributes_cy)
+           (Full_traversal_pure set_node_attributes_cy)
       |> Misc_utils.unwrap_tuple_1
       |> fun m -> Cytoscape.end_batch cy; Cytoscape.style_update cy; m
 
@@ -1330,8 +1404,8 @@ struct
       let children = find_children id m in
       List.iter
         (fun child_id ->
-           let child_id = id_to_string child_id in
-           Dagre.set_edge dagre ~source:id_str ~target:child_id )
+          let child_id = id_to_string child_id in
+          Dagre.set_edge dagre ~source:id_str ~target:child_id )
         children
     in
     let sync_dagre_xy_to_node () (id : id) (_node : node) (_m : t) : unit =
@@ -1356,31 +1430,33 @@ struct
       let children = find_children id m in
       List.iter
         (fun child_id ->
-           let child_id = id_to_string child_id in
-           let source = id_to_string id in
-           let target = child_id in
-           let id = Printf.sprintf "%s_%s" (id_to_string id) child_id in
-           Cytoscape.add_edge cy ~id ~source ~target )
+          let child_id = id_to_string child_id in
+          let source = id_to_string id in
+          let target = child_id in
+          let id = Printf.sprintf "%s_%s" (id_to_string id) child_id in
+          Cytoscape.add_edge cy ~id ~source ~target )
         children
     in
     m
     |> (fun m -> Cytoscape.start_batch cy; m)
     |> (fun m ->
-        match show_label with
-        | None -> m
-        | Some v -> update_label_visibility v m )
+         match show_label with
+         | None ->
+             m
+         | Some v ->
+             update_label_visibility v m )
     |> (fun m -> Cytoscape.clear cy; m)
     |> (fun m ->
-        if label_affect_dag then
-          m
-          |> linear_traverse () (Full_traversal_pure add_node_to_dagre)
-          |> Misc_utils.unwrap_tuple_1
-          |> linear_traverse () (Full_traversal_pure add_edge_to_dagre)
-          |> Misc_utils.unwrap_tuple_1
-          |> (fun m -> Dagre.layout dagre; m)
-          |> linear_traverse () (Full_traversal_pure sync_dagre_xy_to_node)
-          |> Misc_utils.unwrap_tuple_1
-        else m )
+         if label_affect_dag then
+           m
+           |> linear_traverse () (Full_traversal_pure add_node_to_dagre)
+           |> Misc_utils.unwrap_tuple_1
+           |> linear_traverse () (Full_traversal_pure add_edge_to_dagre)
+           |> Misc_utils.unwrap_tuple_1
+           |> (fun m -> Dagre.layout dagre; m)
+           |> linear_traverse () (Full_traversal_pure sync_dagre_xy_to_node)
+           |> Misc_utils.unwrap_tuple_1
+         else m )
     |> linear_traverse () (Full_traversal_pure add_node_to_cy)
     |> Misc_utils.unwrap_tuple_1
     |> linear_traverse () (Full_traversal_pure add_edge_to_cy)

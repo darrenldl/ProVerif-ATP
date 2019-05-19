@@ -25,27 +25,34 @@ let compare_rev (x : 'a) (y : 'a) : int = -compare x y
 
 let rec zip (l1 : 'a list) (l2 : 'a list) : 'a list =
   match (l1, l2) with
-  | [], [] -> []
-  | l, [] | [], l -> l
-  | hd1 :: tl1, hd2 :: tl2 when hd1 = hd2 -> hd1 :: zip tl1 tl2
+  | [], [] ->
+      []
+  | l, [] | [], l ->
+      l
+  | hd1 :: tl1, hd2 :: tl2 when hd1 = hd2 ->
+      hd1 :: zip tl1 tl2
   | hd1 :: tl1, hd2 :: tl2 when not (Stdlib.List.mem hd1 tl2) ->
-    hd1 :: zip tl1 (hd2 :: tl2)
+      hd1 :: zip tl1 (hd2 :: tl2)
   | hd1 :: tl1, hd2 :: tl2 when not (Stdlib.List.mem hd2 tl1) ->
-    hd2 :: zip (hd1 :: tl1) tl2
-  | hd1 :: tl1, hd2 :: tl2 -> hd1 :: zip tl1 (hd2 :: tl2)
+      hd2 :: zip (hd1 :: tl1) tl2
+  | hd1 :: tl1, hd2 :: tl2 ->
+      hd1 :: zip tl1 (hd2 :: tl2)
 
 let group_list (same_group : 'a -> 'a -> bool) (l : 'a list) : 'a list list =
   let rec aux (same_group : 'a -> 'a -> bool) (acc : 'a list list)
       (l : 'a list) =
     match l with
-    | [] -> List.rev (Stdlib.List.map List.rev acc)
+    | [] ->
+        List.rev (Stdlib.List.map List.rev acc)
     | x :: xs ->
-      let acc =
-        match acc with
-        | (y :: ys) :: accs when same_group x y -> (x :: y :: ys) :: accs
-        | _ -> [x] :: acc
-      in
-      aux same_group acc xs
+        let acc =
+          match acc with
+          | (y :: ys) :: accs when same_group x y ->
+              (x :: y :: ys) :: accs
+          | _ ->
+              [x] :: acc
+        in
+        aux same_group acc xs
   in
   aux same_group [] l
 

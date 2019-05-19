@@ -96,7 +96,7 @@ class type t =
     method remove_edge : Js.js_string Js.t -> unit Js.meth
 
     method on :
-      Js.js_string Js.t
+         Js.js_string Js.t
       -> Js.js_string Js.t
       -> (event Js.t -> unit)
       -> unit Js.meth
@@ -184,7 +184,7 @@ let zoom_out_by (cy : t Js.t) (level : float) : unit =
   zoom cy (level_old -. level)
 
 let add_node (cy : t Js.t) ~(id : string) ~ (* ~(label : string) *)
-    (x : int) ~(y : int) : unit =
+                                          (x : int) ~(y : int) : unit =
   let data =
     object%js
       val id = Js.string id (* val label = Js.string label *)
@@ -223,7 +223,7 @@ let remove_node (cy : t Js.t) ~(id : string) : unit =
   cy##remove_node (Js.string (Printf.sprintf "node[id = \"%s\"]" id))
 
 let add_edge (cy : t Js.t) ~(id : string) ~(source : string) ~(target : string)
-  : unit =
+    : unit =
   let data =
     object%js
       val id = Js.string id
@@ -251,12 +251,14 @@ let clear (cy : t Js.t) : unit = cy##remove_node (Js.string "node")
 let on ?(selector : string option) (cy : t Js.t) ~(event : string)
     ~(handler : event Js.t -> unit) : unit =
   let handler : event Js.t -> unit =
-    fun ev ->
-      Lwt_js.yield () >>= (fun () -> handler ev; Lwt.return_unit) |> ignore
+   fun ev ->
+    Lwt_js.yield () >>= (fun () -> handler ev; Lwt.return_unit) |> ignore
   in
   match selector with
-  | None -> cy##on_noselect (Js.string event) handler
-  | Some selector -> cy##on (Js.string event) (Js.string selector) handler
+  | None ->
+      cy##on_noselect (Js.string event) handler
+  | Some selector ->
+      cy##on (Js.string event) (Js.string selector) handler
 
 let style_update (cy : t Js.t) : unit = cy##style##update
 
@@ -270,11 +272,11 @@ let set_node_label ?(update_style : bool = true) (cy : t Js.t) ~(id : string)
 let set_node_color ?(update_style : bool = true) ?(id : string option)
     (cy : t Js.t) ~(color : string) : unit =
   ( match id with
-    | None ->
+  | None ->
       (cy##style##selector (Js.string "node"))##style
         (Js.string "background-color")
         (Js.string color)
-    | Some id ->
+  | Some id ->
       (cy##style##selector (Js.string (Printf.sprintf "node[id=\"%s\"]" id)))##style
         (Js.string "background-color")
         (Js.string color) )
@@ -291,7 +293,7 @@ let set_node_size ?(update_style : bool = true) (cy : t Js.t) ~(id : string)
   if update_style then style_update cy else ()
 
 let set_node_position (cy : t Js.t) ~(id : string) ~(x : int) ~(y : int) : unit
-  =
+    =
   let position =
     object%js
       val x = x
@@ -306,10 +308,14 @@ let set_node_shape ?(update_style : bool = true) (cy : t Js.t) ~(id : string)
   let shape =
     Js.string
       ( match shape with
-        | Circle -> "ellipse"
-        | Ellipse -> "ellipse"
-        | Diamond -> "diamond"
-        | Rectangle -> "rectangle" )
+      | Circle ->
+          "ellipse"
+      | Ellipse ->
+          "ellipse"
+      | Diamond ->
+          "diamond"
+      | Rectangle ->
+          "rectangle" )
   in
   (cy##style##selector (Js.string (Printf.sprintf "node[id=\"%s\"]" id)))##style
     (Js.string "shape") shape

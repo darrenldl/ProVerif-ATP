@@ -58,17 +58,21 @@ let attack_trace node_map =
   let max_proc_name_len_on_left =
     List.fold_left
       (fun cur_max s ->
-         match (s.direction, s.proc_name) with
-         | Client_to_intruder, Some s -> max cur_max (String.length s)
-         | _ -> cur_max )
+        match (s.direction, s.proc_name) with
+        | Client_to_intruder, Some s ->
+            max cur_max (String.length s)
+        | _ ->
+            cur_max )
       0 steps
   in
   let max_proc_name_len_on_right =
     List.fold_left
       (fun cur_max s ->
-         match (s.direction, s.proc_name) with
-         | Intruder_to_client, Some s -> max cur_max (String.length s)
-         | _ -> cur_max )
+        match (s.direction, s.proc_name) with
+        | Intruder_to_client, Some s ->
+            max cur_max (String.length s)
+        | _ ->
+            cur_max )
       0 steps
   in
   let intruder_name = "I" in
@@ -86,34 +90,34 @@ let attack_trace node_map =
   String.concat "\n"
     (List.mapi
        (fun global_step_num s ->
-          let global_step_num = global_step_num + 1 in
-          let open Vampire.Protocol_step in
-          let proc_name =
-            match s.proc_name with None -> "GLOBAL" | Some x -> x
-          in
-          let proc_name_len = String.length proc_name in
-          let proc_name_padding_on_left =
-            if max_proc_name_len_on_left >= proc_name_len then
-              String.make (max_proc_name_len_on_left - proc_name_len) ' '
-            else ""
-          in
-          let proc_name_padding_on_right =
-            if max_proc_name_len_on_right >= proc_name_len then
-              String.make (max_proc_name_len_on_right - proc_name_len) ' '
-            else ""
-          in
-          let expr = Vampire.Analyzed_expr.expr_to_string s.expr in
-          match s.direction with
-          | Client_to_intruder ->
-            Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
-              global_step_num proc_name s.step_num proc_name_padding_on_right
-              proc_name_padding_on_left proc_name intruder_name
-              intruder_name_padding_on_right expr
-          | Intruder_to_client ->
-            Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
-              global_step_num proc_name s.step_num proc_name_padding_on_right
-              intruder_name_padding_on_left intruder_name proc_name
-              proc_name_padding_on_right expr )
+         let global_step_num = global_step_num + 1 in
+         let open Vampire.Protocol_step in
+         let proc_name =
+           match s.proc_name with None -> "GLOBAL" | Some x -> x
+         in
+         let proc_name_len = String.length proc_name in
+         let proc_name_padding_on_left =
+           if max_proc_name_len_on_left >= proc_name_len then
+             String.make (max_proc_name_len_on_left - proc_name_len) ' '
+           else ""
+         in
+         let proc_name_padding_on_right =
+           if max_proc_name_len_on_right >= proc_name_len then
+             String.make (max_proc_name_len_on_right - proc_name_len) ' '
+           else ""
+         in
+         let expr = Vampire.Analyzed_expr.expr_to_string s.expr in
+         match s.direction with
+         | Client_to_intruder ->
+             Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
+               global_step_num proc_name s.step_num proc_name_padding_on_right
+               proc_name_padding_on_left proc_name intruder_name
+               intruder_name_padding_on_right expr
+         | Intruder_to_client ->
+             Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
+               global_step_num proc_name s.step_num proc_name_padding_on_right
+               intruder_name_padding_on_left intruder_name proc_name
+               proc_name_padding_on_right expr )
        steps)
 
 let () =
@@ -149,8 +153,9 @@ let () =
   let rec vampire_file_reader () =
     let%lwt input = Lwt_condition.wait js_ctx.vampire_file_ready in
     ( match Vampire.process_string input with
-      | Error e -> Js_utils.alert e
-      | Ok node_map ->
+    | Error e ->
+        Js_utils.alert e
+    | Ok node_map ->
         (* let node_map = Vampire.Analyzed_graph.remove_node 387 node_map in *)
         (* let debug_print = Js.Unsafe.global##.document##getElementById "debugPrint" in *)
         (* debug_print##.value := Js.string (Vampire.map_debug_string node_map); *)
@@ -194,8 +199,9 @@ let () =
   let rec pv_file_reader () =
     let%lwt input = Lwt_condition.wait js_ctx.pv_file_ready in
     ( match ProVerif.process_string input with
-      | Error e -> Js_utils.alert e
-      | Ok s ->
+    | Error e ->
+        Js_utils.alert e
+    | Ok s ->
         js_ctx.pv_raw <- Some input;
         js_ctx.pv_processed <- Some s;
         let main_text_display =
@@ -251,21 +257,23 @@ let () =
    * in *)
   let disable_border_prev_selected_node () : unit =
     match js_ctx.selected_node with
-    | None -> ()
-    | Some id -> Cytoscape.disable_node_border cy_main ~id
+    | None ->
+        ()
+    | Some id ->
+        Cytoscape.disable_node_border cy_main ~id
   in
   Cytoscape.on cy_main ~event:"boxstart" ~handler:(fun _ev ->
       Lwt_js.yield ()
       >>= (fun () ->
-          js_ctx.box_selected_nodes <- [];
-          return_unit )
+            js_ctx.box_selected_nodes <- [];
+            return_unit )
       |> ignore );
   Cytoscape.on cy_main ~event:"box" ~selector:"node" ~handler:(fun ev ->
       Lwt_js.yield ()
       >>= (fun () ->
-          let target_id = Js.to_string ev##.target_node##id in
-          js_ctx.box_selected_nodes <- target_id :: js_ctx.box_selected_nodes;
-          return_unit )
+            let target_id = Js.to_string ev##.target_node##id in
+            js_ctx.box_selected_nodes <- target_id :: js_ctx.box_selected_nodes;
+            return_unit )
       |> ignore );
   Cytoscape.on cy_main ~event:"tap" ~handler:(fun ev ->
       if ev##.target_cy = ev##.cy then (
@@ -283,30 +291,32 @@ let () =
       js_ctx.selected_node <- Some target_id;
       Cytoscape.enable_node_border cy_main ~id:target_id;
       match js_ctx.cur_node_map with
-      | None -> ()
+      | None ->
+          ()
       | Some (Vampire m) -> (
           let node = Vampire.Analyzed_graph.find_node target_id m in
           match node with
           | Data data ->
-            let expr_str = Vampire.Analyzed_expr.expr_to_string data.expr in
-            let single_formula_box =
-              Js.Unsafe.global##.document##getElementById
-                single_formula_box_ID
-            in
-            single_formula_box##.innerHTML := Js.string expr_str;
-            let em = Vampire.expr_to_node_map data.expr in
-            Vampire.Analyzed_expr_graph.plot None cy_single_nodeAST
-              ~height:expr_AST_height ~show_label:true em
-            |> ignore;
-            let single_explanation_box =
-              Js.Unsafe.global##.document##getElementById
-                single_explanation_box_ID
-            in
-            single_explanation_box##.innerHTML
-            := Js.string
-                (Vampire.derive_explanation_to_string
-                   (Vampire.explain_construction_single target_id m))
-          | Group -> () ) );
+              let expr_str = Vampire.Analyzed_expr.expr_to_string data.expr in
+              let single_formula_box =
+                Js.Unsafe.global##.document##getElementById
+                  single_formula_box_ID
+              in
+              single_formula_box##.innerHTML := Js.string expr_str;
+              let em = Vampire.expr_to_node_map data.expr in
+              Vampire.Analyzed_expr_graph.plot None cy_single_nodeAST
+                ~height:expr_AST_height ~show_label:true em
+              |> ignore;
+              let single_explanation_box =
+                Js.Unsafe.global##.document##getElementById
+                  single_explanation_box_ID
+              in
+              single_explanation_box##.innerHTML
+              := Js.string
+                   (Vampire.derive_explanation_to_string
+                      (Vampire.explain_construction_single target_id m))
+          | Group ->
+              () ) );
   Cytoscape.on cy_main ~event:"tap" ~selector:"edge" ~handler:(fun ev ->
       Js_utils.set_display ~id:single_formula_box_ID ~on:false;
       Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
@@ -321,42 +331,44 @@ let () =
       let source_id = Js.to_string data##.source in
       let target_id = Js.to_string data##.target in
       match js_ctx.cur_node_map with
-      | None -> ()
+      | None ->
+          ()
       | Some (Vampire m) -> (
           let source = Vampire.Analyzed_graph.find_node source_id m in
           let target = Vampire.Analyzed_graph.find_node target_id m in
           match (source, target) with
-          | Group, Group | _, Group | Group, _ -> ()
+          | Group, Group | _, Group | Group, _ ->
+              ()
           | Data source_data, Data target_data ->
-            let source_em = Vampire.expr_to_node_map source_data.expr in
-            let target_em = Vampire.expr_to_node_map target_data.expr in
-            let souce_diff, target_diff =
-              Vampire.Analyzed_expr_graph.diff Top source_em target_em
-            in
-            Cytoscape.reset_style cy_nodeAST1;
-            Cytoscape.reset_style cy_nodeAST2;
-            Vampire.Analyzed_expr_graph.plot None cy_nodeAST1
-              ~height:expr_AST_height ~show_label:true source_em
-            |> ignore;
-            Vampire.Analyzed_expr_graph.plot None cy_nodeAST2
-              ~height:expr_AST_height ~show_label:true target_em
-            |> ignore;
-            Cytoscape.set_node_color cy_nodeAST1 ~color:"#d3d3d3";
-            Cytoscape.set_node_color cy_nodeAST2 ~color:"#d3d3d3";
-            Vampire.Analyzed_expr_graph.linear_traverse ()
-              (Full_traversal_pure
-                 (fun () id _node _m ->
-                    Cytoscape.set_node_color cy_nodeAST1 ~id ~color:"#ff0000"
-                 ))
-              souce_diff
-            |> ignore;
-            Vampire.Analyzed_expr_graph.linear_traverse ()
-              (Full_traversal_pure
-                 (fun () id _node _m ->
-                    Cytoscape.set_node_color cy_nodeAST2 ~id ~color:"#0000ff"
-                 ))
-              target_diff
-            |> ignore ) );
+              let source_em = Vampire.expr_to_node_map source_data.expr in
+              let target_em = Vampire.expr_to_node_map target_data.expr in
+              let souce_diff, target_diff =
+                Vampire.Analyzed_expr_graph.diff Top source_em target_em
+              in
+              Cytoscape.reset_style cy_nodeAST1;
+              Cytoscape.reset_style cy_nodeAST2;
+              Vampire.Analyzed_expr_graph.plot None cy_nodeAST1
+                ~height:expr_AST_height ~show_label:true source_em
+              |> ignore;
+              Vampire.Analyzed_expr_graph.plot None cy_nodeAST2
+                ~height:expr_AST_height ~show_label:true target_em
+              |> ignore;
+              Cytoscape.set_node_color cy_nodeAST1 ~color:"#d3d3d3";
+              Cytoscape.set_node_color cy_nodeAST2 ~color:"#d3d3d3";
+              Vampire.Analyzed_expr_graph.linear_traverse ()
+                (Full_traversal_pure
+                   (fun () id _node _m ->
+                     Cytoscape.set_node_color cy_nodeAST1 ~id ~color:"#ff0000"
+                     ))
+                souce_diff
+              |> ignore;
+              Vampire.Analyzed_expr_graph.linear_traverse ()
+                (Full_traversal_pure
+                   (fun () id _node _m ->
+                     Cytoscape.set_node_color cy_nodeAST2 ~id ~color:"#0000ff"
+                     ))
+                target_diff
+              |> ignore ) );
   Cytoscape.on cy_nodeAST1 ~event:"pan" ~handler:(fun _ev ->
       let pos = cy_nodeAST1##pan_get in
       cy_nodeAST2##pan pos );
@@ -373,8 +385,9 @@ let () =
   compress_button##.onclick :=
     Dom_html.handler (fun _ev ->
         ( match js_ctx.cur_node_map with
-          | None -> ()
-          | Some (Vampire old_m) ->
+        | None ->
+            ()
+        | Some (Vampire old_m) ->
             let open Vampire.Analyzed_graph in
             js_ctx.prev_node_map <- Some (Vampire old_m);
             let ids = js_ctx.box_selected_nodes in
@@ -390,124 +403,134 @@ let () =
   let decompress_button = Dom_html.getElementById_exn "decompressButton" in
   decompress_button##.onclick
   := Dom_html.handler (fun _ev ->
-      ( match js_ctx.cur_node_map with
-        | None -> ()
-        | Some (Vampire old_m) -> (
-            match js_ctx.selected_node with
-            | None -> ()
-            | Some id ->
-              let open Vampire.Analyzed_graph in
-              js_ctx.prev_node_map <- Some (Vampire old_m);
-              let new_m =
-                Vampire.Analyzed_graph.(decompress id Bottom_to_top old_m)
-              in
-              js_ctx.cur_node_map <- Some (Vampire new_m);
-              refresh_node_graphics ~height:main_dag_node_height
-                ~label_affect_dag:false
-                (Misc_utils.unwrap_opt !dagre_main)
-                cy_main old_m new_m
-              |> ignore ) );
-      Js._true );
+         ( match js_ctx.cur_node_map with
+         | None ->
+             ()
+         | Some (Vampire old_m) -> (
+           match js_ctx.selected_node with
+           | None ->
+               ()
+           | Some id ->
+               let open Vampire.Analyzed_graph in
+               js_ctx.prev_node_map <- Some (Vampire old_m);
+               let new_m =
+                 Vampire.Analyzed_graph.(decompress id Bottom_to_top old_m)
+               in
+               js_ctx.cur_node_map <- Some (Vampire new_m);
+               refresh_node_graphics ~height:main_dag_node_height
+                 ~label_affect_dag:false
+                 (Misc_utils.unwrap_opt !dagre_main)
+                 cy_main old_m new_m
+               |> ignore ) );
+         Js._true );
   let recompress_button = Dom_html.getElementById_exn "recompressButton" in
   recompress_button##.onclick
   := Dom_html.handler (fun _ev ->
-      ( match js_ctx.cur_node_map with
-        | None -> ()
-        | Some (Vampire old_m) -> (
-            match js_ctx.selected_node with
-            | None -> ()
-            | Some id ->
-              let open Vampire.Analyzed_graph in
-              js_ctx.prev_node_map <- Some (Vampire old_m);
-              let new_m = recompress id Bottom_to_top old_m in
-              js_ctx.cur_node_map <- Some (Vampire new_m);
-              refresh_node_graphics ~height:main_dag_node_height
-                ~label_affect_dag:false
-                (Misc_utils.unwrap_opt !dagre_main)
-                cy_main old_m new_m
-              |> ignore ) );
-      Js._true );
+         ( match js_ctx.cur_node_map with
+         | None ->
+             ()
+         | Some (Vampire old_m) -> (
+           match js_ctx.selected_node with
+           | None ->
+               ()
+           | Some id ->
+               let open Vampire.Analyzed_graph in
+               js_ctx.prev_node_map <- Some (Vampire old_m);
+               let new_m = recompress id Bottom_to_top old_m in
+               js_ctx.cur_node_map <- Some (Vampire new_m);
+               refresh_node_graphics ~height:main_dag_node_height
+                 ~label_affect_dag:false
+                 (Misc_utils.unwrap_opt !dagre_main)
+                 cy_main old_m new_m
+               |> ignore ) );
+         Js._true );
   let toggle_label_button = Dom_html.getElementById_exn "toggleLabelButton" in
   toggle_label_button##.onclick
   := Dom_html.handler (fun _ev ->
-      ( match js_ctx.cur_node_map with
-        | None -> ()
-        | Some (Vampire old_m) -> (
-            match js_ctx.selected_node with
-            | None -> ()
-            | Some id ->
-              let open Vampire.Analyzed_graph in
-              js_ctx.prev_node_map <- Some (Vampire old_m);
-              let v = get_label_visibility id old_m in
-              let new_m = update_label_visibility ~ids:[id] (not v) old_m in
-              js_ctx.cur_node_map <- Some (Vampire new_m);
-              refresh_node_graphics ~height:main_dag_node_height
-                ~label_affect_dag:true
-                (Misc_utils.unwrap_opt !dagre_main)
-                cy_main old_m new_m
-              |> ignore ) );
-      Js._true );
+         ( match js_ctx.cur_node_map with
+         | None ->
+             ()
+         | Some (Vampire old_m) -> (
+           match js_ctx.selected_node with
+           | None ->
+               ()
+           | Some id ->
+               let open Vampire.Analyzed_graph in
+               js_ctx.prev_node_map <- Some (Vampire old_m);
+               let v = get_label_visibility id old_m in
+               let new_m = update_label_visibility ~ids:[id] (not v) old_m in
+               js_ctx.cur_node_map <- Some (Vampire new_m);
+               refresh_node_graphics ~height:main_dag_node_height
+                 ~label_affect_dag:true
+                 (Misc_utils.unwrap_opt !dagre_main)
+                 cy_main old_m new_m
+               |> ignore ) );
+         Js._true );
   let toggle_label_skip_layout_calc_button =
     Dom_html.getElementById_exn "toggleLabelSkipLayoutCalcButton"
   in
   toggle_label_skip_layout_calc_button##.onclick
   := Dom_html.handler (fun _ev ->
-      ( match js_ctx.cur_node_map with
-        | None -> ()
-        | Some (Vampire old_m) -> (
-            match js_ctx.selected_node with
-            | None -> ()
-            | Some id ->
-              let open Vampire.Analyzed_graph in
-              js_ctx.prev_node_map <- Some (Vampire old_m);
-              let v = get_label_visibility id old_m in
-              let new_m = update_label_visibility ~ids:[id] (not v) old_m in
-              js_ctx.cur_node_map <- Some (Vampire new_m);
-              refresh_node_graphics ~height:main_dag_node_height
-                ~redo_layout:false
-                (Misc_utils.unwrap_opt !dagre_main)
-                cy_main old_m new_m
-              |> ignore ) );
-      Js._true );
+         ( match js_ctx.cur_node_map with
+         | None ->
+             ()
+         | Some (Vampire old_m) -> (
+           match js_ctx.selected_node with
+           | None ->
+               ()
+           | Some id ->
+               let open Vampire.Analyzed_graph in
+               js_ctx.prev_node_map <- Some (Vampire old_m);
+               let v = get_label_visibility id old_m in
+               let new_m = update_label_visibility ~ids:[id] (not v) old_m in
+               js_ctx.cur_node_map <- Some (Vampire new_m);
+               refresh_node_graphics ~height:main_dag_node_height
+                 ~redo_layout:false
+                 (Misc_utils.unwrap_opt !dagre_main)
+                 cy_main old_m new_m
+               |> ignore ) );
+         Js._true );
   let explain_chain_button =
     Dom_html.getElementById_exn "explainChainButton"
   in
   explain_chain_button##.onclick
   := Dom_html.handler (fun _ev ->
-      Js_utils.set_display ~id:single_formula_box_ID ~on:true;
-      Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
-      Js_utils.set_display ~id:nodeAST1_ID ~on:false;
-      Js_utils.set_display ~id:nodeAST2_ID ~on:false;
-      Js_utils.set_display ~id:chain_explanation_box_ID ~on:true;
-      Js_utils.set_display ~id:attack_trace_box_ID ~on:false;
-      Js_utils.set_display ~id:main_graph_display_ID ~on:true;
-      Js_utils.set_display ~id:main_text_display_ID ~on:false;
-      ( match js_ctx.cur_node_map with
-        | None -> ()
-        | Some (Vampire old_m) -> (
-            match js_ctx.selected_node with
-            | None -> ()
-            | Some id ->
-              let open Vampire in
-              (* let explanations    = explain_construction_chain id old_m in
+         Js_utils.set_display ~id:single_formula_box_ID ~on:true;
+         Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
+         Js_utils.set_display ~id:nodeAST1_ID ~on:false;
+         Js_utils.set_display ~id:nodeAST2_ID ~on:false;
+         Js_utils.set_display ~id:chain_explanation_box_ID ~on:true;
+         Js_utils.set_display ~id:attack_trace_box_ID ~on:false;
+         Js_utils.set_display ~id:main_graph_display_ID ~on:true;
+         Js_utils.set_display ~id:main_text_display_ID ~on:false;
+         ( match js_ctx.cur_node_map with
+         | None ->
+             ()
+         | Some (Vampire old_m) -> (
+           match js_ctx.selected_node with
+           | None ->
+               ()
+           | Some id ->
+               let open Vampire in
+               (* let explanations    = explain_construction_chain id old_m in
                * let explanation_str = grouped_derive_explanations_list_to_string explanations in *)
-              let explanations =
-                List.filter
-                  (fun (e : derive_explanation) ->
+               let explanations =
+                 List.filter
+                   (fun (e : derive_explanation) ->
                      e <> Nothing_to_explain && e <> Dont_know_how )
-                  (explain_construction_single_chained id old_m)
-              in
-              let explanation_str =
-                String.concat "\n"
-                  (List.map derive_explanation_to_string explanations)
-              in
-              let chain_explanation_box =
-                Js.Unsafe.global##.document##getElementById
-                  chain_explanation_box_ID
-              in
-              chain_explanation_box##.innerHTML := Js.string explanation_str )
-      );
-      Js._true );
+                   (explain_construction_single_chained id old_m)
+               in
+               let explanation_str =
+                 String.concat "\n"
+                   (List.map derive_explanation_to_string explanations)
+               in
+               let chain_explanation_box =
+                 Js.Unsafe.global##.document##getElementById
+                   chain_explanation_box_ID
+               in
+               chain_explanation_box##.innerHTML := Js.string explanation_str )
+         );
+         Js._true );
   let zoom_in_button = Dom_html.getElementById_exn "zoomInButton" in
   zoom_in_button##.onclick :=
     Dom_html.handler (fun _ev ->
@@ -523,76 +546,80 @@ let () =
   in
   pv_raw_attack_trace_button##.onclick
   := Dom_html.handler (fun _ev ->
-      Js_utils.set_display ~id:single_formula_box_ID ~on:true;
-      Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
-      Js_utils.set_display ~id:nodeAST1_ID ~on:false;
-      Js_utils.set_display ~id:nodeAST2_ID ~on:false;
-      Js_utils.set_display ~id:chain_explanation_box_ID ~on:false;
-      Js_utils.set_display ~id:attack_trace_box_ID ~on:true;
-      Js_utils.set_display ~id:main_graph_display_ID ~on:false;
-      Js_utils.set_display ~id:main_text_display_ID ~on:true;
-      Js_utils.set_display ~id:single_explanation_box_ID ~on:false;
-      ( match js_ctx.pv_raw with
-        | None -> ()
-        | Some text ->
-          let main_text_display =
-            Js.Unsafe.global##.document##getElementById main_text_display_ID
-          in
-          main_text_display##.innerHTML := Js.string text );
-      ( match js_ctx.cur_node_map with
-        | Some (Vampire node_map) ->
-          let attack_trace_box =
-            Js.Unsafe.global##.document##getElementById attack_trace_box_ID
-          in
-          let text = attack_trace node_map in
-          attack_trace_box##.innerHTML := Js.string text
-        | _ -> () );
-      Js._true );
+         Js_utils.set_display ~id:single_formula_box_ID ~on:true;
+         Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
+         Js_utils.set_display ~id:nodeAST1_ID ~on:false;
+         Js_utils.set_display ~id:nodeAST2_ID ~on:false;
+         Js_utils.set_display ~id:chain_explanation_box_ID ~on:false;
+         Js_utils.set_display ~id:attack_trace_box_ID ~on:true;
+         Js_utils.set_display ~id:main_graph_display_ID ~on:false;
+         Js_utils.set_display ~id:main_text_display_ID ~on:true;
+         Js_utils.set_display ~id:single_explanation_box_ID ~on:false;
+         ( match js_ctx.pv_raw with
+         | None ->
+             ()
+         | Some text ->
+             let main_text_display =
+               Js.Unsafe.global##.document##getElementById main_text_display_ID
+             in
+             main_text_display##.innerHTML := Js.string text );
+         ( match js_ctx.cur_node_map with
+         | Some (Vampire node_map) ->
+             let attack_trace_box =
+               Js.Unsafe.global##.document##getElementById attack_trace_box_ID
+             in
+             let text = attack_trace node_map in
+             attack_trace_box##.innerHTML := Js.string text
+         | _ ->
+             () );
+         Js._true );
   let pv_processed_attack_trace_button =
     Dom_html.getElementById_exn "pvProcessedAttackTraceButton"
   in
   pv_processed_attack_trace_button##.onclick
   := Dom_html.handler (fun _ev ->
-      Js_utils.set_display ~id:single_formula_box_ID ~on:true;
-      Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
-      Js_utils.set_display ~id:nodeAST1_ID ~on:false;
-      Js_utils.set_display ~id:nodeAST2_ID ~on:false;
-      Js_utils.set_display ~id:chain_explanation_box_ID ~on:false;
-      Js_utils.set_display ~id:attack_trace_box_ID ~on:true;
-      Js_utils.set_display ~id:main_graph_display_ID ~on:false;
-      Js_utils.set_display ~id:main_text_display_ID ~on:true;
-      Js_utils.set_display ~id:single_explanation_box_ID ~on:false;
-      ( match js_ctx.pv_processed with
-        | None -> ()
-        | Some text ->
-          let main_text_display =
-            Js.Unsafe.global##.document##getElementById main_text_display_ID
-          in
-          main_text_display##.innerHTML := Js.string text );
-      ( match js_ctx.cur_node_map with
-        | Some (Vampire node_map) ->
-          let attack_trace_box =
-            Js.Unsafe.global##.document##getElementById attack_trace_box_ID
-          in
-          let text = attack_trace node_map in
-          attack_trace_box##.innerHTML := Js.string text
-        | _ -> () );
-      Js._true );
+         Js_utils.set_display ~id:single_formula_box_ID ~on:true;
+         Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
+         Js_utils.set_display ~id:nodeAST1_ID ~on:false;
+         Js_utils.set_display ~id:nodeAST2_ID ~on:false;
+         Js_utils.set_display ~id:chain_explanation_box_ID ~on:false;
+         Js_utils.set_display ~id:attack_trace_box_ID ~on:true;
+         Js_utils.set_display ~id:main_graph_display_ID ~on:false;
+         Js_utils.set_display ~id:main_text_display_ID ~on:true;
+         Js_utils.set_display ~id:single_explanation_box_ID ~on:false;
+         ( match js_ctx.pv_processed with
+         | None ->
+             ()
+         | Some text ->
+             let main_text_display =
+               Js.Unsafe.global##.document##getElementById main_text_display_ID
+             in
+             main_text_display##.innerHTML := Js.string text );
+         ( match js_ctx.cur_node_map with
+         | Some (Vampire node_map) ->
+             let attack_trace_box =
+               Js.Unsafe.global##.document##getElementById attack_trace_box_ID
+             in
+             let text = attack_trace node_map in
+             attack_trace_box##.innerHTML := Js.string text
+         | _ ->
+             () );
+         Js._true );
   let knowledge_graph_button =
     Dom_html.getElementById_exn "knowledgeGraphButton"
   in
   knowledge_graph_button##.onclick
   := Dom_html.handler (fun _ev ->
-      Js_utils.set_display ~id:single_formula_box_ID ~on:true;
-      Js_utils.set_display ~id:single_nodeAST_ID ~on:true;
-      Js_utils.set_display ~id:nodeAST1_ID ~on:false;
-      Js_utils.set_display ~id:nodeAST2_ID ~on:false;
-      Js_utils.set_display ~id:chain_explanation_box_ID ~on:false;
-      Js_utils.set_display ~id:attack_trace_box_ID ~on:false;
-      Js_utils.set_display ~id:main_graph_display_ID ~on:true;
-      Js_utils.set_display ~id:main_text_display_ID ~on:false;
-      Js_utils.set_display ~id:single_explanation_box_ID ~on:true;
-      Js._true );
+         Js_utils.set_display ~id:single_formula_box_ID ~on:true;
+         Js_utils.set_display ~id:single_nodeAST_ID ~on:true;
+         Js_utils.set_display ~id:nodeAST1_ID ~on:false;
+         Js_utils.set_display ~id:nodeAST2_ID ~on:false;
+         Js_utils.set_display ~id:chain_explanation_box_ID ~on:false;
+         Js_utils.set_display ~id:attack_trace_box_ID ~on:false;
+         Js_utils.set_display ~id:main_graph_display_ID ~on:true;
+         Js_utils.set_display ~id:main_text_display_ID ~on:false;
+         Js_utils.set_display ~id:single_explanation_box_ID ~on:true;
+         Js._true );
   (* let load_example_button = Dom_html.getElementById_exn "loadExample" in
    * load_example_button##.onclick := Dom_html.handler
    *     (fun _ev ->
