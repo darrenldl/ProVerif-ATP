@@ -81,14 +81,14 @@ and infix_op = Neq
 let rec output_input oc v =
   match v with
   | Include (name, fs) ->
-      Printf.fprintf oc "include %s : %s" name (String.concat ", " fs)
+    Printf.fprintf oc "include %s : %s" name (String.concat ", " fs)
   | Annotated_formula f ->
-      output_formula oc f
+    output_formula oc f
 
 and output_formula oc f =
   match f with
   | Fof_annotated f ->
-      Printf.fprintf oc "fof(%a)" output_fof_annotated f
+    Printf.fprintf oc "fof(%a)" output_fof_annotated f
 
 and output_fof_annotated oc f =
   let {name; _} = f in
@@ -97,82 +97,82 @@ and output_fof_annotated oc f =
 let string_to_formula_role s =
   match s with
   | "axiom" ->
-      FR_axiom
+    FR_axiom
   | "hypothesis" ->
-      FR_hypothesis
+    FR_hypothesis
   | "definition" ->
-      FR_definition
+    FR_definition
   | "assumption" ->
-      FR_assumption
+    FR_assumption
   | "lemma" ->
-      FR_lemma
+    FR_lemma
   | "theorem" ->
-      FR_theorem
+    FR_theorem
   | "corollary" ->
-      FR_corollary
+    FR_corollary
   | "conjecture" ->
-      FR_conjecture
+    FR_conjecture
   | "negated_conjecture" ->
-      FR_negated_conjecture
+    FR_negated_conjecture
   | "plain" ->
-      FR_plain
+    FR_plain
   | "type" ->
-      FR_type
+    FR_type
   | "fi_domain" ->
-      FR_fi_domain
+    FR_fi_domain
   | "fi_functors" ->
-      FR_fi_functors
+    FR_fi_functors
   | "fi_predicates" ->
-      FR_fi_predicates
+    FR_fi_predicates
   | "unknown" ->
-      FR_unknown
+    FR_unknown
   | _ ->
-      raise (ErrorWithMsg ("invalid formula role " ^ s))
+    raise (ErrorWithMsg ("invalid formula role " ^ s))
 
 let formula_role_to_string r =
   match r with
   | FR_axiom ->
-      "axiom"
+    "axiom"
   | FR_hypothesis ->
-      "hypothesis"
+    "hypothesis"
   | FR_definition ->
-      "definition"
+    "definition"
   | FR_assumption ->
-      "assumption"
+    "assumption"
   | FR_lemma ->
-      "lemma"
+    "lemma"
   | FR_theorem ->
-      "theorem"
+    "theorem"
   | FR_corollary ->
-      "corollary"
+    "corollary"
   | FR_conjecture ->
-      "conjecture"
+    "conjecture"
   | FR_negated_conjecture ->
-      "negated_conjecture"
+    "negated_conjecture"
   | FR_plain ->
-      "plain"
+    "plain"
   | FR_type ->
-      "type"
+    "type"
   | FR_fi_domain ->
-      "fi_domain"
+    "fi_domain"
   | FR_fi_functors ->
-      "fi_functors"
+    "fi_functors"
   | FR_fi_predicates ->
-      "fi_predicates"
+    "fi_predicates"
   | FR_unknown ->
-      "unknown"
+    "unknown"
 
 let rec decl_to_string d =
   match d with
   | Include (file, formulas) ->
-      Printf.sprintf "include %s : %s." file (String.concat ", " formulas)
+    Printf.sprintf "include %s : %s." file (String.concat ", " formulas)
   | Annotated_formula f ->
-      annotated_formula_to_string f
+    annotated_formula_to_string f
 
 and annotated_formula_to_string f =
   match f with
   | Fof_annotated f ->
-      Printf.sprintf "fof%s" (fof_annotated_to_string f)
+    Printf.sprintf "fof%s" (fof_annotated_to_string f)
 
 and fof_annotated_to_string f =
   let {name; role; formula; annotations} = f in
@@ -180,80 +180,80 @@ and fof_annotated_to_string f =
     (formula_role_to_string role)
     (fof_formula_to_string formula)
     ( match annotations with
-    | None ->
+      | None ->
         ""
-    | Some a ->
+      | Some a ->
         ", " ^ general_term_to_string a )
 
 and fof_formula_to_string f =
   match f with
   | FOF_F_binary (op, l, r) ->
-      Printf.sprintf "(%s %s %s)" (fof_formula_to_string l)
-        (binary_op_to_string op) (fof_formula_to_string r)
+    Printf.sprintf "(%s %s %s)" (fof_formula_to_string l)
+      (binary_op_to_string op) (fof_formula_to_string r)
   | FOF_F_unary (op, f) ->
-      Printf.sprintf "%s %s" (unary_op_to_string op) (fof_formula_to_string f)
+    Printf.sprintf "%s %s" (unary_op_to_string op) (fof_formula_to_string f)
   | FOF_F_quantified (q, vars, f) ->
-      Printf.sprintf "%s [%s] : %s" (quantifier_to_string q)
-        (String.concat ", " vars) (fof_formula_to_string f)
+    Printf.sprintf "%s [%s] : %s" (quantifier_to_string q)
+      (String.concat ", " vars) (fof_formula_to_string f)
   | FOF_F_atomic t ->
-      fof_term_to_string t
+    fof_term_to_string t
 
 and fof_term_to_string t =
   match t with
   | FOF_T_var s ->
-      s
+    s
   | FOF_T_const s ->
-      s
+    s
   | FOF_T_fun_app (f, args) ->
-      Printf.sprintf "%s(%s)" f
-        (String.concat ", " (List.map fof_term_to_string args))
+    Printf.sprintf "%s(%s)" f
+      (String.concat ", " (List.map fof_term_to_string args))
 
 and general_term_to_string t =
   match t with
   | GT_single d ->
-      general_data_to_string d
+    general_data_to_string d
   | GT_pair (d1, d2) ->
-      Printf.sprintf "%s : %s"
-        (general_data_to_string d1)
-        (general_data_to_string d2)
+    Printf.sprintf "%s : %s"
+      (general_data_to_string d1)
+      (general_data_to_string d2)
   | GT_list l ->
-      Printf.sprintf "[%s]"
-        (String.concat ", " (List.map general_term_to_string l))
+    Printf.sprintf "[%s]"
+      (String.concat ", " (List.map general_term_to_string l))
 
 and general_data_to_string d =
   match d with
   | GD_word s ->
-      s
+    s
   | GD_fun (f, args) ->
-      Printf.sprintf "%s(%s)" f
-        (String.concat ", " (List.map general_term_to_string args))
+    Printf.sprintf "%s(%s)" f
+      (String.concat ", " (List.map general_term_to_string args))
   | GD_var s ->
-      s
+    s
   | GD_num s ->
-      s
+    s
   | GD_dist_obj s ->
-      s
+    s
 
 and binary_op_to_string op =
   match op with
   | And ->
-      "&"
+    "&"
   | Or ->
-      "|"
+    "|"
   | Eq ->
-      "="
+    "="
   | Iff ->
-      "<=>"
+    "<=>"
   | Imply ->
-      "=>"
+    "=>"
   | Left_imply ->
-      "<="
+    "<="
   | Xor ->
-      "<~>"
+    "<~>"
   | Not_or ->
-      "~|"
+    "~|"
   | Not_and ->
-      "~&"
+    "~&"
 
 and unary_op_to_string op = match op with Not -> "~"
 

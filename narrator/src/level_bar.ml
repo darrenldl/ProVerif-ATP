@@ -12,5 +12,5 @@ let update_html (bar : t) : unit =
   List.map (fun (id, label, handler) -> Printf.sprintf "<button>%s</button>")
 
 let add_level (bar : t) ~(id : int) ~(label : string) ~(handler : handler) :
-    unit =
+  unit =
   bar.levels <- (id, label, handler) :: bar.levels

@@ -66,7 +66,7 @@ module type S = sig
   val unwrap_data : node -> data
 
   val add_node :
-       write_mode
+    write_mode
     -> id
     -> node
     -> ?parents:id list
@@ -145,7 +145,7 @@ module type S = sig
   val get_label_visibility : id -> t -> bool
 
   val refresh_node_graphics :
-       height:int
+    height:int
     -> ?redo_layout:bool
     -> ?label_affect_dag:bool
     -> Dagre.t Js_of_ocaml.Js.t
@@ -155,7 +155,7 @@ module type S = sig
     -> t
 
   val plot :
-       height:int
+    height:int
     -> ?show_label:bool
     -> ?label_affect_dag:bool
     -> Dagre.t Js_of_ocaml.Js.t option
