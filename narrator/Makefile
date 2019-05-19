@@ -1,5 +1,26 @@
+SRCFILES = src/*.ml*
+
+CINAPSFILES = src/*.cinaps
+
+OCAMLFORMAT = ocamlformat \
+	--inplace \
+	--field-space loose \
+	--let-and sparse \
+	--let-open auto \
+	--type-decl sparse \
+	--sequence-style terminator \
+	$(SRCFILES) \
+	$(CINAPSFILES)
+
+OCPINDENT = ocp-indent \
+	--inplace \
+	$(SRCFILES) \
+	$(CINAPSFILES)
+
+.PHONY: all
 all: build
-	
+
+.PHONY: build
 build:
 	dune build @js --profile dev
 	cp -r node_modules/        _build/default/src/
@@ -22,3 +43,14 @@ ifneq ($(DEBUG), 1)
 	# mv _build/default/src/narrator-obfuscated.bc.js \
 	# _build/default/src/narrator.bc.js
 endif
+
+.PHONY: format
+format :
+	$(OCAMLFORMAT)
+	$(OCPINDENT)
+
+.PHONY: cinaps
+cinaps :
+	cinaps -i $(SRCFILES)
+	$(OCAMLFORMAT)
+	$(OCPINDENT)
