@@ -40,7 +40,7 @@ rule read =
   | "def"            { DEF }
   | "diff"           { DIFF }
   | "do"             { DO }
-  | "elimtrue        { ELIMTRUE }
+  | "elimtrue"       { ELIMTRUE }
   | "else"           { ELSE }
   | "equation"       { EQUATION }
   | "equivalence"    { EQUIVALENCE }
@@ -97,9 +97,12 @@ rule read =
 
   (* Operators *)
   | '='        { EQ }
-  | '<>'       { NEQ }
+  | "<>"       { NEQ }
   | "&&"       { AND }
   | "||"       { OR }
 
   | '|'        { PARALLEL }
   | '!'        { REPLICATE }
+
+  | _                    { raise (SyntaxError ("Unexpected char: " ^ get lexbuf)) }
+  | eof { EOF }

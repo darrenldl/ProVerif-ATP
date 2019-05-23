@@ -36,25 +36,28 @@ type enriched_term =
   | Event of {name : string; terms : enriched_term list}
 
 and process =
-  | Proc_Null
-  | Proc_Parallel of process * process
-  | Proc_Replicate of process
-  | Proc_New of {new_name : name_ty; next : process}
-  | Proc_In of {channel : enriched_term; message : name_ty; next : process}
-  | Proc_Out of {channel : enriched_term; message : name_ty; next : process}
-  | Proc_Conditional of
+  | Proc_null
+  | Proc_parallel of process * process
+  | Proc_replicate of process
+  | Proc_new of {new_name : name_ty; next : process}
+  | Proc_in of {channel : enriched_term; message : name_ty; next : process}
+  | Proc_out of {channel : enriched_term; message : name_ty; next : process}
+  | Proc_conditional of
       { cond : enriched_term
       ; true_branch : process
       ; false_branch : process }
-  | Proc_Eval of
+  | Proc_eval of
       { let_bind_name : string
       ; let_bind_term : enriched_term
       ; true_branch : process
       ; false_branch : process }
-  | Proc_Macro of string * enriched_term list
+  | Proc_macro of string * enriched_term list
 
 and pattern =
-  | Pat_Typed_var of string * string
-  | Pat_Var of string
-  | Pat_Tuple of pattern list
-  | Pat_Eq of enriched_term
+  | Pat_typed_var of string * string
+  | Pat_var of string
+  | Pat_tuple of pattern list
+  | Pat_eq of enriched_term
+
+and decl =
+  | Decl_proc of process

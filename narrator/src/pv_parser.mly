@@ -70,11 +70,23 @@
 %token AND
 
 %token PARALLEL
+%left PARALLEL
 
-%token PARALLEL
 %token REPLICATE
+
+%token EOF
+
+%start <Pv_ast.decl list> parse_decls
 
 %%
 
 parse_decls:
-  | l = list(decl)
+  | l = list(decl); EOF { l }
+
+decl:
+  | p = process { Decl_proc p }
+
+process:
+  | NULL_PROC { Proc_null }
+  | p1 = process; PARALLEL; p2 = process { Proc_parallel(p1, p2) }
+
