@@ -17,13 +17,13 @@ let newline              = '\r' | '\n' | "\r\n"
 
 let printable_char   = ['\032'-'\126']
 
-let upper_alpha      = ['A'-'Z']
-let lower_alpha      = ['a'-'z']
-let numeric          = ['0'-'9']
-let alpha_numeric    = (lower_alpha | upper_alpha | numeric | ['_'])*
+let upper_alpha       = ['A'-'Z']
+let lower_alpha       = ['a'-'z']
+let numeric           = ['0'-'9']
+let alpha_numeric     = (lower_alpha | upper_alpha | numeric | ['_'])*
+let other_name_symbol = ['\'']
 
-let term     = alpha_numeric+
-let variable = alpha_numeric+
+let name = (alpha_numeric | other_name_symbols)+
 
 rule read =
   parse
@@ -94,6 +94,7 @@ rule read =
   | '['        { LEFT_BRACK }
   | ']'        { RIGHT_BRACK }
   | ':'        { COLON }
+  | ';'        { SEMICOLON }
 
   (* Operators *)
   | '='        { EQ }
@@ -103,6 +104,9 @@ rule read =
 
   | '|'        { PARALLEL }
   | '!'        { REPLICATE }
+
+  (* name *)
+  | name       { NAME name }
 
   | _                    { raise (SyntaxError ("Unexpected char: " ^ get lexbuf)) }
   | eof { EOF }

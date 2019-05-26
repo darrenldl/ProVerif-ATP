@@ -18,7 +18,6 @@ type name_ty =
 
 type enriched_term =
   | Name of string
-  | Var of string
   | Tuple of enriched_term list
   | App of string * enriched_term list
   | UnaryOp of unary_op * enriched_term
