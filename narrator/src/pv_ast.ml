@@ -16,23 +16,30 @@ type name_ty =
   { name : string
   ; ty : string }
 
+type term =
+  | T_name of string
+  | T_tuple of term list
+  | T_app of string * term list
+  | T_unaryOp of unary_op * term
+  | T_binaryOp of binary_op * term * term
+
 type enriched_term =
-  | Name of string
-  | Tuple of enriched_term list
-  | App of string * enriched_term list
-  | UnaryOp of unary_op * enriched_term
-  | BinaryOp of binary_op * enriched_term * enriched_term
-  | New of {new_name : name_ty; next : enriched_term}
-  | Conditional of
+  | ET_name of string
+  | ET_tuple of enriched_term list
+  | ET_app of string * enriched_term list
+  | ET_unaryOp of unary_op * enriched_term
+  | ET_binaryOp of binary_op * enriched_term * enriched_term
+  | ET_new of {new_name : name_ty; next : enriched_term}
+  | ET_conditional of
       { cond : enriched_term
       ; true_branch : enriched_term
       ; false_branch : enriched_term }
-  | Eval of
+  | ET_eval of
       { let_bind_pat : pattern
       ; let_bind_term : enriched_term
       ; true_branch : enriched_term
       ; false_branch : enriched_term }
-  | Event of {name : string; terms : enriched_term list}
+  | ET_event of {name : string; terms : enriched_term list}
 
 and process =
   | Proc_null
