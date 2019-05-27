@@ -117,25 +117,25 @@ process:
   | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = process %prec PROC_NEW
     { Proc_new { new_name = { name; ty }
                ; next } }
-  | IN; LEFT_PAREN; channel = term; COMMA; message = pattern; RIGHT_PAREN
-  | IN; LEFT_PAREN; channel = term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON
+  | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN
+  | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON
     { Proc_in { channel; message; next = Proc_null } }
-  | IN; LEFT_PAREN; channel = term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_IN
+  | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_IN
     { Proc_in { channel; message; next } }
-  | OUT; LEFT_PAREN; channel = term; COMMA; message = term; RIGHT_PAREN
-  | OUT; LEFT_PAREN; channel = term; COMMA; message = term; RIGHT_PAREN; SEMICOLON
-    { Proc_out { channel, message; next = Proc_null } }
-  | OUT; LEFT_PAREN; channel = term; COMMA; message = term; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_OUT
-    { Proc_out { channel, message; next } }
-  | IF; cond = term; THEN; true_branch = process                               %prec PROC_IF
+  | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN
+  | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN; SEMICOLON
+    { Proc_out { channel; message; next = Proc_null } }
+  | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_OUT
+    { Proc_out { channel; message; next } }
+  | IF; cond = enriched_term; THEN; true_branch = process                               %prec PROC_IF
     { Proc_conditional { cond; true_branch; false_branch = Proc_null } }
-  | IF; cond = term; THEN; true_branch = process; ELSE; false_branch = process %prec PROC_IF_ELSE
+  | IF; cond = enriched_term; THEN; true_branch = process; ELSE; false_branch = process %prec PROC_IF_ELSE
     { Proc_conditional { cond; true_branch; false_branch } }
-  | LET; name = NAME; EQ; t = term; IN; true_branch = process                               %prec PROC_LET
-    { Proc_eval { let_bind_name = name; let_bind_term = t; true_branch; false_branch = Proc_null } }
-  | LET; name = NAME; EQ; t = term; IN; true_branch = process; ELSE; false_branch = process %prec PROC_LET_ELSE
-    { Proc_eval { let_bind_name = name; let_bind_term = t; true_branch; false_branch } }
-  | name = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, term); RIGHT_PAREN
+  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = process                               %prec PROC_LET
+    { Proc_eval { let_bind_pat = pat; let_bind_term = t; true_branch; false_branch = Proc_null } }
+  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = process; ELSE; false_branch = process %prec PROC_LET_ELSE
+    { Proc_eval { let_bind_pat = pat; let_bind_term = t; true_branch; false_branch } }
+  | name = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
     { Proc_macro (name, args) }
   | LEFT_PAREN; p = process; RIGHT_PAREN
     { p }

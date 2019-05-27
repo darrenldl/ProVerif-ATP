@@ -46,18 +46,18 @@ and process =
   | Proc_parallel of process * process
   | Proc_replicate of process
   | Proc_new of {name : name_ty; next : process}
-  | Proc_in of {channel : term; message : pattern; next : process}
-  | Proc_out of {channel : term; message : term; next : process}
+  | Proc_in of {channel : enriched_term; message : pattern; next : process}
+  | Proc_out of {channel : enriched_term; message : enriched_term; next : process}
   | Proc_conditional of
-      { cond : term
+      { cond : enriched_term
       ; true_branch : process
       ; false_branch : process }
   | Proc_eval of
-      { let_bind_name : string
+      { let_bind_pat : pattern
       ; let_bind_term : enriched_term
       ; true_branch : process
       ; false_branch : process }
-  | Proc_macro of string * term list
+  | Proc_macro of string * enriched_term list
 
 and pattern =
   | Pat_typed_var of name_ty
