@@ -96,6 +96,12 @@
 %nonassoc PROC_LET_ELSE
 %nonassoc PROC_PARALLEL
 
+%nonassoc ET_NEW
+%nonassoc ET_IF
+%nonassoc ET_IF_ELSE
+%nonassoc ET_LET
+%nonassoc ET_LET_ELSE
+
 %%
 
 parse_decls:
@@ -164,29 +170,29 @@ enriched_term:
     { ET_tuple terms }
   | f = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
     { ET_app (f, args) }
-  | t1 = term; EQ; t2 = term
+  | t1 = enriched_term; EQ; t2 = enriched_term
     { ET_binaryOp (Eq, t1, t2) }
-  | t1 = term; NEQ; t2 = term
+  | t1 = enriched_term; NEQ; t2 = enriched_term
     { ET_binaryOp (Neq, t1, t2) }
-  | t1 = term; AND; t2 = term
+  | t1 = enriched_term; AND; t2 = enriched_term
     { ET_binaryOp (And, t1, t2) }
-  | t1 = term; OR; t2 = term
+  | t1 = enriched_term; OR; t2 = enriched_term
     { ET_binaryOp (Or, t1, t2) }
-  | NOT; LEFT_PAREN; t = term; RIGHT_PAREN
+  | NOT; LEFT_PAREN; t = enriched_term; RIGHT_PAREN
     { ET_unaryOp (Not, t) }
-  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = enriched_term
+  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = enriched_term                             %prec ET_NEW
     { ET_new { name = { name; ty }
              ; next } }
-  | IF; cond = enriched_term; THEN; true_branch = enriched_term
+  | IF; cond = enriched_term; THEN; true_branch = enriched_term                                     %prec ET_IF
     { ET_conditional { cond; true_branch; false_branch = None } }
-  | IF; cond = enriched_term; THEN; true_branch = enriched_term; ELSE; false_branch = enriched_term
+  | IF; cond = enriched_term; THEN; true_branch = enriched_term; ELSE; false_branch = enriched_term %prec ET_IF_ELSE
     { ET_conditional { cond; true_branch; false_branch = Some false_branch } }
-  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = enriched_term
+  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = enriched_term                                     %prec ET_LET
     { ET_eval { let_bind_pat = pat
               ; let_bind_term = t
               ; true_branch
               ; false_branch = None } }
-  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = enriched_term; ELSE; false_branch = enriched_term
+  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = enriched_term; ELSE; false_branch = enriched_term %prec ET_LET_ELSE
     { ET_eval { let_bind_pat = pat
               ; let_bind_term = t
               ; true_branch
