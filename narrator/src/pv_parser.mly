@@ -108,10 +108,6 @@ process:
   | NULL_PROC                                     { Proc_null }
   | p1 = process; PARALLEL; p2 = process          { Proc_parallel(p1, p2) } %prec PROC_PARALLEL
   | REPLICATE; p = process                        { Proc_replicate p }
-  (* | NEW; name = NAME; COLON; ty = NAME
-  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON
-    { Proc_new { new_name = { name; ty }
-               ; next = Proc_null } } *)
   | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = process %prec PROC_NEW
     { Proc_new { new_name = { name; ty }
                ; next } }
@@ -133,14 +129,16 @@ process:
     { Proc_eval { let_bind_name = name; let_bind_term = t; true_branch; false_branch = Proc_null } }
   | LET; name = NAME; EQ; t = term; IN; true_branch = process; ELSE; false_branch = process %prec PROC_LET_ELSE
     { Proc_eval { let_bind_name = name; let_bind_term = t; true_branch; false_branch } }
-  | name = NAME; LEFT_PAREN; args = separated_list(COMMA, term); RIGHT_PAREN
+  | name = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, term); RIGHT_PAREN
     { Proc_macro (name, args) }
+  | LEFT_PAREN; p = process; RIGHT_PAREN
+    { p }
 
 term:
   | name = NAME { T_name name }
-  | LEFT_PAREN; terms = separated_list(COMMA, enriched_term); RIGHT_PAREN
+  | LEFT_PAREN; terms = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
     { T_tuple terms }
-  | f = NAME; LEFT_PAREN; args = separated_list(COMMA, enriched_term); RIGHT_PAREN
+  | f = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
     { T_app (f, args) }
   | t1 = term; EQ; t2 = term
     { T_binaryOp (Eq, t1, t2) }
@@ -156,13 +154,40 @@ term:
 pattern:
   | name = NAME; COLON; ty = NAME { Pat_typed_var { name; ty } }
   | name = NAME                   { Pat_var name }
-  | LEFT_PAREN; l = separated_list(COMMA, pattern); RIGHT_PAREN
+  | LEFT_PAREN; l = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN
     { Pat_tuple l }
   | EQ; t = term                  { Pat_eq t }
 
 enriched_term:
   | name = NAME { ET_name name }
-  | LEFT_PAREN; terms = separated_list(COMMA, enriched_term); RIGHT_PAREN
+  | LEFT_PAREN; terms = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
     { ET_tuple terms }
-  | f = NAME; LEFT_PAREN; args = separated_list(COMMA, enriched_term); RIGHT_PAREN
+  | f = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
     { ET_app (f, args) }
+  | t1 = term; EQ; t2 = term
+    { ET_binaryOp (Eq, t1, t2) }
+  | t1 = term; NEQ; t2 = term
+    { ET_binaryOp (Neq, t1, t2) }
+  | t1 = term; AND; t2 = term
+    { ET_binaryOp (And, t1, t2) }
+  | t1 = term; OR; t2 = term
+    { ET_binaryOp (Or, t1, t2) }
+  | NOT; LEFT_PAREN; t = term; RIGHT_PAREN
+    { ET_unaryOp (Not, t) }
+  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = enriched_term
+    { ET_new { name = { name; ty }
+             ; next } }
+  | IF; cond = enriched_term; THEN; true_branch = enriched_term
+    { ET_conditional { cond; true_branch; false_branch = None } }
+  | IF; cond = enriched_term; THEN; true_branch = enriched_term; ELSE; false_branch = enriched_term
+    { ET_conditional { cond; true_branch; false_branch = Some false_branch } }
+  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = enriched_term
+    { ET_eval { let_bind_pat = pat
+              ; let_bind_term = t
+              ; true_branch
+              ; false_branch = None } }
+  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = enriched_term; ELSE; false_branch = enriched_term
+    { ET_eval { let_bind_pat = pat
+              ; let_bind_term = t
+              ; true_branch
+              ; false_branch = Some false_branch } }

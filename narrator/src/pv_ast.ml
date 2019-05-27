@@ -29,23 +29,23 @@ type enriched_term =
   | ET_app of string * enriched_term list
   | ET_unaryOp of unary_op * enriched_term
   | ET_binaryOp of binary_op * enriched_term * enriched_term
-  | ET_new of {new_name : name_ty; next : enriched_term}
+  | ET_new of {name : name_ty; next : enriched_term}
   | ET_conditional of
       { cond : enriched_term
       ; true_branch : enriched_term
-      ; false_branch : enriched_term }
+      ; false_branch : enriched_term option }
   | ET_eval of
       { let_bind_pat : pattern
       ; let_bind_term : enriched_term
       ; true_branch : enriched_term
-      ; false_branch : enriched_term }
+      ; false_branch : enriched_term option }
   | ET_event of {name : string; terms : enriched_term list}
 
 and process =
   | Proc_null
   | Proc_parallel of process * process
   | Proc_replicate of process
-  | Proc_new of {new_name : name_ty; next : process}
+  | Proc_new of {name : name_ty; next : process}
   | Proc_in of {channel : term; message : pattern; next : process}
   | Proc_out of {channel : term; message : term; next : process}
   | Proc_conditional of
