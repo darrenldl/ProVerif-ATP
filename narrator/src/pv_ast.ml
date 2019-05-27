@@ -49,7 +49,7 @@ and process =
   | Proc_in of {channel : term; message : pattern; next : process}
   | Proc_out of {channel : term; message : term; next : process}
   | Proc_conditional of
-      { cond : enriched_term
+      { cond : term
       ; true_branch : process
       ; false_branch : process }
   | Proc_eval of
@@ -57,7 +57,7 @@ and process =
       ; let_bind_term : enriched_term
       ; true_branch : process
       ; false_branch : process }
-  | Proc_macro of string * enriched_term list
+  | Proc_macro of string * term list
 
 and pattern =
   | Pat_typed_var of name_ty

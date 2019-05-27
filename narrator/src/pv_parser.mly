@@ -56,61 +56,7 @@
 %token WEAKSECRET
 %token YIELD
 
-%left AMONG
-%left CHANNEL
-%left CHOICE
-%left CLAUSES
-%left CONST
-%left DEF
-%left DIFF
-%left DO
-%left ELIMTRUE
-%left ELSE
-%left EQUATION
-%left EQUIVALENCE
-%left EVENT
-%left EXPAND
-%left FAIL
-%left FORALL
-%left FREE
-%left FUN
-%left GET
-%left IF
-%left IMPLEMENTATION
-%left IN
-%left INJ_EVENT
-%left INSERT
-%left LET
-%left LETFUN
-%left NEW
-%left NONINTERF
-%left NOT
-%left NOUNIF
-%left OR
-%left OTHERWISE
-%left OUT
-%left PARAM
-%left PHASE
-%left PRED
-%left PROBA
-%left PROCESS
-%left PROOF
-%left PUBLIC_VARS
-%left PUTBEGIN
-%left QUERY
-%left REDUC
-%left SECRET
-%left SET
-%left SUCHTHAT
-%left SYNC
-%left TABLE
-%left THEN
-%left TYPE
-%left WEAKSECRET
-%left YIELD
-
 %token NULL_PROC
-%left  NULL_PROC
 
 %token LEFT_PAREN
 %token RIGHT_PAREN
@@ -120,19 +66,13 @@
 %token COLON
 %token SEMICOLON
 
-%left LEFT_PAREN
-%left RIGHT_PAREN
-%left COMMA
-%left LEFT_BRACK
-%left RIGHT_BRACK
-%left COLON
-%left SEMICOLON
-
 %token EQ
 %token NEQ
 %token AND
+
 %left EQ
 %left NEQ
+%left OR
 %left AND
 
 %token PARALLEL
@@ -147,6 +87,15 @@
 
 %start <Pv_ast.decl list> parse_decls
 
+%nonassoc PROC_NEW
+%nonassoc PROC_IN
+%nonassoc PROC_OUT
+%nonassoc PROC_IF
+%nonassoc PROC_IF_ELSE
+%nonassoc PROC_LET
+%nonassoc PROC_LET_ELSE
+%nonassoc PROC_PARALLEL
+
 %%
 
 parse_decls:
@@ -157,25 +106,35 @@ decl:
 
 process:
   | NULL_PROC                                     { Proc_null }
-  | p1 = process; PARALLEL; p2 = process          { Proc_parallel(p1, p2) }
+  | p1 = process; PARALLEL; p2 = process          { Proc_parallel(p1, p2) } %prec PROC_PARALLEL
   | REPLICATE; p = process                        { Proc_replicate p }
-  | NEW; name = NAME; COLON; ty = NAME
+  (* | NEW; name = NAME; COLON; ty = NAME
   | NEW; name = NAME; COLON; ty = NAME; SEMICOLON
     { Proc_new { new_name = { name; ty }
-               ; next = Proc_null } }
-  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = process
+               ; next = Proc_null } } *)
+  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = process %prec PROC_NEW
     { Proc_new { new_name = { name; ty }
                ; next } }
   | IN; LEFT_PAREN; channel = term; COMMA; message = pattern; RIGHT_PAREN
   | IN; LEFT_PAREN; channel = term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON
     { Proc_in { channel; message; next = Proc_null } }
-  | IN; LEFT_PAREN; channel = term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON; next = process
+  | IN; LEFT_PAREN; channel = term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_IN
     { Proc_in { channel; message; next } }
   | OUT; LEFT_PAREN; channel = term; COMMA; message = term; RIGHT_PAREN
   | OUT; LEFT_PAREN; channel = term; COMMA; message = term; RIGHT_PAREN; SEMICOLON
     { Proc_out { channel, message; next = Proc_null } }
-  | OUT; LEFT_PAREN; channel = term; COMMA; message = term; RIGHT_PAREN; SEMICOLON; next = process
+  | OUT; LEFT_PAREN; channel = term; COMMA; message = term; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_OUT
     { Proc_out { channel, message; next } }
+  | IF; cond = term; THEN; true_branch = process                               %prec PROC_IF
+    { Proc_conditional { cond; true_branch; false_branch = Proc_null } }
+  | IF; cond = term; THEN; true_branch = process; ELSE; false_branch = process %prec PROC_IF_ELSE
+    { Proc_conditional { cond; true_branch; false_branch } }
+  | LET; name = NAME; EQ; t = term; IN; true_branch = process                               %prec PROC_LET
+    { Proc_eval { let_bind_name = name; let_bind_term = t; true_branch; false_branch = Proc_null } }
+  | LET; name = NAME; EQ; t = term; IN; true_branch = process; ELSE; false_branch = process %prec PROC_LET_ELSE
+    { Proc_eval { let_bind_name = name; let_bind_term = t; true_branch; false_branch } }
+  | name = NAME; LEFT_PAREN; args = separated_list(COMMA, term); RIGHT_PAREN
+    { Proc_macro (name, args) }
 
 term:
   | name = NAME { T_name name }
