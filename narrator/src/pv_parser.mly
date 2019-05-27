@@ -115,7 +115,7 @@ process:
   | p1 = process; PARALLEL; p2 = process          { Proc_parallel(p1, p2) } %prec PROC_PARALLEL
   | REPLICATE; p = process                        { Proc_replicate p }
   | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = process %prec PROC_NEW
-    { Proc_new { new_name = { name; ty }
+    { Proc_new { name = { name; ty }
                ; next } }
   | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN
   | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON
@@ -142,9 +142,9 @@ process:
 
 term:
   | name = NAME { T_name name }
-  | LEFT_PAREN; terms = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
+  | LEFT_PAREN; terms = separated_nonempty_list(COMMA, term); RIGHT_PAREN
     { T_tuple terms }
-  | f = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
+  | f = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, term); RIGHT_PAREN
     { T_app (f, args) }
   | t1 = term; EQ; t2 = term
     { T_binaryOp (Eq, t1, t2) }

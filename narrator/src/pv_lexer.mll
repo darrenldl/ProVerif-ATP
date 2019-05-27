@@ -23,7 +23,7 @@ let numeric           = ['0'-'9']
 let alpha_numeric     = (lower_alpha | upper_alpha | numeric | ['_'])*
 let other_name_symbol = ['\'']
 
-let name = (alpha_numeric | other_name_symbols)+
+let name = (alpha_numeric | other_name_symbol)+
 
 rule read =
   parse
