@@ -110,26 +110,26 @@ decl:
 
 process:
   | NULL_PROC                                     { Proc_null }
-  | p1 = process; PARALLEL; p2 = process          { Proc_parallel(p1, p2) } %prec PROC_PARALLEL
+  | p1 = process; PARALLEL; p2 = process          { Proc_parallel(p1, p2) }                                          %prec PROC_PARALLEL
   | REPLICATE; p = process                        { Proc_replicate p }
-  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = process %prec PROC_NEW
+  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = process                                                    %prec PROC_NEW
     { Proc_new { name = { name; ty }
                ; next } }
   | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN
   | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON
     { Proc_in { channel; message; next = Proc_null } }
-  | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_IN
+  | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON; next = process        %prec PROC_IN
     { Proc_in { channel; message; next } }
   | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN
   | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN; SEMICOLON
     { Proc_out { channel; message; next = Proc_null } }
   | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_OUT
     { Proc_out { channel; message; next } }
-  | IF; cond = enriched_term; THEN; true_branch = process                               %prec PROC_IF
+  | IF; cond = enriched_term; THEN; true_branch = process                                                            %prec PROC_IF
     { Proc_conditional { cond; true_branch; false_branch = Proc_null } }
   | IF; cond = enriched_term; THEN; true_branch = process; ELSE; false_branch = process
     { Proc_conditional { cond; true_branch; false_branch } }
-  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = process                               %prec PROC_LET
+  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = process                                             %prec PROC_LET
     { Proc_eval { let_bind_pat = pat; let_bind_term = t; true_branch; false_branch = Proc_null } }
   | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = process; ELSE; false_branch = process
     { Proc_eval { let_bind_pat = pat; let_bind_term = t; true_branch; false_branch } }
@@ -178,10 +178,10 @@ enriched_term:
     { ET_binaryOp (Or, t1, t2) }
   | NOT; LEFT_PAREN; t = enriched_term; RIGHT_PAREN
     { ET_unaryOp (Not, t) }
-  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = enriched_term                             %prec ET_NEW
+  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = enriched_term                                            %prec ET_NEW
     { ET_new { name = { name; ty }
              ; next } }
-  | IF; cond = enriched_term; THEN; true_branch = enriched_term                                     %prec ET_IF
+  | IF; cond = enriched_term; THEN; true_branch = enriched_term                                                    %prec ET_IF
     { ET_conditional { cond; true_branch; false_branch = None } }
   | IF; cond = enriched_term; THEN; true_branch = enriched_term; ELSE; false_branch = enriched_term
     { ET_conditional { cond; true_branch; false_branch = Some false_branch } }
@@ -195,3 +195,5 @@ enriched_term:
               ; let_bind_term = t
               ; true_branch
               ; false_branch = Some false_branch } }
+  | EVENT; name = NAME; LEFT_PAREN; terms = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
+    { ET_event { name; terms } }
