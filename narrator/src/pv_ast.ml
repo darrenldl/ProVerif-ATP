@@ -39,11 +39,12 @@ type pterm =
       ; let_bind_term : pterm
       ; true_branch : pterm
       ; false_branch : pterm option }
-  | PT_insert of { name : string; terms : pterm list; next : pterm }
-  | PT_get of { name : string
-              ; pats : pattern list
-              ; true_branch : pterm
-              ; false_branch : pterm option }
+  | PT_insert of {name : string; terms : pterm list; next : pterm}
+  | PT_get of
+      { name : string
+      ; pats : pattern list
+      ; true_branch : pterm
+      ; false_branch : pterm option }
   | PT_event of {name : string; terms : pterm list}
 
 and process =
@@ -70,5 +71,4 @@ and pattern =
   | Pat_tuple of pattern list
   | Pat_eq of term
 
-and decl =
-  | Decl_proc of process
+and decl = Decl_proc of process
