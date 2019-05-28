@@ -21,7 +21,7 @@
 %token FORALL
 %token FREE
 %token FUN
-%token GET
+%token GPT
 %token IF
 %token IMPLEMENTATION
 %token IN
@@ -46,15 +46,17 @@
 %token PUTBEGIN
 %token QUERY
 %token REDUC
-%token SECRET
-%token SET
+%token SECRPT
+%token SPT
 %token SUCHTHAT
 %token SYNC
 %token TABLE
 %token THEN
 %token TYPE
-%token WEAKSECRET
+%token WEAKSECRPT
 %token YIELD
+
+%token GET
 
 %token NULL_PROC
 
@@ -94,9 +96,11 @@
 %nonassoc PROC_LET
 %nonassoc PROC_PARALLEL
 
-%nonassoc ET_NEW
-%nonassoc ET_IF
-%nonassoc ET_LET
+%nonassoc PT_NEW
+%nonassoc PT_IF
+%nonassoc PT_LET
+%nonassoc PT_GET
+%nonassoc PT_INSERT
 
 %nonassoc ELSE
 
@@ -115,25 +119,25 @@ process:
   | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = process                                                    %prec PROC_NEW
     { Proc_new { name = { name; ty }
                ; next } }
-  | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN
-  | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON
+  | IN; LEFT_PAREN; channel = pterm; COMMA; message = pattern; RIGHT_PAREN
+  | IN; LEFT_PAREN; channel = pterm; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON
     { Proc_in { channel; message; next = Proc_null } }
-  | IN; LEFT_PAREN; channel = enriched_term; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON; next = process        %prec PROC_IN
+  | IN; LEFT_PAREN; channel = pterm; COMMA; message = pattern; RIGHT_PAREN; SEMICOLON; next = process        %prec PROC_IN
     { Proc_in { channel; message; next } }
-  | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN
-  | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN; SEMICOLON
+  | OUT; LEFT_PAREN; channel = pterm; COMMA; message = pterm; RIGHT_PAREN
+  | OUT; LEFT_PAREN; channel = pterm; COMMA; message = pterm; RIGHT_PAREN; SEMICOLON
     { Proc_out { channel; message; next = Proc_null } }
-  | OUT; LEFT_PAREN; channel = enriched_term; COMMA; message = enriched_term; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_OUT
+  | OUT; LEFT_PAREN; channel = pterm; COMMA; message = pterm; RIGHT_PAREN; SEMICOLON; next = process %prec PROC_OUT
     { Proc_out { channel; message; next } }
-  | IF; cond = enriched_term; THEN; true_branch = process                                                            %prec PROC_IF
+  | IF; cond = pterm; THEN; true_branch = process                                                            %prec PROC_IF
     { Proc_conditional { cond; true_branch; false_branch = Proc_null } }
-  | IF; cond = enriched_term; THEN; true_branch = process; ELSE; false_branch = process
+  | IF; cond = pterm; THEN; true_branch = process; ELSE; false_branch = process
     { Proc_conditional { cond; true_branch; false_branch } }
-  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = process                                             %prec PROC_LET
+  | LET; pat = pattern; EQ; t = pterm; IN; true_branch = process                                             %prec PROC_LET
     { Proc_eval { let_bind_pat = pat; let_bind_term = t; true_branch; false_branch = Proc_null } }
-  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = process; ELSE; false_branch = process
+  | LET; pat = pattern; EQ; t = pterm; IN; true_branch = process; ELSE; false_branch = process
     { Proc_eval { let_bind_pat = pat; let_bind_term = t; true_branch; false_branch } }
-  | name = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
+  | name = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN
     { Proc_macro (name, args) }
   | LEFT_PAREN; p = process; RIGHT_PAREN
     { p }
@@ -162,38 +166,44 @@ pattern:
     { Pat_tuple l }
   | EQ; t = term                  { Pat_eq t }
 
-enriched_term:
-  | name = NAME { ET_name name }
-  | LEFT_PAREN; terms = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
-    { ET_tuple terms }
-  | f = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
-    { ET_app (f, args) }
-  | t1 = enriched_term; EQ; t2 = enriched_term
-    { ET_binaryOp (Eq, t1, t2) }
-  | t1 = enriched_term; NEQ; t2 = enriched_term
-    { ET_binaryOp (Neq, t1, t2) }
-  | t1 = enriched_term; AND; t2 = enriched_term
-    { ET_binaryOp (And, t1, t2) }
-  | t1 = enriched_term; OR; t2 = enriched_term
-    { ET_binaryOp (Or, t1, t2) }
-  | NOT; LEFT_PAREN; t = enriched_term; RIGHT_PAREN
-    { ET_unaryOp (Not, t) }
-  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = enriched_term                                            %prec ET_NEW
-    { ET_new { name = { name; ty }
+pterm:
+  | name = NAME { PT_name name }
+  | LEFT_PAREN; terms = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN
+    { PT_tuple terms }
+  | f = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN
+    { PT_app (f, args) }
+  | t1 = pterm; EQ; t2 = pterm
+    { PT_binaryOp (Eq, t1, t2) }
+  | t1 = pterm; NEQ; t2 = pterm
+    { PT_binaryOp (Neq, t1, t2) }
+  | t1 = pterm; AND; t2 = pterm
+    { PT_binaryOp (And, t1, t2) }
+  | t1 = pterm; OR; t2 = pterm
+    { PT_binaryOp (Or, t1, t2) }
+  | NOT; LEFT_PAREN; t = pterm; RIGHT_PAREN
+    { PT_unaryOp (Not, t) }
+  | NEW; name = NAME; COLON; ty = NAME; SEMICOLON; next = pterm                                            %prec PT_NEW
+    { PT_new { name = { name; ty }
              ; next } }
-  | IF; cond = enriched_term; THEN; true_branch = enriched_term                                                    %prec ET_IF
-    { ET_conditional { cond; true_branch; false_branch = None } }
-  | IF; cond = enriched_term; THEN; true_branch = enriched_term; ELSE; false_branch = enriched_term
-    { ET_conditional { cond; true_branch; false_branch = Some false_branch } }
-  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = enriched_term                                     %prec ET_LET
-    { ET_eval { let_bind_pat = pat
+  | IF; cond = pterm; THEN; true_branch = pterm                                                    %prec PT_IF
+    { PT_conditional { cond; true_branch; false_branch = None } }
+  | IF; cond = pterm; THEN; true_branch = pterm; ELSE; false_branch = pterm
+    { PT_conditional { cond; true_branch; false_branch = Some false_branch } }
+  | LET; pat = pattern; EQ; t = pterm; IN; true_branch = pterm                                     %prec PT_LET
+    { PT_eval { let_bind_pat = pat
               ; let_bind_term = t
               ; true_branch
               ; false_branch = None } }
-  | LET; pat = pattern; EQ; t = enriched_term; IN; true_branch = enriched_term; ELSE; false_branch = enriched_term
-    { ET_eval { let_bind_pat = pat
+  | LET; pat = pattern; EQ; t = pterm; IN; true_branch = pterm; ELSE; false_branch = pterm
+    { PT_eval { let_bind_pat = pat
               ; let_bind_term = t
               ; true_branch
               ; false_branch = Some false_branch } }
-  | EVENT; name = NAME; LEFT_PAREN; terms = separated_nonempty_list(COMMA, enriched_term); RIGHT_PAREN
-    { ET_event { name; terms } }
+  | INSERT; name = NAME; LEFT_PAREN; terms = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN; SEMICOLON; next = pterm %prec PT_INSERT
+    { PT_insert { name; terms; next } }
+  | GET; name = NAME; LEFT_PAREN; pats = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN; IN; true_branch = pterm   %prec PT_GET
+    { PT_get { name; pats; true_branch; false_branch = None } }
+  | GET; name = NAME; LEFT_PAREN; pats = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN; IN; true_branch = pterm; ELSE; false_branch = pterm
+    { PT_get { name; pats; true_branch; false_branch = Some false_branch } }
+  | EVENT; name = NAME; LEFT_PAREN; terms = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN
+    { PT_event { name; terms } }
