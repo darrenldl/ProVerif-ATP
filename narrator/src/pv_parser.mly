@@ -201,9 +201,17 @@ pterm:
               ; false_branch = Some false_branch } }
   | INSERT; name = NAME; LEFT_PAREN; terms = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN; SEMICOLON; next = pterm %prec PT_INSERT
     { PT_insert { name; terms; next } }
+  | GET; name = NAME; LEFT_PAREN; pats = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN
+    { PT_get { name; pats; next = None } }
   | GET; name = NAME; LEFT_PAREN; pats = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN; IN; true_branch = pterm   %prec PT_GET
-    { PT_get { name; pats; true_branch; false_branch = None } }
+    { PT_get { name; pats; next = Some (true_branch, None) } }
   | GET; name = NAME; LEFT_PAREN; pats = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN; IN; true_branch = pterm; ELSE; false_branch = pterm
-    { PT_get { name; pats; true_branch; false_branch = Some false_branch } }
+    { PT_get { name; pats; next = Some (true_branch, Some false_branch) } }
+  | EVENT; name = NAME
+    { PT_event { name; terms = []; next = None } }
+  | EVENT; name = NAME; SEMICOLON; next = pterm
+    { PT_event { name; terms = []; next = Some next } }
   | EVENT; name = NAME; LEFT_PAREN; terms = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN
-    { PT_event { name; terms } }
+    { PT_event { name; terms; next = None } }
+  | EVENT; name = NAME; LEFT_PAREN; terms = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN; SEMICOLON; next = pterm
+    { PT_event { name; terms; next = Some next } }
