@@ -33,6 +33,7 @@
 %token NONINTERF
 %token NOT
 %token NOUNIF
+%token LITERAL_OR
 %token OR
 %token OTHERWISE
 %token OUT
@@ -166,7 +167,23 @@ pattern:
   | name = NAME                   { Pat_var name }
   | LEFT_PAREN; l = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN
     { Pat_tuple l }
+  | name = NAME; LEFT_PAREN; l = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN
+    { Pat_app (name, l) }
   | EQ; t = term                  { Pat_eq t }
+
+mayfailterm:
+  | t = term { MFT_term t }
+  | FAIL     { MFT_fail }
+
+typedecl:
+  | ts = typedecl; COMMA; name = NAME; COLON; ty = NAME  { {name; ty} :: ts }
+
+or_fail:
+  | OR; FAIL { () }
+
+failtypedecl:
+  | ts = failtypedecl; COMMA; name = NAME; COLON; ty = NAME; fail = option(or_fail)
+    { ({ name; ty }, match fail with None -> false | Some _ -> true) :: ts }
 
 pterm:
   | name = NAME { PT_name name }

@@ -46,6 +46,17 @@ and pterm =
       ; next : (pterm * pterm option) option }
   | PT_event of {name : string; terms : pterm list; next : pterm option}
 
+and pattern =
+  | Pat_var of string
+  | Pat_typed_var of name_ty
+  | Pat_tuple of pattern list
+  | Pat_app of string * pattern list
+  | Pat_eq of term
+
+and mayfailterm =
+  | MFT_term of term
+  | MFT_fail
+
 and process =
   | Proc_null
   | Proc_parallel of process * process
@@ -63,12 +74,6 @@ and process =
       ; true_branch : process
       ; false_branch : process }
   | Proc_macro of string * pterm list
-
-and pattern =
-  | Pat_typed_var of name_ty
-  | Pat_var of string
-  | Pat_tuple of pattern list
-  | Pat_eq of term
 
 and decl = Decl_proc of process
 
@@ -118,6 +123,10 @@ let rec pattern_to_string p =
   | Pat_var s -> s
   | Pat_tuple ps ->
     (Misc_utils.map_list_to_string_w_opt_paren pattern_to_string ps)
+  | Pat_app (f, ps) ->
+    Printf.sprintf "%s%s"
+      f
+      (Misc_utils.map_list_to_string_w_opt_paren pattern_to_string ps)
   | Pat_eq t ->
     Printf.sprintf "=%s" (term_to_string t)
 

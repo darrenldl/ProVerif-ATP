@@ -62,7 +62,7 @@ rule read =
   | "noninterf"      { NONINTERF }
   | "not"            { NOT }
   | "nounif"         { NOUNIF }
-  | "or"             { OR }
+  | "or"             { LITERAL_OR }
   | "otherwise"      { OTHERWISE }
   | "out"            { OUT }
   | "param"          { PARAM }
