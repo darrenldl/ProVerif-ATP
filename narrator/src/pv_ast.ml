@@ -257,3 +257,19 @@ let rec pterm_to_string t =
           term_str
           (pterm_to_string next)
     )
+
+let mayfailterm_to_string t =
+  match t with
+  | MFT_term t -> term_to_string t
+  | MFT_fail -> "fail"
+
+module Print_context = struct
+  type    process_structure_type =
+    | Let
+    | IfElse
+    | InOut
+    | Zero
+    | New
+    | Get
+    | Insert
+end
