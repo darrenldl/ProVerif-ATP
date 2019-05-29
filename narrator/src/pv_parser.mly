@@ -212,6 +212,9 @@ failtypedecl:
   | ts = failtypedecl; COMMA; name = NAME; COLON; ty = NAME; fail = option(or_fail)
     { ({ name; ty }, match fail with None -> false | Some _ -> true) :: ts }
 
+name_ty:
+  | name = NAME; COLON; ty = NAME { { name; ty } }
+
 decl:
   | TYPE; name = NAME; opts = options; DOT
     { Decl_ty (name, opts) }
@@ -225,8 +228,18 @@ decl:
     { Decl_fun { name; arg_tys; ret_ty } }
   | EQUATION; eqs = eq_list; options = options; DOT
     { Decl_equation { eqs; options } }
-  | PROCESS; p = process
-    { Decl_proc p }
+  | PRED; name = NAME; LEFT_PAREN; arg_tys = separated_list(COMMA, NAME); RIGHT_PAREN; DOT
+    { Decl_pred { name; arg_tys } }
+  | TABLE; name = NAME; LEFT_PAREN; tys = separated_list(COMMA, NAME); RIGHT_PAREN; DOT
+    { Decl_table { name; tys } }
+  | LET; name = NAME; EQ; process = process; DOT
+    { Decl_let_proc { name; args = []; process } }
+  | LET; name = NAME; LEFT_PAREN; args = separated_list(COMMA, name_ty); RIGHT_PAREN; EQ; process = process; DOT
+    { Decl_let_proc { name; args; process } }
+  | EVENT; name = NAME; DOT
+    { Decl_event { name; args = [] } }
+  | EVENT; name = NAME; LEFT_PAREN; args = separated_list(COMMA, name_ty); RIGHT_PAREN; DOT
+    { Decl_event { name; args } }
 
 forall_typedecl:
   |                        { [] }

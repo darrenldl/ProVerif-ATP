@@ -88,7 +88,22 @@ and decl =
   | Decl_const of { names : string list; ty : string; options : string list }
   | Decl_fun of { name : string; arg_tys : string list; ret_ty : string }
   | Decl_equation of { eqs : (name_ty list * term * term) list; options : string list }
-  | Decl_proc of process
+  | Decl_pred of { name : string; arg_tys : string list }
+  | Decl_table of { name : string; tys : string list }
+  | Decl_let_proc of { name : string; args : name_ty list; process : process }
+  | Decl_event of { name : string; args : name_ty list }
+  | Decl_query of query
+
+and query = query_single list
+
+and query_single =
+  | Q_term of gterm
+
+and gterm =
+  | GT_name of string
+  | GT_app of string * gterm list
+  | GT_binaryOp of binary_op * gterm * gterm
+  | GT_event of gterm list
 
 let unary_op_to_string = function Not -> "~"
 
