@@ -1,2 +1,1 @@
-let process_string _ =
-  Error ""
+let process_string _ = Error ""

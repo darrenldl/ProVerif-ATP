@@ -11,9 +11,7 @@ let map_list_to_string (f : 'a -> string) (l : 'a list) : string =
   String.concat ~sep:", " (List.map ~f l)
 
 let map_list_to_string_w_opt_paren (f : 'a -> string) (l : 'a list) : string =
-  match l with
-  | [] -> ""
-  | l -> Printf.sprintf "(%s)" (map_list_to_string f l)
+  match l with [] -> "" | l -> Printf.sprintf "(%s)" (map_list_to_string f l)
 
 let unwrap_opt (x : 'a option) : 'a =
   match x with Some x -> x | None -> failwith "Unexpected pattern"

@@ -74,7 +74,7 @@ and process =
       ; let_bind_term : pterm
       ; true_branch : process
       ; false_branch : process }
-  | Proc_insert of { name : string; terms : pterm list; next : process }
+  | Proc_insert of {name : string; terms : pterm list; next : process}
   | Proc_get of
       { name : string
       ; pats : pattern list
@@ -84,20 +84,21 @@ and process =
 and decl =
   | Decl_ty of string * string list
   | Decl_channel of string list
-  | Decl_free of { names : string list; ty : string; options : string list }
-  | Decl_const of { names : string list; ty : string; options : string list }
-  | Decl_fun of { name : string; arg_tys : string list; ret_ty : string }
-  | Decl_equation of { eqs : (name_ty list * term * term) list; options : string list }
-  | Decl_pred of { name : string; arg_tys : string list }
-  | Decl_table of { name : string; tys : string list }
-  | Decl_let_proc of { name : string; args : name_ty list; process : process }
-  | Decl_event of { name : string; args : name_ty list }
+  | Decl_free of {names : string list; ty : string; options : string list}
+  | Decl_const of {names : string list; ty : string; options : string list}
+  | Decl_fun of {name : string; arg_tys : string list; ret_ty : string}
+  | Decl_equation of
+      { eqs : (name_ty list * term * term) list
+      ; options : string list }
+  | Decl_pred of {name : string; arg_tys : string list}
+  | Decl_table of {name : string; tys : string list}
+  | Decl_let_proc of {name : string; args : name_ty list; process : process}
+  | Decl_event of {name : string; args : name_ty list}
   | Decl_query of query
 
 and query = query_single list
 
-and query_single =
-  | Q_term of gterm
+and query_single = Q_term of gterm
 
 and gterm =
   | GT_name of string
@@ -108,14 +109,19 @@ and gterm =
 let unary_op_to_string = function Not -> "~"
 
 let binary_op_to_string = function
-  | Eq -> "="
-  | Neq -> "<>"
-  | And -> "&&"
-  | Or -> "||"
+  | Eq ->
+    "="
+  | Neq ->
+    "<>"
+  | And ->
+    "&&"
+  | Or ->
+    "||"
 
 let rec term_to_string t =
   match t with
-  | T_name s -> s
+  | T_name s ->
+    s
   | T_tuple ts ->
     Printf.sprintf "(%s)" (String.concat ", " (List.map term_to_string ts))
   | T_app (name, args) ->
@@ -123,13 +129,11 @@ let rec term_to_string t =
       (Misc_utils.map_list_to_string_w_opt_paren term_to_string args)
   | T_unaryOp (op, t) ->
     Printf.sprintf "%s%s" (unary_op_to_string op)
-      (match t with
-       | T_name _
-       | T_app _
-       | T_unaryOp _
-         -> term_to_string t
-       | _ ->
-         Printf.sprintf "(%s)" (term_to_string t))
+      ( match t with
+        | T_name _ | T_app _ | T_unaryOp _ ->
+          term_to_string t
+        | _ ->
+          Printf.sprintf "(%s)" (term_to_string t) )
   | T_binaryOp (op, l, r) ->
     Printf.sprintf "%s %s %s"
       ( match l with
@@ -146,35 +150,34 @@ let rec term_to_string t =
 
 let rec pattern_to_string p =
   match p with
-  | Pat_typed_var { name; ty } ->
+  | Pat_typed_var {name; ty} ->
     Printf.sprintf "%s : %s" name ty
-  | Pat_var s -> s
+  | Pat_var s ->
+    s
   | Pat_tuple ps ->
-    (Misc_utils.map_list_to_string_w_opt_paren pattern_to_string ps)
+    Misc_utils.map_list_to_string_w_opt_paren pattern_to_string ps
   | Pat_app (f, ps) ->
-    Printf.sprintf "%s%s"
-      f
+    Printf.sprintf "%s%s" f
       (Misc_utils.map_list_to_string_w_opt_paren pattern_to_string ps)
   | Pat_eq t ->
     Printf.sprintf "=%s" (term_to_string t)
 
 let rec pterm_to_string t =
   match t with
-  | PT_name s -> s
+  | PT_name s ->
+    s
   | PT_tuple ts ->
-    (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string ts)
+    Misc_utils.map_list_to_string_w_opt_paren pterm_to_string ts
   | PT_app (name, args) ->
     Printf.sprintf "%s(%s)" name
       (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string args)
   | PT_unaryOp (op, t) ->
     Printf.sprintf "%s%s" (unary_op_to_string op)
-      (match t with
-       | PT_name _
-       | PT_app _
-       | PT_unaryOp _
-         -> pterm_to_string t
-       | _ ->
-         Printf.sprintf "(%s)" (pterm_to_string t))
+      ( match t with
+        | PT_name _ | PT_app _ | PT_unaryOp _ ->
+          pterm_to_string t
+        | _ ->
+          Printf.sprintf "(%s)" (pterm_to_string t) )
   | PT_binaryOp (op, l, r) ->
     Printf.sprintf "%s %s %s"
       ( match l with
@@ -188,83 +191,67 @@ let rec pterm_to_string t =
           pterm_to_string l
         | _ ->
           Printf.sprintf "(%s)" (pterm_to_string r) )
-  | PT_new { name; next } ->
-    Printf.sprintf "new %s : %s;\n%s"
-      name.name
-      name.ty
+  | PT_new {name; next} ->
+    Printf.sprintf "new %s : %s;\n%s" name.name name.ty
       (pterm_to_string next)
-  | PT_conditional { cond; true_branch; false_branch } -> (
+  | PT_conditional {cond; true_branch; false_branch} -> (
       match false_branch with
       | None ->
         Printf.sprintf "if %s then\n%s" (pterm_to_string cond)
           (pterm_to_string true_branch)
       | Some false_branch ->
-        Printf.sprintf "if %s then\n%s\nelse\n%s"
-          (pterm_to_string cond)
+        Printf.sprintf "if %s then\n%s\nelse\n%s" (pterm_to_string cond)
           (pterm_to_string true_branch)
-          (pterm_to_string false_branch)
-    )
-  | PT_eval { let_bind_pat; let_bind_term; true_branch; false_branch } -> (
+          (pterm_to_string false_branch) )
+  | PT_eval {let_bind_pat; let_bind_term; true_branch; false_branch} -> (
       match false_branch with
       | None ->
-        Printf.sprintf "let %s = %s in\n%s" (pattern_to_string let_bind_pat)
+        Printf.sprintf "let %s = %s in\n%s"
+          (pattern_to_string let_bind_pat)
           (pterm_to_string let_bind_term)
           (pterm_to_string true_branch)
       | Some false_branch ->
-        Printf.sprintf "let %s = %s in\n%s\nelse\n%s" (pattern_to_string let_bind_pat)
+        Printf.sprintf "let %s = %s in\n%s\nelse\n%s"
+          (pattern_to_string let_bind_pat)
           (pterm_to_string let_bind_term)
           (pterm_to_string true_branch)
-          (pterm_to_string false_branch)
-    )
-  | PT_insert { name; terms; next } ->
-    Printf.sprintf "insert(%s, %s);\n%s"
-      name
+          (pterm_to_string false_branch) )
+  | PT_insert {name; terms; next} ->
+    Printf.sprintf "insert(%s, %s);\n%s" name
       (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string terms)
       (pterm_to_string next)
-  | PT_get { name; pats; next } -> (
+  | PT_get {name; pats; next} -> (
       match next with
       | None ->
-        Printf.sprintf "get(%s, %s)"
-          name
+        Printf.sprintf "get(%s, %s)" name
           (Misc_utils.map_list_to_string_w_opt_paren pattern_to_string pats)
       | Some (true_branch, false_branch) -> (
           match false_branch with
           | None ->
-            Printf.sprintf "get(%s, %s) in\n%s"
-              name
+            Printf.sprintf "get(%s, %s) in\n%s" name
               (Misc_utils.map_list_to_string_w_opt_paren pattern_to_string pats)
               (pterm_to_string true_branch)
           | Some false_branch ->
-            Printf.sprintf "get(%s, %s) in\n%s\nelse\n%s"
-              name
+            Printf.sprintf "get(%s, %s) in\n%s\nelse\n%s" name
               (Misc_utils.map_list_to_string_w_opt_paren pattern_to_string pats)
               (pterm_to_string true_branch)
-              (pterm_to_string false_branch)
-        )
-    )
-  | PT_event { name; terms; next } -> (
+              (pterm_to_string false_branch) ) )
+  | PT_event {name; terms; next} -> (
       let term_str =
         Misc_utils.map_list_to_string_w_opt_paren pterm_to_string terms
       in
       match next with
       | None ->
-        Printf.sprintf "event%s%s"
-          name
-          term_str
+        Printf.sprintf "event%s%s" name term_str
       | Some next ->
-        Printf.sprintf "event%s%s;\n%s"
-          name
-          term_str
-          (pterm_to_string next)
+        Printf.sprintf "event%s%s;\n%s" name term_str (pterm_to_string next)
     )
 
 let mayfailterm_to_string t =
-  match t with
-  | MFT_term t -> term_to_string t
-  | MFT_fail -> "fail"
+  match t with MFT_term t -> term_to_string t | MFT_fail -> "fail"
 
 module Print_context = struct
-  type    process_structure_type =
+  type process_structure_type =
     | Let
     | IfElse
     | InOut
