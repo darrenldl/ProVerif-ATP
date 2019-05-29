@@ -56,6 +56,7 @@
 %token TYPE
 %token WEAKSECRPT
 %token YIELD
+%token DOT
 
 %token GET
 
@@ -201,6 +202,7 @@ mayfailterm:
   | FAIL     { MFT_fail }
 
 typedecl:
+  | { [] }
   | ts = typedecl; COMMA; name = NAME; COLON; ty = NAME  { {name; ty} :: ts }
 
 or_fail:
@@ -211,16 +213,29 @@ failtypedecl:
     { ({ name; ty }, match fail with None -> false | Some _ -> true) :: ts }
 
 decl:
-  | TYPE; name = NAME; opts = options
+  | TYPE; name = NAME; opts = options; DOT
     { Decl_ty (name, opts) }
-  | CHANNEL; l = nonempty_list(NAME)
+  | CHANNEL; l = separated_nonempty_list(COMMA, NAME); DOT
     { Decl_channel l }
-  | FREE; names = nonempty_list(NAME); COLON; ty = NAME; options = options
+  | FREE; names = separated_nonempty_list(COMMA, NAME); COLON; ty = NAME; options = options; DOT
     { Decl_free { names; ty; options } }
-  | CONST; names = nonempty_list(NAME); COLON; ty = NAME; options = options
+  | CONST; names = separated_nonempty_list(COMMA, NAME); COLON; ty = NAME; options = options; DOT
     { Decl_const { names; ty; options } }
+  | FUN; name = NAME; LEFT_PAREN; arg_tys = separated_list(COMMA, NAME); RIGHT_PAREN; COLON; ret_ty = NAME; DOT
+    { Decl_fun { name; arg_tys; ret_ty } }
+  | EQUATION; eqs = eq_list; options = options; DOT
+    { Decl_equation { eqs; options } }
   | PROCESS; p = process
     { Decl_proc p }
+
+forall_typedecl:
+  |                        { [] }
+  | FORALL; tys = typedecl { tys }
+
+eq_list:
+  | { [] }
+  | eqs = eq_list; SEMICOLON; tys = forall_typedecl; t1 = term; EQ; t2 = term
+    { (tys, t1, t2) :: eqs }
 
 process:
   | NULL_PROC                                     { Proc_null }

@@ -105,6 +105,8 @@ rule read =
   | '|'        { PARALLEL }
   | '!'        { REPLICATE }
 
+  | '.'        { DOT }
+
   (* name *)
   | name       { NAME name }
 

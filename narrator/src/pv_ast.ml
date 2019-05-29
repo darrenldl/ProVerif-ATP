@@ -79,12 +79,15 @@ and process =
       { name : string
       ; pats : pattern list
       ; next : (process * process option) option }
+  | Proc_event of {name : string; terms : pterm list; next : process option}
 
 and decl =
   | Decl_ty of string * string list
   | Decl_channel of string list
   | Decl_free of { names : string list; ty : string; options : string list }
   | Decl_const of { names : string list; ty : string; options : string list }
+  | Decl_fun of { name : string; arg_tys : string list; ret_ty : string }
+  | Decl_equation of { eqs : (name_ty list * term * term) list; options : string list }
   | Decl_proc of process
 
 let unary_op_to_string = function Not -> "~"
