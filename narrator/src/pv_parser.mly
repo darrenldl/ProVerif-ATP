@@ -115,8 +115,10 @@
 parse_decls:
   | l = list(decl); EOF { l }
 
-decl:
-  | PROCESS; p = process { Decl_proc p }
+options:
+  |                                         { [] }
+  | LEFT_BRACK; l = list(NAME); RIGHT_BRACK
+    { l }
 
 term:
   | name = NAME { T_name name }
@@ -134,29 +136,6 @@ term:
     { T_binaryOp (Or, t1, t2) }
   | NOT; LEFT_PAREN; t = term; RIGHT_PAREN
     { T_unaryOp (Not, t) }
-
-pattern:
-  | name = NAME; COLON; ty = NAME { Pat_typed_var { name; ty } }
-  | name = NAME                   { Pat_var name }
-  | LEFT_PAREN; l = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN
-    { Pat_tuple l }
-  | name = NAME; LEFT_PAREN; l = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN
-    { Pat_app (name, l) }
-  | EQ; t = term                  { Pat_eq t }
-
-mayfailterm:
-  | t = term { MFT_term t }
-  | FAIL     { MFT_fail }
-
-typedecl:
-  | ts = typedecl; COMMA; name = NAME; COLON; ty = NAME  { {name; ty} :: ts }
-
-or_fail:
-  | OR; FAIL { () }
-
-failtypedecl:
-  | ts = failtypedecl; COMMA; name = NAME; COLON; ty = NAME; fail = option(or_fail)
-    { ({ name; ty }, match fail with None -> false | Some _ -> true) :: ts }
 
 pterm:
   | name = NAME { PT_name name }
@@ -207,6 +186,41 @@ pterm:
     { PT_event { name; terms; next = None } }
   | EVENT; name = NAME; LEFT_PAREN; terms = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN; SEMICOLON; next = pterm %prec PT_EVENT
     { PT_event { name; terms; next = Some next } }
+
+pattern:
+  | name = NAME; COLON; ty = NAME { Pat_typed_var { name; ty } }
+  | name = NAME                   { Pat_var name }
+  | LEFT_PAREN; l = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN
+    { Pat_tuple l }
+  | name = NAME; LEFT_PAREN; l = separated_nonempty_list(COMMA, pattern); RIGHT_PAREN
+    { Pat_app (name, l) }
+  | EQ; t = term                  { Pat_eq t }
+
+mayfailterm:
+  | t = term { MFT_term t }
+  | FAIL     { MFT_fail }
+
+typedecl:
+  | ts = typedecl; COMMA; name = NAME; COLON; ty = NAME  { {name; ty} :: ts }
+
+or_fail:
+  | OR; FAIL { () }
+
+failtypedecl:
+  | ts = failtypedecl; COMMA; name = NAME; COLON; ty = NAME; fail = option(or_fail)
+    { ({ name; ty }, match fail with None -> false | Some _ -> true) :: ts }
+
+decl:
+  | TYPE; name = NAME; opts = options
+    { Decl_ty (name, opts) }
+  | CHANNEL; l = nonempty_list(NAME)
+    { Decl_channel l }
+  | FREE; names = nonempty_list(NAME); COLON; ty = NAME; options = options
+    { Decl_free { names; ty; options } }
+  | CONST; names = nonempty_list(NAME); COLON; ty = NAME; options = options
+    { Decl_const { names; ty; options } }
+  | PROCESS; p = process
+    { Decl_proc p }
 
 process:
   | NULL_PROC                                     { Proc_null }
