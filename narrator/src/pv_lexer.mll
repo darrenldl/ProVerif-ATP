@@ -23,6 +23,8 @@ let numeric           = ['0'-'9']
 let alpha_numeric     = (lower_alpha | upper_alpha | numeric | ['_'])*
 let other_name_symbol = ['\'']
 
+let comment = "(*" printable_char* "*)"
+
 let name = (alpha_numeric | other_name_symbol)+
 
 rule read =
@@ -109,6 +111,8 @@ rule read =
 
   (* name *)
   | name       { NAME name }
+
+  | comment    { read lexbuf }
 
   | _                    { raise (SyntaxError ("Unexpected char: " ^ get lexbuf)) }
   | eof { EOF }
