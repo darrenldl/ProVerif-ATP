@@ -59,21 +59,26 @@ and mayfailterm =
 
 and process =
   | Proc_null
+  | Proc_macro of string * pterm list
   | Proc_parallel of process * process
   | Proc_replicate of process
-  | Proc_new of {name : name_ty; next : process}
-  | Proc_in of {channel : pterm; message : pattern; next : process}
-  | Proc_out of {channel : pterm; message : pterm; next : process}
+  | Proc_new of {names : string list; ty : string; next : process}
   | Proc_conditional of
       { cond : pterm
       ; true_branch : process
       ; false_branch : process }
+  | Proc_in of {channel : pterm; message : pattern; next : process}
+  | Proc_out of {channel : pterm; message : pterm; next : process}
   | Proc_eval of
       { let_bind_pat : pattern
       ; let_bind_term : pterm
       ; true_branch : process
       ; false_branch : process }
-  | Proc_macro of string * pterm list
+  | Proc_insert of { name : string; terms : pterm list; next : process }
+  | Proc_get of
+      { name : string
+      ; pats : pattern list
+      ; next : (process * process option) option }
 
 and decl = Decl_proc of process
 
