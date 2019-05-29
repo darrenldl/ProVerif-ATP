@@ -259,4 +259,102 @@ module Print_context = struct
     | New
     | Get
     | Insert
+
+  type decl_structure_type =
+    | Const
+    | Free
+    | Table
+    | FunDec
+    | Equation
+    | LetProc
+    | Process
+    | Query
+
+  let indent_space_count = 2
+
+  type t =
+    { mutable proc_name : string option
+    ; mutable prev_decl_struct_ty : decl_structure_type option
+    ; mutable cur_decl_struct_ty : decl_structure_type option
+    ; mutable prev_proc_struct_ty : process_structure_type option
+    ; mutable cur_proc_struct_ty : process_structure_type option
+    ; mutable out_count : int
+    ; mutable indent : int
+    ; mutable buffer : (int * string) list }
+
+  let make () =
+    { proc_name = None
+    ; prev_decl_struct_ty = None
+    ; cur_decl_struct_ty = None
+    ; prev_proc_struct_ty = None
+    ; cur_proc_struct_ty = None
+    ; out_count = 0
+    ; indent = 0
+    ; buffer = [] }
+
+  let reset ctx =
+    ctx.proc_name <- None;
+    ctx.prev_decl_struct_ty <- None;
+    ctx.cur_decl_struct_ty <- None;
+    ctx.prev_proc_struct_ty <- None;
+    ctx.cur_proc_struct_ty <- None;
+    ctx.out_count <- 1;
+    ctx.indent <- 0;
+    ctx.buffer <- []
+
+  let set_decl_struct_ty ctx ty =
+    ctx.prev_decl_struct_ty <- ctx.cur_decl_struct_ty;
+    ctx.cur_decl_struct_ty <- Some ty
+
+  let set_proc_struct_ty ctx ty =
+    ctx.prev_proc_struct_ty <- ctx.cur_proc_struct_ty;
+    ctx.cur_proc_struct_ty <- Some ty
+
+  let set_proc_name ctx x =
+    ctx.proc_name <- Some x;
+    ctx.prev_proc_struct_ty <- None;
+    ctx.cur_proc_struct_ty <- None;
+    ctx.out_count <- 0
+
+  let set_proc_name_none ctx =
+    ctx.proc_name <- None;
+    ctx.prev_proc_struct_ty <- None;
+    ctx.cur_proc_struct_ty <- None;
+    ctx.out_count <- 0
+
+  let incre_indent ctx = ctx.indent <- ctx.indent + 1
+
+  let decre_indent ctx = ctx.indent <- ctx.indent - 1
+
+  let incre_out_count ctx = ctx.out_count <- ctx.out_count + 1
+
+  let push ctx (s : string) = ctx.buffer <- (ctx.indent, s) :: ctx.buffer
+
+  let insert_blank_line_if_diff_decl_struct_ty ctx =
+    match (ctx.prev_decl_struct_ty, ctx.cur_decl_struct_ty) with
+    | Some ty1, Some ty2 when ty1 <> ty2 ->
+      push ctx ""
+    | _ ->
+      ()
+
+  let insert_blank_line_anyway_decl_struct_ty ctx =
+    match ctx.prev_decl_struct_ty with Some _ -> push ctx "" | None -> ()
+
+  let insert_blank_line_if_diff_proc_struct_ty ctx =
+    match (ctx.prev_proc_struct_ty, ctx.cur_proc_struct_ty) with
+    | Some ty1, Some ty2 when ty1 <> ty2 ->
+      push ctx ""
+    | _ ->
+      ()
+
+  let insert_blank_line_anyway_proc_struct_ty ctx =
+    match ctx.prev_proc_struct_ty with Some _ -> push ctx "" | None -> ()
+
+  let finish ctx =
+    String.concat "\n"
+      (List.fold_left
+         (fun acc (indent, s) ->
+            let padding = String.make (indent * indent_space_count) ' ' in
+            Printf.sprintf "%s%s" padding s :: acc )
+         [] ctx.buffer)
 end
