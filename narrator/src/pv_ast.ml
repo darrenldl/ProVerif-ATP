@@ -434,3 +434,14 @@ let rec process_to_string_debug p =
           (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string terms)
           (process_to_string_debug next)
     )
+
+let rec decl_to_string_debug d =
+  match d with
+  | Decl_ty (ty, options) -> (
+      match options with
+      | [] -> Printf.sprintf "type %s." ty
+      | l ->
+        Printf.sprintf "type %s %s." ty
+          (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id l)
+    )
+  | Decl_

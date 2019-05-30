@@ -1,5 +1,7 @@
 open Core_kernel
 
+let id x = x
+
 let string_filter (input : string) (ignore : string) : string =
   let pred c : bool = not (String.contains ignore c) in
   String.filter input ~f:pred
@@ -12,6 +14,9 @@ let map_list_to_string (f : 'a -> string) (l : 'a list) : string =
 
 let map_list_to_string_w_opt_paren (f : 'a -> string) (l : 'a list) : string =
   match l with [] -> "" | l -> Printf.sprintf "(%s)" (map_list_to_string f l)
+
+let map_list_to_string_w_opt_brack (f : 'a -> string) (l : 'a list) : string =
+  match l with [] -> "" | l -> Printf.sprintf "[%s]" (map_list_to_string f l)
 
 let unwrap_opt (x : 'a option) : 'a =
   match x with Some x -> x | None -> failwith "Unexpected pattern"
