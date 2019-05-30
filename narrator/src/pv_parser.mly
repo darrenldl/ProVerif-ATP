@@ -224,8 +224,8 @@ decl:
     { Decl_free { names; ty; options } }
   | CONST; names = separated_nonempty_list(COMMA, NAME); COLON; ty = NAME; options = options; DOT
     { Decl_const { names; ty; options } }
-  | FUN; name = NAME; LEFT_PAREN; arg_tys = separated_list(COMMA, NAME); RIGHT_PAREN; COLON; ret_ty = NAME; DOT
-    { Decl_fun { name; arg_tys; ret_ty } }
+  | FUN; name = NAME; LEFT_PAREN; arg_tys = separated_list(COMMA, NAME); RIGHT_PAREN; COLON; ret_ty = NAME; options = options; DOT
+    { Decl_fun { name; arg_tys; ret_ty; options } }
   | EQUATION; eqs = eq_list; options = options; DOT
     { Decl_equation { eqs; options } }
   | PRED; name = NAME; LEFT_PAREN; arg_tys = separated_list(COMMA, NAME); RIGHT_PAREN; DOT

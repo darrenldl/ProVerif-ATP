@@ -86,7 +86,7 @@ and decl =
   | Decl_channel of string list
   | Decl_free of {names : string list; ty : string; options : string list}
   | Decl_const of {names : string list; ty : string; options : string list}
-  | Decl_fun of {name : string; arg_tys : string list; ret_ty : string}
+  | Decl_fun of {name : string; arg_tys : string list; ret_ty : string; options : string list }
   | Decl_equation of
       { eqs : (name_ty list * term * term) list
       ; options : string list }
@@ -452,11 +452,51 @@ let rec decl_to_string_debug d =
       (String.concat ", " names)
       ty
       (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
-  | Decl_const { names; ty; options } -> ""
-  | Decl_fun { name; arg_tys; ret_ty } ->""
-  | Decl_equation { eqs; options } ->""
-  | Decl_pred { name; arg_tys } ->""
-  | Decl_table { name; tys } ->""
-  | Decl_let_proc { name; args } ->""
-  | Decl_event { name; args } ->""
-  | Decl_query qs ->""
+  | Decl_const { names; ty; options } ->
+    Printf.sprintf "const %s : %s%s."
+      (String.concat ", " names)
+      ty
+      (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+  | Decl_fun { name; arg_tys; ret_ty } ->
+    Printf.sprintf "fun %s(%s) : %s."
+      name
+      (String.concat ", " arg_tys)
+      ret_ty
+  | Decl_equation { eqs; options } ->
+    Printf.sprintf "equation%s"
+      (String.concat
+         ";"
+         (List.map (fun (name_tys, left, right) ->
+              (match name_tys with
+              | [] -> ""
+              | l -> Printf.sprintf "forall %s" (String.concat ", " (List.map (fun {name; ty} -> Printf.sprintf "%s : %s" name ty) l)))
+              ^
+              (term_to_string left)
+              ^
+              " = "
+              ^
+              (term_to_string right)
+            )
+             eqs
+         )
+      )
+  | Decl_pred { name; arg_tys } ->
+    Printf.sprintf "pred %s(%s)."
+      name
+      (String.concat ", " arg_tys)
+  | Decl_table { name; tys } ->
+    Printf.sprintf "table %s(%s)."
+      name
+      (String.concat ", " tys)
+  | Decl_let_proc { name; args; process } -> (
+      Printf.sprintf "let %s%s = \n%s"
+        name
+        (Misc_utils.map_list_to_string_w_opt_paren (fun {name; ty} -> Printf.sprintf "%s : %s" name ty) args)
+        (process_to_string_debug process)
+    )
+  | Decl_event { name; args } ->
+    Printf.sprintf "event %s%s."
+      name
+      (Misc_utils.map_list_to_string_w_opt_paren (fun {name; ty} -> Printf.sprintf "%s : %s" name ty) args)
+  | Decl_query qs ->
+    Printf.sprintf "query %s."
