@@ -252,7 +252,7 @@ let on ?(selector : string option) (cy : t Js.t) ~(event : string)
     ~(handler : event Js.t -> unit) : unit =
   let handler : event Js.t -> unit =
     fun ev ->
-      Lwt_js.yield () >>= (fun () -> handler ev; Lwt.return_unit) |> ignore
+      Js_of_ocaml_lwt.Lwt_js.yield () >>= (fun () -> handler ev; Lwt.return_unit) |> ignore
   in
   match selector with
   | None ->

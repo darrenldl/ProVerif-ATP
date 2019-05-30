@@ -263,13 +263,13 @@ let () =
       Cytoscape.disable_node_border cy_main ~id
   in
   Cytoscape.on cy_main ~event:"boxstart" ~handler:(fun _ev ->
-      Lwt_js.yield ()
+      Js_of_ocaml_lwt.Lwt_js.yield ()
       >>= (fun () ->
           js_ctx.box_selected_nodes <- [];
           return_unit )
       |> ignore );
   Cytoscape.on cy_main ~event:"box" ~selector:"node" ~handler:(fun ev ->
-      Lwt_js.yield ()
+      Js_of_ocaml_lwt.Lwt_js.yield ()
       >>= (fun () ->
           let target_id = Js.to_string ev##.target_node##id in
           js_ctx.box_selected_nodes <- target_id :: js_ctx.box_selected_nodes;
