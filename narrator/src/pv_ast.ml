@@ -445,12 +445,18 @@ let rec decl_to_string_debug d =
           (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id l)
     )
   | Decl_channel l ->
+    Printf.sprintf "channel %s."
+      (String.concat ", " l)
   | Decl_free { names; ty; options } ->
-  | Decl_const { names; ty; options } ->
-  | Decl_fun { names; arg_tys; ret_ty } ->
-  | Decl_equation { eqs; options } ->
-  | Decl_pred { name; arg_tys } ->
-  | Decl_table { name; tys } ->
-  | Decl_let_proc { name; args } ->
-  | Decl_event { name; args } ->
-  | Decl_query qs ->
+    Printf.sprintf "free %s : %s%s."
+      (String.concat ", " names)
+      ty
+      (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+  | Decl_const { names; ty; options } -> ""
+  | Decl_fun { name; arg_tys; ret_ty } ->""
+  | Decl_equation { eqs; options } ->""
+  | Decl_pred { name; arg_tys } ->""
+  | Decl_table { name; tys } ->""
+  | Decl_let_proc { name; args } ->""
+  | Decl_event { name; args } ->""
+  | Decl_query qs ->""
