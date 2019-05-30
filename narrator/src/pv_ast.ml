@@ -358,3 +358,79 @@ module Print_context = struct
             Printf.sprintf "%s%s" padding s :: acc )
          [] ctx.buffer)
 end
+
+let rec process_to_string_debug p =
+  match p with
+  | Proc_null -> "0"
+  | Proc_macro (name, args) ->
+    Printf.sprintf "%s%s" name
+      (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string args)
+  | Proc_parallel (p1, p2) ->
+    Printf.sprintf "%s | %s"
+      (process_to_string_debug p1)
+      (process_to_string_debug p2)
+  | Proc_replicate p ->
+    Printf.sprintf "! %s" (process_to_string_debug p)
+  | Proc_new {names; ty; next} ->
+    Printf.sprintf "new %s : %s;\n%s"
+      (String.concat ", " names)
+      ty
+      (process_to_string_debug next)
+  | Proc_conditional { cond; true_branch; false_branch } ->
+    Printf.sprintf "if %s then\n%s\nelse\n%s"
+      (pterm_to_string cond)
+      (process_to_string_debug true_branch)
+      (process_to_string_debug false_branch)
+  | Proc_in { channel; message; next } ->
+    Printf.sprintf "in(%s, %s);\n%s"
+      (pterm_to_string channel)
+      (pattern_to_string message)
+      (process_to_string_debug next)
+  | Proc_out { channel; message; next } ->
+    Printf.sprintf "out(%s, %s);\n%s"
+      (pterm_to_string channel)
+      (pterm_to_string message)
+      (process_to_string_debug next)
+  | Proc_eval { let_bind_pat; let_bind_term; true_branch; false_branch } ->
+    Printf.sprintf "let %s = %s in\n%s\nelse\n%s"
+      (pattern_to_string let_bind_pat)
+      (pterm_to_string let_bind_term)
+      (process_to_string_debug true_branch)
+      (process_to_string_debug false_branch)
+  | Proc_insert { name; terms; next } ->
+    Printf.sprintf "insert %s(%s);\n%s"
+      name
+      (Misc_utils.map_list_to_string pterm_to_string terms)
+      (process_to_string_debug next)
+  | Proc_get { name; pats; next } -> (
+      match next with
+      | None ->
+        Printf.sprintf "get %s(%s)"
+          name
+          (Misc_utils.map_list_to_string pattern_to_string pats)
+      | Some (true_branch, false_branch) ->
+        match false_branch with
+        | None ->
+          Printf.sprintf "get %s(%s) in\n%s"
+            name
+            (Misc_utils.map_list_to_string pattern_to_string pats)
+            (process_to_string_debug true_branch)
+        | Some false_branch ->
+          Printf.sprintf "get %s(%s) in\n%s\nelse\n%s"
+            name
+            (Misc_utils.map_list_to_string pattern_to_string pats)
+            (process_to_string_debug true_branch)
+            (process_to_string_debug false_branch)
+    )
+  | Proc_event { name; terms; next } -> (
+      match next with
+      | None ->
+        Printf.sprintf "get %s(%s)"
+          name
+          (Misc_utils.map_list_to_string pterm_to_string terms)
+      | Some next ->
+        Printf.sprintf "event %s%s;\n%s"
+          name
+          (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string terms)
+          (process_to_string_debug next)
+    )
