@@ -261,7 +261,9 @@ decl:
     { Decl_event { name; args = [] } }
   | EVENT; name = NAME; LEFT_PAREN; args = separated_list(COMMA, name_ty); RIGHT_PAREN; DOT
     { Decl_event { name; args } }
-  | QUERY; name_tys = loption(l = typedecl; SEMICOLON { l }); query = separated_list(SEMICOLON, gterm); DOT
+  | QUERY; query = separated_list(SEMICOLON, gterm); DOT
+    { Decl_query { name_tys = []; query = List.map (fun x -> Q_term x) query } }
+  | QUERY; name_tys = typedecl; SEMICOLON; query = separated_list(SEMICOLON, gterm); DOT
     { Decl_query { name_tys; query = List.map (fun x -> Q_term x) query } }
 
 forall_typedecl:
