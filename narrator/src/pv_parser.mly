@@ -89,7 +89,7 @@
 
 %token EOF
 
-%start <Pv_ast.decl list> parse_decls
+%start <Pv_ast.decl list * Pv_ast.process> parse
 
 %nonassoc PROC_NEW
 %nonassoc PROC_IN
@@ -113,8 +113,9 @@
 
 %%
 
-parse_decls:
-  | l = list(decl); EOF { l }
+parse:
+  | decls = list(decl); PROCESS; main_proc = process; EOF
+    { (decls, main_proc) }
 
 options:
   |                                         { [] }
@@ -278,6 +279,8 @@ eq_list:
 
 process:
   | NULL_PROC                                     { Proc_null }
+  | name = NAME
+    { Proc_macro (name, []) }
   | name = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, pterm); RIGHT_PAREN
     { Proc_macro (name, args) }
   | LEFT_PAREN; p = process; RIGHT_PAREN

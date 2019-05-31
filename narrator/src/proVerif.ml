@@ -6,20 +6,20 @@ let lexbuf_to_pos_str lexbuf =
     (pos.pos_cnum - pos.pos_bol - 1)
 
 let parse_with_error lexbuf =
-  try Ok (Pv_parser.parse_decls Pv_lexer.read lexbuf) with
+  try Ok (Pv_parser.parse Pv_lexer.read lexbuf) with
   | Pv_lexer.SyntaxError msg ->
     Error (Printf.sprintf "%s: %s" (lexbuf_to_pos_str lexbuf) msg)
   | Pv_parser.Error ->
     Error (Printf.sprintf "%s: syntax error" (lexbuf_to_pos_str lexbuf))
 
 let parse_pv_code (input : string) :
-  (Pv_ast.decl list, string) result =
+  (Pv_ast.decl list * Pv_ast.process, string) result =
   let lexbuf = Lexing.from_string input in
   parse_with_error lexbuf
 
 let process_string s =
   match parse_pv_code s with
-  | Ok l -> Ok (String.concat "\n" (List.map Pv_ast.decl_to_string_debug l))
+  | Ok (decls, main_proc) -> Ok ((String.concat "\n" (List.map Pv_ast.decl_to_string_debug decls)) ^ "process\n" ^ (Pv_ast.process_to_string_debug main_proc))
   | Error s -> Error s
 
 let str =
