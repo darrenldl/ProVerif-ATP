@@ -7,12 +7,10 @@ let lexbuf_to_pos_str lexbuf =
 
 let parse_with_error lexbuf =
   try Ok (Pv_parser.parse_decls Pv_lexer.read lexbuf) with
-  | Tptp_lexer.SyntaxError msg ->
+  | Pv_lexer.SyntaxError msg ->
     Error (Printf.sprintf "%s: %s" (lexbuf_to_pos_str lexbuf) msg)
-  | Tptp_parser.Error ->
+  | Pv_parser.Error ->
     Error (Printf.sprintf "%s: syntax error" (lexbuf_to_pos_str lexbuf))
-  | Tptp_ast.ErrorWithMsg s ->
-    Error (Printf.sprintf "%s: %s" (lexbuf_to_pos_str lexbuf) s)
 
 let parse_pv_code (input : string) :
   (Pv_ast.decl list, string) result =
