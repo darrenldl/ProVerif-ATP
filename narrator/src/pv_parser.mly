@@ -222,6 +222,8 @@ decl:
     { Decl_channel l }
   | FREE; names = separated_nonempty_list(COMMA, NAME); COLON; ty = NAME; options = options; DOT
     { Decl_free { names; ty; options } }
+  | FREE; names = separated_nonempty_list(COMMA, NAME); COLON; CHANNEL; options = options; DOT
+    { Decl_free { names; ty = "channel"; options } }
   | CONST; names = separated_nonempty_list(COMMA, NAME); COLON; ty = NAME; options = options; DOT
     { Decl_const { names; ty; options } }
   | FUN; name = NAME; LEFT_PAREN; arg_tys = separated_list(COMMA, NAME); RIGHT_PAREN; COLON; ret_ty = NAME; options = options; DOT
