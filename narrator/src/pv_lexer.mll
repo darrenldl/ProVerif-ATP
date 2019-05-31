@@ -110,7 +110,7 @@ rule read =
   | '.'        { DOT }
 
   (* name *)
-  | name       { NAME name }
+  | name       { NAME (get lexbuf) }
 
   | comment    { read lexbuf }
 

@@ -47,14 +47,14 @@
 %token PUTBEGIN
 %token QUERY
 %token REDUC
-%token SECRPT
-%token SPT
+%token SECRET
+%token SET
 %token SUCHTHAT
 %token SYNC
 %token TABLE
 %token THEN
 %token TYPE
-%token WEAKSECRPT
+%token WEAKSECRET
 %token YIELD
 %token DOT
 

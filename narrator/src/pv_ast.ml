@@ -250,6 +250,28 @@ let rec pterm_to_string t =
 let mayfailterm_to_string t =
   match t with MFT_term t -> term_to_string t | MFT_fail -> "fail"
 
+let rec gterm_to_string t =
+  match t with
+  | GT_name s -> s
+  | GT_app (name, terms) ->
+    Printf.sprintf "%s(%s)" name
+      (Misc_utils.map_list_to_string gterm_to_string terms)
+  | GT_binaryOp (op, l, r) ->
+    Printf.sprintf "%s %s %s"
+      (gterm_to_string l)
+      (binary_op_to_string op)
+      (gterm_to_string r)
+  | GT_event terms ->
+    Printf.sprintf "event(%s)"
+      (Misc_utils.map_list_to_string gterm_to_string terms)
+
+let query_single_to_string_debug q =
+  match q with
+  | Q_term t -> gterm_to_string t
+
+let query_to_string_debug qs =
+  String.concat ";" (List.map query_single_to_string_debug qs)
+
 module Print_context = struct
   type process_structure_type =
     | Let
@@ -435,7 +457,7 @@ let rec process_to_string_debug p =
           (process_to_string_debug next)
     )
 
-let rec decl_to_string_debug d =
+let decl_to_string_debug d =
   match d with
   | Decl_ty (ty, options) -> (
       match options with
@@ -457,12 +479,13 @@ let rec decl_to_string_debug d =
       (String.concat ", " names)
       ty
       (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
-  | Decl_fun { name; arg_tys; ret_ty } ->
-    Printf.sprintf "fun %s(%s) : %s."
+  | Decl_fun { name; arg_tys; ret_ty; options } ->
+    Printf.sprintf "fun %s(%s) : %s%s."
       name
       (String.concat ", " arg_tys)
       ret_ty
-  | Decl_equation { eqs; options } ->
+      (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+  | Decl_equation { eqs; _ } ->
     Printf.sprintf "equation%s"
       (String.concat
          ";"
@@ -500,3 +523,4 @@ let rec decl_to_string_debug d =
       (Misc_utils.map_list_to_string_w_opt_paren (fun {name; ty} -> Printf.sprintf "%s : %s" name ty) args)
   | Decl_query qs ->
     Printf.sprintf "query %s."
+      (query_to_string_debug qs)
