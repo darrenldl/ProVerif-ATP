@@ -202,8 +202,8 @@ mayfailterm:
   | FAIL     { MFT_fail }
 
 typedecl:
-  | { [] }
-  | ts = typedecl; COMMA; name = NAME; COLON; ty = NAME  { {name; ty} :: ts }
+  | ts = separated_list(COMMA, name = NAME; COLON; ty = NAME { { name; ty } })
+    { ts }
 
 or_fail:
   | OR; FAIL { () }
@@ -244,13 +244,14 @@ decl:
     { Decl_event { name; args } }
 
 forall_typedecl:
-  |                        { [] }
-  | FORALL; tys = typedecl { tys }
+  |                                   { [] }
+  | FORALL; tys = typedecl; SEMICOLON { tys }
+
+eq:
+  | tys = forall_typedecl; t1 = term; EQ; t2 = term { (tys, t1, t2) }
 
 eq_list:
-  | { [] }
-  | eqs = eq_list; SEMICOLON; tys = forall_typedecl; t1 = term; EQ; t2 = term
-    { (tys, t1, t2) :: eqs }
+  | eqs = separated_list(SEMICOLON, eq) { eqs }
 
 process:
   | NULL_PROC                                     { Proc_null }
