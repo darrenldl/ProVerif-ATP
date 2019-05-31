@@ -1807,7 +1807,10 @@ module Protocol_step = struct
       | ["in"; n] ->
         aux [] proc_name_parts (Some In) (int_of_string_opt n)
       | x :: xs ->
-        aux xs (x :: proc_name_parts) in_out n
+        if x = "tuple" then
+          aux xs proc_name_parts in_out n
+        else
+          aux xs (x :: proc_name_parts) in_out n
     in
     aux (String.split_on_char '_' s) [] None None
 
