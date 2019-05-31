@@ -15,6 +15,10 @@
 let white                = [' ' '\t']+
 let newline              = '\r' | '\n' | "\r\n"
 
+let not_star_paren       = ([^'*']*['*']['*']*[^ '*' ')'])*[^'*']*
+
+let not_star         = [^'*']
+
 let printable_char   = ['\032'-'\126']
 
 let upper_alpha       = ['A'-'Z']
@@ -22,8 +26,6 @@ let lower_alpha       = ['a'-'z']
 let numeric           = ['0'-'9']
 let alpha_numeric     = (lower_alpha | upper_alpha | numeric | ['_'])*
 let other_name_symbol = ['\'']
-
-let comment = "(*" printable_char* "*)"
 
 let name = (alpha_numeric | other_name_symbol)+
 
@@ -112,7 +114,14 @@ rule read =
   (* name *)
   | name       { NAME (get lexbuf) }
 
-  | comment    { read lexbuf }
+  | "(*"       { comment lexbuf }
 
   | _                    { raise (SyntaxError ("Unexpected char: " ^ get lexbuf)) }
   | eof { EOF }
+
+and comment =
+  parse
+  | newline        { new_line lexbuf; comment lexbuf }
+  | "*)"           { read lexbuf }
+  | _              { comment lexbuf }
+  | eof            { raise (SyntaxError ("Unterminated comment")) }
