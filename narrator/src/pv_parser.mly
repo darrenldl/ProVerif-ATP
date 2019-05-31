@@ -212,6 +212,25 @@ failtypedecl:
   | ts = failtypedecl; COMMA; name = NAME; COLON; ty = NAME; fail = option(or_fail)
     { ({ name; ty }, match fail with None -> false | Some _ -> true) :: ts }
 
+gterm:
+  | name = NAME { GT_name name }
+  | LEFT_PAREN; terms = separated_nonempty_list(COMMA, gterm); RIGHT_PAREN
+    { GT_tuple terms }
+  | f = NAME; LEFT_PAREN; args = separated_nonempty_list(COMMA, gterm); RIGHT_PAREN
+    { GT_app (f, args) }
+  | t1 = gterm; EQ; t2 = gterm
+    { GT_binaryOp (Eq, t1, t2) }
+  | t1 = gterm; NEQ; t2 = gterm
+    { GT_binaryOp (Neq, t1, t2) }
+  | t1 = gterm; AND; t2 = gterm
+    { GT_binaryOp (And, t1, t2) }
+  | t1 = gterm; OR; t2 = gterm
+    { GT_binaryOp (Or, t1, t2) }
+  | LET; name = NAME; EQ; term = gterm; IN; next = gterm
+    { GT_let { name; term; next } }
+  | EVENT; LEFT_PAREN; terms = separated_nonempty_list(COMMA, gterm); RIGHT_PAREN
+    { GT_event terms }
+
 name_ty:
   | name = NAME; COLON; ty = NAME { { name; ty } }
 
@@ -242,6 +261,8 @@ decl:
     { Decl_event { name; args = [] } }
   | EVENT; name = NAME; LEFT_PAREN; args = separated_list(COMMA, name_ty); RIGHT_PAREN; DOT
     { Decl_event { name; args } }
+  | QUERY; name_tys = loption(l = typedecl; SEMICOLON { l }); query = separated_list(SEMICOLON, gterm); DOT
+    { Decl_query { name_tys; query = List.map (fun x -> Q_term x) query } }
 
 forall_typedecl:
   |                                   { [] }

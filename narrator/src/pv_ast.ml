@@ -94,7 +94,7 @@ and decl =
   | Decl_table of {name : string; tys : string list}
   | Decl_let_proc of {name : string; args : name_ty list; process : process}
   | Decl_event of {name : string; args : name_ty list}
-  | Decl_query of query
+  | Decl_query of { name_tys : name_ty list; query : query }
 
 and query = query_single list
 
@@ -105,6 +105,11 @@ and gterm =
   | GT_app of string * gterm list
   | GT_binaryOp of binary_op * gterm * gterm
   | GT_event of gterm list
+  | GT_tuple of gterm list
+  | GT_let of
+      { name : string
+      ; term : gterm
+      ; next : gterm }
 
 let unary_op_to_string = function Not -> "~"
 
@@ -117,6 +122,9 @@ let binary_op_to_string = function
     "&&"
   | Or ->
     "||"
+
+let name_ty_to_string { name; ty } =
+  Printf.sprintf "%s : %s" name ty
 
 let rec term_to_string t =
   match t with
@@ -264,6 +272,14 @@ let rec gterm_to_string t =
   | GT_event terms ->
     Printf.sprintf "event(%s)"
       (Misc_utils.map_list_to_string gterm_to_string terms)
+  | GT_tuple terms ->
+    Printf.sprintf "(%s)"
+      (Misc_utils.map_list_to_string gterm_to_string terms)
+  | GT_let { name; term; next } ->
+    Printf.sprintf "let %s = %s in %s"
+      name
+      (gterm_to_string term)
+      (gterm_to_string next)
 
 let query_single_to_string_debug q =
   match q with
@@ -521,6 +537,9 @@ let decl_to_string_debug d =
     Printf.sprintf "event %s%s."
       name
       (Misc_utils.map_list_to_string_w_opt_paren (fun {name; ty} -> Printf.sprintf "%s : %s" name ty) args)
-  | Decl_query qs ->
-    Printf.sprintf "query %s."
-      (query_to_string_debug qs)
+  | Decl_query { name_tys; query } ->
+    Printf.sprintf "query %s%s."
+      (match name_tys with
+       | [] -> ""
+       | l -> Printf.sprintf "%s;" (Misc_utils.map_list_to_string name_ty_to_string name_tys))
+      (query_to_string_debug query)
