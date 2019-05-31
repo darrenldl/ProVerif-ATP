@@ -269,32 +269,41 @@ struct
       'a IdMap.t =
       let rec aux ids f m =
         match ids with
-        | [] -> m
+        | [] ->
+          m
         | x :: xs -> (
             match IdMap.find_opt x m with
-            | None -> aux xs f m
-            | Some d -> aux xs f (IdMap.add x (f d) m) )
+            | None ->
+              aux xs f m
+            | Some d ->
+              aux xs f (IdMap.add x (f d) m) )
       in
       aux ids f m
 
     let add_single_to_bucket ~(bucket_id : id) ~(data : 'a)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       match IdMap.find_opt bucket_id m with
-      | None -> IdMap.add bucket_id [data] m
-      | Some l -> IdMap.add bucket_id (List.sort_uniq compare (data :: l)) m
+      | None ->
+        IdMap.add bucket_id [data] m
+      | Some l ->
+        IdMap.add bucket_id (List.sort_uniq compare (data :: l)) m
 
     let add_list_to_bucket ~(bucket_id : id) ~(data : 'a list)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       match IdMap.find_opt bucket_id m with
-      | None -> IdMap.add bucket_id (List.sort_uniq compare data) m
-      | Some l -> IdMap.add bucket_id (List.sort_uniq compare (data @ l)) m
+      | None ->
+        IdMap.add bucket_id (List.sort_uniq compare data) m
+      | Some l ->
+        IdMap.add bucket_id (List.sort_uniq compare (data @ l)) m
 
     let add_single_to_buckets ~(bucket_ids : id list) ~(data : 'a)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let rec aux ids data m =
         match ids with
-        | [] -> m
-        | x :: xs -> aux xs data (add_single_to_bucket ~bucket_id:x ~data m)
+        | [] ->
+          m
+        | x :: xs ->
+          aux xs data (add_single_to_bucket ~bucket_id:x ~data m)
       in
       aux bucket_ids data m
 
@@ -302,8 +311,10 @@ struct
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let rec aux ids data m =
         match ids with
-        | [] -> m
-        | x :: xs -> aux xs data (add_list_to_bucket ~bucket_id:x ~data m)
+        | [] ->
+          m
+        | x :: xs ->
+          aux xs data (add_list_to_bucket ~bucket_id:x ~data m)
       in
       aux bucket_ids data m
 
@@ -311,30 +322,38 @@ struct
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let filter l = List.filter (fun x -> x <> data) l in
       match IdMap.find_opt bucket_id m with
-      | None -> m
-      | Some d -> IdMap.add bucket_id (filter d) m
+      | None ->
+        m
+      | Some d ->
+        IdMap.add bucket_id (filter d) m
 
     let remove_list_from_bucket ~(data : 'a list) ~(bucket_id : id)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let filter l = List.filter (fun x -> not (List.mem x data)) l in
       match IdMap.find_opt bucket_id m with
-      | None -> m
-      | Some d -> IdMap.add bucket_id (filter d) m
+      | None ->
+        m
+      | Some d ->
+        IdMap.add bucket_id (filter d) m
 
     let remove_single_from_buckets ~(data : 'a) ?(bucket_ids : id list option)
         (m : 'a list IdMap.t) : 'a list IdMap.t =
       let filter l = List.filter (fun x -> x <> data) l in
       match bucket_ids with
-      | None -> IdMap.map filter m
-      | Some l -> map_with_ids ~ids:l filter m
+      | None ->
+        IdMap.map filter m
+      | Some l ->
+        map_with_ids ~ids:l filter m
 
     let remove_list_from_buckets ~(data : 'a list)
         ?(bucket_ids : id list option) (m : 'a list IdMap.t) : 'a list IdMap.t
       =
       let filter l = List.filter (fun x -> not (List.mem x data)) l in
       match bucket_ids with
-      | None -> IdMap.map filter m
-      | Some l -> map_with_ids ~ids:l filter m
+      | None ->
+        IdMap.map filter m
+      | Some l ->
+        map_with_ids ~ids:l filter m
 
     let id_list (m : 'a IdMap.t) : id list =
       let bindings = IdMap.bindings m in
@@ -346,8 +365,10 @@ struct
 
     let gen_id (m : t) : id =
       match IdMap.max_binding_opt m.node_store with
-      | None -> B.first_id
-      | Some (id, _) -> B.next_id id
+      | None ->
+        B.first_id
+      | Some (id, _) ->
+        B.next_id id
 
     let is_visible (id : id) (m : t) : bool = IdMap.find id m.node_visibility
 
@@ -374,7 +395,8 @@ struct
     let filter_invisible_ids (ids : id list) (m : t) : id list =
       let rec aux ids acc =
         match ids with
-        | [] -> List.rev acc
+        | [] ->
+          List.rev acc
         | x :: xs ->
           aux xs (if IdMap.find x m.node_visibility then x :: acc else acc)
       in
@@ -407,8 +429,10 @@ struct
 
   let unwrap_data (node : node) : data =
     match node with
-    | Data data -> data
-    | Group -> failwith "Expected data node"
+    | Data data ->
+      data
+    | Group ->
+      failwith "Expected data node"
 
   let append_parents_children_linkage ~(id : id) ~(parents : id list option)
       ~(children : id list option) (m : t) : t =
@@ -470,7 +494,8 @@ struct
     let group_lookup = group_lookup |> IdMap.remove id in
     let group_members_lookup =
       match group with
-      | None -> group_members_lookup
+      | None ->
+        group_members_lookup
       | Some group ->
         group_members_lookup
         |> remove_single_from_bucket ~data:id ~bucket_id:group
@@ -494,7 +519,8 @@ struct
         ; group_lookup
         ; group_members_lookup
         ; node_visibility
-        ; label_visibility; _ } =
+        ; label_visibility
+        ; _ } =
       m
     in
     let node_store =
@@ -502,26 +528,34 @@ struct
       | None ->
         raise_exn_if_missing id node_store
           ~msg:"Node is missing in node store"
-      | Some node -> IdMap.add id node node_store
+      | Some node ->
+        IdMap.add id node node_store
     in
     let group_lookup =
       match group with
-      | None -> group_lookup
-      | Some group -> IdMap.add id group group_lookup
+      | None ->
+        group_lookup
+      | Some group ->
+        IdMap.add id group group_lookup
     in
     let node_visibility =
       match node_visible with
-      | None -> add_to_map_if_missing id true node_visibility
-      | Some v -> IdMap.add id v node_visibility
+      | None ->
+        add_to_map_if_missing id true node_visibility
+      | Some v ->
+        IdMap.add id v node_visibility
     in
     let label_visibility =
       match label_visible with
-      | None -> add_to_map_if_missing id false label_visibility
-      | Some v -> IdMap.add id v label_visibility
+      | None ->
+        add_to_map_if_missing id false label_visibility
+      | Some v ->
+        IdMap.add id v label_visibility
     in
     let group_members_lookup =
       match group with
-      | None -> group_members_lookup
+      | None ->
+        group_members_lookup
       | Some group ->
         add_single_to_bucket ~bucket_id:group ~data:id group_members_lookup
     in
@@ -534,7 +568,8 @@ struct
       ; label_visibility }
     in
     match write_mode with
-    | Append -> append_parents_children_linkage ~id ~parents ~children m
+    | Append ->
+      append_parents_children_linkage ~id ~parents ~children m
     | Overwrite ->
       let remove_parents_linkage =
         match parents with None -> false | Some _ -> true
@@ -567,8 +602,10 @@ struct
       (records : node_record list) (m : t) : t =
     let rec aux records m =
       match records with
-      | [] -> m
-      | x :: xs -> aux xs (add_node_via_record write_mode x m)
+      | [] ->
+        m
+      | x :: xs ->
+        aux xs (add_node_via_record write_mode x m)
     in
     aux records m
 
@@ -591,8 +628,10 @@ struct
          (List.map
             (fun id ->
                match find_node_opt id m with
-               | None -> None
-               | Some n -> Some (id, n) )
+               | None ->
+                 None
+               | Some n ->
+                 Some (id, n) )
             ids))
 
   let find_group (id : id) (m : t) : id =
@@ -629,18 +668,22 @@ struct
     'a * t =
     let rec aux look_up_opt ids ctx f m =
       match ids with
-      | [] -> (ctx, m)
+      | [] ->
+        (ctx, m)
       | x :: xs -> (
           match look_up_opt x m.node_store m with
-          | None -> aux look_up_opt xs ctx f m
+          | None ->
+            aux look_up_opt xs ctx f m
           | Some n ->
             let terminate, new_ctx, new_m =
               match f with
               | Full_traversal f ->
                 let new_ctx, new_m = f ctx x n m in
                 (false, new_ctx, new_m)
-              | Partial_traversal f -> f ctx x n m
-              | Full_traversal_pure f -> (false, f ctx x n m, m)
+              | Partial_traversal f ->
+                f ctx x n m
+              | Full_traversal_pure f ->
+                (false, f ctx x n m, m)
               | Partial_traversal_pure f ->
                 let term, new_ctx = f ctx x n m in
                 (term, new_ctx, m)
@@ -660,21 +703,24 @@ struct
   let linear_traverse ?(ids : id list option) (ctx : 'a)
       (f : 'a traversal_function) (m : t) : 'a * t =
     match ids with
-    | None -> linear_traverse_internal ~respect_visibility:true ctx f m
+    | None ->
+      linear_traverse_internal ~respect_visibility:true ctx f m
     | Some ids ->
       linear_traverse_internal ~respect_visibility:true ~ids ctx f m
 
   let linear_traverse_ignore_vis ?(ids : id list option) (ctx : 'a)
       (f : 'a traversal_function) (m : t) : 'a * t =
     match ids with
-    | None -> linear_traverse_internal ~respect_visibility:false ctx f m
+    | None ->
+      linear_traverse_internal ~respect_visibility:false ctx f m
     | Some ids ->
       linear_traverse_internal ~respect_visibility:false ~ids ctx f m
 
   let linear_traverse_rev ?(ids : id list option) (ctx : 'a)
       (f : 'a traversal_function) (m : t) : 'a * t =
     match ids with
-    | None -> linear_traverse ctx f m
+    | None ->
+      linear_traverse ctx f m
     | Some ids ->
       let ids = List.rev ids in
       linear_traverse ~ids ctx f m
@@ -682,7 +728,8 @@ struct
   let linear_traverse_rev_ignore_vis ?(ids : id list option) (ctx : 'a)
       (f : 'a traversal_function) (m : t) : 'a * t =
     match ids with
-    | None -> linear_traverse_ignore_vis ctx f m
+    | None ->
+      linear_traverse_ignore_vis ctx f m
     | Some ids ->
       let ids = List.rev ids in
       linear_traverse_ignore_vis ~ids ctx f m
@@ -692,7 +739,8 @@ struct
     : 'a * t =
     let rec add_to_queue ids queue visited =
       match ids with
-      | [] -> ()
+      | [] ->
+        ()
       | x :: xs ->
         if not (IdSet.mem x !visited) then (
           Queue.push x queue;
@@ -712,7 +760,8 @@ struct
     while Queue.length queue > 0 do
       let id = Queue.pop queue in
       match look_up_opt id !m.node_store !m with
-      | None -> ()
+      | None ->
+        ()
       | Some cur ->
         (* executes operation *)
         let terminate, new_ctx, new_m =
@@ -720,8 +769,10 @@ struct
           | Full_traversal f ->
             let new_ctx, new_m = f !ctx id cur !m in
             (false, new_ctx, new_m)
-          | Partial_traversal f -> f !ctx id cur !m
-          | Full_traversal_pure f -> (false, f !ctx id cur !m, !m)
+          | Partial_traversal f ->
+            f !ctx id cur !m
+          | Full_traversal_pure f ->
+            (false, f !ctx id cur !m, !m)
           | Partial_traversal_pure f ->
             let term, new_ctx = f !ctx id cur !m in
             (term, new_ctx, !m)
@@ -732,8 +783,10 @@ struct
         else
           let ids =
             match direction with
-            | Top_to_bottom -> IdMap.find id !m.children_lookup
-            | Bottom_to_top -> IdMap.find id !m.parents_lookup
+            | Top_to_bottom ->
+              IdMap.find id !m.children_lookup
+            | Bottom_to_top ->
+              IdMap.find id !m.parents_lookup
           in
           add_to_queue ids queue visited
     done;
@@ -789,7 +842,8 @@ struct
     t =
     let rec aux ids visibility m =
       match ids with
-      | [] -> m
+      | [] ->
+        m
       | x :: xs ->
         aux xs visibility (update_single_node_visibility x visibility m)
     in
@@ -799,7 +853,8 @@ struct
     =
     let rec aux ids old_m m =
       match ids with
-      | [] -> m
+      | [] ->
+        m
       | x :: xs ->
         let visibility =
           Helpers.find_with_default x false old_m.node_visibility
@@ -835,15 +890,19 @@ struct
   let find_root_opt (root_type : root_type) (m : t) : id option =
     let pred =
       match root_type with
-      | Top -> fun id _node m -> find_parents id m = []
-      | Bottom -> fun id _node m -> find_children id m = []
+      | Top ->
+        fun id _node m -> find_parents id m = []
+      | Bottom ->
+        fun id _node m -> find_children id m = []
     in
     filter_first_opt pred m
 
   let find_root (root_type : root_type) (m : t) : id =
     match find_root_opt root_type m with
-    | Some x -> x
-    | None -> failwith "No root found"
+    | Some x ->
+      x
+    | None ->
+      failwith "No root found"
 
   let diff (root_type : root_type) (m1 : t) (m2 : t) : t * t =
     let same (id1 : id) (n1 : node) (m1 : t) (id2 : id) (n2 : node) (m2 : t) :
@@ -887,13 +946,17 @@ struct
     in
     let id1 =
       match find_root_opt root_type m1 with
-      | None -> failwith "No root for n1"
-      | Some x -> x
+      | None ->
+        failwith "No root for n1"
+      | Some x ->
+        x
     in
     let id2 =
       match find_root_opt root_type m2 with
-      | None -> failwith "No root for n2"
-      | Some x -> x
+      | None ->
+        failwith "No root for n2"
+      | Some x ->
+        x
     in
     let res =
       remove_common id1 (find_node id1 m1) m1 id2 (find_node id2 m2) m2
@@ -972,7 +1035,8 @@ struct
     let group_id = Helpers.gen_id m in
     (* quit if only one node or list is empty *)
     match ids with
-    | [] | [_] -> m
+    | [] | [_] ->
+      m
     | _ ->
       let id_set = IdSet.of_list ids in
       (* add nodes to the new group *)
@@ -983,7 +1047,8 @@ struct
                 let { group_lookup
                     ; group_members_lookup
                     ; children_lookup
-                    ; parents_lookup; _ } =
+                    ; parents_lookup
+                    ; _ } =
                   m
                 in
                 let group_lookup = IdMap.add id group_id group_lookup in
@@ -1039,8 +1104,10 @@ struct
     (* quit if the node itself is a leaf *)
     let is_leaf =
       match direction with
-      | Bottom_to_top -> find_parents id m = []
-      | Top_to_bottom -> find_children id m = []
+      | Bottom_to_top ->
+        find_parents id m = []
+      | Top_to_bottom ->
+        find_children id m = []
     in
     if is_leaf then m
     else
@@ -1055,12 +1122,16 @@ struct
                   else
                     let leaves =
                       match direction with
-                      | Bottom_to_top -> find_parents id m
-                      | Top_to_bottom -> find_children id m
+                      | Bottom_to_top ->
+                        find_parents id m
+                      | Top_to_bottom ->
+                        find_children id m
                     in
                     match leaves with
-                    | [] -> if compress_leaf then id :: acc else acc
-                    | _ -> id :: acc
+                    | [] ->
+                      if compress_leaf then id :: acc else acc
+                    | _ ->
+                      id :: acc
                 in
                 (acc, m) ))
           m
@@ -1070,7 +1141,8 @@ struct
 
   let recompress (id : id) (direction : bfs_traversal_direction) (m : t) : t =
     match IdMap.find_opt id m.group_lookup with
-    | None -> m
+    | None ->
+      m
     | Some group_id -> (
         match IdMap.find group_id m.group_type_lookup with
         | BFS ->
@@ -1109,7 +1181,8 @@ struct
 
   let decompress (id : id) (direction : bfs_traversal_direction) (m : t) : t =
     match IdMap.find_opt id m.group_members_lookup with
-    | None -> m
+    | None ->
+      m
     | Some members -> (
         (* check if there was a snapshot taken *)
         match IdMap.find_opt id m.snapshots with
@@ -1159,7 +1232,8 @@ struct
       (m : t) : t =
     let rec aux ids visibility m =
       match ids with
-      | [] -> m
+      | [] ->
+        m
       | x :: xs ->
         aux xs visibility (update_single_label_visibility x visibility m)
     in
@@ -1367,8 +1441,10 @@ struct
     |> (fun m -> Cytoscape.start_batch cy; m)
     |> (fun m ->
         match show_label with
-        | None -> m
-        | Some v -> update_label_visibility v m )
+        | None ->
+          m
+        | Some v ->
+          update_label_visibility v m )
     |> (fun m -> Cytoscape.clear cy; m)
     |> (fun m ->
         if label_affect_dag then

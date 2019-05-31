@@ -3,7 +3,7 @@ free A : bitstring.
 free B : bitstring.
 free I : bitstring.
 
-fun succ(bitstring) : bitstring[data].
+fun succ(bitstring) : bitstring [data].
 fun enc(bitstring, bitstring) : bitstring.
 fun dec(bitstring, bitstring) : bitstring.
 

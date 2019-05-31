@@ -26,572 +26,362 @@ constr_CONST_0x30 != constr_CONST_4).
 fof(ax4, axiom,
 constr_CONST_0x30 != constr_ZERO).
 fof(ax5, axiom,
-constr_CONST_0x30 != constr_home_network_STEP_1).
-fof(ax6, axiom,
-constr_CONST_0x30 != constr_home_network_STEP_2).
-fof(ax7, axiom,
-constr_CONST_0x30 != constr_home_network_STEP_3).
-fof(ax8, axiom,
-constr_CONST_0x30 != constr_serving_network_STEP_1).
-fof(ax9, axiom,
-constr_CONST_0x30 != constr_serving_network_STEP_2).
-fof(ax10, axiom,
-constr_CONST_0x30 != constr_subscriber_STEP_1).
-fof(ax11, axiom,
-constr_CONST_0x30 != constr_subscriber_STEP_2).
-fof(ax12, axiom,
 constr_CONST_0x30 != name_K).
-fof(ax13, axiom,
-constr_CONST_0x30 != name_R_21).
-fof(ax14, axiom,
+fof(ax6, axiom,
+constr_CONST_0x30 != name_R_20x30).
+fof(ax7, axiom,
 constr_CONST_0x30 != name_SNname).
-fof(ax15, axiom,
-constr_CONST_0x30 != name_SQN_HN_22).
-fof(ax16, axiom,
+fof(ax8, axiom,
+constr_CONST_0x30 != name_SQN_HN_21).
+fof(ax9, axiom,
 constr_CONST_0x30 != name_SUCI).
-fof(ax17, axiom,
+fof(ax10, axiom,
 constr_CONST_0x30 != name_SUPI).
-fof(ax18, axiom,
+fof(ax11, axiom,
 constr_CONST_0x30 != name_c_SN_HN).
-fof(ax19, axiom,
+fof(ax12, axiom,
 constr_CONST_0x30 != name_c_UE_SN).
-fof(ax20, axiom,
+fof(ax13, axiom,
 constr_CONST_0x30 != name_objective).
-fof(ax21, axiom,
+fof(ax14, axiom,
 constr_CONST_1 != constr_CONST_2).
-fof(ax22, axiom,
+fof(ax15, axiom,
 constr_CONST_1 != constr_CONST_3).
-fof(ax23, axiom,
+fof(ax16, axiom,
 constr_CONST_1 != constr_CONST_4).
-fof(ax24, axiom,
+fof(ax17, axiom,
 constr_CONST_1 != constr_ZERO).
-fof(ax25, axiom,
-constr_CONST_1 != constr_home_network_STEP_1).
-fof(ax26, axiom,
-constr_CONST_1 != constr_home_network_STEP_2).
-fof(ax27, axiom,
-constr_CONST_1 != constr_home_network_STEP_3).
-fof(ax28, axiom,
-constr_CONST_1 != constr_serving_network_STEP_1).
-fof(ax29, axiom,
-constr_CONST_1 != constr_serving_network_STEP_2).
-fof(ax30, axiom,
-constr_CONST_1 != constr_subscriber_STEP_1).
-fof(ax31, axiom,
-constr_CONST_1 != constr_subscriber_STEP_2).
-fof(ax32, axiom,
+fof(ax18, axiom,
 constr_CONST_1 != name_K).
-fof(ax33, axiom,
-constr_CONST_1 != name_R_21).
-fof(ax34, axiom,
+fof(ax19, axiom,
+constr_CONST_1 != name_R_20x30).
+fof(ax20, axiom,
 constr_CONST_1 != name_SNname).
-fof(ax35, axiom,
-constr_CONST_1 != name_SQN_HN_22).
-fof(ax36, axiom,
+fof(ax21, axiom,
+constr_CONST_1 != name_SQN_HN_21).
+fof(ax22, axiom,
 constr_CONST_1 != name_SUCI).
-fof(ax37, axiom,
+fof(ax23, axiom,
 constr_CONST_1 != name_SUPI).
-fof(ax38, axiom,
+fof(ax24, axiom,
 constr_CONST_1 != name_c_SN_HN).
-fof(ax39, axiom,
+fof(ax25, axiom,
 constr_CONST_1 != name_c_UE_SN).
-fof(ax40, axiom,
+fof(ax26, axiom,
 constr_CONST_1 != name_objective).
-fof(ax41, axiom,
+fof(ax27, axiom,
 constr_CONST_2 != constr_CONST_3).
-fof(ax42, axiom,
+fof(ax28, axiom,
 constr_CONST_2 != constr_CONST_4).
-fof(ax43, axiom,
+fof(ax29, axiom,
 constr_CONST_2 != constr_ZERO).
-fof(ax44, axiom,
-constr_CONST_2 != constr_home_network_STEP_1).
-fof(ax45, axiom,
-constr_CONST_2 != constr_home_network_STEP_2).
-fof(ax46, axiom,
-constr_CONST_2 != constr_home_network_STEP_3).
-fof(ax47, axiom,
-constr_CONST_2 != constr_serving_network_STEP_1).
-fof(ax48, axiom,
-constr_CONST_2 != constr_serving_network_STEP_2).
-fof(ax49, axiom,
-constr_CONST_2 != constr_subscriber_STEP_1).
-fof(ax50, axiom,
-constr_CONST_2 != constr_subscriber_STEP_2).
-fof(ax51, axiom,
+fof(ax30, axiom,
 constr_CONST_2 != name_K).
-fof(ax52, axiom,
-constr_CONST_2 != name_R_21).
-fof(ax53, axiom,
+fof(ax31, axiom,
+constr_CONST_2 != name_R_20x30).
+fof(ax32, axiom,
 constr_CONST_2 != name_SNname).
-fof(ax54, axiom,
-constr_CONST_2 != name_SQN_HN_22).
-fof(ax55, axiom,
+fof(ax33, axiom,
+constr_CONST_2 != name_SQN_HN_21).
+fof(ax34, axiom,
 constr_CONST_2 != name_SUCI).
-fof(ax56, axiom,
+fof(ax35, axiom,
 constr_CONST_2 != name_SUPI).
-fof(ax57, axiom,
+fof(ax36, axiom,
 constr_CONST_2 != name_c_SN_HN).
-fof(ax58, axiom,
+fof(ax37, axiom,
 constr_CONST_2 != name_c_UE_SN).
-fof(ax59, axiom,
+fof(ax38, axiom,
 constr_CONST_2 != name_objective).
-fof(ax60, axiom,
+fof(ax39, axiom,
 constr_CONST_3 != constr_CONST_4).
-fof(ax61, axiom,
+fof(ax40, axiom,
 constr_CONST_3 != constr_ZERO).
-fof(ax62, axiom,
-constr_CONST_3 != constr_home_network_STEP_1).
-fof(ax63, axiom,
-constr_CONST_3 != constr_home_network_STEP_2).
-fof(ax64, axiom,
-constr_CONST_3 != constr_home_network_STEP_3).
-fof(ax65, axiom,
-constr_CONST_3 != constr_serving_network_STEP_1).
-fof(ax66, axiom,
-constr_CONST_3 != constr_serving_network_STEP_2).
-fof(ax67, axiom,
-constr_CONST_3 != constr_subscriber_STEP_1).
-fof(ax68, axiom,
-constr_CONST_3 != constr_subscriber_STEP_2).
-fof(ax69, axiom,
+fof(ax41, axiom,
 constr_CONST_3 != name_K).
-fof(ax70, axiom,
-constr_CONST_3 != name_R_21).
-fof(ax71, axiom,
+fof(ax42, axiom,
+constr_CONST_3 != name_R_20x30).
+fof(ax43, axiom,
 constr_CONST_3 != name_SNname).
-fof(ax72, axiom,
-constr_CONST_3 != name_SQN_HN_22).
-fof(ax73, axiom,
+fof(ax44, axiom,
+constr_CONST_3 != name_SQN_HN_21).
+fof(ax45, axiom,
 constr_CONST_3 != name_SUCI).
-fof(ax74, axiom,
+fof(ax46, axiom,
 constr_CONST_3 != name_SUPI).
-fof(ax75, axiom,
+fof(ax47, axiom,
 constr_CONST_3 != name_c_SN_HN).
-fof(ax76, axiom,
+fof(ax48, axiom,
 constr_CONST_3 != name_c_UE_SN).
-fof(ax77, axiom,
+fof(ax49, axiom,
 constr_CONST_3 != name_objective).
-fof(ax78, axiom,
+fof(ax50, axiom,
 constr_CONST_4 != constr_ZERO).
-fof(ax79, axiom,
-constr_CONST_4 != constr_home_network_STEP_1).
-fof(ax80, axiom,
-constr_CONST_4 != constr_home_network_STEP_2).
-fof(ax81, axiom,
-constr_CONST_4 != constr_home_network_STEP_3).
-fof(ax82, axiom,
-constr_CONST_4 != constr_serving_network_STEP_1).
-fof(ax83, axiom,
-constr_CONST_4 != constr_serving_network_STEP_2).
-fof(ax84, axiom,
-constr_CONST_4 != constr_subscriber_STEP_1).
-fof(ax85, axiom,
-constr_CONST_4 != constr_subscriber_STEP_2).
-fof(ax86, axiom,
+fof(ax51, axiom,
 constr_CONST_4 != name_K).
-fof(ax87, axiom,
-constr_CONST_4 != name_R_21).
-fof(ax88, axiom,
+fof(ax52, axiom,
+constr_CONST_4 != name_R_20x30).
+fof(ax53, axiom,
 constr_CONST_4 != name_SNname).
-fof(ax89, axiom,
-constr_CONST_4 != name_SQN_HN_22).
-fof(ax90, axiom,
+fof(ax54, axiom,
+constr_CONST_4 != name_SQN_HN_21).
+fof(ax55, axiom,
 constr_CONST_4 != name_SUCI).
-fof(ax91, axiom,
+fof(ax56, axiom,
 constr_CONST_4 != name_SUPI).
-fof(ax92, axiom,
+fof(ax57, axiom,
 constr_CONST_4 != name_c_SN_HN).
-fof(ax93, axiom,
+fof(ax58, axiom,
 constr_CONST_4 != name_c_UE_SN).
-fof(ax94, axiom,
+fof(ax59, axiom,
 constr_CONST_4 != name_objective).
-fof(ax95, axiom,
-constr_ZERO != constr_home_network_STEP_1).
-fof(ax96, axiom,
-constr_ZERO != constr_home_network_STEP_2).
-fof(ax97, axiom,
-constr_ZERO != constr_home_network_STEP_3).
-fof(ax98, axiom,
-constr_ZERO != constr_serving_network_STEP_1).
-fof(ax99, axiom,
-constr_ZERO != constr_serving_network_STEP_2).
-fof(ax100, axiom,
-constr_ZERO != constr_subscriber_STEP_1).
-fof(ax101, axiom,
-constr_ZERO != constr_subscriber_STEP_2).
-fof(ax102, axiom,
+fof(ax60, axiom,
 constr_ZERO != name_K).
-fof(ax103, axiom,
-constr_ZERO != name_R_21).
-fof(ax104, axiom,
+fof(ax61, axiom,
+constr_ZERO != name_R_20x30).
+fof(ax62, axiom,
 constr_ZERO != name_SNname).
-fof(ax105, axiom,
-constr_ZERO != name_SQN_HN_22).
-fof(ax106, axiom,
+fof(ax63, axiom,
+constr_ZERO != name_SQN_HN_21).
+fof(ax64, axiom,
 constr_ZERO != name_SUCI).
-fof(ax107, axiom,
+fof(ax65, axiom,
 constr_ZERO != name_SUPI).
-fof(ax108, axiom,
+fof(ax66, axiom,
 constr_ZERO != name_c_SN_HN).
-fof(ax109, axiom,
+fof(ax67, axiom,
 constr_ZERO != name_c_UE_SN).
-fof(ax110, axiom,
+fof(ax68, axiom,
 constr_ZERO != name_objective).
-fof(ax111, axiom,
-constr_home_network_STEP_1 != constr_home_network_STEP_2).
-fof(ax112, axiom,
-constr_home_network_STEP_1 != constr_home_network_STEP_3).
-fof(ax113, axiom,
-constr_home_network_STEP_1 != constr_serving_network_STEP_1).
-fof(ax114, axiom,
-constr_home_network_STEP_1 != constr_serving_network_STEP_2).
-fof(ax115, axiom,
-constr_home_network_STEP_1 != constr_subscriber_STEP_1).
-fof(ax116, axiom,
-constr_home_network_STEP_1 != constr_subscriber_STEP_2).
-fof(ax117, axiom,
-constr_home_network_STEP_1 != name_K).
-fof(ax118, axiom,
-constr_home_network_STEP_1 != name_R_21).
-fof(ax119, axiom,
-constr_home_network_STEP_1 != name_SNname).
-fof(ax120, axiom,
-constr_home_network_STEP_1 != name_SQN_HN_22).
-fof(ax121, axiom,
-constr_home_network_STEP_1 != name_SUCI).
-fof(ax122, axiom,
-constr_home_network_STEP_1 != name_SUPI).
-fof(ax123, axiom,
-constr_home_network_STEP_1 != name_c_SN_HN).
-fof(ax124, axiom,
-constr_home_network_STEP_1 != name_c_UE_SN).
-fof(ax125, axiom,
-constr_home_network_STEP_1 != name_objective).
-fof(ax126, axiom,
-constr_home_network_STEP_2 != constr_home_network_STEP_3).
-fof(ax127, axiom,
-constr_home_network_STEP_2 != constr_serving_network_STEP_1).
-fof(ax128, axiom,
-constr_home_network_STEP_2 != constr_serving_network_STEP_2).
-fof(ax129, axiom,
-constr_home_network_STEP_2 != constr_subscriber_STEP_1).
-fof(ax130, axiom,
-constr_home_network_STEP_2 != constr_subscriber_STEP_2).
-fof(ax131, axiom,
-constr_home_network_STEP_2 != name_K).
-fof(ax132, axiom,
-constr_home_network_STEP_2 != name_R_21).
-fof(ax133, axiom,
-constr_home_network_STEP_2 != name_SNname).
-fof(ax134, axiom,
-constr_home_network_STEP_2 != name_SQN_HN_22).
-fof(ax135, axiom,
-constr_home_network_STEP_2 != name_SUCI).
-fof(ax136, axiom,
-constr_home_network_STEP_2 != name_SUPI).
-fof(ax137, axiom,
-constr_home_network_STEP_2 != name_c_SN_HN).
-fof(ax138, axiom,
-constr_home_network_STEP_2 != name_c_UE_SN).
-fof(ax139, axiom,
-constr_home_network_STEP_2 != name_objective).
-fof(ax140, axiom,
-constr_home_network_STEP_3 != constr_serving_network_STEP_1).
-fof(ax141, axiom,
-constr_home_network_STEP_3 != constr_serving_network_STEP_2).
-fof(ax142, axiom,
-constr_home_network_STEP_3 != constr_subscriber_STEP_1).
-fof(ax143, axiom,
-constr_home_network_STEP_3 != constr_subscriber_STEP_2).
-fof(ax144, axiom,
-constr_home_network_STEP_3 != name_K).
-fof(ax145, axiom,
-constr_home_network_STEP_3 != name_R_21).
-fof(ax146, axiom,
-constr_home_network_STEP_3 != name_SNname).
-fof(ax147, axiom,
-constr_home_network_STEP_3 != name_SQN_HN_22).
-fof(ax148, axiom,
-constr_home_network_STEP_3 != name_SUCI).
-fof(ax149, axiom,
-constr_home_network_STEP_3 != name_SUPI).
-fof(ax150, axiom,
-constr_home_network_STEP_3 != name_c_SN_HN).
-fof(ax151, axiom,
-constr_home_network_STEP_3 != name_c_UE_SN).
-fof(ax152, axiom,
-constr_home_network_STEP_3 != name_objective).
-fof(ax153, axiom,
-constr_serving_network_STEP_1 != constr_serving_network_STEP_2).
-fof(ax154, axiom,
-constr_serving_network_STEP_1 != constr_subscriber_STEP_1).
-fof(ax155, axiom,
-constr_serving_network_STEP_1 != constr_subscriber_STEP_2).
-fof(ax156, axiom,
-constr_serving_network_STEP_1 != name_K).
-fof(ax157, axiom,
-constr_serving_network_STEP_1 != name_R_21).
-fof(ax158, axiom,
-constr_serving_network_STEP_1 != name_SNname).
-fof(ax159, axiom,
-constr_serving_network_STEP_1 != name_SQN_HN_22).
-fof(ax160, axiom,
-constr_serving_network_STEP_1 != name_SUCI).
-fof(ax161, axiom,
-constr_serving_network_STEP_1 != name_SUPI).
-fof(ax162, axiom,
-constr_serving_network_STEP_1 != name_c_SN_HN).
-fof(ax163, axiom,
-constr_serving_network_STEP_1 != name_c_UE_SN).
-fof(ax164, axiom,
-constr_serving_network_STEP_1 != name_objective).
-fof(ax165, axiom,
-constr_serving_network_STEP_2 != constr_subscriber_STEP_1).
-fof(ax166, axiom,
-constr_serving_network_STEP_2 != constr_subscriber_STEP_2).
-fof(ax167, axiom,
-constr_serving_network_STEP_2 != name_K).
-fof(ax168, axiom,
-constr_serving_network_STEP_2 != name_R_21).
-fof(ax169, axiom,
-constr_serving_network_STEP_2 != name_SNname).
-fof(ax170, axiom,
-constr_serving_network_STEP_2 != name_SQN_HN_22).
-fof(ax171, axiom,
-constr_serving_network_STEP_2 != name_SUCI).
-fof(ax172, axiom,
-constr_serving_network_STEP_2 != name_SUPI).
-fof(ax173, axiom,
-constr_serving_network_STEP_2 != name_c_SN_HN).
-fof(ax174, axiom,
-constr_serving_network_STEP_2 != name_c_UE_SN).
-fof(ax175, axiom,
-constr_serving_network_STEP_2 != name_objective).
-fof(ax176, axiom,
-constr_subscriber_STEP_1 != constr_subscriber_STEP_2).
-fof(ax177, axiom,
-constr_subscriber_STEP_1 != name_K).
-fof(ax178, axiom,
-constr_subscriber_STEP_1 != name_R_21).
-fof(ax179, axiom,
-constr_subscriber_STEP_1 != name_SNname).
-fof(ax180, axiom,
-constr_subscriber_STEP_1 != name_SQN_HN_22).
-fof(ax181, axiom,
-constr_subscriber_STEP_1 != name_SUCI).
-fof(ax182, axiom,
-constr_subscriber_STEP_1 != name_SUPI).
-fof(ax183, axiom,
-constr_subscriber_STEP_1 != name_c_SN_HN).
-fof(ax184, axiom,
-constr_subscriber_STEP_1 != name_c_UE_SN).
-fof(ax185, axiom,
-constr_subscriber_STEP_1 != name_objective).
-fof(ax186, axiom,
-constr_subscriber_STEP_2 != name_K).
-fof(ax187, axiom,
-constr_subscriber_STEP_2 != name_R_21).
-fof(ax188, axiom,
-constr_subscriber_STEP_2 != name_SNname).
-fof(ax189, axiom,
-constr_subscriber_STEP_2 != name_SQN_HN_22).
-fof(ax190, axiom,
-constr_subscriber_STEP_2 != name_SUCI).
-fof(ax191, axiom,
-constr_subscriber_STEP_2 != name_SUPI).
-fof(ax192, axiom,
-constr_subscriber_STEP_2 != name_c_SN_HN).
-fof(ax193, axiom,
-constr_subscriber_STEP_2 != name_c_UE_SN).
-fof(ax194, axiom,
-constr_subscriber_STEP_2 != name_objective).
-fof(ax195, axiom,
-name_K != name_R_21).
-fof(ax196, axiom,
+fof(ax69, axiom,
+name_K != name_R_20x30).
+fof(ax70, axiom,
 name_K != name_SNname).
-fof(ax197, axiom,
-name_K != name_SQN_HN_22).
-fof(ax198, axiom,
+fof(ax71, axiom,
+name_K != name_SQN_HN_21).
+fof(ax72, axiom,
 name_K != name_SUCI).
-fof(ax199, axiom,
+fof(ax73, axiom,
 name_K != name_SUPI).
-fof(ax200, axiom,
+fof(ax74, axiom,
 name_K != name_c_SN_HN).
-fof(ax201, axiom,
+fof(ax75, axiom,
 name_K != name_c_UE_SN).
-fof(ax202, axiom,
+fof(ax76, axiom,
 name_K != name_objective).
-fof(ax203, axiom,
-name_R_21 != name_SNname).
-fof(ax204, axiom,
-name_R_21 != name_SQN_HN_22).
-fof(ax205, axiom,
-name_R_21 != name_SUCI).
-fof(ax206, axiom,
-name_R_21 != name_SUPI).
-fof(ax207, axiom,
-name_R_21 != name_c_SN_HN).
-fof(ax208, axiom,
-name_R_21 != name_c_UE_SN).
-fof(ax209, axiom,
-name_R_21 != name_objective).
-fof(ax210, axiom,
-name_SNname != name_SQN_HN_22).
-fof(ax211, axiom,
+fof(ax77, axiom,
+name_R_20x30 != name_SNname).
+fof(ax78, axiom,
+name_R_20x30 != name_SQN_HN_21).
+fof(ax79, axiom,
+name_R_20x30 != name_SUCI).
+fof(ax80, axiom,
+name_R_20x30 != name_SUPI).
+fof(ax81, axiom,
+name_R_20x30 != name_c_SN_HN).
+fof(ax82, axiom,
+name_R_20x30 != name_c_UE_SN).
+fof(ax83, axiom,
+name_R_20x30 != name_objective).
+fof(ax84, axiom,
+name_SNname != name_SQN_HN_21).
+fof(ax85, axiom,
 name_SNname != name_SUCI).
-fof(ax212, axiom,
+fof(ax86, axiom,
 name_SNname != name_SUPI).
-fof(ax213, axiom,
+fof(ax87, axiom,
 name_SNname != name_c_SN_HN).
-fof(ax214, axiom,
+fof(ax88, axiom,
 name_SNname != name_c_UE_SN).
-fof(ax215, axiom,
+fof(ax89, axiom,
 name_SNname != name_objective).
-fof(ax216, axiom,
-name_SQN_HN_22 != name_SUCI).
-fof(ax217, axiom,
-name_SQN_HN_22 != name_SUPI).
-fof(ax218, axiom,
-name_SQN_HN_22 != name_c_SN_HN).
-fof(ax219, axiom,
-name_SQN_HN_22 != name_c_UE_SN).
-fof(ax220, axiom,
-name_SQN_HN_22 != name_objective).
-fof(ax221, axiom,
+fof(ax90, axiom,
+name_SQN_HN_21 != name_SUCI).
+fof(ax91, axiom,
+name_SQN_HN_21 != name_SUPI).
+fof(ax92, axiom,
+name_SQN_HN_21 != name_c_SN_HN).
+fof(ax93, axiom,
+name_SQN_HN_21 != name_c_UE_SN).
+fof(ax94, axiom,
+name_SQN_HN_21 != name_objective).
+fof(ax95, axiom,
 name_SUCI != name_SUPI).
-fof(ax222, axiom,
+fof(ax96, axiom,
 name_SUCI != name_c_SN_HN).
-fof(ax223, axiom,
+fof(ax97, axiom,
 name_SUCI != name_c_UE_SN).
-fof(ax224, axiom,
+fof(ax98, axiom,
 name_SUCI != name_objective).
-fof(ax225, axiom,
+fof(ax99, axiom,
 name_SUPI != name_c_SN_HN).
-fof(ax226, axiom,
+fof(ax100, axiom,
 name_SUPI != name_c_UE_SN).
-fof(ax227, axiom,
+fof(ax101, axiom,
 name_SUPI != name_objective).
-fof(ax228, axiom,
+fof(ax102, axiom,
 name_c_SN_HN != name_c_UE_SN).
-fof(ax229, axiom,
+fof(ax103, axiom,
 name_c_SN_HN != name_objective).
-fof(ax230, axiom,
+fof(ax104, axiom,
 name_c_UE_SN != name_objective).
-fof(ax231, axiom,
+fof(ax105, axiom,
 ![VAR_K_0X30, VAR_M_0X30] : (constr_dec(constr_enc(VAR_M_0X30, VAR_K_0X30), VAR_K_0X30) = VAR_M_0X30)).
-fof(ax232, axiom,
-![VAR_X_13] : (constr_xor(VAR_X_13, VAR_X_13) = constr_ZERO)).
-fof(ax233, axiom,
-![VAR_X_12] : (constr_xor(VAR_X_12, constr_ZERO) = VAR_X_12)).
-fof(ax234, axiom,
-![VAR_X_10X30, VAR_Y_11] : (constr_xor(VAR_X_10X30, VAR_Y_11) = constr_xor(VAR_Y_11, VAR_X_10X30))).
-fof(ax235, axiom,
-![VAR_X_9, VAR_Y_0X30, VAR_Z_0X30] : (constr_xor(VAR_X_9, constr_xor(VAR_Y_0X30, VAR_Z_0X30)) = constr_xor(constr_xor(VAR_X_9, VAR_Y_0X30), VAR_Z_0X30))).
-fof(ax236, axiom,
-![VAR_X0X30_7, VAR_X1_8] : (constr_tuple_2_get_1(tuple_2(VAR_X0X30_7, VAR_X1_8)) = VAR_X1_8)).
-fof(ax237, axiom,
-![VAR_X0X30_0X30, VAR_X1_0X30] : (constr_tuple_2_get_0x30(tuple_2(VAR_X0X30_0X30, VAR_X1_0X30)) = VAR_X0X30_0X30)).
-fof(ax238, axiom,
-![VAR_X_41] : (pred_eq(VAR_X_41, VAR_X_41))).
-fof(ax239, axiom,
-![VAR_V_48, VAR_V_49] : ((pred_attacker(VAR_V_48) & pred_attacker(VAR_V_49)) => pred_attacker(constr_xor(VAR_V_48, VAR_V_49)))).
-fof(ax240, axiom,
-![VAR_V_51] : (pred_attacker(VAR_V_51) => pred_attacker(constr_tuple_2_get_1(VAR_V_51)))).
-fof(ax241, axiom,
-![VAR_V_53] : (pred_attacker(VAR_V_53) => pred_attacker(constr_tuple_2_get_0x30(VAR_V_53)))).
-fof(ax242, axiom,
+fof(ax106, axiom,
+![VAR_X_12] : (constr_xor(VAR_X_12, VAR_X_12) = constr_ZERO)).
+fof(ax107, axiom,
+![VAR_X_11] : (constr_xor(VAR_X_11, constr_ZERO) = VAR_X_11)).
+fof(ax108, axiom,
+![VAR_X_9, VAR_Y_10X30] : (constr_xor(VAR_X_9, VAR_Y_10X30) = constr_xor(VAR_Y_10X30, VAR_X_9))).
+fof(ax109, axiom,
+![VAR_X_0X30, VAR_Y_0X30, VAR_Z_0X30] : (constr_xor(VAR_X_0X30, constr_xor(VAR_Y_0X30, VAR_Z_0X30)) = constr_xor(constr_xor(VAR_X_0X30, VAR_Y_0X30), VAR_Z_0X30))).
+fof(ax110, axiom,
+![VAR_X0X30_7, VAR_X1_8] : (constr_tuple_2_get_1_bitstring(tuple_2(VAR_X0X30_7, VAR_X1_8)) = VAR_X1_8)).
+fof(ax111, axiom,
+![VAR_X0X30_0X30, VAR_X1_0X30] : (constr_tuple_2_get_0x30_bitstring(tuple_2(VAR_X0X30_0X30, VAR_X1_0X30)) = VAR_X0X30_0X30)).
+fof(ax112, axiom,
+![VAR_V_44, VAR_V_45] : ((pred_attacker(VAR_V_44) & pred_attacker(VAR_V_45)) => pred_attacker(constr_xor(VAR_V_44, VAR_V_45)))).
+fof(ax113, axiom,
+![VAR_V_47] : (pred_attacker(VAR_V_47) => pred_attacker(constr_tuple_2_get_1_bitstring(VAR_V_47)))).
+fof(ax114, axiom,
+![VAR_V_49] : (pred_attacker(VAR_V_49) => pred_attacker(constr_tuple_2_get_0x30_bitstring(VAR_V_49)))).
+fof(ax115, axiom,
 pred_attacker(tuple_true)).
-fof(ax243, axiom,
-pred_attacker(constr_subscriber_STEP_2)).
-fof(ax244, axiom,
-pred_attacker(constr_subscriber_STEP_1)).
-fof(ax245, axiom,
-![VAR_V_55] : (pred_attacker(VAR_V_55) => pred_attacker(constr_sha256(VAR_V_55)))).
-fof(ax246, axiom,
-pred_attacker(constr_serving_network_STEP_2)).
-fof(ax247, axiom,
-pred_attacker(constr_serving_network_STEP_1)).
-fof(ax248, axiom,
-![VAR_V_61, VAR_V_62, VAR_V_63, VAR_V_64] : ((pred_attacker(VAR_V_61) & pred_attacker(VAR_V_62) & pred_attacker(VAR_V_63) & pred_attacker(VAR_V_64)) => pred_attacker(constr_key_seed(VAR_V_61, VAR_V_62, VAR_V_63, VAR_V_64)))).
-fof(ax249, axiom,
-![VAR_V_66] : (pred_attacker(VAR_V_66) => pred_attacker(constr_inc(VAR_V_66)))).
-fof(ax250, axiom,
-pred_attacker(constr_home_network_STEP_3)).
-fof(ax251, axiom,
-pred_attacker(constr_home_network_STEP_2)).
-fof(ax252, axiom,
-pred_attacker(constr_home_network_STEP_1)).
-fof(ax253, axiom,
+fof(ax116, axiom,
+![VAR_V_51] : (pred_attacker(VAR_V_51) => pred_attacker(tuple_subscriber_out_2(VAR_V_51)))).
+fof(ax117, axiom,
+![VAR_V_54] : (pred_attacker(tuple_subscriber_out_2(VAR_V_54)) => pred_attacker(VAR_V_54))).
+fof(ax118, axiom,
+![VAR_V_57] : (pred_attacker(VAR_V_57) => pred_attacker(tuple_subscriber_out_1(VAR_V_57)))).
+fof(ax119, axiom,
+![VAR_V_60X30] : (pred_attacker(tuple_subscriber_out_1(VAR_V_60X30)) => pred_attacker(VAR_V_60X30))).
+fof(ax120, axiom,
+![VAR_V_64, VAR_V_65] : ((pred_attacker(VAR_V_64) & pred_attacker(VAR_V_65)) => pred_attacker(tuple_subscriber_in_1(VAR_V_64, VAR_V_65)))).
+fof(ax121, axiom,
+![VAR_V_72, VAR_V_73] : (pred_attacker(tuple_subscriber_in_1(VAR_V_72, VAR_V_73)) => pred_attacker(VAR_V_72))).
+fof(ax122, axiom,
+![VAR_V_75, VAR_V_76] : (pred_attacker(tuple_subscriber_in_1(VAR_V_75, VAR_V_76)) => pred_attacker(VAR_V_76))).
+fof(ax123, axiom,
+![VAR_V_79] : (pred_attacker(VAR_V_79) => pred_attacker(constr_sha256(VAR_V_79)))).
+fof(ax124, axiom,
+![VAR_V_82, VAR_V_83] : ((pred_attacker(VAR_V_82) & pred_attacker(VAR_V_83)) => pred_attacker(tuple_serving_network_out_2(VAR_V_82, VAR_V_83)))).
+fof(ax125, axiom,
+![VAR_V_90X30, VAR_V_91] : (pred_attacker(tuple_serving_network_out_2(VAR_V_90X30, VAR_V_91)) => pred_attacker(VAR_V_90X30))).
+fof(ax126, axiom,
+![VAR_V_93, VAR_V_94] : (pred_attacker(tuple_serving_network_out_2(VAR_V_93, VAR_V_94)) => pred_attacker(VAR_V_94))).
+fof(ax127, axiom,
+![VAR_V_98, VAR_V_99] : ((pred_attacker(VAR_V_98) & pred_attacker(VAR_V_99)) => pred_attacker(tuple_serving_network_out_1(VAR_V_98, VAR_V_99)))).
+fof(ax128, axiom,
+![VAR_V_10X306, VAR_V_10X307] : (pred_attacker(tuple_serving_network_out_1(VAR_V_10X306, VAR_V_10X307)) => pred_attacker(VAR_V_10X306))).
+fof(ax129, axiom,
+![VAR_V_10X309, VAR_V_110X30] : (pred_attacker(tuple_serving_network_out_1(VAR_V_10X309, VAR_V_110X30)) => pred_attacker(VAR_V_110X30))).
+fof(ax130, axiom,
+![VAR_V_113] : (pred_attacker(VAR_V_113) => pred_attacker(tuple_serving_network_in_3(VAR_V_113)))).
+fof(ax131, axiom,
+![VAR_V_116] : (pred_attacker(tuple_serving_network_in_3(VAR_V_116)) => pred_attacker(VAR_V_116))).
+fof(ax132, axiom,
+![VAR_V_119] : (pred_attacker(VAR_V_119) => pred_attacker(tuple_serving_network_in_2(VAR_V_119)))).
+fof(ax133, axiom,
+![VAR_V_122] : (pred_attacker(tuple_serving_network_in_2(VAR_V_122)) => pred_attacker(VAR_V_122))).
+fof(ax134, axiom,
+![VAR_V_128, VAR_V_129, VAR_V_130X30, VAR_V_131] : ((pred_attacker(VAR_V_128) & pred_attacker(VAR_V_129) & pred_attacker(VAR_V_130X30) & pred_attacker(VAR_V_131)) => pred_attacker(tuple_serving_network_in_1(VAR_V_128, VAR_V_129, VAR_V_130X30, VAR_V_131)))).
+fof(ax135, axiom,
+![VAR_V_152, VAR_V_153, VAR_V_154, VAR_V_155] : (pred_attacker(tuple_serving_network_in_1(VAR_V_152, VAR_V_153, VAR_V_154, VAR_V_155)) => pred_attacker(VAR_V_152))).
+fof(ax136, axiom,
+![VAR_V_157, VAR_V_158, VAR_V_159, VAR_V_160X30] : (pred_attacker(tuple_serving_network_in_1(VAR_V_157, VAR_V_158, VAR_V_159, VAR_V_160X30)) => pred_attacker(VAR_V_158))).
+fof(ax137, axiom,
+![VAR_V_162, VAR_V_163, VAR_V_164, VAR_V_165] : (pred_attacker(tuple_serving_network_in_1(VAR_V_162, VAR_V_163, VAR_V_164, VAR_V_165)) => pred_attacker(VAR_V_164))).
+fof(ax138, axiom,
+![VAR_V_167, VAR_V_168, VAR_V_169, VAR_V_170X30] : (pred_attacker(tuple_serving_network_in_1(VAR_V_167, VAR_V_168, VAR_V_169, VAR_V_170X30)) => pred_attacker(VAR_V_170X30))).
+fof(ax139, axiom,
+![VAR_V_177, VAR_V_178, VAR_V_179, VAR_V_180X30] : ((pred_attacker(VAR_V_177) & pred_attacker(VAR_V_178) & pred_attacker(VAR_V_179) & pred_attacker(VAR_V_180X30)) => pred_attacker(constr_key_seed(VAR_V_177, VAR_V_178, VAR_V_179, VAR_V_180X30)))).
+fof(ax140, axiom,
+![VAR_V_182] : (pred_attacker(VAR_V_182) => pred_attacker(constr_inc(VAR_V_182)))).
+fof(ax141, axiom,
+![VAR_V_184] : (pred_attacker(VAR_V_184) => pred_attacker(tuple_home_network_out_3(VAR_V_184)))).
+fof(ax142, axiom,
+![VAR_V_187] : (pred_attacker(tuple_home_network_out_3(VAR_V_187)) => pred_attacker(VAR_V_187))).
+fof(ax143, axiom,
+![VAR_V_190X30] : (pred_attacker(VAR_V_190X30) => pred_attacker(tuple_home_network_out_2(VAR_V_190X30)))).
+fof(ax144, axiom,
+![VAR_V_193] : (pred_attacker(tuple_home_network_out_2(VAR_V_193)) => pred_attacker(VAR_V_193))).
+fof(ax145, axiom,
+![VAR_V_199, VAR_V_20X300X30, VAR_V_20X301, VAR_V_20X302] : ((pred_attacker(VAR_V_199) & pred_attacker(VAR_V_20X300X30) & pred_attacker(VAR_V_20X301) & pred_attacker(VAR_V_20X302)) => pred_attacker(tuple_home_network_out_1(VAR_V_199, VAR_V_20X300X30, VAR_V_20X301, VAR_V_20X302)))).
+fof(ax146, axiom,
+![VAR_V_223, VAR_V_224, VAR_V_225, VAR_V_226] : (pred_attacker(tuple_home_network_out_1(VAR_V_223, VAR_V_224, VAR_V_225, VAR_V_226)) => pred_attacker(VAR_V_223))).
+fof(ax147, axiom,
+![VAR_V_228, VAR_V_229, VAR_V_230X30, VAR_V_231] : (pred_attacker(tuple_home_network_out_1(VAR_V_228, VAR_V_229, VAR_V_230X30, VAR_V_231)) => pred_attacker(VAR_V_229))).
+fof(ax148, axiom,
+![VAR_V_233, VAR_V_234, VAR_V_235, VAR_V_236] : (pred_attacker(tuple_home_network_out_1(VAR_V_233, VAR_V_234, VAR_V_235, VAR_V_236)) => pred_attacker(VAR_V_235))).
+fof(ax149, axiom,
+![VAR_V_238, VAR_V_239, VAR_V_240X30, VAR_V_241] : (pred_attacker(tuple_home_network_out_1(VAR_V_238, VAR_V_239, VAR_V_240X30, VAR_V_241)) => pred_attacker(VAR_V_241))).
+fof(ax150, axiom,
+![VAR_V_245, VAR_V_246] : ((pred_attacker(VAR_V_245) & pred_attacker(VAR_V_246)) => pred_attacker(tuple_home_network_in_1(VAR_V_245, VAR_V_246)))).
+fof(ax151, axiom,
+![VAR_V_253, VAR_V_254] : (pred_attacker(tuple_home_network_in_1(VAR_V_253, VAR_V_254)) => pred_attacker(VAR_V_253))).
+fof(ax152, axiom,
+![VAR_V_256, VAR_V_257] : (pred_attacker(tuple_home_network_in_1(VAR_V_256, VAR_V_257)) => pred_attacker(VAR_V_257))).
+fof(ax153, axiom,
 pred_attacker(tuple_false)).
-fof(ax254, axiom,
-![VAR_V_69, VAR_V_70X30] : ((pred_attacker(VAR_V_69) & pred_attacker(VAR_V_70X30)) => pred_attacker(constr_f5(VAR_V_69, VAR_V_70X30)))).
-fof(ax255, axiom,
-![VAR_V_73, VAR_V_74] : ((pred_attacker(VAR_V_73) & pred_attacker(VAR_V_74)) => pred_attacker(constr_f4(VAR_V_73, VAR_V_74)))).
-fof(ax256, axiom,
-![VAR_V_77, VAR_V_78] : ((pred_attacker(VAR_V_77) & pred_attacker(VAR_V_78)) => pred_attacker(constr_f3(VAR_V_77, VAR_V_78)))).
-fof(ax257, axiom,
-![VAR_V_81, VAR_V_82] : ((pred_attacker(VAR_V_81) & pred_attacker(VAR_V_82)) => pred_attacker(constr_f2(VAR_V_81, VAR_V_82)))).
-fof(ax258, axiom,
-![VAR_V_85, VAR_V_86] : ((pred_attacker(VAR_V_85) & pred_attacker(VAR_V_86)) => pred_attacker(constr_f1(VAR_V_85, VAR_V_86)))).
-fof(ax259, axiom,
-![VAR_V_89, VAR_V_90X30] : ((pred_attacker(VAR_V_89) & pred_attacker(VAR_V_90X30)) => pred_attacker(constr_enc(VAR_V_89, VAR_V_90X30)))).
-fof(ax260, axiom,
-![VAR_V_93, VAR_V_94] : ((pred_attacker(VAR_V_93) & pred_attacker(VAR_V_94)) => pred_attacker(constr_dec(VAR_V_93, VAR_V_94)))).
-fof(ax261, axiom,
-![VAR_V_98, VAR_V_99, VAR_V_10X300X30] : ((pred_attacker(VAR_V_98) & pred_attacker(VAR_V_99) & pred_attacker(VAR_V_10X300X30)) => pred_attacker(constr_challenge(VAR_V_98, VAR_V_99, VAR_V_10X300X30)))).
-fof(ax262, axiom,
+fof(ax154, axiom,
+![VAR_V_261, VAR_V_262] : ((pred_attacker(VAR_V_261) & pred_attacker(VAR_V_262)) => pred_attacker(constr_f5(VAR_V_261, VAR_V_262)))).
+fof(ax155, axiom,
+![VAR_V_265, VAR_V_266] : ((pred_attacker(VAR_V_265) & pred_attacker(VAR_V_266)) => pred_attacker(constr_f4(VAR_V_265, VAR_V_266)))).
+fof(ax156, axiom,
+![VAR_V_269, VAR_V_270X30] : ((pred_attacker(VAR_V_269) & pred_attacker(VAR_V_270X30)) => pred_attacker(constr_f3(VAR_V_269, VAR_V_270X30)))).
+fof(ax157, axiom,
+![VAR_V_273, VAR_V_274] : ((pred_attacker(VAR_V_273) & pred_attacker(VAR_V_274)) => pred_attacker(constr_f2(VAR_V_273, VAR_V_274)))).
+fof(ax158, axiom,
+![VAR_V_277, VAR_V_278] : ((pred_attacker(VAR_V_277) & pred_attacker(VAR_V_278)) => pred_attacker(constr_f1(VAR_V_277, VAR_V_278)))).
+fof(ax159, axiom,
+![VAR_V_281, VAR_V_282] : ((pred_attacker(VAR_V_281) & pred_attacker(VAR_V_282)) => pred_attacker(constr_enc(VAR_V_281, VAR_V_282)))).
+fof(ax160, axiom,
+![VAR_V_285, VAR_V_286] : ((pred_attacker(VAR_V_285) & pred_attacker(VAR_V_286)) => pred_attacker(constr_dec(VAR_V_285, VAR_V_286)))).
+fof(ax161, axiom,
+![VAR_V_290X30, VAR_V_291, VAR_V_292] : ((pred_attacker(VAR_V_290X30) & pred_attacker(VAR_V_291) & pred_attacker(VAR_V_292)) => pred_attacker(constr_challenge(VAR_V_290X30, VAR_V_291, VAR_V_292)))).
+fof(ax162, axiom,
 pred_attacker(constr_ZERO)).
-fof(ax263, axiom,
+fof(ax163, axiom,
 pred_attacker(constr_CONST_4)).
-fof(ax264, axiom,
+fof(ax164, axiom,
 pred_attacker(constr_CONST_3)).
-fof(ax265, axiom,
+fof(ax165, axiom,
 pred_attacker(constr_CONST_2)).
-fof(ax266, axiom,
+fof(ax166, axiom,
 pred_attacker(constr_CONST_1)).
-fof(ax267, axiom,
+fof(ax167, axiom,
 pred_attacker(constr_CONST_0x30)).
-fof(ax268, axiom,
-![VAR_V_10X309, VAR_V_110X30, VAR_V_111, VAR_V_112] : ((pred_attacker(VAR_V_10X309) & pred_attacker(VAR_V_110X30) & pred_attacker(VAR_V_111) & pred_attacker(VAR_V_112)) => pred_attacker(tuple_4(VAR_V_10X309, VAR_V_110X30, VAR_V_111, VAR_V_112)))).
-fof(ax269, axiom,
-![VAR_V_133, VAR_V_134, VAR_V_135, VAR_V_136] : (pred_attacker(tuple_4(VAR_V_133, VAR_V_134, VAR_V_135, VAR_V_136)) => pred_attacker(VAR_V_133))).
-fof(ax270, axiom,
-![VAR_V_138, VAR_V_139, VAR_V_140X30, VAR_V_141] : (pred_attacker(tuple_4(VAR_V_138, VAR_V_139, VAR_V_140X30, VAR_V_141)) => pred_attacker(VAR_V_139))).
-fof(ax271, axiom,
-![VAR_V_143, VAR_V_144, VAR_V_145, VAR_V_146] : (pred_attacker(tuple_4(VAR_V_143, VAR_V_144, VAR_V_145, VAR_V_146)) => pred_attacker(VAR_V_145))).
-fof(ax272, axiom,
-![VAR_V_148, VAR_V_149, VAR_V_150X30, VAR_V_151] : (pred_attacker(tuple_4(VAR_V_148, VAR_V_149, VAR_V_150X30, VAR_V_151)) => pred_attacker(VAR_V_151))).
-fof(ax273, axiom,
-![VAR_V_155, VAR_V_156] : ((pred_attacker(VAR_V_155) & pred_attacker(VAR_V_156)) => pred_attacker(tuple_2(VAR_V_155, VAR_V_156)))).
-fof(ax274, axiom,
-![VAR_V_163, VAR_V_164] : (pred_attacker(tuple_2(VAR_V_163, VAR_V_164)) => pred_attacker(VAR_V_163))).
-fof(ax275, axiom,
-![VAR_V_166, VAR_V_167] : (pred_attacker(tuple_2(VAR_V_166, VAR_V_167)) => pred_attacker(VAR_V_167))).
-fof(ax276, axiom,
-![VAR_V_169, VAR_V_170X30] : ((pred_mess(VAR_V_170X30, VAR_V_169) & pred_attacker(VAR_V_170X30)) => pred_attacker(VAR_V_169))).
-fof(ax277, axiom,
-![VAR_V_171, VAR_V_172] : ((pred_attacker(VAR_V_172) & pred_attacker(VAR_V_171)) => pred_mess(VAR_V_172, VAR_V_171))).
-fof(ax278, axiom,
+fof(ax168, axiom,
+![VAR_V_299, VAR_V_30X300X30] : ((pred_attacker(VAR_V_299) & pred_attacker(VAR_V_30X300X30)) => pred_attacker(tuple_2(VAR_V_299, VAR_V_30X300X30)))).
+fof(ax169, axiom,
+![VAR_V_30X307, VAR_V_30X308] : (pred_attacker(tuple_2(VAR_V_30X307, VAR_V_30X308)) => pred_attacker(VAR_V_30X307))).
+fof(ax170, axiom,
+![VAR_V_310X30, VAR_V_311] : (pred_attacker(tuple_2(VAR_V_310X30, VAR_V_311)) => pred_attacker(VAR_V_311))).
+fof(ax171, axiom,
+![VAR_V_313, VAR_V_314] : ((pred_mess(VAR_V_314, VAR_V_313) & pred_attacker(VAR_V_314)) => pred_attacker(VAR_V_313))).
+fof(ax172, axiom,
+![VAR_V_315, VAR_V_316] : ((pred_attacker(VAR_V_316) & pred_attacker(VAR_V_315)) => pred_mess(VAR_V_316, VAR_V_315))).
+fof(ax173, axiom,
 pred_attacker(name_c_UE_SN)).
-fof(ax279, axiom,
+fof(ax174, axiom,
 pred_attacker(name_c_SN_HN)).
-fof(ax280, axiom,
+fof(ax175, axiom,
 pred_attacker(name_SUCI)).
-fof(ax281, axiom,
+fof(ax176, axiom,
 pred_attacker(name_SNname)).
-fof(ax282, axiom,
-![VAR_V_174] : (pred_equal(VAR_V_174, VAR_V_174))).
-fof(ax283, axiom,
-![VAR_V_175] : (pred_attacker(name_new0x2Dname(VAR_V_175)))).
-fof(ax284, axiom,
-![VAR_AUTN_268, VAR_HXRES_269, VAR_K_SEAF_270X30, VAR_R_267] : (pred_attacker(tuple_4(VAR_R_267, VAR_AUTN_268, VAR_HXRES_269, VAR_K_SEAF_270X30)) => pred_attacker(tuple_2(tuple_2(VAR_R_267, VAR_AUTN_268), constr_serving_network_STEP_1)))).
-fof(ax285, axiom,
-![VAR_AUTN_310X30, VAR_K_SEAF_311, VAR_R_30X309, VAR_RES_30X308] : ((pred_attacker(VAR_RES_30X308) & pred_attacker(tuple_4(VAR_R_30X309, VAR_AUTN_310X30, constr_sha256(tuple_2(VAR_R_30X309, VAR_RES_30X308)), VAR_K_SEAF_311))) => pred_attacker(tuple_2(tuple_2(VAR_RES_30X308, name_SUCI), constr_serving_network_STEP_2)))).
-fof(ax286, axiom,
-pred_attacker(tuple_2(tuple_4(name_R_21, tuple_2(constr_xor(name_SQN_HN_22, constr_f5(name_K, name_R_21)), constr_f1(name_K, tuple_2(name_SQN_HN_22, name_R_21))), constr_sha256(tuple_2(name_R_21, constr_challenge(name_K, name_R_21, name_SNname))), constr_key_seed(name_K, name_R_21, name_SQN_HN_22, name_SNname)), constr_home_network_STEP_1))).
-fof(ax287, axiom,
-pred_attacker(tuple_2(constr_challenge(name_K, name_R_21, name_SNname), name_SUCI)) => pred_attacker(tuple_2(name_SUPI, constr_home_network_STEP_2))).
-fof(ax288, axiom,
-pred_attacker(tuple_2(constr_challenge(name_K, name_R_21, name_SNname), name_SUCI)) => pred_attacker(tuple_2(name_objective, constr_home_network_STEP_3))).
+fof(ax177, axiom,
+![VAR_V_318] : (pred_equal(VAR_V_318, VAR_V_318))).
+fof(ax178, axiom,
+![VAR_V_319] : (pred_attacker(name_new0x2Dname(VAR_V_319)))).
+fof(ax179, axiom,
+![VAR_AUTN_40X304, VAR_HXRES_40X305, VAR_K_SEAF_40X306, VAR_R_40X303] : (pred_attacker(tuple_serving_network_in_1(VAR_R_40X303, VAR_AUTN_40X304, VAR_HXRES_40X305, VAR_K_SEAF_40X306)) => pred_attacker(tuple_serving_network_out_1(VAR_R_40X303, VAR_AUTN_40X304)))).
+fof(ax180, axiom,
+![VAR_AUTN_436, VAR_K_SEAF_437, VAR_R_435, VAR_RES_434] : ((pred_attacker(tuple_serving_network_in_2(VAR_RES_434)) & pred_attacker(tuple_serving_network_in_1(VAR_R_435, VAR_AUTN_436, constr_sha256(tuple_2(VAR_R_435, VAR_RES_434)), VAR_K_SEAF_437))) => pred_attacker(tuple_serving_network_out_2(VAR_RES_434, name_SUCI)))).
+fof(ax181, axiom,
+pred_attacker(tuple_home_network_out_1(name_R_20x30, tuple_2(constr_xor(name_SQN_HN_21, constr_f5(name_K, name_R_20x30)), constr_f1(name_K, tuple_2(name_SQN_HN_21, name_R_20x30))), constr_sha256(tuple_2(name_R_20x30, constr_challenge(name_K, name_R_20x30, name_SNname))), constr_key_seed(name_K, name_R_20x30, name_SQN_HN_21, name_SNname)))).
+fof(ax182, axiom,
+pred_attacker(tuple_home_network_in_1(constr_challenge(name_K, name_R_20x30, name_SNname), name_SUCI)) => pred_attacker(tuple_home_network_out_2(name_SUPI))).
+fof(ax183, axiom,
+pred_attacker(tuple_home_network_in_1(constr_challenge(name_K, name_R_20x30, name_SNname), name_SUCI)) => pred_attacker(tuple_home_network_out_3(name_objective))).
 fof(co0, conjecture,
 pred_attacker(name_objective)).

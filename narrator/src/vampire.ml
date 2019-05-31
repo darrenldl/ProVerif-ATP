@@ -19,44 +19,63 @@ module Raw_expr = struct
 
   let rec expr_to_string (e : expr) : string =
     match e with
-    | Variable ident -> ident
+    | Variable ident ->
+      ident
     | Function (name, params) ->
       sprintf "%s(%s)" name
         (join_with_comma (List.map expr_to_string params))
     | UnaryOp (op, expr) ->
       sprintf "%s%s" (unary_op_to_string op)
         ( match expr with
-          | Variable _ as e -> expr_to_string e
-          | Function _ as e -> expr_to_string e
-          | UnaryOp _ as e -> expr_to_string e
-          | _ as e -> sprintf "(%s)" (expr_to_string e) )
+          | Variable _ as e ->
+            expr_to_string e
+          | Function _ as e ->
+            expr_to_string e
+          | UnaryOp _ as e ->
+            expr_to_string e
+          | _ as e ->
+            sprintf "(%s)" (expr_to_string e) )
     | BinaryOp (op, l, r) ->
       sprintf "%s %s %s"
         ( match l with
-          | Variable _ as e -> expr_to_string e
-          | Function _ as e -> expr_to_string e
-          | UnaryOp _ as e -> expr_to_string e
-          | _ as e -> sprintf "(%s)" (expr_to_string e) )
+          | Variable _ as e ->
+            expr_to_string e
+          | Function _ as e ->
+            expr_to_string e
+          | UnaryOp _ as e ->
+            expr_to_string e
+          | _ as e ->
+            sprintf "(%s)" (expr_to_string e) )
         (binary_op_to_string op)
         ( match r with
-          | Variable _ as e -> expr_to_string e
-          | Function _ as e -> expr_to_string e
-          | UnaryOp _ as e -> expr_to_string e
-          | _ as e -> sprintf "(%s)" (expr_to_string e) )
+          | Variable _ as e ->
+            expr_to_string e
+          | Function _ as e ->
+            expr_to_string e
+          | UnaryOp _ as e ->
+            expr_to_string e
+          | _ as e ->
+            sprintf "(%s)" (expr_to_string e) )
     | Quantified (q, idents, e) ->
       sprintf "%s [%s] : %s" (quantifier_to_string q)
         (join_with_comma idents) (expr_to_string e)
-    | False -> "$false"
-    | InsertedF l -> String.concat "" (List.map string_of_int l)
+    | False ->
+      "$false"
+    | InsertedF l ->
+      String.concat "" (List.map string_of_int l)
 
   let rec of_tptp_fof_formula (f : Tptp_ast.fof_formula) =
     let open Tptp_ast in
     let rec aux f =
       match f with
-      | FOF_F_binary (b_op, l, r) -> BinaryOp (b_op, aux l, aux r)
-      | FOF_F_unary (u_op, f) -> UnaryOp (u_op, aux f)
-      | FOF_F_quantified (q, vars, f) -> Quantified (q, vars, aux f)
-      | FOF_F_atomic t -> of_tptp_fof_term t
+      | FOF_F_binary (b_op, l, r) ->
+        BinaryOp (b_op, aux l, aux r)
+      | FOF_F_unary (u_op, f) ->
+        UnaryOp (u_op, aux f)
+      | FOF_F_quantified (q, vars, f) ->
+        Quantified (q, vars, aux f)
+      | FOF_F_atomic t ->
+        of_tptp_fof_term t
     in
     aux f
 
@@ -64,11 +83,16 @@ module Raw_expr = struct
     let open Tptp_ast in
     let rec aux t =
       match t with
-      | FOF_T_var "$false" -> False
-      | FOF_T_var v -> Variable v
-      | FOF_T_const "$false" -> False
-      | FOF_T_const c -> Variable c
-      | FOF_T_fun_app (f, args) -> Function (f, List.map aux args)
+      | FOF_T_var "$false" ->
+        False
+      | FOF_T_var v ->
+        Variable v
+      | FOF_T_const "$false" ->
+        False
+      | FOF_T_const c ->
+        Variable c
+      | FOF_T_fun_app (f, args) ->
+        Function (f, List.map aux args)
     in
     aux t
 
@@ -188,7 +212,8 @@ module Raw_line = struct
 
   let line_to_string (line : line option) : string =
     match line with
-    | None -> "Blank line"
+    | None ->
+      "Blank line"
     | Some (node_no, expr, derive_descr, parent_no_s) ->
       sprintf "%s. %s (%s) [%s]" node_no
         (Raw_expr.expr_to_string expr)
@@ -199,13 +224,16 @@ module Raw_line = struct
     let open Tptp_ast in
     let aux decl =
       match decl with
-      | Include _ -> None
+      | Include _ ->
+        None
       | Annotated_formula (Fof_annotated f) ->
         let {name; formula; annotations; _} = f in
         let descr, parent_ids =
           match annotations_to_descr_parent_ids annotations with
-          | None -> ("", [])
-          | Some p -> p
+          | None ->
+            ("", [])
+          | Some p ->
+            p
         in
         Some (name, Raw_expr.of_tptp_fof_formula formula, descr, parent_ids)
     in
@@ -213,14 +241,18 @@ module Raw_line = struct
 
   and annotations_to_descr_parent_ids ann =
     match ann with
-    | None -> None
-    | Some t -> collect_descr_parent_ids_from_general_term t
+    | None ->
+      None
+    | Some t ->
+      collect_descr_parent_ids_from_general_term t
 
   and collect_descr_parent_ids_from_general_term t =
     let open Tptp_ast in
     match t with
-    | GT_single d -> collect_descr_parent_ids_from_general_data d
-    | _ -> None
+    | GT_single d ->
+      collect_descr_parent_ids_from_general_data d
+    | _ ->
+      None
 
   and collect_descr_parent_ids_from_general_data d =
     let open Tptp_ast in
@@ -236,7 +268,8 @@ module Raw_line = struct
         |> List.rev
       in
       Some (descr, parents)
-    | _ -> None
+    | _ ->
+      None
 end
 
 (* module File_parser = struct
@@ -260,8 +293,10 @@ module File_parser = struct
     (Raw_line.line option list, string) result =
     let lexbuf = Lexing.from_string input in
     match Tptp.parse_with_error lexbuf with
-    | Ok l -> Ok (List.map (fun x -> Raw_line.of_tptp_decl x) l)
-    | Error msg -> Error msg
+    | Ok l ->
+      Ok (List.map (fun x -> Raw_line.of_tptp_decl x) l)
+    | Error msg ->
+      Error msg
 end
 
 module Analyzed_expr = struct
@@ -328,7 +363,8 @@ module Analyzed_expr = struct
   let is_quantified (ctx : context list) (e : identifier) : quantifier option =
     let rec aux (ctx : context list) (e : identifier) : quantifier option =
       match ctx with
-      | [] -> None
+      | [] ->
+        None
       | x :: xs ->
         if List.mem e x.quantified_idents then Some x.quantifier
         else aux xs e
@@ -340,26 +376,38 @@ module Analyzed_expr = struct
       match raw with
       | Variable ident -> (
           match is_quantified ctx ident with
-          | None -> Variable (Unsure, ident)
-          | Some `Exists -> Variable (Existential, ident)
-          | Some `Forall -> Variable (Universal, ident) )
-      | Function (name, params) -> Function (name, List.map (aux ctx) params)
-      | UnaryOp (op, e) -> UnaryOp (op, aux ctx e)
-      | BinaryOp (op, l, r) -> BinaryOp (op, aux ctx l, aux ctx r)
+          | None ->
+            Variable (Unsure, ident)
+          | Some `Exists ->
+            Variable (Existential, ident)
+          | Some `Forall ->
+            Variable (Universal, ident) )
+      | Function (name, params) ->
+        Function (name, List.map (aux ctx) params)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux ctx e)
+      | BinaryOp (op, l, r) ->
+        BinaryOp (op, aux ctx l, aux ctx r)
       | Quantified (q, idents, e) ->
         let new_ctx = {quantifier = q; quantified_idents = idents} in
         Quantified (q, idents, aux (new_ctx :: ctx) e)
-      | False -> False
-      | InsertedF formulas -> InsertedF formulas
+      | False ->
+        False
+      | InsertedF formulas ->
+        InsertedF formulas
     in
     aux [] raw
 
   let rec expr_to_string_debug (e : expr) : string =
     match e with
-    | Variable (Free, x) -> sprintf "%s[free]" x
-    | Variable (Universal, x) -> sprintf "%s[U]" x
-    | Variable (Existential, x) -> sprintf "%s[E]" x
-    | Variable (Unsure, x) -> sprintf "%s[unsure]" x
+    | Variable (Free, x) ->
+      sprintf "%s[free]" x
+    | Variable (Universal, x) ->
+      sprintf "%s[U]" x
+    | Variable (Existential, x) ->
+      sprintf "%s[E]" x
+    | Variable (Unsure, x) ->
+      sprintf "%s[unsure]" x
     | Function (name, params) ->
       sprintf "%s(%s)" name
         (join_with_comma (List.map expr_to_string_debug params))
@@ -371,75 +419,112 @@ module Analyzed_expr = struct
     | Quantified (q, idents, e) ->
       sprintf "%s [%s] : %s" (quantifier_to_string q)
         (join_with_comma idents) (expr_to_string_debug e)
-    | False -> "$false"
-    | InsertedF l -> String.concat "" (List.map string_of_int l)
+    | False ->
+      "$false"
+    | InsertedF l ->
+      String.concat "" (List.map string_of_int l)
 
   let rec expr_to_string (e : expr) : string =
     match e with
-    | Variable (Free, x) -> sprintf "%s" x
-    | Variable (Universal, x) -> sprintf "%s" x
-    | Variable (Existential, x) -> sprintf "%s" x
-    | Variable (Unsure, x) -> sprintf "%s" x
+    | Variable (Free, x) ->
+      sprintf "%s" x
+    | Variable (Universal, x) ->
+      sprintf "%s" x
+    | Variable (Existential, x) ->
+      sprintf "%s" x
+    | Variable (Unsure, x) ->
+      sprintf "%s" x
     | Function (name, params) ->
       sprintf "%s(%s)" name
         (join_with_comma (List.map expr_to_string params))
     | UnaryOp (op, expr) ->
       sprintf "%s%s" (unary_op_to_string op)
         ( match expr with
-          | Variable _ as e -> expr_to_string e
-          | Function _ as e -> expr_to_string e
-          | UnaryOp _ as e -> expr_to_string e
-          | _ as e -> sprintf "(%s)" (expr_to_string e) )
+          | Variable _ as e ->
+            expr_to_string e
+          | Function _ as e ->
+            expr_to_string e
+          | UnaryOp _ as e ->
+            expr_to_string e
+          | _ as e ->
+            sprintf "(%s)" (expr_to_string e) )
     | BinaryOp (op, l, r) -> (
         match op with
         | And | Or | Imply | Left_imply | Not_or | Not_and ->
           sprintf "%s %s %s"
             ( match l with
-              | Variable _ as e -> expr_to_string e
-              | Function _ as e -> expr_to_string e
-              | UnaryOp _ as e -> expr_to_string e
-              | _ as e -> sprintf "(%s)" (expr_to_string e) )
+              | Variable _ as e ->
+                expr_to_string e
+              | Function _ as e ->
+                expr_to_string e
+              | UnaryOp _ as e ->
+                expr_to_string e
+              | _ as e ->
+                sprintf "(%s)" (expr_to_string e) )
             (binary_op_to_string op)
             ( match r with
-              | Variable _ as e -> expr_to_string e
-              | Function _ as e -> expr_to_string e
-              | UnaryOp _ as e -> expr_to_string e
-              | _ as e -> sprintf "(%s)" (expr_to_string e) )
+              | Variable _ as e ->
+                expr_to_string e
+              | Function _ as e ->
+                expr_to_string e
+              | UnaryOp _ as e ->
+                expr_to_string e
+              | _ as e ->
+                sprintf "(%s)" (expr_to_string e) )
         | Eq | Iff | Xor ->
           sprintf "%s %s %s" (expr_to_string l) (binary_op_to_string op)
             (expr_to_string r) )
     | Quantified (q, idents, e) ->
       sprintf "%s [%s] : %s" (quantifier_to_string q)
         (join_with_comma idents) (expr_to_string e)
-    | False -> "$false"
-    | InsertedF l -> String.concat "" (List.map string_of_int l)
+    | False ->
+      "$false"
+    | InsertedF l ->
+      String.concat "" (List.map string_of_int l)
 
   let get_boundedness (e : expr) : (string * boundedness) list =
     let rec aux (e : expr) acc : (string * boundedness) list =
       match e with
-      | Variable (b, v) -> (v, b) :: acc
-      | Function (_, params) -> List.fold_left (fun x y -> aux y x) acc params
-      | UnaryOp (_, e) -> aux e acc
-      | BinaryOp (_, l, r) -> aux l (aux r acc)
-      | Quantified (_, _, e) -> aux e acc
-      | False -> acc
-      | InsertedF _ -> acc
+      | Variable (b, v) ->
+        (v, b) :: acc
+      | Function (_, params) ->
+        List.fold_left (fun x y -> aux y x) acc params
+      | UnaryOp (_, e) ->
+        aux e acc
+      | BinaryOp (_, l, r) ->
+        aux l (aux r acc)
+      | Quantified (_, _, e) ->
+        aux e acc
+      | False ->
+        acc
+      | InsertedF _ ->
+        acc
     in
     aux e []
 
   let mark_if_unsure (bound : boundedness) (e : expr) : expr =
     let rec aux (e : expr) : expr =
       match e with
-      | Variable (Unsure, v) -> Variable (bound, v)
-      | Variable (Free, v) -> Variable (Free, v)
-      | Variable (Universal, v) -> Variable (Universal, v)
-      | Variable (Existential, v) -> Variable (Existential, v)
-      | Function (name, params) -> Function (name, List.map aux params)
-      | UnaryOp (op, e) -> UnaryOp (op, aux e)
-      | BinaryOp (op, l, r) -> BinaryOp (op, aux l, aux r)
-      | Quantified (q, idents, e) -> Quantified (q, idents, aux e)
-      | False -> False
-      | InsertedF formulas -> InsertedF formulas
+      | Variable (Unsure, v) ->
+        Variable (bound, v)
+      | Variable (Free, v) ->
+        Variable (Free, v)
+      | Variable (Universal, v) ->
+        Variable (Universal, v)
+      | Variable (Existential, v) ->
+        Variable (Existential, v)
+      | Function (name, params) ->
+        Function (name, List.map aux params)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux e)
+      | BinaryOp (op, l, r) ->
+        BinaryOp (op, aux l, aux r)
+      | Quantified (q, idents, e) ->
+        Quantified (q, idents, aux e)
+      | False ->
+        False
+      | InsertedF formulas ->
+        InsertedF formulas
     in
     aux e
 
@@ -449,30 +534,46 @@ module Analyzed_expr = struct
       match e with
       | Variable (b, v) -> (
           match List.assoc_opt v changes with
-          | None -> Variable (b, v)
+          | None ->
+            Variable (b, v)
           | Some new_b -> (
               match (new_b, b) with
-              | x, Unsure -> Variable (x, v)
-              | _, _h -> Variable (b, v) (* only update when unsure *) ) )
-      | Function (name, params) -> Function (name, List.map aux params)
-      | UnaryOp (op, e) -> UnaryOp (op, aux e)
-      | BinaryOp (op, l, r) -> BinaryOp (op, aux l, aux r)
-      | Quantified (q, idents, e) -> Quantified (q, idents, aux e)
-      | False -> False
-      | InsertedF formulas -> InsertedF formulas
+              | x, Unsure ->
+                Variable (x, v)
+              | _, _h ->
+                Variable (b, v) (* only update when unsure *) ) )
+      | Function (name, params) ->
+        Function (name, List.map aux params)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux e)
+      | BinaryOp (op, l, r) ->
+        BinaryOp (op, aux l, aux r)
+      | Quantified (q, idents, e) ->
+        Quantified (q, idents, aux e)
+      | False ->
+        False
+      | InsertedF formulas ->
+        InsertedF formulas
     in
     aux e
 
   let get_function_names (e : expr) : string list =
     let rec aux (e : expr) : string list =
       match e with
-      | Variable _ -> []
-      | Function (name, params) -> name :: List.concat (List.map aux params)
-      | UnaryOp (_, e) -> aux e
-      | BinaryOp (_, e1, e2) -> List.append (aux e1) (aux e2)
-      | Quantified (_, _, e) -> aux e
-      | False -> []
-      | InsertedF _ -> []
+      | Variable _ ->
+        []
+      | Function (name, params) ->
+        name :: List.concat (List.map aux params)
+      | UnaryOp (_, e) ->
+        aux e
+      | BinaryOp (_, e1, e2) ->
+        List.append (aux e1) (aux e2)
+      | Quantified (_, _, e) ->
+        aux e
+      | False ->
+        []
+      | InsertedF _ ->
+        []
     in
     List.sort_uniq compare (aux e)
 
@@ -481,29 +582,44 @@ module Analyzed_expr = struct
       match e with
       | Variable (b, name) -> (
           match boundedness with
-          | Some boundedness -> if b = boundedness then [name] else []
-          | None -> [name] )
-      | Function (name, params) -> name :: List.concat (List.map aux params)
-      | UnaryOp (_, e) -> aux e
-      | BinaryOp (_, e1, e2) -> List.append (aux e1) (aux e2)
-      | Quantified (_, _, e) -> aux e
-      | False -> []
-      | InsertedF _ -> []
+          | Some boundedness ->
+            if b = boundedness then [name] else []
+          | None ->
+            [name] )
+      | Function (name, params) ->
+        name :: List.concat (List.map aux params)
+      | UnaryOp (_, e) ->
+        aux e
+      | BinaryOp (_, e1, e2) ->
+        List.append (aux e1) (aux e2)
+      | Quantified (_, _, e) ->
+        aux e
+      | False ->
+        []
+      | InsertedF _ ->
+        []
     in
     List.sort_uniq compare (aux e)
 
   let pattern_matches ~(pattern : expr) (expr : expr) : bool =
     let rec aux (pattern : expr) (expr : expr) : bool =
       match (pattern, expr) with
-      | Variable (Unsure, _), _ -> raise Unexpected_unsure_var
-      | _, Variable (Unsure, _) -> raise Unexpected_unsure_var
-      | Variable (Existential, _), _ -> raise Unexpected_existential_var
-      | _, Variable (Existential, _) -> raise Unexpected_existential_var
-      | Quantified (`Exists, _, _), _ -> raise Unexpected_exists_quantifier
-      | _, Quantified (`Exists, _, _) -> raise Unexpected_exists_quantifier
+      | Variable (Unsure, _), _ ->
+        raise Unexpected_unsure_var
+      | _, Variable (Unsure, _) ->
+        raise Unexpected_unsure_var
+      | Variable (Existential, _), _ ->
+        raise Unexpected_existential_var
+      | _, Variable (Existential, _) ->
+        raise Unexpected_existential_var
+      | Quantified (`Exists, _, _), _ ->
+        raise Unexpected_exists_quantifier
+      | _, Quantified (`Exists, _, _) ->
+        raise Unexpected_exists_quantifier
       | (Variable (Free, _) as v1), (Variable (Free, _) as v2) ->
         if v1 = v2 then true else false
-      | Variable (Universal, _), _ -> true
+      | Variable (Universal, _), _ ->
+        true
       | Function (f1, es1), Function (f2, es2) ->
         if f1 = f2 && List.length es1 = List.length es2 then aux_list es1 es2
         else false
@@ -511,11 +627,16 @@ module Analyzed_expr = struct
         if op1 = op2 then aux e1 e2 else false
       | BinaryOp (op1, e1a, e1b), BinaryOp (op2, e2a, e2b) ->
         if op1 = op2 then aux e1a e2a && aux e1b e2b else false
-      | Quantified (`Forall, _, e1), Quantified (`Forall, _, e2) -> aux e1 e2
-      | Quantified (`Forall, _, e1), (_ as e2) -> aux e1 e2
-      | False, False -> true
-      | InsertedF l1, InsertedF l2 -> l1 = l2
-      | _ -> false
+      | Quantified (`Forall, _, e1), Quantified (`Forall, _, e2) ->
+        aux e1 e2
+      | Quantified (`Forall, _, e1), (_ as e2) ->
+        aux e1 e2
+      | False, False ->
+        true
+      | InsertedF l1, InsertedF l2 ->
+        l1 = l2
+      | _ ->
+        false
     and aux_list (es1 : expr list) (es2 : expr list) : bool =
       List.length es1 = List.length es2
       && List.fold_left2 (fun res e1 e2 -> res && aux e1 e2) true es1 es2
@@ -529,13 +650,20 @@ module Analyzed_expr = struct
         if pattern_matches ~pattern expr then ExprSet.add expr s else s
       in
       match expr with
-      | Variable _ -> s
-      | Function (_, es) -> aux_list pattern es s
-      | UnaryOp (_, e) -> aux pattern e s
-      | BinaryOp (_, e1, e2) -> aux_list pattern [e1; e2] s
-      | Quantified (_, _, e) -> aux pattern e s
-      | False -> s
-      | InsertedF _ -> s
+      | Variable _ ->
+        s
+      | Function (_, es) ->
+        aux_list pattern es s
+      | UnaryOp (_, e) ->
+        aux pattern e s
+      | BinaryOp (_, e1, e2) ->
+        aux_list pattern [e1; e2] s
+      | Quantified (_, _, e) ->
+        aux pattern e s
+      | False ->
+        s
+      | InsertedF _ ->
+        s
     and aux_list (pattern : expr) (es : expr list) (s : ExprSet.t) : ExprSet.t
       =
       List.fold_left (fun s e -> aux pattern e s) s es
@@ -547,17 +675,26 @@ module Analyzed_expr = struct
     let rec aux (pattern : expr) (expr : expr) (m : expr VarMap.t) :
       expr VarMap.t =
       match (pattern, expr) with
-      | Variable (Free, _), _ -> m
-      | Variable (Universal, name), (_ as v) -> VarMap.add name v m
-      | Variable (Existential, _), _ -> raise Unexpected_existential_var
-      | Function (_, es1), Function (_, es2) -> aux_list es1 es2 m
-      | UnaryOp (_, e1), UnaryOp (_, e2) -> aux e1 e2 m
+      | Variable (Free, _), _ ->
+        m
+      | Variable (Universal, name), (_ as v) ->
+        VarMap.add name v m
+      | Variable (Existential, _), _ ->
+        raise Unexpected_existential_var
+      | Function (_, es1), Function (_, es2) ->
+        aux_list es1 es2 m
+      | UnaryOp (_, e1), UnaryOp (_, e2) ->
+        aux e1 e2 m
       | BinaryOp (_, e1a, e1b), BinaryOp (_, e2a, e2b) ->
         aux_list [e1a; e1b] [e2a; e2b] m
-      | Quantified (_, _, e1), Quantified (_, _, e2) -> aux e1 e2 m
-      | False, False -> m
-      | InsertedF _, InsertedF _ -> m
-      | _ -> raise Unmatching_structure
+      | Quantified (_, _, e1), Quantified (_, _, e2) ->
+        aux e1 e2 m
+      | False, False ->
+        m
+      | InsertedF _, InsertedF _ ->
+        m
+      | _ ->
+        raise Unmatching_structure
     and aux_list (es1 : expr list) (es2 : expr list) (m : expr VarMap.t) :
       expr VarMap.t =
       List.fold_left2 (fun m e1 e2 -> aux e1 e2 m) m es1 es2
@@ -572,24 +709,35 @@ module Analyzed_expr = struct
          res
          &&
          match VarMap.find_opt k larger with
-         | None -> true
-         | Some c -> VarMap.find k smaller = c )
+         | None ->
+           true
+         | Some c ->
+           VarMap.find k smaller = c )
       true keys
 
   let fill_in_pattern ~(pattern : expr) (var_bindings : expr VarMap.t) : expr =
     let rec aux (pattern : expr) (var_bindings : expr VarMap.t) : expr =
       match pattern with
-      | Variable (Unsure, _) -> raise Unexpected_unsure_var
-      | Variable (Free, _) as e -> e
-      | Variable (Existential, _) -> raise Unexpected_existential_var
-      | Variable (Universal, name) -> VarMap.find name var_bindings
-      | Function (name, es1) -> Function (name, aux_list es1 var_bindings)
-      | UnaryOp (op, e) -> UnaryOp (op, aux e var_bindings)
+      | Variable (Unsure, _) ->
+        raise Unexpected_unsure_var
+      | Variable (Free, _) as e ->
+        e
+      | Variable (Existential, _) ->
+        raise Unexpected_existential_var
+      | Variable (Universal, name) ->
+        VarMap.find name var_bindings
+      | Function (name, es1) ->
+        Function (name, aux_list es1 var_bindings)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux e var_bindings)
       | BinaryOp (op, e1, e2) ->
         BinaryOp (op, aux e1 var_bindings, aux e2 var_bindings)
-      | Quantified (q, ids, e) -> Quantified (q, ids, aux e var_bindings)
-      | False as e -> e
-      | InsertedF _ as e -> e
+      | Quantified (q, ids, e) ->
+        Quantified (q, ids, aux e var_bindings)
+      | False as e ->
+        e
+      | InsertedF _ as e ->
+        e
     and aux_list (patterns : expr list) (var_bindings : expr VarMap.t) :
       expr list =
       List.map (fun e -> aux e var_bindings) patterns
@@ -599,16 +747,26 @@ module Analyzed_expr = struct
   let has_universal_var (e : expr) : bool =
     let rec aux (e : expr) : bool =
       match e with
-      | Variable (Unsure, _) -> raise Unexpected_unsure_var
-      | Variable (Free, _) -> false
-      | Variable (Existential, _) -> false
-      | Variable (Universal, _) -> true
-      | Function (_, es) -> aux_list es
-      | UnaryOp (_, e) -> aux e
-      | BinaryOp (_, e1, e2) -> aux e1 || aux e2
-      | Quantified (_, _, e) -> aux e
-      | False -> false
-      | InsertedF _ -> false
+      | Variable (Unsure, _) ->
+        raise Unexpected_unsure_var
+      | Variable (Free, _) ->
+        false
+      | Variable (Existential, _) ->
+        false
+      | Variable (Universal, _) ->
+        true
+      | Function (_, es) ->
+        aux_list es
+      | UnaryOp (_, e) ->
+        aux e
+      | BinaryOp (_, e1, e2) ->
+        aux e1 || aux e2
+      | Quantified (_, _, e) ->
+        aux e
+      | False ->
+        false
+      | InsertedF _ ->
+        false
     and aux_list (es : expr list) : bool =
       List.fold_left (fun res e -> res || aux e) false es
     in
@@ -617,22 +775,38 @@ module Analyzed_expr = struct
   let negate (e : expr) : expr =
     let rec aux (e : expr) : expr =
       match e with
-      | UnaryOp (Not, e) -> e
-      | Variable _ -> UnaryOp (Not, e)
-      | Function _ -> UnaryOp (Not, e)
-      | BinaryOp (And, e1, e2) -> BinaryOp (Or, aux e1, aux e2)
-      | BinaryOp (Or, e1, e2) -> BinaryOp (And, aux e1, aux e2)
-      | BinaryOp (Eq, _, _) -> UnaryOp (Not, e)
-      | BinaryOp (Iff, e1, e2) -> BinaryOp (Xor, e1, e2)
-      | BinaryOp (Imply, e1, e2) -> BinaryOp (And, e1, aux e2)
-      | BinaryOp (Left_imply, e1, e2) -> BinaryOp (And, aux e1, e2)
-      | BinaryOp (Xor, e1, e2) -> BinaryOp (Iff, e1, e2)
-      | BinaryOp (Not_or, e1, e2) -> BinaryOp (Or, e1, e2)
-      | BinaryOp (Not_and, e1, e2) -> BinaryOp (And, e1, e2)
-      | Quantified (`Forall, vars, e) -> Quantified (`Exists, vars, aux e)
-      | Quantified (`Exists, vars, e) -> Quantified (`Forall, vars, aux e)
-      | False -> UnaryOp (Not, False)
-      | InsertedF _ -> UnaryOp (Not, e)
+      | UnaryOp (Not, e) ->
+        e
+      | Variable _ ->
+        UnaryOp (Not, e)
+      | Function _ ->
+        UnaryOp (Not, e)
+      | BinaryOp (And, e1, e2) ->
+        BinaryOp (Or, aux e1, aux e2)
+      | BinaryOp (Or, e1, e2) ->
+        BinaryOp (And, aux e1, aux e2)
+      | BinaryOp (Eq, _, _) ->
+        UnaryOp (Not, e)
+      | BinaryOp (Iff, e1, e2) ->
+        BinaryOp (Xor, e1, e2)
+      | BinaryOp (Imply, e1, e2) ->
+        BinaryOp (And, e1, aux e2)
+      | BinaryOp (Left_imply, e1, e2) ->
+        BinaryOp (And, aux e1, e2)
+      | BinaryOp (Xor, e1, e2) ->
+        BinaryOp (Iff, e1, e2)
+      | BinaryOp (Not_or, e1, e2) ->
+        BinaryOp (Or, e1, e2)
+      | BinaryOp (Not_and, e1, e2) ->
+        BinaryOp (And, e1, e2)
+      | Quantified (`Forall, vars, e) ->
+        Quantified (`Exists, vars, aux e)
+      | Quantified (`Exists, vars, e) ->
+        Quantified (`Forall, vars, aux e)
+      | False ->
+        UnaryOp (Not, False)
+      | InsertedF _ ->
+        UnaryOp (Not, e)
     in
     aux e
 
@@ -659,19 +833,26 @@ module Analyzed_expr = struct
   let remove_subsumptions (e : expr) : expr =
     let rec aux (e : expr) : expr =
       match e with
-      | Variable _ -> e
-      | Function (f, args) -> Function (f, List.map aux args)
-      | UnaryOp (op, e) -> UnaryOp (op, aux e)
+      | Variable _ ->
+        e
+      | Function (f, args) ->
+        Function (f, List.map aux args)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux e)
       | BinaryOp (Or, e, UnaryOp (Not, Variable (_, v)))
         when has_prefix v "spl" ->
         e
       | BinaryOp (Or, UnaryOp (Not, Variable (_, v)), e)
         when has_prefix v "spl" ->
         e
-      | BinaryOp (op, e1, e2) -> BinaryOp (op, aux e1, aux e2)
-      | Quantified (q, vars, e) -> Quantified (q, vars, aux e)
-      | False -> e
-      | InsertedF _ -> e
+      | BinaryOp (op, e1, e2) ->
+        BinaryOp (op, aux e1, aux e2)
+      | Quantified (q, vars, e) ->
+        Quantified (q, vars, aux e)
+      | False ->
+        e
+      | InsertedF _ ->
+        e
     in
     aux e
 
@@ -694,13 +875,20 @@ module Analyzed_expr = struct
     let rec aux (acc : int) (e : expr) : int =
       let acc = acc + 1 in
       match e with
-      | Variable _ -> acc
-      | Function (_, es) -> aux_list acc es
-      | UnaryOp (_, e) -> aux acc e
-      | BinaryOp (_, e1, e2) -> aux_list acc [e1; e2]
-      | Quantified (_, _, e) -> aux acc e
-      | False -> acc
-      | InsertedF _ -> acc
+      | Variable _ ->
+        acc
+      | Function (_, es) ->
+        aux_list acc es
+      | UnaryOp (_, e) ->
+        aux acc e
+      | BinaryOp (_, e1, e2) ->
+        aux_list acc [e1; e2]
+      | Quantified (_, _, e) ->
+        aux acc e
+      | False ->
+        acc
+      | InsertedF _ ->
+        acc
     and aux_list (acc : int) (es : expr list) : int =
       List.fold_left (fun acc e -> aux acc e) acc es
     in
@@ -712,14 +900,20 @@ module Analyzed_expr = struct
       if base = expr_from then to_expr
       else
         match base with
-        | Variable _ as e -> e
-        | Function (name, es) -> Function (name, aux_list es expr_from to_expr)
-        | UnaryOp (op, e) -> UnaryOp (op, aux e expr_from to_expr)
+        | Variable _ as e ->
+          e
+        | Function (name, es) ->
+          Function (name, aux_list es expr_from to_expr)
+        | UnaryOp (op, e) ->
+          UnaryOp (op, aux e expr_from to_expr)
         | BinaryOp (op, e1, e2) ->
           BinaryOp (op, aux e1 expr_from to_expr, aux e2 expr_from to_expr)
-        | Quantified (q, ids, e) -> Quantified (q, ids, aux e expr_from to_expr)
-        | False as e -> e
-        | InsertedF _ as e -> e
+        | Quantified (q, ids, e) ->
+          Quantified (q, ids, aux e expr_from to_expr)
+        | False as e ->
+          e
+        | InsertedF _ as e ->
+          e
     and aux_list (bases : expr list) (expr_from : expr) (to_expr : expr) :
       expr list =
       List.map (fun e -> aux e expr_from to_expr) bases
@@ -733,21 +927,30 @@ module Analyzed_expr = struct
   let similarity (e1 : expr) (e2 : expr) : float =
     let rec aux (e1 : expr) (e2 : expr) : int =
       match (e1, e2) with
-      | Variable (Free, n1), Variable (Free, n2) -> if n1 = n2 then 2 else 0
-      | Variable (Universal, _), (_ as v) -> 1 + length v
-      | (_ as v), Variable (Universal, _) -> 1 + length v
-      | Variable (Existential, _), _ -> raise Unexpected_existential_var
-      | _, Variable (Existential, _) -> raise Unexpected_existential_var
+      | Variable (Free, n1), Variable (Free, n2) ->
+        if n1 = n2 then 2 else 0
+      | Variable (Universal, _), (_ as v) ->
+        1 + length v
+      | (_ as v), Variable (Universal, _) ->
+        1 + length v
+      | Variable (Existential, _), _ ->
+        raise Unexpected_existential_var
+      | _, Variable (Existential, _) ->
+        raise Unexpected_existential_var
       | Function (n1, es1), Function (n2, es2) ->
         if n1 = n2 then 2 + aux_list es1 es2 else 0
       | UnaryOp (op1, e1), UnaryOp (op2, e2) ->
         if op1 = op2 then 2 + aux e1 e2 else 0
       | BinaryOp (op1, e1a, e1b), BinaryOp (op2, e2a, e2b) ->
         if op1 = op2 then 2 + aux_list [e1a; e1b] [e2a; e2b] else 0
-      | Quantified (_, _, e1), Quantified (_, _, e2) -> aux e1 e2
-      | False, False -> 2
-      | InsertedF n1, InsertedF n2 -> if n1 = n2 then 2 else 0
-      | _ -> 0
+      | Quantified (_, _, e1), Quantified (_, _, e2) ->
+        aux e1 e2
+      | False, False ->
+        2
+      | InsertedF n1, InsertedF n2 ->
+        if n1 = n2 then 2 else 0
+      | _ ->
+        0
     and aux_list (es1 : expr list) (es2 : expr list) : int =
       List.fold_left2 (fun acc e1 e2 -> acc + aux e1 e2) 0 es1 es2
     in
@@ -761,7 +964,8 @@ module Analyzed_expr = struct
       let rec aux (acc : (expr * expr) list) (exprs1 : expr list)
           (exprs : expr list) : (expr * expr) list =
         match exprs1 with
-        | [] -> acc
+        | [] ->
+          acc
         | p :: ps ->
           let acc = List.map (fun e -> (p, e)) exprs @ acc in
           aux acc ps exprs
@@ -786,12 +990,15 @@ module Analyzed_expr = struct
       let rec aux (m : expr list ExprMap.t) (combinations : (expr * expr) list)
         : expr list ExprMap.t =
         match combinations with
-        | [] -> m
+        | [] ->
+          m
         | (p, e) :: cs ->
           let m =
             match ExprMap.find_opt p m with
-            | None -> ExprMap.add p [e] m
-            | Some l -> ExprMap.add p (e :: l) m
+            | None ->
+              ExprMap.add p [e] m
+            | Some l ->
+              ExprMap.add p (e :: l) m
           in
           aux m cs
       in
@@ -802,7 +1009,8 @@ module Analyzed_expr = struct
       let rec aux (keys : expr list) (m : expr list ExprMap.t)
           (cur : expr ExprMap.t) : expr ExprMap.t list =
         match keys with
-        | [] -> [cur]
+        | [] ->
+          [cur]
         | k :: ks ->
           let vals = ExprMap.find k m in
           List.concat
@@ -821,7 +1029,8 @@ module Analyzed_expr = struct
         let rec aux (keys : expr list) (m : expr ExprMap.t)
             (exprs1_used : ExprSet.t) (exprs2_used : ExprSet.t) : bool =
           match keys with
-          | [] -> true
+          | [] ->
+            true
           | pat :: ks ->
             let expr = ExprMap.find pat m in
             let pattern_no_overlap = not (ExprSet.mem pat exprs1_used) in
@@ -844,7 +1053,8 @@ module Analyzed_expr = struct
         let rec aux (keys : expr list) (var_bindings : expr VarMap.t)
             (m : expr ExprMap.t) : bool =
           match keys with
-          | [] -> true
+          | [] ->
+            true
           | pat :: ks ->
             let expr = ExprMap.find pat m in
             let bindings = var_bindings_in_pattern_match ~pattern:pat expr in
@@ -866,7 +1076,8 @@ module Analyzed_expr = struct
       let rec aux (keys : expr list) (score_acc : float) (m : expr ExprMap.t) :
         float =
         match keys with
-        | [] -> score_acc
+        | [] ->
+          score_acc
         | pat :: ks ->
           let expr = ExprMap.find pat m in
           let score_acc = similarity pat expr +. score_acc in
@@ -996,16 +1207,21 @@ module Analyzed_expr = struct
       match e with
       | Variable (Universal, name) ->
         Variable (Universal, if name = original then replacement else name)
-      | Variable _ as e -> e
-      | Function (name, es) -> Function (name, aux_list original replacement es)
-      | UnaryOp (op, e) -> UnaryOp (op, aux original replacement e)
+      | Variable _ as e ->
+        e
+      | Function (name, es) ->
+        Function (name, aux_list original replacement es)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux original replacement e)
       | BinaryOp (op, e1, e2) ->
         BinaryOp
           (op, aux original replacement e1, aux original replacement e2)
       | Quantified (q, ids, e) ->
         Quantified (q, ids, aux original replacement e)
-      | False -> False
-      | InsertedF _ as e -> e
+      | False ->
+        False
+      | InsertedF _ as e ->
+        e
     and aux_list (original : string) (replacement : string) (es : expr list) :
       expr list =
       List.map (aux original replacement) es
@@ -1016,7 +1232,8 @@ module Analyzed_expr = struct
     expr =
     let rec aux (l : (string * string) list) (e : expr) : expr =
       match l with
-      | [] -> e
+      | [] ->
+        e
       | (name, replacement) :: l ->
         aux l (replace_universal_var_name name replacement e)
     in
@@ -1025,14 +1242,22 @@ module Analyzed_expr = struct
   let universal_var_names (e : expr) : string list =
     let rec aux (e : expr) : string list =
       match e with
-      | Variable (Universal, name) -> [name]
-      | Variable _ -> []
-      | Function (_, es) -> aux_list es
-      | UnaryOp (_, e) -> aux e
-      | BinaryOp (_, e1, e2) -> aux e1 @ aux e2
-      | Quantified (_, _, e) -> aux e
-      | False -> []
-      | InsertedF _ -> []
+      | Variable (Universal, name) ->
+        [name]
+      | Variable _ ->
+        []
+      | Function (_, es) ->
+        aux_list es
+      | UnaryOp (_, e) ->
+        aux e
+      | BinaryOp (_, e1, e2) ->
+        aux e1 @ aux e2
+      | Quantified (_, _, e) ->
+        aux e
+      | False ->
+        []
+      | InsertedF _ ->
+        []
     and aux_list (es : expr list) : string list =
       List.concat (List.map aux es)
     in
@@ -1050,7 +1275,8 @@ module Analyzed_expr = struct
     let rec aux (gen_id : unit -> string) (acc : expr list list)
         (ess : expr list list) : expr list list =
       match ess with
-      | [] -> List.rev acc
+      | [] ->
+        List.rev acc
       | es :: ess ->
         let names =
           List.sort_uniq compare
@@ -1074,7 +1300,8 @@ module Analyzed_expr = struct
         (get_exprs : 'a -> expr list) (acc : 'a list) (xs : 'a list) : 'a list
       =
       match xs with
-      | [] -> List.rev acc
+      | [] ->
+        List.rev acc
       | x :: xs ->
         let exprs = get_exprs x in
         let names =
@@ -1251,17 +1478,28 @@ type classification =
 
 let classification_to_string (c : classification) : string =
   match c with
-  | Unsure -> "unsure"
-  | Axiom -> "axiom"
-  | InitialKnowledge -> "initial knowledge"
-  | Rewriting -> "rewriting"
-  | Knowledge -> "knowledge"
-  | Goal -> "goal"
-  | NegatedGoal -> "negated goal"
-  | Contradiction -> "contradiction"
-  | ProtocolStep -> "protocol step"
-  | InteractiveProtocolStep -> "interactive protocol step"
-  | Alias -> "alias"
+  | Unsure ->
+    "unsure"
+  | Axiom ->
+    "axiom"
+  | InitialKnowledge ->
+    "initial knowledge"
+  | Rewriting ->
+    "rewriting"
+  | Knowledge ->
+    "knowledge"
+  | Goal ->
+    "goal"
+  | NegatedGoal ->
+    "negated goal"
+  | Contradiction ->
+    "contradiction"
+  | ProtocolStep ->
+    "protocol step"
+  | InteractiveProtocolStep ->
+    "interactive protocol step"
+  | Alias ->
+    "alias"
 
 module Analyzed_graph_base = struct
   type data =
@@ -1294,24 +1532,37 @@ module Analyzed_graph_base = struct
         (Analyzed_expr.expr_to_string node.expr)
         (StringLabels.capitalize_ascii
            (classification_to_string node.classification))
-    | Group -> sprintf "%s. Group" _id
+    | Group ->
+      sprintf "%s. Group" _id
 
   let color_internal (_id : id) (node : node) : string =
     match node with
     | Data node -> (
         match node.classification with
-        | Unsure -> "#FFC300"
-        | Axiom -> "#74C2F6"
-        | InitialKnowledge -> "#64db7e"
-        | Rewriting -> "#5C91E5"
-        | Knowledge -> "#30873E"
-        | Goal -> "#4C5967"
-        | NegatedGoal -> "#4C5967"
-        | Contradiction -> "#4C5967"
-        | ProtocolStep -> "#F67476"
-        | InteractiveProtocolStep -> "#E10E11"
-        | Alias -> "#979890" )
-    | Group -> "#ff0000"
+        | Unsure ->
+          "#FFC300"
+        | Axiom ->
+          "#74C2F6"
+        | InitialKnowledge ->
+          "#64db7e"
+        | Rewriting ->
+          "#5C91E5"
+        | Knowledge ->
+          "#30873E"
+        | Goal ->
+          "#4C5967"
+        | NegatedGoal ->
+          "#4C5967"
+        | Contradiction ->
+          "#4C5967"
+        | ProtocolStep ->
+          "#F67476"
+        | InteractiveProtocolStep ->
+          "#E10E11"
+        | Alias ->
+          "#979890" )
+    | Group ->
+      "#ff0000"
 
   let size_internal (_id : id) (node : node) : int =
     match node with Data _ -> 40 | Group -> 80
@@ -1379,8 +1630,10 @@ let uniquify_universal_var_names_derive_explanations
         pairs
     in
     match explanation with
-    | Nothing_to_explain -> explanation
-    | Dont_know_how -> explanation
+    | Nothing_to_explain ->
+      explanation
+    | Dont_know_how ->
+      explanation
     | Rewrite pairs ->
       Rewrite (replace_id_for_pairs original replacement pairs)
     | Combine_knowledge (infos, es) ->
@@ -1392,7 +1645,8 @@ let uniquify_universal_var_names_derive_explanations
                  Expr
                    (Analyzed_expr.replace_universal_var_name original
                       replacement e)
-               | _ -> info )
+               | _ ->
+                 info )
             infos
         , List.map
             (Analyzed_expr.replace_universal_var_name original replacement)
@@ -1409,9 +1663,12 @@ let uniquify_universal_var_names_derive_explanations
       List.fold_left (fun acc (k, v) -> k :: v :: acc) [] pairs
     in
     match explanation with
-    | Nothing_to_explain -> []
-    | Dont_know_how -> []
-    | Rewrite pairs -> pairs_to_exprs pairs
+    | Nothing_to_explain ->
+      []
+    | Dont_know_how ->
+      []
+    | Rewrite pairs ->
+      pairs_to_exprs pairs
     | Combine_knowledge (infos, es) ->
       List.map
         (fun info ->
@@ -1419,9 +1676,12 @@ let uniquify_universal_var_names_derive_explanations
         (List.filter
            (fun info ->
               match info with
-              | Step _ -> false
-              | Axiom _ -> false
-              | Expr _ -> true )
+              | Step _ ->
+                false
+              | Axiom _ ->
+                false
+              | Expr _ ->
+                true )
            infos)
       @ es
     (* | Combine_knowledge (_, _)              -> [] *)
@@ -1436,11 +1696,16 @@ let var_bindings_in_explanations (explanations : derive_explanation list) :
   let open Analyzed_expr in
   let get_pairs (explanation : derive_explanation) : (expr * expr) list =
     match explanation with
-    | Nothing_to_explain -> []
-    | Dont_know_how -> []
-    | Rewrite pairs -> pairs
-    | Combine_knowledge _ -> []
-    | Gain_knowledge (_, pairs1, pairs2) -> pairs1 @ pairs2
+    | Nothing_to_explain ->
+      []
+    | Dont_know_how ->
+      []
+    | Rewrite pairs ->
+      pairs
+    | Combine_knowledge _ ->
+      []
+    | Gain_knowledge (_, pairs1, pairs2) ->
+      pairs1 @ pairs2
   in
   List.fold_left
     (fun m e -> var_bindings_in_generic ~m ~get_pairs e)
@@ -1512,81 +1777,70 @@ module Protocol_step = struct
     | Client_to_intruder
     | Intruder_to_client
 
+  type in_out =
+    | In
+    | Out
+
   type t =
     { proc_name : string option
+    ; in_out : in_out
     ; direction : direction
     ; step_num : int
     ; expr : Analyzed_expr.expr }
 
-  let break_down_step_string (s : string) : string option * int option =
+  let break_down_step_string (s : string) :
+    string option * in_out option * int option =
     let rec aux (parts : string list) (proc_name_parts : string list)
-        (n : int option) : string option * int option =
+        (in_out : in_out option) (n : int option) :
+      string option * in_out option * int option =
       match parts with
       | [] ->
         ( ( match List.rev proc_name_parts with
-              | [] -> None
-              | l -> Some (String.concat "_" l) )
+              | [] ->
+                None
+              | l ->
+                Some (String.concat "_" l) )
+        , in_out
         , n )
-      | ["STEP"; n] -> aux [] proc_name_parts (int_of_string_opt n)
-      | x :: xs -> aux xs (x :: proc_name_parts) n
+      | ["out"; n] ->
+        aux [] proc_name_parts (Some Out) (int_of_string_opt n)
+      | ["in"; n] ->
+        aux [] proc_name_parts (Some In) (int_of_string_opt n)
+      | x :: xs ->
+        aux xs (x :: proc_name_parts) in_out n
     in
-    aux (String.split_on_char '_' s) [] None
+    aux (String.split_on_char '_' s) [] None None
 
   let node_to_steps (node : node) : t list =
+    let expr_to_steps e =
+      match Analyzed_expr.(e |> strip_att) with
+      | Function (name, [expr]) -> (
+          match break_down_step_string name with
+          | proc_name, Some in_out, Some step_num ->
+            [ { proc_name
+              ; in_out
+              ; step_num
+              ; direction = Client_to_intruder
+              ; expr } ]
+          | _ ->
+            [] )
+      | _ ->
+        []
+    in
     match node with
-    | Group -> []
+    | Group ->
+      []
     | Data node -> (
         match node.classification with
-        | ProtocolStep -> (
-            let es =
-              Analyzed_expr.(node.expr |> strip_att |> get_function_args)
-            in
-            match es with
-            | [e1; e2] -> (
-                match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some step_num ->
-                  [ { proc_name = None
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 } ]
-                | Some proc_name, Some step_num ->
-                  [ { proc_name = Some proc_name
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 } ]
-                | _ -> [] )
-            | _ -> [] )
-        | InteractiveProtocolStep -> (
-            let pre, e =
-              let open Analyzed_expr in
-              node.expr |> strip_quant |> split_on_impl
-              |> (function None -> failwith "Unexpected None" | Some x -> x)
-              |> fun (x, y) -> (strip_att x, strip_att y)
-            in
-            match Analyzed_expr.get_function_args e with
-            | [e1; e2] -> (
-                match break_down_step_string (Analyzed_expr.expr_to_string e2) with
-                | None, Some step_num ->
-                  [ { proc_name = None
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 }
-                  ; { proc_name = None
-                    ; step_num
-                    ; direction = Intruder_to_client
-                    ; expr = pre } ]
-                | Some proc_name, Some step_num ->
-                  [ { proc_name = Some proc_name
-                    ; step_num
-                    ; direction = Client_to_intruder
-                    ; expr = e1 }
-                  ; { proc_name = Some proc_name
-                    ; step_num
-                    ; direction = Intruder_to_client
-                    ; expr = pre } ]
-                | _ -> [] )
-            | _ -> [] )
-        | _ -> [] )
+        | ProtocolStep ->
+          expr_to_steps node.expr
+        | InteractiveProtocolStep ->
+          let open Analyzed_expr in
+          node.expr |> strip_quant |> split_on_impl
+          |> (function None -> failwith "Unexpected None" | Some x -> x)
+          |> fun (pre, e) -> expr_to_steps pre @ expr_to_steps e
+        | _ ->
+          [] )
 end
 
 let classify_negated_goal (m : node_graph) : node_graph =
@@ -1610,7 +1864,8 @@ let classify_negated_goal (m : node_graph) : node_graph =
       in
       let data = {data with classification} in
       ((), add_node Overwrite id (Data data) m)
-    | _ -> ((), m)
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1635,7 +1890,8 @@ let classify_goal (m : node_graph) : node_graph =
       in
       let data = {data with classification} in
       ((), add_node Overwrite id (Data data) m)
-    | _ -> ((), m)
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1643,8 +1899,10 @@ let classify_protocol_step (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let check_tag (tag : string) : bool =
     match Protocol_step.break_down_step_string tag with
-    | _, Some _ -> true
-    | _ -> false
+    | _, Some _, Some _ ->
+      true
+    | _ ->
+      false
   in
   let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
     =
@@ -1655,28 +1913,36 @@ let classify_protocol_step (m : node_graph) : node_graph =
         | [] ->
           let classification =
             match data.expr with
-            | Function
-                ("attacker", [Function ("tuple_2", [_; Variable (Free, tag)])])
-              when check_tag tag ->
-              ProtocolStep
+            | Function ("attacker", [Function (name, _)]) -> (
+                match Protocol_step.break_down_step_string name with
+                | _, Some _, Some _ ->
+                  ProtocolStep
+                | _ ->
+                  data.classification )
             | Quantified
                 ( _
                 , _
                 , BinaryOp
                     ( Imply
-                    , _
-                    , Function
-                        ( "attacker"
-                        , [Function ("tuple_2", [_; Variable (Free, tag)])] ) )
-                )
-              when check_tag tag ->
-              InteractiveProtocolStep
-            | _ -> data.classification
+                    , Function ("attacker", [Function (name_1, _)])
+                    , Function ("attacker", [Function (name_2, _)]) ) ) -> (
+                match
+                  ( Protocol_step.break_down_step_string name_1
+                  , Protocol_step.break_down_step_string name_2 )
+                with
+                | (_, Some _, Some _), (_, Some _, Some _) ->
+                  InteractiveProtocolStep
+                | _ ->
+                  data.classification )
+            | _ ->
+              data.classification
           in
           let data = {data with classification} in
           ((), add_node Overwrite id (Data data) m)
-        | _ -> ((), m) )
-    | _ -> ((), m)
+        | _ ->
+          ((), m) )
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1693,13 +1959,17 @@ let classify_axiom (m : node_graph) : node_graph =
             match data.expr with
             | Quantified (`Forall, _, BinaryOp (Eq, _, _)) ->
               (Axiom : classification)
-            | Quantified (`Forall, _, BinaryOp (Imply, _, _)) -> Axiom
-            | _ -> data.classification
+            | Quantified (`Forall, _, BinaryOp (Imply, _, _)) ->
+              Axiom
+            | _ ->
+              data.classification
           in
           let data = {data with classification} in
           ((), add_node Overwrite id (Data data) m)
-        | _ -> ((), m) )
-    | _ -> ((), m)
+        | _ ->
+          ((), m) )
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1724,7 +1994,8 @@ let classify_rewriting (m : node_graph) : node_graph =
       in
       let data = {data with classification} in
       ((), add_node Overwrite id (Data data) m)
-    | _ -> ((), m)
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1739,13 +2010,17 @@ let classify_initial_knowledge (m : node_graph) : node_graph =
         | [] ->
           let classification =
             match data.expr with
-            | Function ("attacker", _) -> InitialKnowledge
-            | _ -> data.classification
+            | Function ("attacker", _) ->
+              InitialKnowledge
+            | _ ->
+              data.classification
           in
           let data = {data with classification} in
           ((), add_node Overwrite id (Data data) m)
-        | _ -> ((), m) )
-    | _ -> ((), m)
+        | _ ->
+          ((), m) )
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1758,12 +2033,15 @@ let classify_contradiction (m : node_graph) : node_graph =
     | Unsure ->
       let classification =
         match data.expr with
-        | False -> Contradiction
-        | _ -> data.classification
+        | False ->
+          Contradiction
+        | _ ->
+          data.classification
       in
       let data = {data with classification} in
       ((), add_node Overwrite id (Data data) m)
-    | _ -> ((), m)
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1790,7 +2068,8 @@ let classify_knowledge (m : node_graph) : node_graph =
       in
       let data = {data with classification} in
       ((), add_node Overwrite id (Data data) m)
-    | _ -> ((), m)
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1805,8 +2084,10 @@ let classify_alias (m : node_graph) : node_graph =
         | [] ->
           let classification =
             match data.expr with
-            | BinaryOp (Iff, _, _) -> Alias
-            | _ -> data.classification
+            | BinaryOp (Iff, _, _) ->
+              Alias
+            | _ ->
+              data.classification
           in
           let data = {data with classification} in
           ((), add_node Overwrite id (Data data) m)
@@ -1831,7 +2112,8 @@ let classify_alias (m : node_graph) : node_graph =
                 List.filter (fun x -> x <> id) (find_children alias m)
               in
               match children with
-              | [] -> data.classification
+              | [] ->
+                data.classification
               | children ->
                 let original = find_node (List.nth children 0) m in
                 (unwrap_data original).classification
@@ -1839,7 +2121,8 @@ let classify_alias (m : node_graph) : node_graph =
           in
           let data = {data with classification} in
           ((), add_node Overwrite id (Data data) m) )
-    | _ -> ((), m)
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
@@ -1883,8 +2166,10 @@ let rewrite_conclusion (m : node_graph) : node_graph =
     let rec aux acc id m =
       let acc = id :: acc in
       match find_children id m with
-      | [] -> acc
-      | l -> List.fold_left (fun acc x -> aux acc x m) acc l
+      | [] ->
+        acc
+      | l ->
+        List.fold_left (fun acc x -> aux acc x m) acc l
     in
     aux [] goal_id m
   in
@@ -1902,7 +2187,8 @@ let rewrite_conclusion (m : node_graph) : node_graph =
       (fun _ node _ -> (unwrap_data node).classification = Goal)
       m
   with
-  | None -> m
+  | None ->
+    m
   | Some goal_id ->
     let goal = find_node goal_id m in
     let remove_ids = collect_ids_to_remove goal_id m in
@@ -1930,8 +2216,10 @@ let classify_nodes (m : node_graph) : node_graph =
         let func_names = Analyzed_expr.get_function_names data.expr in
         let is_axiom =
           match data.expr with
-          | Analyzed_expr.Quantified _ -> true
-          | _ -> false
+          | Analyzed_expr.Quantified _ ->
+            true
+          | _ ->
+            false
         in
         let is_knowledge_possibly =
           List.filter (fun x -> x = "attacker") func_names <> []
@@ -1994,7 +2282,8 @@ let remove_goal (m : node_graph) : node_graph =
     let children = find_children id m in
     let parents = find_parents id m in
     match children with
-    | [] -> ((), m)
+    | [] ->
+      ((), m)
     | l ->
       let data = unwrap_data node in
       let is_negated_goal = data.classification = NegatedGoal in
@@ -2030,7 +2319,8 @@ let get_chain (m : node_graph) (id : string) : string * string * string list =
       else acc
     in
     match children with
-    | [x] -> aux m x acc
+    | [x] ->
+      aux m x acc
     | _ ->
       let tail = List.hd acc in
       let acc = List.rev acc in
@@ -2043,7 +2333,8 @@ let mark_chains (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let rec update_chain (m : node_graph) chain ids =
     match ids with
-    | [] -> m
+    | [] ->
+      m
     | x :: xs ->
       let node = find_node x m in
       let data = unwrap_data node in
@@ -2058,7 +2349,8 @@ let mark_chains (m : node_graph) : node_graph =
     | [] ->
       let hd, tl, chain = get_chain m id in
       ((), update_chain m (hd, tl, chain) chain)
-    | _ -> ((), m)
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal mark_chain) m |> Misc_utils.unwrap_tuple_1
 
@@ -2091,7 +2383,8 @@ let compress_chains (m : node_graph) : node_graph =
         |> Analyzed_graph.remove_nodes (List.tl (List.rev chain))
         (* |> Analyzed_graph.remove_nodes (List.tl chain) *)
         |> Analyzed_graph.add_node Overwrite tl (Data tail) )
-    | _ -> ((), m)
+    | _ ->
+      ((), m)
   in
   linear_traverse () (Full_traversal compress_chain) m
   |> Misc_utils.unwrap_tuple_1
@@ -2103,9 +2396,12 @@ let compress_rewrite_trees (m : node_graph) : node_graph =
       match node with
       | Data data -> (
           match data.classification with
-          | Rewriting -> compress_bfs Bottom_to_top id m
-          | _ -> m )
-      | Group -> m
+          | Rewriting ->
+            compress_bfs Bottom_to_top id m
+          | _ ->
+            m )
+      | Group ->
+        m
     in
     ((), m)
   in
@@ -2122,9 +2418,12 @@ let compress_knowledge_trees (m : node_graph) : node_graph =
       match node with
       | Data data -> (
           match data.classification with
-          | Knowledge -> compress_bfs Bottom_to_top id m
-          | _ -> m )
-      | Group -> m
+          | Knowledge ->
+            compress_bfs Bottom_to_top id m
+          | _ ->
+            m )
+      | Group ->
+        m
     in
     ((), m)
   in
@@ -2157,14 +2456,23 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
   let open Analyzed_graph in
   let check_tag (tag : string) : bool =
     match Protocol_step.break_down_step_string tag with
-    | _, Some _ -> true
-    | _ -> false
+    | _, Some _, Some _ ->
+      true
+    | _ ->
+      false
   in
   let reformat_tag (tag : string) : string =
     match Protocol_step.break_down_step_string tag with
-    | Some p, Some n -> Printf.sprintf "%s.%d" p n
-    | None, Some n -> Printf.sprintf "GLOBAL.%d" n
-    | _ -> failwith "Unexpected case"
+    | Some p, Some In, Some n ->
+      Printf.sprintf "%s.in.%d" p n
+    | Some p, Some Out, Some n ->
+      Printf.sprintf "%s.out.%d" p n
+    | None, Some In, Some n ->
+      Printf.sprintf "GLOBAL.in.%d" n
+    | None, Some Out, Some n ->
+      Printf.sprintf "GLOBAL.out.%d" n
+    | _ ->
+      failwith "Unexpected case"
   in
   let rec aux (id : id) (m : node_graph) : info_source list =
     match find_parents id m with
@@ -2186,16 +2494,21 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
                     , [Function ("tuple_2", [_; Variable (Free, tag)])] ) ) )
           when check_tag tag ->
           [Step (reformat_tag tag)]
-        | _ -> [Axiom data.expr] )
-    | ps -> List.concat (List.map (fun p -> aux p m) ps)
+        | _ ->
+          [Axiom data.expr] )
+    | ps ->
+      List.concat (List.map (fun p -> aux p m) ps)
   in
   List.sort_uniq compare (aux id m)
 
 let info_source_to_string (x : info_source) : string =
   match x with
-  | Step tag -> Printf.sprintf "step %s" tag
-  | Axiom ax -> Printf.sprintf "axiom %s" (Analyzed_expr.expr_to_string ax)
-  | Expr e -> Printf.sprintf "%s" (Analyzed_expr.expr_to_string e)
+  | Step tag ->
+    Printf.sprintf "step %s" tag
+  | Axiom ax ->
+    Printf.sprintf "axiom %s" (Analyzed_expr.expr_to_string ax)
+  | Expr e ->
+    Printf.sprintf "%s" (Analyzed_expr.expr_to_string e)
 
 let explain_construction_single (id : Analyzed_graph.id) (m : node_graph) :
   derive_explanation =
@@ -2206,11 +2519,13 @@ let explain_construction_single (id : Analyzed_graph.id) (m : node_graph) :
   in
   let base = unwrap_data (find_node id m) in
   match find_children id m with
-  | [] -> Nothing_to_explain
+  | [] ->
+    Nothing_to_explain
   | [result_id] -> (
       let result = unwrap_data (find_node result_id m) in
       match List.filter (fun x -> x <> id) (find_parents result_id m) with
-      | [] -> Nothing_to_explain
+      | [] ->
+        Nothing_to_explain
       | [agent_id] -> (
           (* explain single base, agent, and result *)
           let agent = unwrap_data (find_node agent_id m) in
@@ -2275,9 +2590,12 @@ let explain_construction_single (id : Analyzed_graph.id) (m : node_graph) :
             in
             Gain_knowledge
               (trace_sources agent_id m, new_knowledge, old_knowledge)
-          | _ -> Dont_know_how )
-      | _ -> Dont_know_how )
-  | _ -> Dont_know_how
+          | _ ->
+            Dont_know_how )
+      | _ ->
+        Dont_know_how )
+  | _ ->
+    Dont_know_how
 
 let explain_construction_single_chained (id : Analyzed_graph.id)
     (m : node_graph) : derive_explanation list =
@@ -2297,12 +2615,18 @@ let group_derive_explanations (explanations : derive_explanation list) :
   let open Analyzed_expr in
   let same_group (e1 : derive_explanation) (e2 : derive_explanation) : bool =
     match (e1, e2) with
-    | Nothing_to_explain, Nothing_to_explain -> true
-    | Dont_know_how, Dont_know_how -> true
-    | Rewrite _, Rewrite _ -> true
-    | Combine_knowledge _, Combine_knowledge _ -> true
-    | Gain_knowledge _, Gain_knowledge _ -> true
-    | _ -> false
+    | Nothing_to_explain, Nothing_to_explain ->
+      true
+    | Dont_know_how, Dont_know_how ->
+      true
+    | Rewrite _, Rewrite _ ->
+      true
+    | Combine_knowledge _, Combine_knowledge _ ->
+      true
+    | Gain_knowledge _, Gain_knowledge _ ->
+      true
+    | _ ->
+      false
   in
   let group_into_list (explanations : derive_explanation list) :
     derive_explanation list list =
@@ -2310,14 +2634,17 @@ let group_derive_explanations (explanations : derive_explanation list) :
         (explanations : derive_explanation list) : derive_explanation list list
       =
       match explanations with
-      | [] -> List.rev (List.map List.rev acc)
+      | [] ->
+        List.rev (List.map List.rev acc)
       | e :: es ->
         let acc : derive_explanation list list =
           match acc with
-          | [] -> [[e]]
+          | [] ->
+            [[e]]
           | last_es :: acc -> (
               match last_es with
-              | [] -> [e] :: acc
+              | [] ->
+                [e] :: acc
               | last_e :: last_es ->
                 if same_group e last_e then (e :: last_e :: last_es) :: acc
                 else [e] :: (last_e :: last_es) :: acc )
@@ -2331,11 +2658,13 @@ let group_derive_explanations (explanations : derive_explanation list) :
     let rec match_into_buckets (buckets : expr list list)
         (pairs_list : (expr * expr) list list) : expr list list =
       match pairs_list with
-      | [] -> List.map List.rev buckets
+      | [] ->
+        List.map List.rev buckets
       | pairs :: rest ->
         let buckets =
           match buckets with
-          | [] -> List.map (fun (k, v) -> [k; v]) pairs
+          | [] ->
+            List.map (fun (k, v) -> [k; v]) pairs
           | buckets ->
             let pair_heads = List.map (fun (k, _) -> k) pairs in
             let bucket_heads = List.map List.hd buckets in
@@ -2345,7 +2674,8 @@ let group_derive_explanations (explanations : derive_explanation list) :
             List.map
               (fun l ->
                  match l with
-                 | [] -> []
+                 | [] ->
+                   []
                  | hd :: tl ->
                    let new_hd =
                      List.assoc (ExprMap.find hd match_map) pairs
@@ -2359,8 +2689,10 @@ let group_derive_explanations (explanations : derive_explanation list) :
       List.map
         (fun x ->
            match x with
-           | Rewrite pairs -> pairs
-           | _ -> failwith "Incorrect case" )
+           | Rewrite pairs ->
+             pairs
+           | _ ->
+             failwith "Incorrect case" )
         explanations
     in
     Rewrites (match_into_buckets [] match_pairs_list)
@@ -2370,9 +2702,11 @@ let group_derive_explanations (explanations : derive_explanation list) :
     List.map
       (fun (e : derive_explanation) ->
          ( match e with
-           | Combine_knowledge (info_src, es) -> Combine_knowledge (info_src, es)
-           | _ -> failwith "Incorrect case"
-                  : grouped_derive_explanations ) )
+           | Combine_knowledge (info_src, es) ->
+             Combine_knowledge (info_src, es)
+           | _ ->
+             failwith "Incorrect case"
+             : grouped_derive_explanations ) )
       explanations
   in
   let convert_gain_knowledge (explanations : derive_explanation list) :
@@ -2383,8 +2717,9 @@ let group_derive_explanations (explanations : derive_explanation list) :
            | Gain_knowledge (info_src, new_knowledge, _) ->
              Gain_knowledge
                (info_src, List.map (fun (k, _) -> k) new_knowledge)
-           | _ -> failwith "Incorrect case"
-                  : grouped_derive_explanations ) )
+           | _ ->
+             failwith "Incorrect case"
+             : grouped_derive_explanations ) )
       explanations
   in
   let convert_to_grouped (grouped_explanations : derive_explanation list list)
@@ -2393,16 +2728,23 @@ let group_derive_explanations (explanations : derive_explanation list) :
         (grouped_explanations : derive_explanation list list) :
       grouped_derive_explanations list =
       match grouped_explanations with
-      | [] -> List.rev acc
+      | [] ->
+        List.rev acc
       | g :: gs ->
         let acc =
           match g with
-          | [] -> acc
-          | Nothing_to_explain :: _ -> Nothing_to_explain :: acc
-          | Dont_know_how :: _ -> Dont_know_how :: acc
-          | Rewrite _ :: _ -> convert_rewrite g :: acc
-          | Combine_knowledge _ :: _ -> convert_combine_knowledge g @ acc
-          | Gain_knowledge _ :: _ -> convert_gain_knowledge g @ acc
+          | [] ->
+            acc
+          | Nothing_to_explain :: _ ->
+            Nothing_to_explain :: acc
+          | Dont_know_how :: _ ->
+            Dont_know_how :: acc
+          | Rewrite _ :: _ ->
+            convert_rewrite g :: acc
+          | Combine_knowledge _ :: _ ->
+            convert_combine_knowledge g @ acc
+          | Gain_knowledge _ :: _ ->
+            convert_gain_knowledge g @ acc
         in
         aux acc gs
     in
@@ -2440,8 +2782,10 @@ let explain_construction_chain (id : Analyzed_graph.id) (m : node_graph) :
 let derive_explanation_to_string (explanation : derive_explanation) : string =
   let open Analyzed_expr in
   match explanation with
-  | Nothing_to_explain -> "N/A"
-  | Dont_know_how -> "N/A"
+  | Nothing_to_explain ->
+    "N/A"
+  | Dont_know_how ->
+    "N/A"
   | Rewrite rewrites ->
     Printf.sprintf
       "Attacker rewrites\n%s\n                                          "
@@ -2473,11 +2817,11 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
             (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
             srcs_from))
       (* (String.concat "\n"
-                                                                 *    (List.map
-                                                                 *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                                                 *       old_knowledge
-                                                                 *    )
-                                                                 * ) *)
+                                                           *    (List.map
+                                                           *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                                           *       old_knowledge
+                                                           *    )
+                                                           * ) *)
       (String.concat "\n"
          (List.map
             (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
@@ -2487,8 +2831,10 @@ let grouped_derive_explanations_to_string
     (explanation : grouped_derive_explanations) : string =
   let open Analyzed_expr in
   match explanation with
-  | Nothing_to_explain -> "Nothing to explain"
-  | Dont_know_how -> "Don't know how to explain"
+  | Nothing_to_explain ->
+    "Nothing to explain"
+  | Dont_know_how ->
+    "Don't know how to explain"
   | Rewrites buckets ->
     Printf.sprintf "%s\n"
       (String.concat "\n\n"
@@ -2538,7 +2884,8 @@ let node_to_string_debug (id : Analyzed_graph.id) (node : node)
     (m : node_graph) : string =
   let open Analyzed_graph in
   match node with
-  | Group -> "Group node"
+  | Group ->
+    "Group node"
   | Data data ->
     let expr_str = Analyzed_expr.expr_to_string_debug data.expr in
     let parents = find_parents id m in
@@ -2637,7 +2984,8 @@ let process_string (input : string) : (node_graph, string) result =
      *     | Group  -> true
      *   )) *)
     |> fun x -> Ok x
-  | Error msg -> Error msg
+  | Error msg ->
+    Error msg
 
 let collect_steps (m : node_graph) : Protocol_step.t list =
   let open Protocol_step in
@@ -2650,7 +2998,8 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
     let rec aux (cur_path : id list) id m =
       let children = find_children id m in
       match children with
-      | [] -> [List.rev (id :: cur_path)]
+      | [] ->
+        [List.rev (id :: cur_path)]
       | l ->
         let cur_path = id :: cur_path in
         List.concat (List.map (fun c -> aux cur_path c m) l)
@@ -2688,20 +3037,24 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
           let steps = Protocol_step.node_to_steps node in
           steps @ List.filter (fun s -> not (List.mem s steps)) acc
         else acc
-      | _ -> acc
+      | _ ->
+        acc
     in
     let rec aux (acc : Protocol_step.t list) (last_id : id option)
         (path : id list) (m : node_graph) =
       match path with
-      | [] -> List.rev acc
+      | [] ->
+        List.rev acc
       | x :: xs ->
         (* check if any other path upward (i.e. a turn) to take *)
         let choices_upward =
           List.filter
             (fun x ->
                match last_id with
-               | None -> true
-               | Some last_id -> x <> last_id )
+               | None ->
+                 true
+               | Some last_id ->
+                 x <> last_id )
             (find_parents x m)
         in
         (* collect steps reachable from the paths upward *)

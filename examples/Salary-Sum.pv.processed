@@ -4,12 +4,6 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 free c : channel.
 free A : bitstring.
 free B : bitstring.
@@ -47,57 +41,69 @@ equation
   forall m : bitstring, k : bitstring; 
     adec(aenc(m, pkey(k)), k) = m.
 
-const client_A_STEP_1 : bitstring.
-const client_A_STEP_2 : bitstring.
+fun client_A_in_1(bitstring) : bitstring [data].
+fun client_A_in_2(bitstring) : bitstring [data].
+fun client_A_out_1(bitstring, bitstring) : bitstring [data].
+fun client_A_in_3(bitstring, bitstring) : bitstring [data].
+fun client_A_out_2(bitstring) : bitstring [data].
 
 let client_A(skA : bitstring) =
   new Na : bitstring;
-  in(c, pkNextT : bitstring);
-  in(c, lastT : bitstring);
-  out(c, ((A, aenc(add(Na, Sa), pkNextT)), client_A_STEP_1));
-  in(c, (=lastT, aenc_add_Na_Sa_Sb_Sc_Sd : bitstring));
+  in(c, client_A_in_1(pkNextT : bitstring));
+  in(c, client_A_in_2(lastT : bitstring));
+  out(c, client_A_out_1(A, aenc(add(Na, Sa), pkNextT)));
+  in(c, client_A_in_3(=lastT, aenc_add_Na_Sa_Sb_Sc_Sd : bitstring));
   let add_Na_Sa_Sb_Sc_Sd = adec(aenc_add_Na_Sa_Sb_Sc_Sd, skA) in
   let add_Sa_Sb_Sc_Sd = add(add_Na_Sa_Sb_Sc_Sd, neg(Na)) in
-  out(c, (add_Sa_Sb_Sc_Sd, client_A_STEP_2));
+  out(c, client_A_out_2(add_Sa_Sb_Sc_Sd));
   0.
 
-const client_B_STEP_1 : bitstring.
+fun client_B_in_1(bitstring) : bitstring [data].
+fun client_B_in_2(bitstring) : bitstring [data].
+fun client_B_in_3(bitstring, bitstring) : bitstring [data].
+fun client_B_out_1(bitstring, bitstring) : bitstring [data].
 
 let client_B(skB : bitstring) =
-  in(c, prevT : bitstring);
-  in(c, pkNextT : bitstring);
-  in(c, (=prevT, aenc_add_Na_Sa : bitstring));
+  in(c, client_B_in_1(prevT : bitstring));
+  in(c, client_B_in_2(pkNextT : bitstring));
+  in(c, client_B_in_3(=prevT, aenc_add_Na_Sa : bitstring));
   let add_Na_Sa = adec(aenc_add_Na_Sa, skB) in
-  out(c, ((B, aenc(add(add_Na_Sa, Sb), pkNextT)), client_B_STEP_1));
+  out(c, client_B_out_1(B, aenc(add(add_Na_Sa, Sb), pkNextT)));
   0.
 
-const client_C_STEP_1 : bitstring.
+fun client_C_in_1(bitstring) : bitstring [data].
+fun client_C_in_2(bitstring) : bitstring [data].
+fun client_C_in_3(bitstring, bitstring) : bitstring [data].
+fun client_C_out_1(bitstring, bitstring) : bitstring [data].
 
 let client_C(skC : bitstring) =
-  in(c, prevT : bitstring);
-  in(c, pkNextT : bitstring);
-  in(c, (=prevT, aenc_add_Na_Sa_Sb : bitstring));
+  in(c, client_C_in_1(prevT : bitstring));
+  in(c, client_C_in_2(pkNextT : bitstring));
+  in(c, client_C_in_3(=prevT, aenc_add_Na_Sa_Sb : bitstring));
   let add_Na_Sa_Sb = adec(aenc_add_Na_Sa_Sb, skC) in
-  out(c, ((C, aenc(add(add_Na_Sa_Sb, Sc), pkNextT)), client_C_STEP_1));
+  out(c, client_C_out_1(C, aenc(add(add_Na_Sa_Sb, Sc), pkNextT)));
   0.
 
-const client_D_STEP_1 : bitstring.
+fun client_D_in_1(bitstring) : bitstring [data].
+fun client_D_in_2(bitstring) : bitstring [data].
+fun client_D_in_3(bitstring, bitstring) : bitstring [data].
+fun client_D_out_1(bitstring, bitstring) : bitstring [data].
 
 let client_D(skD : bitstring) =
-  in(c, prevT : bitstring);
-  in(c, pkNextT : bitstring);
-  in(c, (=prevT, aenc_add_Na_Sa_Sb_Sc : bitstring));
+  in(c, client_D_in_1(prevT : bitstring));
+  in(c, client_D_in_2(pkNextT : bitstring));
+  in(c, client_D_in_3(=prevT, aenc_add_Na_Sa_Sb_Sc : bitstring));
   let add_Na_Sa_Sb_Sc = adec(aenc_add_Na_Sa_Sb_Sc, skD) in
-  out(c, ((D, aenc(add(add_Na_Sa_Sb_Sc, Sd), pkNextT)), client_D_STEP_1));
+  out(c, client_D_out_1(D, aenc(add(add_Na_Sa_Sb_Sc, Sd), pkNextT)));
   0.
 
 query 
   attacker(Sa).
 
-const STEP_1 : bitstring.
-const STEP_2 : bitstring.
-const STEP_3 : bitstring.
-const STEP_4 : bitstring.
+fun out_1(bitstring) : bitstring [data].
+fun out_2(bitstring) : bitstring [data].
+fun out_3(bitstring) : bitstring [data].
+fun out_4(bitstring) : bitstring [data].
 
 process
   new skA : bitstring;
@@ -108,10 +114,10 @@ process
   let pkB = pkey(skB) in
   let pkC = pkey(skC) in
   let pkD = pkey(skD) in
-  out(c, (pkA, STEP_1));
-  out(c, (pkB, STEP_2));
-  out(c, (pkC, STEP_3));
-  out(c, (pkD, STEP_4));
+  out(c, out_1(pkA));
+  out(c, out_2(pkB));
+  out(c, out_3(pkC));
+  out(c, out_4(pkD));
   (
     client_A(skA)
   )

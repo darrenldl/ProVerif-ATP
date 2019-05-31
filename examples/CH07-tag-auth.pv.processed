@@ -3,13 +3,6 @@ const CONST_1 : bitstring.
 const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
-
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 const ZERO : bitstring.
 const QUERY : bitstring.
 
@@ -42,38 +35,39 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const R_STEP_1 : bitstring.
-const R_STEP_2 : bitstring.
-const R_STEP_3 : bitstring.
+fun R_out_1(bitstring, bitstring) : bitstring [data].
+fun R_in_1(bitstring, bitstring) : bitstring [data].
+fun R_out_2(bitstring) : bitstring [data].
+fun R_out_3(bitstring) : bitstring [data].
 
 let R =
   new r1 : bitstring;
-  out(c, ((QUERY, r1), R_STEP_1));
-  in(c, (r2 : bitstring, left_xor_ID2_g : bitstring));
+  out(c, R_out_1(QUERY, r1));
+  in(c, R_in_1(r2 : bitstring, left_xor_ID2_g : bitstring));
   let g = h(xor(xor(r1, r2), k)) in
   let ID2 = rotate(ID, g) in
   let left = split_L(xor(ID2, g)) in
   let right = split_R(xor(ID2, g)) in
   
   if left = left_xor_ID2_g then
-  out(c, (right, R_STEP_2));
-  out(c, (objective, R_STEP_3));
+  out(c, R_out_2(right));
+  out(c, R_out_3(objective));
   0.
 
-const sess_1_STEP_1 : bitstring.
-const sess_1_STEP_2 : bitstring.
-const sess_1_STEP_3 : bitstring.
+fun sess_1_out_1(bitstring) : bitstring [data].
+fun sess_1_out_2(bitstring, bitstring) : bitstring [data].
+fun sess_1_out_3(bitstring) : bitstring [data].
 
 let sess_1 =
   new r1_s1 : bitstring;
-  out(c, (r1_s1, sess_1_STEP_1));
+  out(c, sess_1_out_1(r1_s1));
   new r2_s1 : bitstring;
   let g_s1 = h(xor(xor(r1_s1, r2_s1), k)) in
   let ID2_s1 = rotate(ID, g_s1) in
   let left_s1 = split_L(xor(ID2_s1, g_s1)) in
   let right_s1 = split_R(xor(ID2_s1, g_s1)) in
-  out(c, ((r2_s1, left_s1), sess_1_STEP_2));
-  out(c, (right_s1, sess_1_STEP_3));
+  out(c, sess_1_out_2(r2_s1, left_s1));
+  out(c, sess_1_out_3(right_s1));
   0.
 
 process

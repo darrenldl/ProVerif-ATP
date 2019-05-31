@@ -4,11 +4,11 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
+pred eq_bitstring_bitstring(bitstring, bitstring).
 
 clauses
-  forall x : bitstring;
-    eq(x, x).
+  forall x : bitstring, y : bitstring;
+    eq_bitstring_bitstring(x, y).
 
 fun tuple_3_get_0(bitstring) : bitstring.
 
@@ -16,17 +16,17 @@ equation
   forall x0 : bitstring, x1 : bitstring, x2 : bitstring; 
     tuple_3_get_0((x0, x1, x2)) = x0.
 
-fun tuple_3_get_1(bitstring) : bitstring.
+fun tuple_3_get_1_bitstring(bitstring) : bitstring.
 
 equation
   forall x0 : bitstring, x1 : bitstring, x2 : bitstring; 
-    tuple_3_get_1((x0, x1, x2)) = x1.
+    tuple_3_get_1_bitstring((x0, x1, x2)) = x1.
 
-fun tuple_3_get_2(bitstring) : bitstring.
+fun tuple_3_get_2_bitstring(bitstring) : bitstring.
 
 equation
   forall x0 : bitstring, x1 : bitstring, x2 : bitstring; 
-    tuple_3_get_2((x0, x1, x2)) = x2.
+    tuple_3_get_2_bitstring((x0, x1, x2)) = x2.
 
 free c : channel.
 free A : bitstring.
@@ -84,33 +84,35 @@ free objective : bitstring [private].
 query 
   attacker(objective).
 
-const client_B_STEP_1 : bitstring.
+fun client_B_in_1(bitstring) : bitstring [data].
+fun client_B_out_1(bitstring) : bitstring [data].
 
 let client_B(Kbs : bitstring) =
   new Nb : bitstring;
-  in(c, enc_A_Kab_T : bitstring);
+  in(c, client_B_in_1(enc_A_Kab_T : bitstring));
   
-  if eq(A, tuple_3_get_0(cbc_dec_3(enc_A_Kab_T, Kbs))) then
-  let Kab : bitstring = tuple_3_get_1(cbc_dec_3(enc_A_Kab_T, Kbs)) in
-  let T : bitstring = tuple_3_get_2(cbc_dec_3(enc_A_Kab_T, Kbs)) in
-  out(c, (objective, client_B_STEP_1));
+  if eq_bitstring_bitstring(A, tuple_3_get_0(cbc_dec_3(enc_A_Kab_T, Kbs))) then
+  let Kab : bitstring = tuple_3_get_1_bitstring(cbc_dec_3(enc_A_Kab_T, Kbs)) in
+  let T : bitstring = tuple_3_get_2_bitstring(cbc_dec_3(enc_A_Kab_T, Kbs)) in
+  out(c, client_B_out_1(objective));
   0.
 
-const server_S_STEP_1 : bitstring.
-const server_S_STEP_2 : bitstring.
+fun server_S_in_1(bitstring, bitstring) : bitstring [data].
+fun server_S_out_1(bitstring) : bitstring [data].
+fun server_S_out_2(bitstring) : bitstring [data].
 
 let server_S(Kas : bitstring, Kbs : bitstring) =
   new Kab : bitstring;
   new T : bitstring;
-  in(c, (src : bitstring, dst : bitstring));
+  in(c, server_S_in_1(src : bitstring, dst : bitstring));
   
   if src = A && dst = B then (
-    out(c, (cbc_enc_4(B, Kab, T, cbc_enc_3(A, Kab, T, Kbs), Kas), server_S_STEP_2));
+    out(c, server_S_out_2(cbc_enc_4(B, Kab, T, cbc_enc_3(A, Kab, T, Kbs), Kas)));
     0
   ) else (
     
     if src = B && dst = A then
-    out(c, (cbc_enc_4(A, Kab, T, cbc_enc_3(B, Kab, T, Kas), Kbs), server_S_STEP_1));
+    out(c, server_S_out_1(cbc_enc_4(A, Kab, T, cbc_enc_3(B, Kab, T, Kas), Kbs)));
     0
   ).
 

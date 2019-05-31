@@ -15,15 +15,19 @@
 let white                = [' ' '\t']+
 let newline              = '\r' | '\n' | "\r\n"
 
+let not_star_paren       = ([^'*']*['*']['*']*[^ '*' ')'])*[^'*']*
+
+let not_star         = [^'*']
+
 let printable_char   = ['\032'-'\126']
 
-let upper_alpha      = ['A'-'Z']
-let lower_alpha      = ['a'-'z']
-let numeric          = ['0'-'9']
-let alpha_numeric    = (lower_alpha | upper_alpha | numeric | ['_'])*
+let upper_alpha       = ['A'-'Z']
+let lower_alpha       = ['a'-'z']
+let numeric           = ['0'-'9']
+let alpha_numeric     = (lower_alpha | upper_alpha | numeric | ['_'])*
+let other_name_symbol = ['\'']
 
-let term     = alpha_numeric+
-let variable = alpha_numeric+
+let name = (alpha_numeric | other_name_symbol)+
 
 rule read =
   parse
@@ -32,18 +36,60 @@ rule read =
   | newline    { new_line lexbuf; read lexbuf }
 
   (* Keywords *)
-  | "fun"      { FUN }
-  | "equation" { EQUATION }
-  | "reduc"    { REDUC }
-  | "forall"   { FORALL }
-  | "new"      { NEW }
-  | "out"      { OUT }
-  | "let"      { LET }
-  | "in"       { IN }
-  | "if"       { IF }
-  | "then"     { THEN }
-  | "else"     { ELSE }
-  | '0'        { NULL_PROC }
+  | "among"          { AMONG }
+  | "channel"        { CHANNEL }
+  | "choice"         { CHOICE }
+  | "clauses"        { CLAUSES }
+  | "const"          { CONST }
+  | "def"            { DEF }
+  | "diff"           { DIFF }
+  | "do"             { DO }
+  | "elimtrue"       { ELIMTRUE }
+  | "else"           { ELSE }
+  | "equation"       { EQUATION }
+  | "equivalence"    { EQUIVALENCE }
+  | "event"          { EVENT }
+  | "expand"         { EXPAND }
+  | "fail"           { FAIL }
+  | "forall"         { FORALL }
+  | "free"           { FREE }
+  | "fun"            { FUN }
+  | "get"            { GET }
+  | "if"             { IF }
+  | "implementation" { IMPLEMENTATION }
+  | "in"             { IN }
+  | "inj-event"      { INJ_EVENT }
+  | "insert"         { INSERT }
+  | "let"            { LET }
+  | "letfun"         { LETFUN }
+  | "new"            { NEW }
+  | "noninterf"      { NONINTERF }
+  | "not"            { NOT }
+  | "nounif"         { NOUNIF }
+  | "or"             { LITERAL_OR }
+  | "otherwise"      { OTHERWISE }
+  | "out"            { OUT }
+  | "param"          { PARAM }
+  | "phase"          { PHASE }
+  | "pred"           { PRED }
+  | "proba"          { PROBA }
+  | "process"        { PROCESS }
+  | "proof"          { PROOF }
+  | "public_vars"    { PUBLIC_VARS }
+  | "putbegin"       { PUTBEGIN }
+  | "query"          { QUERY }
+  | "reduc"          { REDUC }
+  | "secret"         { SECRET }
+  | "set"            { SET }
+  | "suchthat"       { SUCHTHAT }
+  | "sync"           { SYNC }
+  | "table"          { TABLE }
+  | "then"           { THEN }
+  | "type"           { TYPE }
+  | "weaksecret"     { WEAKSECRET }
+  | "yield"          { YIELD }
+
+  | '0'              { NULL_PROC }
 
   (* Symbols *)
   | '('        { LEFT_PAREN }
@@ -52,13 +98,30 @@ rule read =
   | '['        { LEFT_BRACK }
   | ']'        { RIGHT_BRACK }
   | ':'        { COLON }
+  | ';'        { SEMICOLON }
 
   (* Operators *)
   | '='        { EQ }
-  | '<>'       { NEQ }
+  | "<>"       { NEQ }
   | "&&"       { AND }
   | "||"       { OR }
-  | "not"      { NOT }
 
   | '|'        { PARALLEL }
   | '!'        { REPLICATE }
+
+  | '.'        { DOT }
+
+  (* name *)
+  | name       { NAME (get lexbuf) }
+
+  | "(*"       { comment lexbuf }
+
+  | _                    { raise (SyntaxError ("Unexpected char: " ^ get lexbuf)) }
+  | eof { EOF }
+
+and comment =
+  parse
+  | newline        { new_line lexbuf; comment lexbuf }
+  | "*)"           { read lexbuf }
+  | _              { comment lexbuf }
+  | eof            { raise (SyntaxError ("Unterminated comment")) }

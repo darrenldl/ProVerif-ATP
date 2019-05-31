@@ -59,16 +59,20 @@ let attack_trace node_map =
     List.fold_left
       (fun cur_max s ->
          match (s.direction, s.proc_name) with
-         | Client_to_intruder, Some s -> max cur_max (String.length s)
-         | _ -> cur_max )
+         | Client_to_intruder, Some s ->
+           max cur_max (String.length s)
+         | _ ->
+           cur_max )
       0 steps
   in
   let max_proc_name_len_on_right =
     List.fold_left
       (fun cur_max s ->
          match (s.direction, s.proc_name) with
-         | Intruder_to_client, Some s -> max cur_max (String.length s)
-         | _ -> cur_max )
+         | Intruder_to_client, Some s ->
+           max cur_max (String.length s)
+         | _ ->
+           cur_max )
       0 steps
   in
   let intruder_name = "I" in
@@ -149,7 +153,8 @@ let () =
   let rec vampire_file_reader () =
     let%lwt input = Lwt_condition.wait js_ctx.vampire_file_ready in
     ( match Vampire.process_string input with
-      | Error e -> Js_utils.alert e
+      | Error e ->
+        Js_utils.alert e
       | Ok node_map ->
         (* let node_map = Vampire.Analyzed_graph.remove_node 387 node_map in *)
         (* let debug_print = Js.Unsafe.global##.document##getElementById "debugPrint" in *)
@@ -194,7 +199,8 @@ let () =
   let rec pv_file_reader () =
     let%lwt input = Lwt_condition.wait js_ctx.pv_file_ready in
     ( match ProVerif.process_string input with
-      | Error e -> Js_utils.alert e
+      | Error e ->
+        Js_utils.alert e
       | Ok s ->
         js_ctx.pv_raw <- Some input;
         js_ctx.pv_processed <- Some s;
@@ -251,17 +257,19 @@ let () =
    * in *)
   let disable_border_prev_selected_node () : unit =
     match js_ctx.selected_node with
-    | None -> ()
-    | Some id -> Cytoscape.disable_node_border cy_main ~id
+    | None ->
+      ()
+    | Some id ->
+      Cytoscape.disable_node_border cy_main ~id
   in
   Cytoscape.on cy_main ~event:"boxstart" ~handler:(fun _ev ->
-      Lwt_js.yield ()
+      Js_of_ocaml_lwt.Lwt_js.yield ()
       >>= (fun () ->
           js_ctx.box_selected_nodes <- [];
           return_unit )
       |> ignore );
   Cytoscape.on cy_main ~event:"box" ~selector:"node" ~handler:(fun ev ->
-      Lwt_js.yield ()
+      Js_of_ocaml_lwt.Lwt_js.yield ()
       >>= (fun () ->
           let target_id = Js.to_string ev##.target_node##id in
           js_ctx.box_selected_nodes <- target_id :: js_ctx.box_selected_nodes;
@@ -283,7 +291,8 @@ let () =
       js_ctx.selected_node <- Some target_id;
       Cytoscape.enable_node_border cy_main ~id:target_id;
       match js_ctx.cur_node_map with
-      | None -> ()
+      | None ->
+        ()
       | Some (Vampire m) -> (
           let node = Vampire.Analyzed_graph.find_node target_id m in
           match node with
@@ -306,7 +315,8 @@ let () =
             := Js.string
                 (Vampire.derive_explanation_to_string
                    (Vampire.explain_construction_single target_id m))
-          | Group -> () ) );
+          | Group ->
+            () ) );
   Cytoscape.on cy_main ~event:"tap" ~selector:"edge" ~handler:(fun ev ->
       Js_utils.set_display ~id:single_formula_box_ID ~on:false;
       Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
@@ -321,12 +331,14 @@ let () =
       let source_id = Js.to_string data##.source in
       let target_id = Js.to_string data##.target in
       match js_ctx.cur_node_map with
-      | None -> ()
+      | None ->
+        ()
       | Some (Vampire m) -> (
           let source = Vampire.Analyzed_graph.find_node source_id m in
           let target = Vampire.Analyzed_graph.find_node target_id m in
           match (source, target) with
-          | Group, Group | _, Group | Group, _ -> ()
+          | Group, Group | _, Group | Group, _ ->
+            ()
           | Data source_data, Data target_data ->
             let source_em = Vampire.expr_to_node_map source_data.expr in
             let target_em = Vampire.expr_to_node_map target_data.expr in
@@ -373,7 +385,8 @@ let () =
   compress_button##.onclick :=
     Dom_html.handler (fun _ev ->
         ( match js_ctx.cur_node_map with
-          | None -> ()
+          | None ->
+            ()
           | Some (Vampire old_m) ->
             let open Vampire.Analyzed_graph in
             js_ctx.prev_node_map <- Some (Vampire old_m);
@@ -391,10 +404,12 @@ let () =
   decompress_button##.onclick
   := Dom_html.handler (fun _ev ->
       ( match js_ctx.cur_node_map with
-        | None -> ()
+        | None ->
+          ()
         | Some (Vampire old_m) -> (
             match js_ctx.selected_node with
-            | None -> ()
+            | None ->
+              ()
             | Some id ->
               let open Vampire.Analyzed_graph in
               js_ctx.prev_node_map <- Some (Vampire old_m);
@@ -412,10 +427,12 @@ let () =
   recompress_button##.onclick
   := Dom_html.handler (fun _ev ->
       ( match js_ctx.cur_node_map with
-        | None -> ()
+        | None ->
+          ()
         | Some (Vampire old_m) -> (
             match js_ctx.selected_node with
-            | None -> ()
+            | None ->
+              ()
             | Some id ->
               let open Vampire.Analyzed_graph in
               js_ctx.prev_node_map <- Some (Vampire old_m);
@@ -431,10 +448,12 @@ let () =
   toggle_label_button##.onclick
   := Dom_html.handler (fun _ev ->
       ( match js_ctx.cur_node_map with
-        | None -> ()
+        | None ->
+          ()
         | Some (Vampire old_m) -> (
             match js_ctx.selected_node with
-            | None -> ()
+            | None ->
+              ()
             | Some id ->
               let open Vampire.Analyzed_graph in
               js_ctx.prev_node_map <- Some (Vampire old_m);
@@ -453,10 +472,12 @@ let () =
   toggle_label_skip_layout_calc_button##.onclick
   := Dom_html.handler (fun _ev ->
       ( match js_ctx.cur_node_map with
-        | None -> ()
+        | None ->
+          ()
         | Some (Vampire old_m) -> (
             match js_ctx.selected_node with
-            | None -> ()
+            | None ->
+              ()
             | Some id ->
               let open Vampire.Analyzed_graph in
               js_ctx.prev_node_map <- Some (Vampire old_m);
@@ -483,10 +504,12 @@ let () =
       Js_utils.set_display ~id:main_graph_display_ID ~on:true;
       Js_utils.set_display ~id:main_text_display_ID ~on:false;
       ( match js_ctx.cur_node_map with
-        | None -> ()
+        | None ->
+          ()
         | Some (Vampire old_m) -> (
             match js_ctx.selected_node with
-            | None -> ()
+            | None ->
+              ()
             | Some id ->
               let open Vampire in
               (* let explanations    = explain_construction_chain id old_m in
@@ -533,7 +556,8 @@ let () =
       Js_utils.set_display ~id:main_text_display_ID ~on:true;
       Js_utils.set_display ~id:single_explanation_box_ID ~on:false;
       ( match js_ctx.pv_raw with
-        | None -> ()
+        | None ->
+          ()
         | Some text ->
           let main_text_display =
             Js.Unsafe.global##.document##getElementById main_text_display_ID
@@ -546,7 +570,8 @@ let () =
           in
           let text = attack_trace node_map in
           attack_trace_box##.innerHTML := Js.string text
-        | _ -> () );
+        | _ ->
+          () );
       Js._true );
   let pv_processed_attack_trace_button =
     Dom_html.getElementById_exn "pvProcessedAttackTraceButton"
@@ -563,7 +588,8 @@ let () =
       Js_utils.set_display ~id:main_text_display_ID ~on:true;
       Js_utils.set_display ~id:single_explanation_box_ID ~on:false;
       ( match js_ctx.pv_processed with
-        | None -> ()
+        | None ->
+          ()
         | Some text ->
           let main_text_display =
             Js.Unsafe.global##.document##getElementById main_text_display_ID
@@ -576,7 +602,8 @@ let () =
           in
           let text = attack_trace node_map in
           attack_trace_box##.innerHTML := Js.string text
-        | _ -> () );
+        | _ ->
+          () );
       Js._true );
   let knowledge_graph_button =
     Dom_html.getElementById_exn "knowledgeGraphButton"

@@ -1,82 +1,124 @@
 % Refutation found. Thanks to Tanya!
 % SZS status Theorem for OTYT06-reader-auth
 % SZS output start Proof for OTYT06-reader-auth
-fof(f72,axiom,(
+fof(f47,axiom,(
+  ! [X11] : (pred_attacker(tuple_T_out_2(X11)) => pred_attacker(X11))),
+  file('OTYT06-reader-auth.p',unknown)).
+fof(f50,axiom,(
+  ! [X14] : (pred_attacker(X14) => pred_attacker(tuple_T_in_2(X14)))),
+  file('OTYT06-reader-auth.p',unknown)).
+fof(f52,axiom,(
+  ! [X16] : (pred_attacker(X16) => pred_attacker(tuple_T_in_1(X16)))),
+  file('OTYT06-reader-auth.p',unknown)).
+fof(f58,axiom,(
   pred_attacker(constr_CONST_0x30)),
   file('OTYT06-reader-auth.p',unknown)).
-fof(f74,axiom,(
-  ! [X13,X14] : (pred_attacker(tuple_2(X13,X14)) => pred_attacker(X13))),
+fof(f65,axiom,(
+  ! [X25,X26] : ((pred_attacker(tuple_T_in_1(X26)) & pred_attacker(tuple_T_in_2(X25))) => pred_attacker(tuple_T_out_2(name_objective)))),
   file('OTYT06-reader-auth.p',unknown)).
-fof(f82,axiom,(
-  ! [X24,X25] : ((pred_attacker(X25) & pred_attacker(X24)) => pred_attacker(tuple_2(name_objective,constr_T_STEP_2)))),
-  file('OTYT06-reader-auth.p',unknown)).
-fof(f83,conjecture,(
+fof(f66,conjecture,(
   pred_attacker(name_objective)),
   file('OTYT06-reader-auth.p',unknown)).
-fof(f84,negated_conjecture,(
+fof(f67,negated_conjecture,(
   ~pred_attacker(name_objective)),
-  inference(negated_conjecture,[],[f83])).
-fof(f92,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
-  inference(rectify,[],[f74])).
-fof(f99,plain,(
-  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_2(name_objective,constr_T_STEP_2)))),
-  inference(rectify,[],[f82])).
-fof(f100,plain,(
+  inference(negated_conjecture,[],[f66])).
+fof(f74,plain,(
+  ! [X0] : (pred_attacker(tuple_T_out_2(X0)) => pred_attacker(X0))),
+  inference(rectify,[],[f47])).
+fof(f77,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_T_in_2(X0)))),
+  inference(rectify,[],[f50])).
+fof(f79,plain,(
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_T_in_1(X0)))),
+  inference(rectify,[],[f52])).
+fof(f86,plain,(
+  ! [X0,X1] : ((pred_attacker(tuple_T_in_1(X1)) & pred_attacker(tuple_T_in_2(X0))) => pred_attacker(tuple_T_out_2(name_objective)))),
+  inference(rectify,[],[f65])).
+fof(f87,plain,(
   ~pred_attacker(name_objective)),
-  inference(flattening,[],[f84])).
-fof(f108,plain,(
-  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
-  inference(ennf_transformation,[],[f92])).
-fof(f115,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
-  inference(ennf_transformation,[],[f99])).
-fof(f116,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
-  inference(flattening,[],[f115])).
-fof(f187,plain,(
+  inference(flattening,[],[f67])).
+fof(f93,plain,(
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_T_out_2(X0)))),
+  inference(ennf_transformation,[],[f74])).
+fof(f96,plain,(
+  ! [X0] : (pred_attacker(tuple_T_in_2(X0)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f77])).
+fof(f98,plain,(
+  ! [X0] : (pred_attacker(tuple_T_in_1(X0)) | ~pred_attacker(X0))),
+  inference(ennf_transformation,[],[f79])).
+fof(f105,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_T_out_2(name_objective)) | (~pred_attacker(tuple_T_in_1(X1)) | ~pred_attacker(tuple_T_in_2(X0))))),
+  inference(ennf_transformation,[],[f86])).
+fof(f106,plain,(
+  ! [X0,X1] : (pred_attacker(tuple_T_out_2(name_objective)) | ~pred_attacker(tuple_T_in_1(X1)) | ~pred_attacker(tuple_T_in_2(X0)))),
+  inference(flattening,[],[f105])).
+fof(f153,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_T_out_2(X0)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f93])).
+fof(f156,plain,(
+  ( ! [X0] : (pred_attacker(tuple_T_in_2(X0)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f96])).
+fof(f158,plain,(
+  ( ! [X0] : (pred_attacker(tuple_T_in_1(X0)) | ~pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f98])).
+fof(f164,plain,(
   pred_attacker(constr_CONST_0x30)),
-  inference(cnf_transformation,[],[f72])).
-fof(f189,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_2(X0,X1)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f108])).
-fof(f196,plain,(
-  ( ! [X0,X1] : (pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f116])).
-fof(f197,plain,(
+  inference(cnf_transformation,[],[f58])).
+fof(f170,plain,(
+  ( ! [X0,X1] : (pred_attacker(tuple_T_out_2(name_objective)) | ~pred_attacker(tuple_T_in_1(X1)) | ~pred_attacker(tuple_T_in_2(X0))) )),
+  inference(cnf_transformation,[],[f106])).
+fof(f171,plain,(
   ~pred_attacker(name_objective)),
-  inference(cnf_transformation,[],[f100])).
-fof(f199,plain,(
-  spl0_0 <=> ! [X0] : ~pred_attacker(X0)),
+  inference(cnf_transformation,[],[f87])).
+fof(f173,plain,(
+  spl0_0 <=> ! [X0] : ~pred_attacker(tuple_T_in_2(X0))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
-fof(f200,plain,(
-  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl0_0),
-  inference(avatar_component_clause,[],[f199])).
-fof(f205,plain,(
-  spl0_2 <=> pred_attacker(tuple_2(name_objective,constr_T_STEP_2))),
+fof(f174,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_T_in_2(X0))) ) | ~spl0_0),
+  inference(avatar_component_clause,[],[f173])).
+fof(f176,plain,(
+  spl0_2 <=> ! [X1] : ~pred_attacker(tuple_T_in_1(X1))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
-fof(f206,plain,(
-  pred_attacker(tuple_2(name_objective,constr_T_STEP_2)) | ~spl0_2),
-  inference(avatar_component_clause,[],[f205])).
-fof(f207,plain,(
-  spl0_0 | spl0_0 | spl0_2),
-  inference(avatar_split_clause,[],[f196,f205,f199,f199])).
-fof(f208,plain,(
-  pred_attacker(name_objective) | ~spl0_2),
-  inference(resolution,[],[f189,f206])).
-fof(f209,plain,(
+fof(f177,plain,(
+  ( ! [X1] : (~pred_attacker(tuple_T_in_1(X1))) ) | ~spl0_2),
+  inference(avatar_component_clause,[],[f176])).
+fof(f182,plain,(
+  spl0_4 <=> pred_attacker(tuple_T_out_2(name_objective))),
+  introduced(avatar_definition,[new_symbols(naming,[spl0_4])])).
+fof(f183,plain,(
+  pred_attacker(tuple_T_out_2(name_objective)) | ~spl0_4),
+  inference(avatar_component_clause,[],[f182])).
+fof(f184,plain,(
+  spl0_0 | spl0_2 | spl0_4),
+  inference(avatar_split_clause,[],[f170,f182,f176,f173])).
+fof(f188,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl0_2),
+  inference(resolution,[],[f158,f177])).
+fof(f189,plain,(
   $false | ~spl0_2),
-  inference(subsumption_resolution,[],[f208,f197])).
-fof(f210,plain,(
+  inference(resolution,[],[f188,f164])).
+fof(f213,plain,(
   ~spl0_2),
-  inference(avatar_contradiction_clause,[],[f209])).
-fof(f211,plain,(
+  inference(avatar_contradiction_clause,[],[f189])).
+fof(f214,plain,(
+  pred_attacker(name_objective) | ~spl0_4),
+  inference(resolution,[],[f183,f153])).
+fof(f215,plain,(
+  $false | ~spl0_4),
+  inference(subsumption_resolution,[],[f214,f171])).
+fof(f216,plain,(
+  ~spl0_4),
+  inference(avatar_contradiction_clause,[],[f215])).
+fof(f217,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl0_0),
+  inference(resolution,[],[f174,f156])).
+fof(f219,plain,(
   $false | ~spl0_0),
-  inference(resolution,[],[f200,f187])).
-fof(f235,plain,(
+  inference(resolution,[],[f217,f164])).
+fof(f243,plain,(
   ~spl0_0),
-  inference(avatar_contradiction_clause,[],[f211])).
-fof(f236,plain,(
+  inference(avatar_contradiction_clause,[],[f219])).
+fof(f244,plain,(
   $false),
-  inference(avatar_sat_refutation,[],[f207,f210,f235])).
+  inference(avatar_sat_refutation,[],[f184,f213,f216,f243])).
 % SZS output end Proof for OTYT06-reader-auth

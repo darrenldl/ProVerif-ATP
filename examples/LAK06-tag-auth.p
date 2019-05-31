@@ -24,372 +24,210 @@ constr_CONST_0x30 != constr_CONST_3).
 fof(ax3, axiom,
 constr_CONST_0x30 != constr_CONST_4).
 fof(ax4, axiom,
-constr_CONST_0x30 != constr_R_STEP_1).
-fof(ax5, axiom,
-constr_CONST_0x30 != constr_R_STEP_2).
-fof(ax6, axiom,
-constr_CONST_0x30 != constr_R_STEP_3).
-fof(ax7, axiom,
 constr_CONST_0x30 != constr_ZERO).
-fof(ax8, axiom,
-constr_CONST_0x30 != constr_knowledge_from_1st_round_STEP_1).
-fof(ax9, axiom,
-constr_CONST_0x30 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax10, axiom,
-constr_CONST_0x30 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax11, axiom,
+fof(ax5, axiom,
 constr_CONST_0x30 != name_c).
-fof(ax12, axiom,
+fof(ax6, axiom,
 constr_CONST_0x30 != name_k).
-fof(ax13, axiom,
+fof(ax7, axiom,
 constr_CONST_0x30 != name_objective_R).
-fof(ax14, axiom,
+fof(ax8, axiom,
 constr_CONST_0x30 != name_r0x30).
-fof(ax15, axiom,
+fof(ax9, axiom,
 constr_CONST_0x30 != name_r0x30_from_1st).
-fof(ax16, axiom,
+fof(ax10, axiom,
 constr_CONST_0x30 != name_r1_from_1st).
-fof(ax17, axiom,
+fof(ax11, axiom,
 constr_CONST_1 != constr_CONST_2).
-fof(ax18, axiom,
+fof(ax12, axiom,
 constr_CONST_1 != constr_CONST_3).
-fof(ax19, axiom,
+fof(ax13, axiom,
 constr_CONST_1 != constr_CONST_4).
-fof(ax20, axiom,
-constr_CONST_1 != constr_R_STEP_1).
-fof(ax21, axiom,
-constr_CONST_1 != constr_R_STEP_2).
-fof(ax22, axiom,
-constr_CONST_1 != constr_R_STEP_3).
-fof(ax23, axiom,
+fof(ax14, axiom,
 constr_CONST_1 != constr_ZERO).
-fof(ax24, axiom,
-constr_CONST_1 != constr_knowledge_from_1st_round_STEP_1).
-fof(ax25, axiom,
-constr_CONST_1 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax26, axiom,
-constr_CONST_1 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax27, axiom,
+fof(ax15, axiom,
 constr_CONST_1 != name_c).
-fof(ax28, axiom,
+fof(ax16, axiom,
 constr_CONST_1 != name_k).
-fof(ax29, axiom,
+fof(ax17, axiom,
 constr_CONST_1 != name_objective_R).
-fof(ax30, axiom,
+fof(ax18, axiom,
 constr_CONST_1 != name_r0x30).
-fof(ax31, axiom,
+fof(ax19, axiom,
 constr_CONST_1 != name_r0x30_from_1st).
-fof(ax32, axiom,
+fof(ax20, axiom,
 constr_CONST_1 != name_r1_from_1st).
-fof(ax33, axiom,
+fof(ax21, axiom,
 constr_CONST_2 != constr_CONST_3).
-fof(ax34, axiom,
+fof(ax22, axiom,
 constr_CONST_2 != constr_CONST_4).
-fof(ax35, axiom,
-constr_CONST_2 != constr_R_STEP_1).
-fof(ax36, axiom,
-constr_CONST_2 != constr_R_STEP_2).
-fof(ax37, axiom,
-constr_CONST_2 != constr_R_STEP_3).
-fof(ax38, axiom,
+fof(ax23, axiom,
 constr_CONST_2 != constr_ZERO).
-fof(ax39, axiom,
-constr_CONST_2 != constr_knowledge_from_1st_round_STEP_1).
-fof(ax40, axiom,
-constr_CONST_2 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax41, axiom,
-constr_CONST_2 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax42, axiom,
+fof(ax24, axiom,
 constr_CONST_2 != name_c).
-fof(ax43, axiom,
+fof(ax25, axiom,
 constr_CONST_2 != name_k).
-fof(ax44, axiom,
+fof(ax26, axiom,
 constr_CONST_2 != name_objective_R).
-fof(ax45, axiom,
+fof(ax27, axiom,
 constr_CONST_2 != name_r0x30).
-fof(ax46, axiom,
+fof(ax28, axiom,
 constr_CONST_2 != name_r0x30_from_1st).
-fof(ax47, axiom,
+fof(ax29, axiom,
 constr_CONST_2 != name_r1_from_1st).
-fof(ax48, axiom,
+fof(ax30, axiom,
 constr_CONST_3 != constr_CONST_4).
-fof(ax49, axiom,
-constr_CONST_3 != constr_R_STEP_1).
-fof(ax50, axiom,
-constr_CONST_3 != constr_R_STEP_2).
-fof(ax51, axiom,
-constr_CONST_3 != constr_R_STEP_3).
-fof(ax52, axiom,
+fof(ax31, axiom,
 constr_CONST_3 != constr_ZERO).
-fof(ax53, axiom,
-constr_CONST_3 != constr_knowledge_from_1st_round_STEP_1).
-fof(ax54, axiom,
-constr_CONST_3 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax55, axiom,
-constr_CONST_3 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax56, axiom,
+fof(ax32, axiom,
 constr_CONST_3 != name_c).
-fof(ax57, axiom,
+fof(ax33, axiom,
 constr_CONST_3 != name_k).
-fof(ax58, axiom,
+fof(ax34, axiom,
 constr_CONST_3 != name_objective_R).
-fof(ax59, axiom,
+fof(ax35, axiom,
 constr_CONST_3 != name_r0x30).
-fof(ax60, axiom,
+fof(ax36, axiom,
 constr_CONST_3 != name_r0x30_from_1st).
-fof(ax61, axiom,
+fof(ax37, axiom,
 constr_CONST_3 != name_r1_from_1st).
-fof(ax62, axiom,
-constr_CONST_4 != constr_R_STEP_1).
-fof(ax63, axiom,
-constr_CONST_4 != constr_R_STEP_2).
-fof(ax64, axiom,
-constr_CONST_4 != constr_R_STEP_3).
-fof(ax65, axiom,
+fof(ax38, axiom,
 constr_CONST_4 != constr_ZERO).
-fof(ax66, axiom,
-constr_CONST_4 != constr_knowledge_from_1st_round_STEP_1).
-fof(ax67, axiom,
-constr_CONST_4 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax68, axiom,
-constr_CONST_4 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax69, axiom,
+fof(ax39, axiom,
 constr_CONST_4 != name_c).
-fof(ax70, axiom,
+fof(ax40, axiom,
 constr_CONST_4 != name_k).
-fof(ax71, axiom,
+fof(ax41, axiom,
 constr_CONST_4 != name_objective_R).
-fof(ax72, axiom,
+fof(ax42, axiom,
 constr_CONST_4 != name_r0x30).
-fof(ax73, axiom,
+fof(ax43, axiom,
 constr_CONST_4 != name_r0x30_from_1st).
-fof(ax74, axiom,
+fof(ax44, axiom,
 constr_CONST_4 != name_r1_from_1st).
-fof(ax75, axiom,
-constr_R_STEP_1 != constr_R_STEP_2).
-fof(ax76, axiom,
-constr_R_STEP_1 != constr_R_STEP_3).
-fof(ax77, axiom,
-constr_R_STEP_1 != constr_ZERO).
-fof(ax78, axiom,
-constr_R_STEP_1 != constr_knowledge_from_1st_round_STEP_1).
-fof(ax79, axiom,
-constr_R_STEP_1 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax80, axiom,
-constr_R_STEP_1 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax81, axiom,
-constr_R_STEP_1 != name_c).
-fof(ax82, axiom,
-constr_R_STEP_1 != name_k).
-fof(ax83, axiom,
-constr_R_STEP_1 != name_objective_R).
-fof(ax84, axiom,
-constr_R_STEP_1 != name_r0x30).
-fof(ax85, axiom,
-constr_R_STEP_1 != name_r0x30_from_1st).
-fof(ax86, axiom,
-constr_R_STEP_1 != name_r1_from_1st).
-fof(ax87, axiom,
-constr_R_STEP_2 != constr_R_STEP_3).
-fof(ax88, axiom,
-constr_R_STEP_2 != constr_ZERO).
-fof(ax89, axiom,
-constr_R_STEP_2 != constr_knowledge_from_1st_round_STEP_1).
-fof(ax90, axiom,
-constr_R_STEP_2 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax91, axiom,
-constr_R_STEP_2 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax92, axiom,
-constr_R_STEP_2 != name_c).
-fof(ax93, axiom,
-constr_R_STEP_2 != name_k).
-fof(ax94, axiom,
-constr_R_STEP_2 != name_objective_R).
-fof(ax95, axiom,
-constr_R_STEP_2 != name_r0x30).
-fof(ax96, axiom,
-constr_R_STEP_2 != name_r0x30_from_1st).
-fof(ax97, axiom,
-constr_R_STEP_2 != name_r1_from_1st).
-fof(ax98, axiom,
-constr_R_STEP_3 != constr_ZERO).
-fof(ax99, axiom,
-constr_R_STEP_3 != constr_knowledge_from_1st_round_STEP_1).
-fof(ax100, axiom,
-constr_R_STEP_3 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax101, axiom,
-constr_R_STEP_3 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax102, axiom,
-constr_R_STEP_3 != name_c).
-fof(ax103, axiom,
-constr_R_STEP_3 != name_k).
-fof(ax104, axiom,
-constr_R_STEP_3 != name_objective_R).
-fof(ax105, axiom,
-constr_R_STEP_3 != name_r0x30).
-fof(ax106, axiom,
-constr_R_STEP_3 != name_r0x30_from_1st).
-fof(ax107, axiom,
-constr_R_STEP_3 != name_r1_from_1st).
-fof(ax108, axiom,
-constr_ZERO != constr_knowledge_from_1st_round_STEP_1).
-fof(ax109, axiom,
-constr_ZERO != constr_knowledge_from_1st_round_STEP_2).
-fof(ax110, axiom,
-constr_ZERO != constr_knowledge_from_1st_round_STEP_3).
-fof(ax111, axiom,
+fof(ax45, axiom,
 constr_ZERO != name_c).
-fof(ax112, axiom,
+fof(ax46, axiom,
 constr_ZERO != name_k).
-fof(ax113, axiom,
+fof(ax47, axiom,
 constr_ZERO != name_objective_R).
-fof(ax114, axiom,
+fof(ax48, axiom,
 constr_ZERO != name_r0x30).
-fof(ax115, axiom,
+fof(ax49, axiom,
 constr_ZERO != name_r0x30_from_1st).
-fof(ax116, axiom,
+fof(ax50, axiom,
 constr_ZERO != name_r1_from_1st).
-fof(ax117, axiom,
-constr_knowledge_from_1st_round_STEP_1 != constr_knowledge_from_1st_round_STEP_2).
-fof(ax118, axiom,
-constr_knowledge_from_1st_round_STEP_1 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax119, axiom,
-constr_knowledge_from_1st_round_STEP_1 != name_c).
-fof(ax120, axiom,
-constr_knowledge_from_1st_round_STEP_1 != name_k).
-fof(ax121, axiom,
-constr_knowledge_from_1st_round_STEP_1 != name_objective_R).
-fof(ax122, axiom,
-constr_knowledge_from_1st_round_STEP_1 != name_r0x30).
-fof(ax123, axiom,
-constr_knowledge_from_1st_round_STEP_1 != name_r0x30_from_1st).
-fof(ax124, axiom,
-constr_knowledge_from_1st_round_STEP_1 != name_r1_from_1st).
-fof(ax125, axiom,
-constr_knowledge_from_1st_round_STEP_2 != constr_knowledge_from_1st_round_STEP_3).
-fof(ax126, axiom,
-constr_knowledge_from_1st_round_STEP_2 != name_c).
-fof(ax127, axiom,
-constr_knowledge_from_1st_round_STEP_2 != name_k).
-fof(ax128, axiom,
-constr_knowledge_from_1st_round_STEP_2 != name_objective_R).
-fof(ax129, axiom,
-constr_knowledge_from_1st_round_STEP_2 != name_r0x30).
-fof(ax130, axiom,
-constr_knowledge_from_1st_round_STEP_2 != name_r0x30_from_1st).
-fof(ax131, axiom,
-constr_knowledge_from_1st_round_STEP_2 != name_r1_from_1st).
-fof(ax132, axiom,
-constr_knowledge_from_1st_round_STEP_3 != name_c).
-fof(ax133, axiom,
-constr_knowledge_from_1st_round_STEP_3 != name_k).
-fof(ax134, axiom,
-constr_knowledge_from_1st_round_STEP_3 != name_objective_R).
-fof(ax135, axiom,
-constr_knowledge_from_1st_round_STEP_3 != name_r0x30).
-fof(ax136, axiom,
-constr_knowledge_from_1st_round_STEP_3 != name_r0x30_from_1st).
-fof(ax137, axiom,
-constr_knowledge_from_1st_round_STEP_3 != name_r1_from_1st).
-fof(ax138, axiom,
+fof(ax51, axiom,
 name_c != name_k).
-fof(ax139, axiom,
+fof(ax52, axiom,
 name_c != name_objective_R).
-fof(ax140, axiom,
+fof(ax53, axiom,
 name_c != name_r0x30).
-fof(ax141, axiom,
+fof(ax54, axiom,
 name_c != name_r0x30_from_1st).
-fof(ax142, axiom,
+fof(ax55, axiom,
 name_c != name_r1_from_1st).
-fof(ax143, axiom,
+fof(ax56, axiom,
 name_k != name_objective_R).
-fof(ax144, axiom,
+fof(ax57, axiom,
 name_k != name_r0x30).
-fof(ax145, axiom,
+fof(ax58, axiom,
 name_k != name_r0x30_from_1st).
-fof(ax146, axiom,
+fof(ax59, axiom,
 name_k != name_r1_from_1st).
-fof(ax147, axiom,
+fof(ax60, axiom,
 name_objective_R != name_r0x30).
-fof(ax148, axiom,
+fof(ax61, axiom,
 name_objective_R != name_r0x30_from_1st).
-fof(ax149, axiom,
+fof(ax62, axiom,
 name_objective_R != name_r1_from_1st).
-fof(ax150, axiom,
+fof(ax63, axiom,
 name_r0x30 != name_r0x30_from_1st).
-fof(ax151, axiom,
+fof(ax64, axiom,
 name_r0x30 != name_r1_from_1st).
-fof(ax152, axiom,
+fof(ax65, axiom,
 name_r0x30_from_1st != name_r1_from_1st).
-fof(ax153, axiom,
-![VAR_X_11] : (constr_xor(VAR_X_11, VAR_X_11) = constr_ZERO)).
-fof(ax154, axiom,
-![VAR_X_10X30] : (constr_xor(VAR_X_10X30, constr_ZERO) = VAR_X_10X30)).
-fof(ax155, axiom,
-![VAR_X_8, VAR_Y_9] : (constr_xor(VAR_X_8, VAR_Y_9) = constr_xor(VAR_Y_9, VAR_X_8))).
-fof(ax156, axiom,
-![VAR_X_7, VAR_Y_0X30, VAR_Z_0X30] : (constr_xor(VAR_X_7, constr_xor(VAR_Y_0X30, VAR_Z_0X30)) = constr_xor(constr_xor(VAR_X_7, VAR_Y_0X30), VAR_Z_0X30))).
-fof(ax157, axiom,
-![VAR_X_27] : (pred_eq(VAR_X_27, VAR_X_27))).
-fof(ax158, axiom,
-![VAR_V_34, VAR_V_35] : ((pred_attacker(VAR_V_34) & pred_attacker(VAR_V_35)) => pred_attacker(constr_xor(VAR_V_34, VAR_V_35)))).
-fof(ax159, axiom,
+fof(ax66, axiom,
+![VAR_X_10X30] : (constr_xor(VAR_X_10X30, VAR_X_10X30) = constr_ZERO)).
+fof(ax67, axiom,
+![VAR_X_9] : (constr_xor(VAR_X_9, constr_ZERO) = VAR_X_9)).
+fof(ax68, axiom,
+![VAR_X_7, VAR_Y_8] : (constr_xor(VAR_X_7, VAR_Y_8) = constr_xor(VAR_Y_8, VAR_X_7))).
+fof(ax69, axiom,
+![VAR_X_0X30, VAR_Y_0X30, VAR_Z_0X30] : (constr_xor(VAR_X_0X30, constr_xor(VAR_Y_0X30, VAR_Z_0X30)) = constr_xor(constr_xor(VAR_X_0X30, VAR_Y_0X30), VAR_Z_0X30))).
+fof(ax70, axiom,
+![VAR_V_30X30, VAR_V_31] : ((pred_attacker(VAR_V_30X30) & pred_attacker(VAR_V_31)) => pred_attacker(constr_xor(VAR_V_30X30, VAR_V_31)))).
+fof(ax71, axiom,
 pred_attacker(tuple_true)).
-fof(ax160, axiom,
-pred_attacker(constr_knowledge_from_1st_round_STEP_3)).
-fof(ax161, axiom,
-pred_attacker(constr_knowledge_from_1st_round_STEP_2)).
-fof(ax162, axiom,
-pred_attacker(constr_knowledge_from_1st_round_STEP_1)).
-fof(ax163, axiom,
-![VAR_V_38] : (pred_attacker(VAR_V_38) => pred_attacker(constr_h(VAR_V_38)))).
-fof(ax164, axiom,
+fof(ax72, axiom,
+![VAR_V_34] : (pred_attacker(VAR_V_34) => pred_attacker(tuple_knowledge_from_1st_round_out_3(VAR_V_34)))).
+fof(ax73, axiom,
+![VAR_V_37] : (pred_attacker(tuple_knowledge_from_1st_round_out_3(VAR_V_37)) => pred_attacker(VAR_V_37))).
+fof(ax74, axiom,
+![VAR_V_41, VAR_V_42] : ((pred_attacker(VAR_V_41) & pred_attacker(VAR_V_42)) => pred_attacker(tuple_knowledge_from_1st_round_out_2(VAR_V_41, VAR_V_42)))).
+fof(ax75, axiom,
+![VAR_V_49, VAR_V_50X30] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(VAR_V_49, VAR_V_50X30)) => pred_attacker(VAR_V_49))).
+fof(ax76, axiom,
+![VAR_V_52, VAR_V_53] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(VAR_V_52, VAR_V_53)) => pred_attacker(VAR_V_53))).
+fof(ax77, axiom,
+![VAR_V_56] : (pred_attacker(VAR_V_56) => pred_attacker(tuple_knowledge_from_1st_round_out_1(VAR_V_56)))).
+fof(ax78, axiom,
+![VAR_V_59] : (pred_attacker(tuple_knowledge_from_1st_round_out_1(VAR_V_59)) => pred_attacker(VAR_V_59))).
+fof(ax79, axiom,
+![VAR_V_62] : (pred_attacker(VAR_V_62) => pred_attacker(constr_h(VAR_V_62)))).
+fof(ax80, axiom,
 pred_attacker(tuple_false)).
-fof(ax165, axiom,
+fof(ax81, axiom,
 pred_attacker(constr_ZERO)).
-fof(ax166, axiom,
-pred_attacker(constr_R_STEP_3)).
-fof(ax167, axiom,
-pred_attacker(constr_R_STEP_2)).
-fof(ax168, axiom,
-pred_attacker(constr_R_STEP_1)).
-fof(ax169, axiom,
+fof(ax82, axiom,
+![VAR_V_64] : (pred_attacker(VAR_V_64) => pred_attacker(tuple_R_out_3(VAR_V_64)))).
+fof(ax83, axiom,
+![VAR_V_67] : (pred_attacker(tuple_R_out_3(VAR_V_67)) => pred_attacker(VAR_V_67))).
+fof(ax84, axiom,
+![VAR_V_70X30] : (pred_attacker(VAR_V_70X30) => pred_attacker(tuple_R_out_2(VAR_V_70X30)))).
+fof(ax85, axiom,
+![VAR_V_73] : (pred_attacker(tuple_R_out_2(VAR_V_73)) => pred_attacker(VAR_V_73))).
+fof(ax86, axiom,
+![VAR_V_76] : (pred_attacker(VAR_V_76) => pred_attacker(tuple_R_out_1(VAR_V_76)))).
+fof(ax87, axiom,
+![VAR_V_79] : (pred_attacker(tuple_R_out_1(VAR_V_79)) => pred_attacker(VAR_V_79))).
+fof(ax88, axiom,
+![VAR_V_83, VAR_V_84] : ((pred_attacker(VAR_V_83) & pred_attacker(VAR_V_84)) => pred_attacker(tuple_R_in_1(VAR_V_83, VAR_V_84)))).
+fof(ax89, axiom,
+![VAR_V_91, VAR_V_92] : (pred_attacker(tuple_R_in_1(VAR_V_91, VAR_V_92)) => pred_attacker(VAR_V_91))).
+fof(ax90, axiom,
+![VAR_V_94, VAR_V_95] : (pred_attacker(tuple_R_in_1(VAR_V_94, VAR_V_95)) => pred_attacker(VAR_V_95))).
+fof(ax91, axiom,
 pred_attacker(constr_CONST_4)).
-fof(ax170, axiom,
+fof(ax92, axiom,
 pred_attacker(constr_CONST_3)).
-fof(ax171, axiom,
+fof(ax93, axiom,
 pred_attacker(constr_CONST_2)).
-fof(ax172, axiom,
+fof(ax94, axiom,
 pred_attacker(constr_CONST_1)).
-fof(ax173, axiom,
+fof(ax95, axiom,
 pred_attacker(constr_CONST_0x30)).
-fof(ax174, axiom,
-![VAR_V_45, VAR_V_46] : ((pred_attacker(VAR_V_45) & pred_attacker(VAR_V_46)) => pred_attacker(tuple_2(VAR_V_45, VAR_V_46)))).
-fof(ax175, axiom,
-![VAR_V_53, VAR_V_54] : (pred_attacker(tuple_2(VAR_V_53, VAR_V_54)) => pred_attacker(VAR_V_53))).
-fof(ax176, axiom,
-![VAR_V_56, VAR_V_57] : (pred_attacker(tuple_2(VAR_V_56, VAR_V_57)) => pred_attacker(VAR_V_57))).
-fof(ax177, axiom,
-![VAR_V_59, VAR_V_60X30] : ((pred_mess(VAR_V_60X30, VAR_V_59) & pred_attacker(VAR_V_60X30)) => pred_attacker(VAR_V_59))).
-fof(ax178, axiom,
-![VAR_V_61, VAR_V_62] : ((pred_attacker(VAR_V_62) & pred_attacker(VAR_V_61)) => pred_mess(VAR_V_62, VAR_V_61))).
-fof(ax179, axiom,
+fof(ax96, axiom,
+![VAR_V_10X301, VAR_V_10X302] : ((pred_mess(VAR_V_10X302, VAR_V_10X301) & pred_attacker(VAR_V_10X302)) => pred_attacker(VAR_V_10X301))).
+fof(ax97, axiom,
+![VAR_V_10X303, VAR_V_10X304] : ((pred_attacker(VAR_V_10X304) & pred_attacker(VAR_V_10X303)) => pred_mess(VAR_V_10X304, VAR_V_10X303))).
+fof(ax98, axiom,
 pred_attacker(name_c)).
-fof(ax180, axiom,
-![VAR_V_64] : (pred_equal(VAR_V_64, VAR_V_64))).
-fof(ax181, axiom,
-![VAR_V_65] : (pred_attacker(name_new0x2Dname(VAR_V_65)))).
-fof(ax182, axiom,
-pred_attacker(tuple_2(name_r0x30_from_1st, constr_knowledge_from_1st_round_STEP_1))).
-fof(ax183, axiom,
-pred_attacker(tuple_2(tuple_2(name_r1_from_1st, constr_h(constr_xor(constr_xor(name_r0x30_from_1st, name_r1_from_1st), name_k))), constr_knowledge_from_1st_round_STEP_2))).
-fof(ax184, axiom,
-pred_attacker(tuple_2(constr_h(constr_xor(constr_xor(constr_h(constr_xor(constr_xor(name_r0x30_from_1st, name_r1_from_1st), name_k)), name_k), name_r0x30_from_1st)), constr_knowledge_from_1st_round_STEP_3))).
-fof(ax185, axiom,
-pred_attacker(tuple_2(name_r0x30, constr_R_STEP_1))).
-fof(ax186, axiom,
-![VAR_R1_IN_224] : (pred_attacker(tuple_2(VAR_R1_IN_224, constr_h(constr_xor(constr_xor(name_r0x30, VAR_R1_IN_224), name_k)))) => pred_attacker(tuple_2(constr_h(constr_xor(constr_xor(constr_h(constr_xor(constr_xor(name_r0x30, VAR_R1_IN_224), name_k)), name_k), name_r0x30)), constr_R_STEP_2)))).
-fof(ax187, axiom,
-![VAR_R1_IN_240X30] : (pred_attacker(tuple_2(VAR_R1_IN_240X30, constr_h(constr_xor(constr_xor(name_r0x30, VAR_R1_IN_240X30), name_k)))) => pred_attacker(tuple_2(name_objective_R, constr_R_STEP_3)))).
+fof(ax99, axiom,
+![VAR_V_10X306] : (pred_equal(VAR_V_10X306, VAR_V_10X306))).
+fof(ax100, axiom,
+![VAR_V_10X307] : (pred_attacker(name_new0x2Dname(VAR_V_10X307)))).
+fof(ax101, axiom,
+pred_attacker(tuple_knowledge_from_1st_round_out_1(name_r0x30_from_1st))).
+fof(ax102, axiom,
+pred_attacker(tuple_knowledge_from_1st_round_out_2(name_r1_from_1st, constr_h(constr_xor(constr_xor(name_r0x30_from_1st, name_r1_from_1st), name_k))))).
+fof(ax103, axiom,
+pred_attacker(tuple_knowledge_from_1st_round_out_3(constr_h(constr_xor(constr_xor(constr_h(constr_xor(constr_xor(name_r0x30_from_1st, name_r1_from_1st), name_k)), name_k), name_r0x30_from_1st))))).
+fof(ax104, axiom,
+pred_attacker(tuple_R_out_1(name_r0x30))).
+fof(ax105, axiom,
+![VAR_R1_IN_234] : (pred_attacker(tuple_R_in_1(VAR_R1_IN_234, constr_h(constr_xor(constr_xor(name_r0x30, VAR_R1_IN_234), name_k)))) => pred_attacker(tuple_R_out_2(constr_h(constr_xor(constr_xor(constr_h(constr_xor(constr_xor(name_r0x30, VAR_R1_IN_234), name_k)), name_k), name_r0x30)))))).
+fof(ax106, axiom,
+![VAR_R1_IN_244] : (pred_attacker(tuple_R_in_1(VAR_R1_IN_244, constr_h(constr_xor(constr_xor(name_r0x30, VAR_R1_IN_244), name_k)))) => pred_attacker(tuple_R_out_3(name_objective_R)))).
 fof(co0, conjecture,
 pred_attacker(name_objective_R)).

@@ -24,548 +24,322 @@ constr_CONST_0x30 != constr_CONST_3).
 fof(ax3, axiom,
 constr_CONST_0x30 != constr_CONST_4).
 fof(ax4, axiom,
-constr_CONST_0x30 != constr_STEP_1).
-fof(ax5, axiom,
-constr_CONST_0x30 != constr_STEP_2).
-fof(ax6, axiom,
-constr_CONST_0x30 != constr_STEP_3).
-fof(ax7, axiom,
-constr_CONST_0x30 != constr_client_A_STEP_1).
-fof(ax8, axiom,
-constr_CONST_0x30 != constr_client_A_STEP_2).
-fof(ax9, axiom,
-constr_CONST_0x30 != constr_client_A_STEP_3).
-fof(ax10, axiom,
-constr_CONST_0x30 != constr_client_B_STEP_1).
-fof(ax11, axiom,
-constr_CONST_0x30 != constr_client_B_STEP_2).
-fof(ax12, axiom,
-constr_CONST_0x30 != constr_key_retrieval_server_STEP_1).
-fof(ax13, axiom,
 constr_CONST_0x30 != name_A).
-fof(ax14, axiom,
+fof(ax5, axiom,
 constr_CONST_0x30 != name_B).
-fof(ax15, axiom,
+fof(ax6, axiom,
 constr_CONST_0x30 != name_I).
-fof(ax16, axiom,
+fof(ax7, axiom,
 constr_CONST_0x30 != name_c).
-fof(ax17, axiom,
+fof(ax8, axiom,
 constr_CONST_0x30 != name_skA).
-fof(ax18, axiom,
+fof(ax9, axiom,
 constr_CONST_0x30 != name_skB).
-fof(ax19, axiom,
+fof(ax10, axiom,
 constr_CONST_0x30 != name_skS).
-fof(ax20, axiom,
+fof(ax11, axiom,
 constr_CONST_1 != constr_CONST_2).
-fof(ax21, axiom,
+fof(ax12, axiom,
 constr_CONST_1 != constr_CONST_3).
-fof(ax22, axiom,
+fof(ax13, axiom,
 constr_CONST_1 != constr_CONST_4).
-fof(ax23, axiom,
-constr_CONST_1 != constr_STEP_1).
-fof(ax24, axiom,
-constr_CONST_1 != constr_STEP_2).
-fof(ax25, axiom,
-constr_CONST_1 != constr_STEP_3).
-fof(ax26, axiom,
-constr_CONST_1 != constr_client_A_STEP_1).
-fof(ax27, axiom,
-constr_CONST_1 != constr_client_A_STEP_2).
-fof(ax28, axiom,
-constr_CONST_1 != constr_client_A_STEP_3).
-fof(ax29, axiom,
-constr_CONST_1 != constr_client_B_STEP_1).
-fof(ax30, axiom,
-constr_CONST_1 != constr_client_B_STEP_2).
-fof(ax31, axiom,
-constr_CONST_1 != constr_key_retrieval_server_STEP_1).
-fof(ax32, axiom,
+fof(ax14, axiom,
 constr_CONST_1 != name_A).
-fof(ax33, axiom,
+fof(ax15, axiom,
 constr_CONST_1 != name_B).
-fof(ax34, axiom,
+fof(ax16, axiom,
 constr_CONST_1 != name_I).
-fof(ax35, axiom,
+fof(ax17, axiom,
 constr_CONST_1 != name_c).
-fof(ax36, axiom,
+fof(ax18, axiom,
 constr_CONST_1 != name_skA).
-fof(ax37, axiom,
+fof(ax19, axiom,
 constr_CONST_1 != name_skB).
-fof(ax38, axiom,
+fof(ax20, axiom,
 constr_CONST_1 != name_skS).
-fof(ax39, axiom,
+fof(ax21, axiom,
 constr_CONST_2 != constr_CONST_3).
-fof(ax40, axiom,
+fof(ax22, axiom,
 constr_CONST_2 != constr_CONST_4).
-fof(ax41, axiom,
-constr_CONST_2 != constr_STEP_1).
-fof(ax42, axiom,
-constr_CONST_2 != constr_STEP_2).
-fof(ax43, axiom,
-constr_CONST_2 != constr_STEP_3).
-fof(ax44, axiom,
-constr_CONST_2 != constr_client_A_STEP_1).
-fof(ax45, axiom,
-constr_CONST_2 != constr_client_A_STEP_2).
-fof(ax46, axiom,
-constr_CONST_2 != constr_client_A_STEP_3).
-fof(ax47, axiom,
-constr_CONST_2 != constr_client_B_STEP_1).
-fof(ax48, axiom,
-constr_CONST_2 != constr_client_B_STEP_2).
-fof(ax49, axiom,
-constr_CONST_2 != constr_key_retrieval_server_STEP_1).
-fof(ax50, axiom,
+fof(ax23, axiom,
 constr_CONST_2 != name_A).
-fof(ax51, axiom,
+fof(ax24, axiom,
 constr_CONST_2 != name_B).
-fof(ax52, axiom,
+fof(ax25, axiom,
 constr_CONST_2 != name_I).
-fof(ax53, axiom,
+fof(ax26, axiom,
 constr_CONST_2 != name_c).
-fof(ax54, axiom,
+fof(ax27, axiom,
 constr_CONST_2 != name_skA).
-fof(ax55, axiom,
+fof(ax28, axiom,
 constr_CONST_2 != name_skB).
-fof(ax56, axiom,
+fof(ax29, axiom,
 constr_CONST_2 != name_skS).
-fof(ax57, axiom,
+fof(ax30, axiom,
 constr_CONST_3 != constr_CONST_4).
-fof(ax58, axiom,
-constr_CONST_3 != constr_STEP_1).
-fof(ax59, axiom,
-constr_CONST_3 != constr_STEP_2).
-fof(ax60, axiom,
-constr_CONST_3 != constr_STEP_3).
-fof(ax61, axiom,
-constr_CONST_3 != constr_client_A_STEP_1).
-fof(ax62, axiom,
-constr_CONST_3 != constr_client_A_STEP_2).
-fof(ax63, axiom,
-constr_CONST_3 != constr_client_A_STEP_3).
-fof(ax64, axiom,
-constr_CONST_3 != constr_client_B_STEP_1).
-fof(ax65, axiom,
-constr_CONST_3 != constr_client_B_STEP_2).
-fof(ax66, axiom,
-constr_CONST_3 != constr_key_retrieval_server_STEP_1).
-fof(ax67, axiom,
+fof(ax31, axiom,
 constr_CONST_3 != name_A).
-fof(ax68, axiom,
+fof(ax32, axiom,
 constr_CONST_3 != name_B).
-fof(ax69, axiom,
+fof(ax33, axiom,
 constr_CONST_3 != name_I).
-fof(ax70, axiom,
+fof(ax34, axiom,
 constr_CONST_3 != name_c).
-fof(ax71, axiom,
+fof(ax35, axiom,
 constr_CONST_3 != name_skA).
-fof(ax72, axiom,
+fof(ax36, axiom,
 constr_CONST_3 != name_skB).
-fof(ax73, axiom,
+fof(ax37, axiom,
 constr_CONST_3 != name_skS).
-fof(ax74, axiom,
-constr_CONST_4 != constr_STEP_1).
-fof(ax75, axiom,
-constr_CONST_4 != constr_STEP_2).
-fof(ax76, axiom,
-constr_CONST_4 != constr_STEP_3).
-fof(ax77, axiom,
-constr_CONST_4 != constr_client_A_STEP_1).
-fof(ax78, axiom,
-constr_CONST_4 != constr_client_A_STEP_2).
-fof(ax79, axiom,
-constr_CONST_4 != constr_client_A_STEP_3).
-fof(ax80, axiom,
-constr_CONST_4 != constr_client_B_STEP_1).
-fof(ax81, axiom,
-constr_CONST_4 != constr_client_B_STEP_2).
-fof(ax82, axiom,
-constr_CONST_4 != constr_key_retrieval_server_STEP_1).
-fof(ax83, axiom,
+fof(ax38, axiom,
 constr_CONST_4 != name_A).
-fof(ax84, axiom,
+fof(ax39, axiom,
 constr_CONST_4 != name_B).
-fof(ax85, axiom,
+fof(ax40, axiom,
 constr_CONST_4 != name_I).
-fof(ax86, axiom,
+fof(ax41, axiom,
 constr_CONST_4 != name_c).
-fof(ax87, axiom,
+fof(ax42, axiom,
 constr_CONST_4 != name_skA).
-fof(ax88, axiom,
+fof(ax43, axiom,
 constr_CONST_4 != name_skB).
-fof(ax89, axiom,
+fof(ax44, axiom,
 constr_CONST_4 != name_skS).
-fof(ax90, axiom,
-constr_STEP_1 != constr_STEP_2).
-fof(ax91, axiom,
-constr_STEP_1 != constr_STEP_3).
-fof(ax92, axiom,
-constr_STEP_1 != constr_client_A_STEP_1).
-fof(ax93, axiom,
-constr_STEP_1 != constr_client_A_STEP_2).
-fof(ax94, axiom,
-constr_STEP_1 != constr_client_A_STEP_3).
-fof(ax95, axiom,
-constr_STEP_1 != constr_client_B_STEP_1).
-fof(ax96, axiom,
-constr_STEP_1 != constr_client_B_STEP_2).
-fof(ax97, axiom,
-constr_STEP_1 != constr_key_retrieval_server_STEP_1).
-fof(ax98, axiom,
-constr_STEP_1 != name_A).
-fof(ax99, axiom,
-constr_STEP_1 != name_B).
-fof(ax100, axiom,
-constr_STEP_1 != name_I).
-fof(ax101, axiom,
-constr_STEP_1 != name_c).
-fof(ax102, axiom,
-constr_STEP_1 != name_skA).
-fof(ax103, axiom,
-constr_STEP_1 != name_skB).
-fof(ax104, axiom,
-constr_STEP_1 != name_skS).
-fof(ax105, axiom,
-constr_STEP_2 != constr_STEP_3).
-fof(ax106, axiom,
-constr_STEP_2 != constr_client_A_STEP_1).
-fof(ax107, axiom,
-constr_STEP_2 != constr_client_A_STEP_2).
-fof(ax108, axiom,
-constr_STEP_2 != constr_client_A_STEP_3).
-fof(ax109, axiom,
-constr_STEP_2 != constr_client_B_STEP_1).
-fof(ax110, axiom,
-constr_STEP_2 != constr_client_B_STEP_2).
-fof(ax111, axiom,
-constr_STEP_2 != constr_key_retrieval_server_STEP_1).
-fof(ax112, axiom,
-constr_STEP_2 != name_A).
-fof(ax113, axiom,
-constr_STEP_2 != name_B).
-fof(ax114, axiom,
-constr_STEP_2 != name_I).
-fof(ax115, axiom,
-constr_STEP_2 != name_c).
-fof(ax116, axiom,
-constr_STEP_2 != name_skA).
-fof(ax117, axiom,
-constr_STEP_2 != name_skB).
-fof(ax118, axiom,
-constr_STEP_2 != name_skS).
-fof(ax119, axiom,
-constr_STEP_3 != constr_client_A_STEP_1).
-fof(ax120, axiom,
-constr_STEP_3 != constr_client_A_STEP_2).
-fof(ax121, axiom,
-constr_STEP_3 != constr_client_A_STEP_3).
-fof(ax122, axiom,
-constr_STEP_3 != constr_client_B_STEP_1).
-fof(ax123, axiom,
-constr_STEP_3 != constr_client_B_STEP_2).
-fof(ax124, axiom,
-constr_STEP_3 != constr_key_retrieval_server_STEP_1).
-fof(ax125, axiom,
-constr_STEP_3 != name_A).
-fof(ax126, axiom,
-constr_STEP_3 != name_B).
-fof(ax127, axiom,
-constr_STEP_3 != name_I).
-fof(ax128, axiom,
-constr_STEP_3 != name_c).
-fof(ax129, axiom,
-constr_STEP_3 != name_skA).
-fof(ax130, axiom,
-constr_STEP_3 != name_skB).
-fof(ax131, axiom,
-constr_STEP_3 != name_skS).
-fof(ax132, axiom,
-constr_client_A_STEP_1 != constr_client_A_STEP_2).
-fof(ax133, axiom,
-constr_client_A_STEP_1 != constr_client_A_STEP_3).
-fof(ax134, axiom,
-constr_client_A_STEP_1 != constr_client_B_STEP_1).
-fof(ax135, axiom,
-constr_client_A_STEP_1 != constr_client_B_STEP_2).
-fof(ax136, axiom,
-constr_client_A_STEP_1 != constr_key_retrieval_server_STEP_1).
-fof(ax137, axiom,
-constr_client_A_STEP_1 != name_A).
-fof(ax138, axiom,
-constr_client_A_STEP_1 != name_B).
-fof(ax139, axiom,
-constr_client_A_STEP_1 != name_I).
-fof(ax140, axiom,
-constr_client_A_STEP_1 != name_c).
-fof(ax141, axiom,
-constr_client_A_STEP_1 != name_skA).
-fof(ax142, axiom,
-constr_client_A_STEP_1 != name_skB).
-fof(ax143, axiom,
-constr_client_A_STEP_1 != name_skS).
-fof(ax144, axiom,
-constr_client_A_STEP_2 != constr_client_A_STEP_3).
-fof(ax145, axiom,
-constr_client_A_STEP_2 != constr_client_B_STEP_1).
-fof(ax146, axiom,
-constr_client_A_STEP_2 != constr_client_B_STEP_2).
-fof(ax147, axiom,
-constr_client_A_STEP_2 != constr_key_retrieval_server_STEP_1).
-fof(ax148, axiom,
-constr_client_A_STEP_2 != name_A).
-fof(ax149, axiom,
-constr_client_A_STEP_2 != name_B).
-fof(ax150, axiom,
-constr_client_A_STEP_2 != name_I).
-fof(ax151, axiom,
-constr_client_A_STEP_2 != name_c).
-fof(ax152, axiom,
-constr_client_A_STEP_2 != name_skA).
-fof(ax153, axiom,
-constr_client_A_STEP_2 != name_skB).
-fof(ax154, axiom,
-constr_client_A_STEP_2 != name_skS).
-fof(ax155, axiom,
-constr_client_A_STEP_3 != constr_client_B_STEP_1).
-fof(ax156, axiom,
-constr_client_A_STEP_3 != constr_client_B_STEP_2).
-fof(ax157, axiom,
-constr_client_A_STEP_3 != constr_key_retrieval_server_STEP_1).
-fof(ax158, axiom,
-constr_client_A_STEP_3 != name_A).
-fof(ax159, axiom,
-constr_client_A_STEP_3 != name_B).
-fof(ax160, axiom,
-constr_client_A_STEP_3 != name_I).
-fof(ax161, axiom,
-constr_client_A_STEP_3 != name_c).
-fof(ax162, axiom,
-constr_client_A_STEP_3 != name_skA).
-fof(ax163, axiom,
-constr_client_A_STEP_3 != name_skB).
-fof(ax164, axiom,
-constr_client_A_STEP_3 != name_skS).
-fof(ax165, axiom,
-constr_client_B_STEP_1 != constr_client_B_STEP_2).
-fof(ax166, axiom,
-constr_client_B_STEP_1 != constr_key_retrieval_server_STEP_1).
-fof(ax167, axiom,
-constr_client_B_STEP_1 != name_A).
-fof(ax168, axiom,
-constr_client_B_STEP_1 != name_B).
-fof(ax169, axiom,
-constr_client_B_STEP_1 != name_I).
-fof(ax170, axiom,
-constr_client_B_STEP_1 != name_c).
-fof(ax171, axiom,
-constr_client_B_STEP_1 != name_skA).
-fof(ax172, axiom,
-constr_client_B_STEP_1 != name_skB).
-fof(ax173, axiom,
-constr_client_B_STEP_1 != name_skS).
-fof(ax174, axiom,
-constr_client_B_STEP_2 != constr_key_retrieval_server_STEP_1).
-fof(ax175, axiom,
-constr_client_B_STEP_2 != name_A).
-fof(ax176, axiom,
-constr_client_B_STEP_2 != name_B).
-fof(ax177, axiom,
-constr_client_B_STEP_2 != name_I).
-fof(ax178, axiom,
-constr_client_B_STEP_2 != name_c).
-fof(ax179, axiom,
-constr_client_B_STEP_2 != name_skA).
-fof(ax180, axiom,
-constr_client_B_STEP_2 != name_skB).
-fof(ax181, axiom,
-constr_client_B_STEP_2 != name_skS).
-fof(ax182, axiom,
-constr_key_retrieval_server_STEP_1 != name_A).
-fof(ax183, axiom,
-constr_key_retrieval_server_STEP_1 != name_B).
-fof(ax184, axiom,
-constr_key_retrieval_server_STEP_1 != name_I).
-fof(ax185, axiom,
-constr_key_retrieval_server_STEP_1 != name_c).
-fof(ax186, axiom,
-constr_key_retrieval_server_STEP_1 != name_skA).
-fof(ax187, axiom,
-constr_key_retrieval_server_STEP_1 != name_skB).
-fof(ax188, axiom,
-constr_key_retrieval_server_STEP_1 != name_skS).
-fof(ax189, axiom,
+fof(ax45, axiom,
 name_A != name_B).
-fof(ax190, axiom,
+fof(ax46, axiom,
 name_A != name_I).
-fof(ax191, axiom,
+fof(ax47, axiom,
 name_A != name_c).
-fof(ax192, axiom,
+fof(ax48, axiom,
 name_A != name_skA).
-fof(ax193, axiom,
+fof(ax49, axiom,
 name_A != name_skB).
-fof(ax194, axiom,
+fof(ax50, axiom,
 name_A != name_skS).
-fof(ax195, axiom,
+fof(ax51, axiom,
 name_B != name_I).
-fof(ax196, axiom,
+fof(ax52, axiom,
 name_B != name_c).
-fof(ax197, axiom,
+fof(ax53, axiom,
 name_B != name_skA).
-fof(ax198, axiom,
+fof(ax54, axiom,
 name_B != name_skB).
-fof(ax199, axiom,
+fof(ax55, axiom,
 name_B != name_skS).
-fof(ax200, axiom,
+fof(ax56, axiom,
 name_I != name_c).
-fof(ax201, axiom,
+fof(ax57, axiom,
 name_I != name_skA).
-fof(ax202, axiom,
+fof(ax58, axiom,
 name_I != name_skB).
-fof(ax203, axiom,
+fof(ax59, axiom,
 name_I != name_skS).
-fof(ax204, axiom,
+fof(ax60, axiom,
 name_c != name_skA).
-fof(ax205, axiom,
+fof(ax61, axiom,
 name_c != name_skB).
-fof(ax206, axiom,
+fof(ax62, axiom,
 name_c != name_skS).
-fof(ax207, axiom,
+fof(ax63, axiom,
 name_skA != name_skB).
-fof(ax208, axiom,
+fof(ax64, axiom,
 name_skA != name_skS).
-fof(ax209, axiom,
+fof(ax65, axiom,
 name_skB != name_skS).
-fof(ax210, axiom,
-![VAR_K_22, VAR_M_21] : (constr_adec(constr_aenc(VAR_M_21, constr_pkey(VAR_K_22)), VAR_K_22) = VAR_M_21)).
-fof(ax211, axiom,
-![VAR_K_20X30, VAR_M_19] : (constr_dec(constr_enc(VAR_M_19, VAR_K_20X30), VAR_K_20X30) = VAR_M_19)).
-fof(ax212, axiom,
-![VAR_K_18, VAR_M_17] : (constr_getmess(constr_sign(VAR_M_17, VAR_K_18)) = VAR_M_17)).
-fof(ax213, axiom,
+fof(ax66, axiom,
+![VAR_K_26, VAR_M_25] : (constr_adec(constr_aenc(VAR_M_25, constr_pkey(VAR_K_26)), VAR_K_26) = VAR_M_25)).
+fof(ax67, axiom,
+![VAR_K_24, VAR_M_23] : (constr_dec(constr_enc(VAR_M_23, VAR_K_24), VAR_K_24) = VAR_M_23)).
+fof(ax68, axiom,
+![VAR_K_22, VAR_M_21] : (constr_getmess(constr_sign(VAR_M_21, VAR_K_22)) = VAR_M_21)).
+fof(ax69, axiom,
 ![VAR_K_0X30, VAR_M_0X30] : (constr_checksign(constr_sign(VAR_M_0X30, VAR_K_0X30), constr_pkey(VAR_K_0X30)) = VAR_M_0X30)).
-fof(ax214, axiom,
-![VAR_X0X30_14, VAR_X1_15, VAR_X2_16] : (constr_tuple_3_get_2(tuple_3(VAR_X0X30_14, VAR_X1_15, VAR_X2_16)) = VAR_X2_16)).
-fof(ax215, axiom,
-![VAR_X0X30_11, VAR_X1_12, VAR_X2_13] : (constr_tuple_3_get_1(tuple_3(VAR_X0X30_11, VAR_X1_12, VAR_X2_13)) = VAR_X1_12)).
-fof(ax216, axiom,
+fof(ax70, axiom,
+![VAR_X0X30_18, VAR_X1_19, VAR_X2_20X30] : (constr_tuple_3_get_1_bitstring(tuple_3(VAR_X0X30_18, VAR_X1_19, VAR_X2_20X30)) = VAR_X1_19)).
+fof(ax71, axiom,
+![VAR_X0X30_16, VAR_X1_17] : (constr_tuple_2_get_1_bitstring(tuple_2(VAR_X0X30_16, VAR_X1_17)) = VAR_X1_17)).
+fof(ax72, axiom,
+![VAR_X0X30_14, VAR_X1_15] : (constr_tuple_2_get_0x30_bitstring(tuple_2(VAR_X0X30_14, VAR_X1_15)) = VAR_X0X30_14)).
+fof(ax73, axiom,
+![VAR_X0X30_11, VAR_X1_12, VAR_X2_13] : (constr_tuple_3_get_2(tuple_3(VAR_X0X30_11, VAR_X1_12, VAR_X2_13)) = VAR_X2_13)).
+fof(ax74, axiom,
 ![VAR_X0X30_9, VAR_X1_10X30, VAR_X2_0X30] : (constr_tuple_3_get_0x30(tuple_3(VAR_X0X30_9, VAR_X1_10X30, VAR_X2_0X30)) = VAR_X0X30_9)).
-fof(ax217, axiom,
+fof(ax75, axiom,
 ![VAR_X0X30_7, VAR_X1_8] : (constr_tuple_2_get_1(tuple_2(VAR_X0X30_7, VAR_X1_8)) = VAR_X1_8)).
-fof(ax218, axiom,
+fof(ax76, axiom,
 ![VAR_X0X30_0X30, VAR_X1_0X30] : (constr_tuple_2_get_0x30(tuple_2(VAR_X0X30_0X30, VAR_X1_0X30)) = VAR_X0X30_0X30)).
-fof(ax219, axiom,
-![VAR_X_40X30] : (pred_eq(VAR_X_40X30, VAR_X_40X30))).
-fof(ax220, axiom,
-![VAR_V_46] : (pred_attacker(VAR_V_46) => pred_attacker(constr_tuple_3_get_2(VAR_V_46)))).
-fof(ax221, axiom,
-![VAR_V_48] : (pred_attacker(VAR_V_48) => pred_attacker(constr_tuple_3_get_1(VAR_V_48)))).
-fof(ax222, axiom,
-![VAR_V_50X30] : (pred_attacker(VAR_V_50X30) => pred_attacker(constr_tuple_3_get_0x30(VAR_V_50X30)))).
-fof(ax223, axiom,
-![VAR_V_52] : (pred_attacker(VAR_V_52) => pred_attacker(constr_tuple_2_get_1(VAR_V_52)))).
-fof(ax224, axiom,
-![VAR_V_54] : (pred_attacker(VAR_V_54) => pred_attacker(constr_tuple_2_get_0x30(VAR_V_54)))).
-fof(ax225, axiom,
+fof(ax77, axiom,
+![VAR_X_44, VAR_Y_45] : (pred_eq_bitstring_bitstring(VAR_X_44, VAR_Y_45))).
+fof(ax78, axiom,
+![VAR_V_51] : (pred_attacker(VAR_V_51) => pred_attacker(constr_tuple_3_get_2(VAR_V_51)))).
+fof(ax79, axiom,
+![VAR_V_53] : (pred_attacker(VAR_V_53) => pred_attacker(constr_tuple_3_get_1_bitstring(VAR_V_53)))).
+fof(ax80, axiom,
+![VAR_V_55] : (pred_attacker(VAR_V_55) => pred_attacker(constr_tuple_3_get_0x30(VAR_V_55)))).
+fof(ax81, axiom,
+![VAR_V_57] : (pred_attacker(VAR_V_57) => pred_attacker(constr_tuple_2_get_1_bitstring(VAR_V_57)))).
+fof(ax82, axiom,
+![VAR_V_59] : (pred_attacker(VAR_V_59) => pred_attacker(constr_tuple_2_get_1(VAR_V_59)))).
+fof(ax83, axiom,
+![VAR_V_61] : (pred_attacker(VAR_V_61) => pred_attacker(constr_tuple_2_get_0x30_bitstring(VAR_V_61)))).
+fof(ax84, axiom,
+![VAR_V_63] : (pred_attacker(VAR_V_63) => pred_attacker(constr_tuple_2_get_0x30(VAR_V_63)))).
+fof(ax85, axiom,
 pred_attacker(tuple_true)).
-fof(ax226, axiom,
-![VAR_V_57, VAR_V_58] : ((pred_attacker(VAR_V_57) & pred_attacker(VAR_V_58)) => pred_attacker(constr_sign(VAR_V_57, VAR_V_58)))).
-fof(ax227, axiom,
-![VAR_V_60X30] : (pred_attacker(VAR_V_60X30) => pred_attacker(constr_pkey(VAR_V_60X30)))).
-fof(ax228, axiom,
-pred_attacker(constr_key_retrieval_server_STEP_1)).
-fof(ax229, axiom,
-![VAR_V_63] : (pred_attacker(VAR_V_63) => pred_attacker(constr_getmess(VAR_V_63)))).
-fof(ax230, axiom,
+fof(ax86, axiom,
+![VAR_V_66, VAR_V_67] : ((pred_attacker(VAR_V_66) & pred_attacker(VAR_V_67)) => pred_attacker(constr_sign(VAR_V_66, VAR_V_67)))).
+fof(ax87, axiom,
+![VAR_V_69] : (pred_attacker(VAR_V_69) => pred_attacker(constr_pkey(VAR_V_69)))).
+fof(ax88, axiom,
+![VAR_V_71] : (pred_attacker(VAR_V_71) => pred_attacker(tuple_out_3(VAR_V_71)))).
+fof(ax89, axiom,
+![VAR_V_74] : (pred_attacker(tuple_out_3(VAR_V_74)) => pred_attacker(VAR_V_74))).
+fof(ax90, axiom,
+![VAR_V_77] : (pred_attacker(VAR_V_77) => pred_attacker(tuple_out_2(VAR_V_77)))).
+fof(ax91, axiom,
+![VAR_V_80X30] : (pred_attacker(tuple_out_2(VAR_V_80X30)) => pred_attacker(VAR_V_80X30))).
+fof(ax92, axiom,
+![VAR_V_83] : (pred_attacker(VAR_V_83) => pred_attacker(tuple_out_1(VAR_V_83)))).
+fof(ax93, axiom,
+![VAR_V_86] : (pred_attacker(tuple_out_1(VAR_V_86)) => pred_attacker(VAR_V_86))).
+fof(ax94, axiom,
+![VAR_V_90X30] : (pred_attacker(VAR_V_90X30) => pred_attacker(tuple_key_retrieval_server_out_1(VAR_V_90X30)))).
+fof(ax95, axiom,
+![VAR_V_93] : (pred_attacker(tuple_key_retrieval_server_out_1(VAR_V_93)) => pred_attacker(VAR_V_93))).
+fof(ax96, axiom,
+![VAR_V_97, VAR_V_98] : ((pred_attacker(VAR_V_97) & pred_attacker(VAR_V_98)) => pred_attacker(tuple_key_retrieval_server_in_1(VAR_V_97, VAR_V_98)))).
+fof(ax97, axiom,
+![VAR_V_10X305, VAR_V_10X306] : (pred_attacker(tuple_key_retrieval_server_in_1(VAR_V_10X305, VAR_V_10X306)) => pred_attacker(VAR_V_10X305))).
+fof(ax98, axiom,
+![VAR_V_10X308, VAR_V_10X309] : (pred_attacker(tuple_key_retrieval_server_in_1(VAR_V_10X308, VAR_V_10X309)) => pred_attacker(VAR_V_10X309))).
+fof(ax99, axiom,
+![VAR_V_113, VAR_V_114] : ((pred_attacker(VAR_V_113) & pred_attacker(VAR_V_114)) => pred_attacker(tuple_key_register_server_in_1(VAR_V_113, VAR_V_114)))).
+fof(ax100, axiom,
+![VAR_V_121, VAR_V_122] : (pred_attacker(tuple_key_register_server_in_1(VAR_V_121, VAR_V_122)) => pred_attacker(VAR_V_121))).
+fof(ax101, axiom,
+![VAR_V_124, VAR_V_125] : (pred_attacker(tuple_key_register_server_in_1(VAR_V_124, VAR_V_125)) => pred_attacker(VAR_V_125))).
+fof(ax102, axiom,
+![VAR_V_128] : (pred_attacker(VAR_V_128) => pred_attacker(constr_getmess(VAR_V_128)))).
+fof(ax103, axiom,
 pred_attacker(tuple_false)).
-fof(ax231, axiom,
-![VAR_V_66, VAR_V_67] : ((pred_attacker(VAR_V_66) & pred_attacker(VAR_V_67)) => pred_attacker(constr_enc(VAR_V_66, VAR_V_67)))).
-fof(ax232, axiom,
-![VAR_V_70X30, VAR_V_71] : ((pred_attacker(VAR_V_70X30) & pred_attacker(VAR_V_71)) => pred_attacker(constr_dec(VAR_V_70X30, VAR_V_71)))).
-fof(ax233, axiom,
-pred_attacker(constr_client_B_STEP_2)).
-fof(ax234, axiom,
-pred_attacker(constr_client_B_STEP_1)).
-fof(ax235, axiom,
-pred_attacker(constr_client_A_STEP_3)).
-fof(ax236, axiom,
-pred_attacker(constr_client_A_STEP_2)).
-fof(ax237, axiom,
-pred_attacker(constr_client_A_STEP_1)).
-fof(ax238, axiom,
-![VAR_V_74, VAR_V_75] : ((pred_attacker(VAR_V_74) & pred_attacker(VAR_V_75)) => pred_attacker(constr_checksign(VAR_V_74, VAR_V_75)))).
-fof(ax239, axiom,
-![VAR_V_78, VAR_V_79] : ((pred_attacker(VAR_V_78) & pred_attacker(VAR_V_79)) => pred_attacker(constr_aenc(VAR_V_78, VAR_V_79)))).
-fof(ax240, axiom,
-![VAR_V_82, VAR_V_83] : ((pred_attacker(VAR_V_82) & pred_attacker(VAR_V_83)) => pred_attacker(constr_adec(VAR_V_82, VAR_V_83)))).
-fof(ax241, axiom,
-pred_attacker(constr_STEP_3)).
-fof(ax242, axiom,
-pred_attacker(constr_STEP_2)).
-fof(ax243, axiom,
-pred_attacker(constr_STEP_1)).
-fof(ax244, axiom,
+fof(ax104, axiom,
+![VAR_V_131, VAR_V_132] : ((pred_attacker(VAR_V_131) & pred_attacker(VAR_V_132)) => pred_attacker(constr_enc(VAR_V_131, VAR_V_132)))).
+fof(ax105, axiom,
+![VAR_V_135, VAR_V_136] : ((pred_attacker(VAR_V_135) & pred_attacker(VAR_V_136)) => pred_attacker(constr_dec(VAR_V_135, VAR_V_136)))).
+fof(ax106, axiom,
+![VAR_V_138] : (pred_attacker(VAR_V_138) => pred_attacker(tuple_client_B_out_2(VAR_V_138)))).
+fof(ax107, axiom,
+![VAR_V_141] : (pred_attacker(tuple_client_B_out_2(VAR_V_141)) => pred_attacker(VAR_V_141))).
+fof(ax108, axiom,
+![VAR_V_145, VAR_V_146] : ((pred_attacker(VAR_V_145) & pred_attacker(VAR_V_146)) => pred_attacker(tuple_client_B_out_1(VAR_V_145, VAR_V_146)))).
+fof(ax109, axiom,
+![VAR_V_153, VAR_V_154] : (pred_attacker(tuple_client_B_out_1(VAR_V_153, VAR_V_154)) => pred_attacker(VAR_V_153))).
+fof(ax110, axiom,
+![VAR_V_156, VAR_V_157] : (pred_attacker(tuple_client_B_out_1(VAR_V_156, VAR_V_157)) => pred_attacker(VAR_V_157))).
+fof(ax111, axiom,
+![VAR_V_160X30] : (pred_attacker(VAR_V_160X30) => pred_attacker(tuple_client_B_in_3(VAR_V_160X30)))).
+fof(ax112, axiom,
+![VAR_V_163] : (pred_attacker(tuple_client_B_in_3(VAR_V_163)) => pred_attacker(VAR_V_163))).
+fof(ax113, axiom,
+![VAR_V_166] : (pred_attacker(VAR_V_166) => pred_attacker(tuple_client_B_in_2(VAR_V_166)))).
+fof(ax114, axiom,
+![VAR_V_169] : (pred_attacker(tuple_client_B_in_2(VAR_V_169)) => pred_attacker(VAR_V_169))).
+fof(ax115, axiom,
+![VAR_V_172] : (pred_attacker(VAR_V_172) => pred_attacker(tuple_client_B_in_1(VAR_V_172)))).
+fof(ax116, axiom,
+![VAR_V_175] : (pred_attacker(tuple_client_B_in_1(VAR_V_175)) => pred_attacker(VAR_V_175))).
+fof(ax117, axiom,
+![VAR_V_178] : (pred_attacker(VAR_V_178) => pred_attacker(tuple_client_A_out_3(VAR_V_178)))).
+fof(ax118, axiom,
+![VAR_V_181] : (pred_attacker(tuple_client_A_out_3(VAR_V_181)) => pred_attacker(VAR_V_181))).
+fof(ax119, axiom,
+![VAR_V_184] : (pred_attacker(VAR_V_184) => pred_attacker(tuple_client_A_out_2(VAR_V_184)))).
+fof(ax120, axiom,
+![VAR_V_187] : (pred_attacker(tuple_client_A_out_2(VAR_V_187)) => pred_attacker(VAR_V_187))).
+fof(ax121, axiom,
+![VAR_V_191, VAR_V_192] : ((pred_attacker(VAR_V_191) & pred_attacker(VAR_V_192)) => pred_attacker(tuple_client_A_out_1(VAR_V_191, VAR_V_192)))).
+fof(ax122, axiom,
+![VAR_V_199, VAR_V_20X300X30] : (pred_attacker(tuple_client_A_out_1(VAR_V_199, VAR_V_20X300X30)) => pred_attacker(VAR_V_199))).
+fof(ax123, axiom,
+![VAR_V_20X302, VAR_V_20X303] : (pred_attacker(tuple_client_A_out_1(VAR_V_20X302, VAR_V_20X303)) => pred_attacker(VAR_V_20X303))).
+fof(ax124, axiom,
+![VAR_V_20X306] : (pred_attacker(VAR_V_20X306) => pred_attacker(tuple_client_A_in_2(VAR_V_20X306)))).
+fof(ax125, axiom,
+![VAR_V_20X309] : (pred_attacker(tuple_client_A_in_2(VAR_V_20X309)) => pred_attacker(VAR_V_20X309))).
+fof(ax126, axiom,
+![VAR_V_212] : (pred_attacker(VAR_V_212) => pred_attacker(tuple_client_A_in_1(VAR_V_212)))).
+fof(ax127, axiom,
+![VAR_V_215] : (pred_attacker(tuple_client_A_in_1(VAR_V_215)) => pred_attacker(VAR_V_215))).
+fof(ax128, axiom,
+![VAR_V_219, VAR_V_220X30] : ((pred_attacker(VAR_V_219) & pred_attacker(VAR_V_220X30)) => pred_attacker(constr_checksign(VAR_V_219, VAR_V_220X30)))).
+fof(ax129, axiom,
+![VAR_V_223, VAR_V_224] : ((pred_attacker(VAR_V_223) & pred_attacker(VAR_V_224)) => pred_attacker(constr_aenc(VAR_V_223, VAR_V_224)))).
+fof(ax130, axiom,
+![VAR_V_227, VAR_V_228] : ((pred_attacker(VAR_V_227) & pred_attacker(VAR_V_228)) => pred_attacker(constr_adec(VAR_V_227, VAR_V_228)))).
+fof(ax131, axiom,
 pred_attacker(constr_CONST_4)).
-fof(ax245, axiom,
+fof(ax132, axiom,
 pred_attacker(constr_CONST_3)).
-fof(ax246, axiom,
+fof(ax133, axiom,
 pred_attacker(constr_CONST_2)).
-fof(ax247, axiom,
+fof(ax134, axiom,
 pred_attacker(constr_CONST_1)).
-fof(ax248, axiom,
+fof(ax135, axiom,
 pred_attacker(constr_CONST_0x30)).
-fof(ax249, axiom,
-![VAR_V_91, VAR_V_92, VAR_V_93] : ((pred_attacker(VAR_V_91) & pred_attacker(VAR_V_92) & pred_attacker(VAR_V_93)) => pred_attacker(tuple_3(VAR_V_91, VAR_V_92, VAR_V_93)))).
-fof(ax250, axiom,
-![VAR_V_10X306, VAR_V_10X307, VAR_V_10X308] : (pred_attacker(tuple_3(VAR_V_10X306, VAR_V_10X307, VAR_V_10X308)) => pred_attacker(VAR_V_10X306))).
-fof(ax251, axiom,
-![VAR_V_110X30, VAR_V_111, VAR_V_112] : (pred_attacker(tuple_3(VAR_V_110X30, VAR_V_111, VAR_V_112)) => pred_attacker(VAR_V_111))).
-fof(ax252, axiom,
-![VAR_V_114, VAR_V_115, VAR_V_116] : (pred_attacker(tuple_3(VAR_V_114, VAR_V_115, VAR_V_116)) => pred_attacker(VAR_V_116))).
-fof(ax253, axiom,
-![VAR_V_120X30, VAR_V_121] : ((pred_attacker(VAR_V_120X30) & pred_attacker(VAR_V_121)) => pred_attacker(tuple_2(VAR_V_120X30, VAR_V_121)))).
-fof(ax254, axiom,
-![VAR_V_128, VAR_V_129] : (pred_attacker(tuple_2(VAR_V_128, VAR_V_129)) => pred_attacker(VAR_V_128))).
-fof(ax255, axiom,
-![VAR_V_131, VAR_V_132] : (pred_attacker(tuple_2(VAR_V_131, VAR_V_132)) => pred_attacker(VAR_V_132))).
-fof(ax256, axiom,
-![VAR_V_134, VAR_V_135] : ((pred_mess(VAR_V_135, VAR_V_134) & pred_attacker(VAR_V_135)) => pred_attacker(VAR_V_134))).
-fof(ax257, axiom,
-![VAR_V_136, VAR_V_137] : ((pred_attacker(VAR_V_137) & pred_attacker(VAR_V_136)) => pred_mess(VAR_V_137, VAR_V_136))).
-fof(ax258, axiom,
+fof(ax136, axiom,
+![VAR_V_236, VAR_V_237, VAR_V_238] : ((pred_attacker(VAR_V_236) & pred_attacker(VAR_V_237) & pred_attacker(VAR_V_238)) => pred_attacker(tuple_3(VAR_V_236, VAR_V_237, VAR_V_238)))).
+fof(ax137, axiom,
+![VAR_V_251, VAR_V_252, VAR_V_253] : (pred_attacker(tuple_3(VAR_V_251, VAR_V_252, VAR_V_253)) => pred_attacker(VAR_V_251))).
+fof(ax138, axiom,
+![VAR_V_255, VAR_V_256, VAR_V_257] : (pred_attacker(tuple_3(VAR_V_255, VAR_V_256, VAR_V_257)) => pred_attacker(VAR_V_256))).
+fof(ax139, axiom,
+![VAR_V_259, VAR_V_260X30, VAR_V_261] : (pred_attacker(tuple_3(VAR_V_259, VAR_V_260X30, VAR_V_261)) => pred_attacker(VAR_V_261))).
+fof(ax140, axiom,
+![VAR_V_265, VAR_V_266] : ((pred_attacker(VAR_V_265) & pred_attacker(VAR_V_266)) => pred_attacker(tuple_2(VAR_V_265, VAR_V_266)))).
+fof(ax141, axiom,
+![VAR_V_273, VAR_V_274] : (pred_attacker(tuple_2(VAR_V_273, VAR_V_274)) => pred_attacker(VAR_V_273))).
+fof(ax142, axiom,
+![VAR_V_276, VAR_V_277] : (pred_attacker(tuple_2(VAR_V_276, VAR_V_277)) => pred_attacker(VAR_V_277))).
+fof(ax143, axiom,
+![VAR_V_279, VAR_V_280X30] : ((pred_mess(VAR_V_280X30, VAR_V_279) & pred_attacker(VAR_V_280X30)) => pred_attacker(VAR_V_279))).
+fof(ax144, axiom,
+![VAR_V_281, VAR_V_282] : ((pred_attacker(VAR_V_282) & pred_attacker(VAR_V_281)) => pred_mess(VAR_V_282, VAR_V_281))).
+fof(ax145, axiom,
 pred_attacker(name_c)).
-fof(ax259, axiom,
+fof(ax146, axiom,
 pred_attacker(name_I)).
-fof(ax260, axiom,
+fof(ax147, axiom,
 pred_attacker(name_B)).
-fof(ax261, axiom,
+fof(ax148, axiom,
 pred_attacker(name_A)).
-fof(ax262, axiom,
-![VAR_V_139] : (pred_equal(VAR_V_139, VAR_V_139))).
-fof(ax263, axiom,
-![VAR_V_140X30] : (pred_attacker(name_new0x2Dname(VAR_V_140X30)))).
-fof(ax264, axiom,
+fof(ax149, axiom,
+![VAR_V_284] : (pred_equal(VAR_V_284, VAR_V_284))).
+fof(ax150, axiom,
+![VAR_V_285] : (pred_attacker(name_new0x2Dname(VAR_V_285)))).
+fof(ax151, axiom,
 pred_table(tuple_keys(name_A, constr_pkey(name_skA)))).
-fof(ax265, axiom,
+fof(ax152, axiom,
 pred_table(tuple_keys(name_B, constr_pkey(name_skB)))).
-fof(ax266, axiom,
-pred_attacker(tuple_2(constr_pkey(name_skA), constr_STEP_1))).
-fof(ax267, axiom,
-pred_attacker(tuple_2(constr_pkey(name_skB), constr_STEP_2))).
-fof(ax268, axiom,
-pred_attacker(tuple_2(constr_pkey(name_skS), constr_STEP_3))).
-fof(ax269, axiom,
-pred_attacker(tuple_2(tuple_2(name_A, name_I), constr_client_A_STEP_1))).
-fof(ax270, axiom,
-![VAR_0X40SID_292, VAR_SIGN_I_PKI_291] : ((pred_eq(constr_tuple_2_get_0x30(constr_checksign(VAR_SIGN_I_PKI_291, constr_pkey(name_skS))), name_I) & pred_attacker(VAR_SIGN_I_PKI_291)) => pred_attacker(tuple_2(constr_aenc(tuple_2(name_Na(VAR_0X40SID_292), name_A), constr_tuple_2_get_1(constr_checksign(VAR_SIGN_I_PKI_291, constr_pkey(name_skS)))), constr_client_A_STEP_2)))).
-fof(ax271, axiom,
-![VAR_0X40SID_361, VAR_AENC_NA_NI_I_360X30, VAR_SIGN_I_PKI_362] : ((pred_eq(constr_tuple_3_get_2(constr_adec(VAR_AENC_NA_NI_I_360X30, name_skA)), name_I) & pred_eq(constr_tuple_3_get_0x30(constr_adec(VAR_AENC_NA_NI_I_360X30, name_skA)), name_Na(VAR_0X40SID_361)) & pred_attacker(VAR_AENC_NA_NI_I_360X30) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(VAR_SIGN_I_PKI_362, constr_pkey(name_skS))), name_I) & pred_attacker(VAR_SIGN_I_PKI_362)) => pred_attacker(tuple_2(constr_aenc(constr_tuple_3_get_1(constr_adec(VAR_AENC_NA_NI_I_360X30, name_skA)), constr_tuple_2_get_1(constr_checksign(VAR_SIGN_I_PKI_362, constr_pkey(name_skS)))), constr_client_A_STEP_3)))).
-fof(ax272, axiom,
-pred_attacker(tuple_2(tuple_2(name_B, name_A), constr_client_B_STEP_1))).
-fof(ax273, axiom,
-![VAR_0X40SID_491, VAR_AENC_NA_A_489, VAR_SIGN_A_PKA_490X30] : ((pred_eq(constr_tuple_2_get_1(constr_adec(VAR_AENC_NA_A_489, name_skB)), name_A) & pred_attacker(VAR_AENC_NA_A_489) & pred_eq(constr_tuple_2_get_0x30(constr_checksign(VAR_SIGN_A_PKA_490X30, constr_pkey(name_skS))), name_A) & pred_attacker(VAR_SIGN_A_PKA_490X30)) => pred_attacker(tuple_2(constr_aenc(tuple_3(constr_tuple_2_get_0x30(constr_adec(VAR_AENC_NA_A_489, name_skB)), name_Nb(VAR_0X40SID_491), name_B), constr_tuple_2_get_1(constr_checksign(VAR_SIGN_A_PKA_490X30, constr_pkey(name_skS)))), constr_client_B_STEP_2)))).
-fof(ax274, axiom,
-![VAR_DST_556, VAR_PKDST_557, VAR_SRC_558] : ((pred_table(tuple_keys(VAR_DST_556, VAR_PKDST_557)) & pred_attacker(tuple_2(VAR_SRC_558, VAR_DST_556))) => pred_attacker(tuple_2(constr_sign(tuple_2(VAR_DST_556, VAR_PKDST_557), name_skS), constr_key_retrieval_server_STEP_1)))).
-fof(ax275, axiom,
-![VAR_HOST_612, VAR_PK_613] : ((VAR_HOST_612 != name_B & VAR_HOST_612 != name_A & pred_attacker(tuple_2(VAR_HOST_612, VAR_PK_613))) => pred_table(tuple_keys(VAR_HOST_612, VAR_PK_613)))).
+fof(ax153, axiom,
+pred_attacker(tuple_out_1(constr_pkey(name_skA)))).
+fof(ax154, axiom,
+pred_attacker(tuple_out_2(constr_pkey(name_skB)))).
+fof(ax155, axiom,
+pred_attacker(tuple_out_3(constr_pkey(name_skS)))).
+fof(ax156, axiom,
+pred_attacker(tuple_client_A_out_1(name_A, name_I))).
+fof(ax157, axiom,
+![VAR_0X40SID_40X305, VAR_SIGN_I_PKI_40X304] : ((pred_eq_bitstring_bitstring(name_I, constr_tuple_2_get_0x30(constr_checksign(VAR_SIGN_I_PKI_40X304, constr_pkey(name_skS)))) & pred_attacker(tuple_client_A_in_1(VAR_SIGN_I_PKI_40X304))) => pred_attacker(tuple_client_A_out_2(constr_aenc(tuple_2(name_Na(VAR_0X40SID_40X305), name_A), constr_tuple_2_get_1_bitstring(constr_checksign(VAR_SIGN_I_PKI_40X304, constr_pkey(name_skS)))))))).
+fof(ax158, axiom,
+![VAR_0X40SID_468, VAR_AENC_NA_NI_I_467, VAR_SIGN_I_PKI_469] : ((pred_eq_bitstring_bitstring(name_I, constr_tuple_3_get_2(constr_adec(VAR_AENC_NA_NI_I_467, name_skA))) & pred_eq_bitstring_bitstring(name_Na(VAR_0X40SID_468), constr_tuple_3_get_0x30(constr_adec(VAR_AENC_NA_NI_I_467, name_skA))) & pred_attacker(tuple_client_A_in_2(VAR_AENC_NA_NI_I_467)) & pred_eq_bitstring_bitstring(name_I, constr_tuple_2_get_0x30(constr_checksign(VAR_SIGN_I_PKI_469, constr_pkey(name_skS)))) & pred_attacker(tuple_client_A_in_1(VAR_SIGN_I_PKI_469))) => pred_attacker(tuple_client_A_out_3(constr_aenc(constr_tuple_3_get_1_bitstring(constr_adec(VAR_AENC_NA_NI_I_467, name_skA)), constr_tuple_2_get_1_bitstring(constr_checksign(VAR_SIGN_I_PKI_469, constr_pkey(name_skS)))))))).
+fof(ax159, axiom,
+pred_attacker(tuple_client_B_out_1(name_B, name_A))).
+fof(ax160, axiom,
+![VAR_0X40SID_582, VAR_AENC_NA_A_580X30, VAR_SIGN_A_PKA_581] : ((pred_eq_bitstring_bitstring(name_A, constr_tuple_2_get_1(constr_adec(VAR_AENC_NA_A_580X30, name_skB))) & pred_attacker(tuple_client_B_in_2(VAR_AENC_NA_A_580X30)) & pred_eq_bitstring_bitstring(name_A, constr_tuple_2_get_0x30(constr_checksign(VAR_SIGN_A_PKA_581, constr_pkey(name_skS)))) & pred_attacker(tuple_client_B_in_1(VAR_SIGN_A_PKA_581))) => pred_attacker(tuple_client_B_out_2(constr_aenc(tuple_3(constr_tuple_2_get_0x30_bitstring(constr_adec(VAR_AENC_NA_A_580X30, name_skB)), name_Nb(VAR_0X40SID_582), name_B), constr_tuple_2_get_1_bitstring(constr_checksign(VAR_SIGN_A_PKA_581, constr_pkey(name_skS)))))))).
+fof(ax161, axiom,
+![VAR_DST_641, VAR_PKDST_642, VAR_SRC_643] : ((pred_table(tuple_keys(VAR_DST_641, VAR_PKDST_642)) & pred_attacker(tuple_key_retrieval_server_in_1(VAR_SRC_643, VAR_DST_641))) => pred_attacker(tuple_key_retrieval_server_out_1(constr_sign(tuple_2(VAR_DST_641, VAR_PKDST_642), name_skS))))).
+fof(ax162, axiom,
+![VAR_HOST_695, VAR_PK_696] : ((VAR_HOST_695 != name_B & VAR_HOST_695 != name_A & pred_attacker(tuple_key_register_server_in_1(VAR_HOST_695, VAR_PK_696))) => pred_table(tuple_keys(VAR_HOST_695, VAR_PK_696)))).
 fof(co0, conjecture,
-pred_attacker(name_Nb(VAR_V_621))).
+pred_attacker(name_Nb(VAR_V_70X304))).

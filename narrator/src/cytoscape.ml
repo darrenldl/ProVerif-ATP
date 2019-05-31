@@ -252,11 +252,13 @@ let on ?(selector : string option) (cy : t Js.t) ~(event : string)
     ~(handler : event Js.t -> unit) : unit =
   let handler : event Js.t -> unit =
     fun ev ->
-      Lwt_js.yield () >>= (fun () -> handler ev; Lwt.return_unit) |> ignore
+      Js_of_ocaml_lwt.Lwt_js.yield () >>= (fun () -> handler ev; Lwt.return_unit) |> ignore
   in
   match selector with
-  | None -> cy##on_noselect (Js.string event) handler
-  | Some selector -> cy##on (Js.string event) (Js.string selector) handler
+  | None ->
+    cy##on_noselect (Js.string event) handler
+  | Some selector ->
+    cy##on (Js.string event) (Js.string selector) handler
 
 let style_update (cy : t Js.t) : unit = cy##style##update
 
@@ -306,10 +308,14 @@ let set_node_shape ?(update_style : bool = true) (cy : t Js.t) ~(id : string)
   let shape =
     Js.string
       ( match shape with
-        | Circle -> "ellipse"
-        | Ellipse -> "ellipse"
-        | Diamond -> "diamond"
-        | Rectangle -> "rectangle" )
+        | Circle ->
+          "ellipse"
+        | Ellipse ->
+          "ellipse"
+        | Diamond ->
+          "diamond"
+        | Rectangle ->
+          "rectangle" )
   in
   (cy##style##selector (Js.string (Printf.sprintf "node[id=\"%s\"]" id)))##style
     (Js.string "shape") shape

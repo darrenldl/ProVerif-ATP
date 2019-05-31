@@ -4,12 +4,6 @@ const CONST_2 : bitstring.
 const CONST_3 : bitstring.
 const CONST_4 : bitstring.
 
-pred eq(bitstring, bitstring).
-
-clauses
-  forall x : bitstring;
-    eq(x, x).
-
 free c : channel.
 free objective : bitstring [private].
 
@@ -30,28 +24,31 @@ equation
 query 
   attacker(objective).
 
-const A_STEP_1 : bitstring.
-const A_STEP_2 : bitstring.
-const A_STEP_3 : bitstring.
+fun A_out_1(bitstring, bitstring) : bitstring [data].
+fun A_out_2(bitstring) : bitstring [data].
+fun A_in_1(bitstring) : bitstring [data].
+fun A_out_3(bitstring) : bitstring [data].
 
 let A =
   new P : bitstring;
   new G : bitstring;
   new Na : bitstring;
-  out(c, ((P, G), A_STEP_1));
-  out(c, (mod(exp(G, Na), P), A_STEP_2));
-  in(c, B : bitstring);
+  out(c, A_out_1(P, G));
+  out(c, A_out_2(mod(exp(G, Na), P)));
+  in(c, A_in_1(B : bitstring));
   let s = mod(exp(B, Na), P) in
-  out(c, (enc(objective, s), A_STEP_3));
+  out(c, A_out_3(enc(objective, s)));
   0.
 
-const B_STEP_1 : bitstring.
+fun B_in_1(bitstring, bitstring) : bitstring [data].
+fun B_in_2(bitstring) : bitstring [data].
+fun B_out_1(bitstring) : bitstring [data].
 
 let B =
   new Nb : bitstring;
-  in(c, (P : bitstring, G : bitstring));
-  in(c, A : bitstring);
-  out(c, (mod(exp(G, Nb), P), B_STEP_1));
+  in(c, B_in_1(P : bitstring, G : bitstring));
+  in(c, B_in_2(A : bitstring));
+  out(c, B_out_1(mod(exp(G, Nb), P)));
   let s = mod(exp(A, Nb), P) in
   0.
 

@@ -82,10 +82,12 @@ let rec output_input oc v =
   match v with
   | Include (name, fs) ->
     Printf.fprintf oc "include %s : %s" name (String.concat ", " fs)
-  | Annotated_formula f -> output_formula oc f
+  | Annotated_formula f ->
+    output_formula oc f
 
 and output_formula oc f =
-  match f with Fof_annotated f ->
+  match f with
+  | Fof_annotated f ->
     Printf.fprintf oc "fof(%a)" output_fof_annotated f
 
 and output_fof_annotated oc f =
@@ -94,49 +96,82 @@ and output_fof_annotated oc f =
 
 let string_to_formula_role s =
   match s with
-  | "axiom" -> FR_axiom
-  | "hypothesis" -> FR_hypothesis
-  | "definition" -> FR_definition
-  | "assumption" -> FR_assumption
-  | "lemma" -> FR_lemma
-  | "theorem" -> FR_theorem
-  | "corollary" -> FR_corollary
-  | "conjecture" -> FR_conjecture
-  | "negated_conjecture" -> FR_negated_conjecture
-  | "plain" -> FR_plain
-  | "type" -> FR_type
-  | "fi_domain" -> FR_fi_domain
-  | "fi_functors" -> FR_fi_functors
-  | "fi_predicates" -> FR_fi_predicates
-  | "unknown" -> FR_unknown
-  | _ -> raise (ErrorWithMsg ("invalid formula role " ^ s))
+  | "axiom" ->
+    FR_axiom
+  | "hypothesis" ->
+    FR_hypothesis
+  | "definition" ->
+    FR_definition
+  | "assumption" ->
+    FR_assumption
+  | "lemma" ->
+    FR_lemma
+  | "theorem" ->
+    FR_theorem
+  | "corollary" ->
+    FR_corollary
+  | "conjecture" ->
+    FR_conjecture
+  | "negated_conjecture" ->
+    FR_negated_conjecture
+  | "plain" ->
+    FR_plain
+  | "type" ->
+    FR_type
+  | "fi_domain" ->
+    FR_fi_domain
+  | "fi_functors" ->
+    FR_fi_functors
+  | "fi_predicates" ->
+    FR_fi_predicates
+  | "unknown" ->
+    FR_unknown
+  | _ ->
+    raise (ErrorWithMsg ("invalid formula role " ^ s))
 
 let formula_role_to_string r =
   match r with
-  | FR_axiom -> "axiom"
-  | FR_hypothesis -> "hypothesis"
-  | FR_definition -> "definition"
-  | FR_assumption -> "assumption"
-  | FR_lemma -> "lemma"
-  | FR_theorem -> "theorem"
-  | FR_corollary -> "corollary"
-  | FR_conjecture -> "conjecture"
-  | FR_negated_conjecture -> "negated_conjecture"
-  | FR_plain -> "plain"
-  | FR_type -> "type"
-  | FR_fi_domain -> "fi_domain"
-  | FR_fi_functors -> "fi_functors"
-  | FR_fi_predicates -> "fi_predicates"
-  | FR_unknown -> "unknown"
+  | FR_axiom ->
+    "axiom"
+  | FR_hypothesis ->
+    "hypothesis"
+  | FR_definition ->
+    "definition"
+  | FR_assumption ->
+    "assumption"
+  | FR_lemma ->
+    "lemma"
+  | FR_theorem ->
+    "theorem"
+  | FR_corollary ->
+    "corollary"
+  | FR_conjecture ->
+    "conjecture"
+  | FR_negated_conjecture ->
+    "negated_conjecture"
+  | FR_plain ->
+    "plain"
+  | FR_type ->
+    "type"
+  | FR_fi_domain ->
+    "fi_domain"
+  | FR_fi_functors ->
+    "fi_functors"
+  | FR_fi_predicates ->
+    "fi_predicates"
+  | FR_unknown ->
+    "unknown"
 
 let rec decl_to_string d =
   match d with
   | Include (file, formulas) ->
     Printf.sprintf "include %s : %s." file (String.concat ", " formulas)
-  | Annotated_formula f -> annotated_formula_to_string f
+  | Annotated_formula f ->
+    annotated_formula_to_string f
 
 and annotated_formula_to_string f =
-  match f with Fof_annotated f ->
+  match f with
+  | Fof_annotated f ->
     Printf.sprintf "fof%s" (fof_annotated_to_string f)
 
 and fof_annotated_to_string f =
@@ -145,8 +180,10 @@ and fof_annotated_to_string f =
     (formula_role_to_string role)
     (fof_formula_to_string formula)
     ( match annotations with
-      | None -> ""
-      | Some a -> ", " ^ general_term_to_string a )
+      | None ->
+        ""
+      | Some a ->
+        ", " ^ general_term_to_string a )
 
 and fof_formula_to_string f =
   match f with
@@ -158,19 +195,23 @@ and fof_formula_to_string f =
   | FOF_F_quantified (q, vars, f) ->
     Printf.sprintf "%s [%s] : %s" (quantifier_to_string q)
       (String.concat ", " vars) (fof_formula_to_string f)
-  | FOF_F_atomic t -> fof_term_to_string t
+  | FOF_F_atomic t ->
+    fof_term_to_string t
 
 and fof_term_to_string t =
   match t with
-  | FOF_T_var s -> s
-  | FOF_T_const s -> s
+  | FOF_T_var s ->
+    s
+  | FOF_T_const s ->
+    s
   | FOF_T_fun_app (f, args) ->
     Printf.sprintf "%s(%s)" f
       (String.concat ", " (List.map fof_term_to_string args))
 
 and general_term_to_string t =
   match t with
-  | GT_single d -> general_data_to_string d
+  | GT_single d ->
+    general_data_to_string d
   | GT_pair (d1, d2) ->
     Printf.sprintf "%s : %s"
       (general_data_to_string d1)
@@ -181,25 +222,38 @@ and general_term_to_string t =
 
 and general_data_to_string d =
   match d with
-  | GD_word s -> s
+  | GD_word s ->
+    s
   | GD_fun (f, args) ->
     Printf.sprintf "%s(%s)" f
       (String.concat ", " (List.map general_term_to_string args))
-  | GD_var s -> s
-  | GD_num s -> s
-  | GD_dist_obj s -> s
+  | GD_var s ->
+    s
+  | GD_num s ->
+    s
+  | GD_dist_obj s ->
+    s
 
 and binary_op_to_string op =
   match op with
-  | And -> "&"
-  | Or -> "|"
-  | Eq -> "="
-  | Iff -> "<=>"
-  | Imply -> "=>"
-  | Left_imply -> "<="
-  | Xor -> "<~>"
-  | Not_or -> "~|"
-  | Not_and -> "~&"
+  | And ->
+    "&"
+  | Or ->
+    "|"
+  | Eq ->
+    "="
+  | Iff ->
+    "<=>"
+  | Imply ->
+    "=>"
+  | Left_imply ->
+    "<="
+  | Xor ->
+    "<~>"
+  | Not_or ->
+    "~|"
+  | Not_and ->
+    "~&"
 
 and unary_op_to_string op = match op with Not -> "~"
 

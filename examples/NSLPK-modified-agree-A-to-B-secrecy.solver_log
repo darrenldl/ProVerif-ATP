@@ -1,106 +1,103 @@
 % Refutation found. Thanks to Tanya!
 % SZS status Theorem for NSLPK-modified-agree-A-to-B-secrecy
 % SZS output start Proof for NSLPK-modified-agree-A-to-B-secrecy
-fof(f258,axiom,(
+fof(f83,axiom,(
   ! [X8,X9,X10] : tuple_assoc_pair(X8,tuple_assoc_pair(X9,X10)) = tuple_assoc_pair(tuple_assoc_pair(X8,X9),X10)),
   file('NSLPK-modified-agree-A-to-B-secrecy.p',unknown)).
-fof(f260,axiom,(
-  ! [X13,X14] : constr_assoc_pair_2_get_0x30(tuple_assoc_pair(X13,X14)) = X13),
+fof(f85,axiom,(
+  ! [X13,X14] : constr_assoc_pair_2_get_0x30_bitstring(tuple_assoc_pair(X13,X14)) = X13),
   file('NSLPK-modified-agree-A-to-B-secrecy.p',unknown)).
-fof(f285,axiom,(
-  ! [X38,X39] : (pred_attacker(tuple_assoc_pair(X38,X39)) => pred_attacker(X39))),
+fof(f145,axiom,(
+  ! [X95,X96] : (pred_attacker(tuple_assoc_pair(X95,X96)) => pred_attacker(X96))),
   file('NSLPK-modified-agree-A-to-B-secrecy.p',unknown)).
-fof(f295,axiom,(
+fof(f152,axiom,(
   pred_attacker(constr_CONST_0x30)),
   file('NSLPK-modified-agree-A-to-B-secrecy.p',unknown)).
-fof(f320,conjecture,(
-  ( ! [X73] : (pred_attacker(tuple_2(name_Nb(X73),name_objective))) )),
+fof(f177,conjecture,(
+  ( ! [X130] : (pred_attacker(tuple_2(name_Nb(X130),name_objective))) )),
   file('NSLPK-modified-agree-A-to-B-secrecy.p',unknown)).
-fof(f321,negated_conjecture,(
-  ~! [X73] : pred_attacker(tuple_2(name_Nb(X73),name_objective))),
-  inference(negated_conjecture,[],[f320])).
-fof(f325,plain,(
+fof(f178,negated_conjecture,(
+  ~! [X130] : pred_attacker(tuple_2(name_Nb(X130),name_objective))),
+  inference(negated_conjecture,[],[f177])).
+fof(f182,plain,(
   ! [X0,X1,X2] : tuple_assoc_pair(X0,tuple_assoc_pair(X1,X2)) = tuple_assoc_pair(tuple_assoc_pair(X0,X1),X2)),
-  inference(rectify,[],[f258])).
-fof(f327,plain,(
-  ! [X0,X1] : constr_assoc_pair_2_get_0x30(tuple_assoc_pair(X0,X1)) = X0),
-  inference(rectify,[],[f260])).
-fof(f343,plain,(
+  inference(rectify,[],[f83])).
+fof(f184,plain,(
+  ! [X0,X1] : constr_assoc_pair_2_get_0x30_bitstring(tuple_assoc_pair(X0,X1)) = X0),
+  inference(rectify,[],[f85])).
+fof(f242,plain,(
   ! [X0,X1] : (pred_attacker(tuple_assoc_pair(X0,X1)) => pred_attacker(X1))),
-  inference(rectify,[],[f285])).
-fof(f359,plain,(
+  inference(rectify,[],[f145])).
+fof(f258,plain,(
   ~! [X0] : pred_attacker(tuple_2(name_Nb(X0),name_objective))),
-  inference(rectify,[],[f321])).
-fof(f378,plain,(
+  inference(rectify,[],[f178])).
+fof(f321,plain,(
   ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_assoc_pair(X0,X1)))),
-  inference(ennf_transformation,[],[f343])).
-fof(f403,plain,(
+  inference(ennf_transformation,[],[f242])).
+fof(f346,plain,(
   ? [X0] : ~pred_attacker(tuple_2(name_Nb(X0),name_objective))),
-  inference(ennf_transformation,[],[f359])).
-fof(f404,plain,(
+  inference(ennf_transformation,[],[f258])).
+fof(f347,plain,(
   ? [X0] : ~pred_attacker(tuple_2(name_Nb(X0),name_objective)) => ~pred_attacker(tuple_2(name_Nb(sK0),name_objective))),
   introduced(choice_axiom,[])).
-fof(f405,plain,(
+fof(f348,plain,(
   ~pred_attacker(tuple_2(name_Nb(sK0),name_objective))),
-  inference(skolemisation,[status(esa),new_symbols(skolem,[sK0])],[f403,f404])).
-fof(f663,plain,(
+  inference(skolemisation,[status(esa),new_symbols(skolem,[sK0])],[f346,f347])).
+fof(f431,plain,(
   ( ! [X2,X0,X1] : (tuple_assoc_pair(X0,tuple_assoc_pair(X1,X2)) = tuple_assoc_pair(tuple_assoc_pair(X0,X1),X2)) )),
-  inference(cnf_transformation,[],[f325])).
-fof(f665,plain,(
-  ( ! [X0,X1] : (constr_assoc_pair_2_get_0x30(tuple_assoc_pair(X0,X1)) = X0) )),
-  inference(cnf_transformation,[],[f327])).
-fof(f690,plain,(
+  inference(cnf_transformation,[],[f182])).
+fof(f433,plain,(
+  ( ! [X0,X1] : (constr_assoc_pair_2_get_0x30_bitstring(tuple_assoc_pair(X0,X1)) = X0) )),
+  inference(cnf_transformation,[],[f184])).
+fof(f493,plain,(
   ( ! [X0,X1] : (~pred_attacker(tuple_assoc_pair(X0,X1)) | pred_attacker(X1)) )),
-  inference(cnf_transformation,[],[f378])).
-fof(f700,plain,(
+  inference(cnf_transformation,[],[f321])).
+fof(f500,plain,(
   pred_attacker(constr_CONST_0x30)),
-  inference(cnf_transformation,[],[f295])).
-fof(f724,plain,(
+  inference(cnf_transformation,[],[f152])).
+fof(f524,plain,(
   ~pred_attacker(tuple_2(name_Nb(sK0),name_objective))),
-  inference(cnf_transformation,[],[f405])).
-fof(f789,plain,(
-  ( ! [X4,X5,X3] : (~pred_attacker(tuple_assoc_pair(X3,tuple_assoc_pair(X4,X5))) | pred_attacker(X5)) )),
-  inference(superposition,[],[f690,f663])).
-fof(f791,plain,(
-  ( ! [X10,X11,X9] : (tuple_assoc_pair(X9,X10) = constr_assoc_pair_2_get_0x30(tuple_assoc_pair(X9,tuple_assoc_pair(X10,X11)))) )),
-  inference(superposition,[],[f665,f663])).
-fof(f795,plain,(
-  ( ! [X10,X9] : (tuple_assoc_pair(X9,X10) = X9) )),
-  inference(forward_demodulation,[],[f791,f665])).
-fof(f803,plain,(
-  ( ! [X4,X5,X3] : (~pred_attacker(tuple_assoc_pair(X3,X4)) | pred_attacker(X5)) )),
-  inference(backward_demodulation,[],[f795,f789])).
-fof(f811,plain,(
-  spl1_12 <=> ! [X1] : pred_attacker(X1)),
-  introduced(avatar_definition,[new_symbols(naming,[spl1_12])])).
-fof(f812,plain,(
-  ( ! [X1] : (pred_attacker(X1)) ) | ~spl1_12),
-  inference(avatar_component_clause,[],[f811])).
-fof(f814,plain,(
-  spl1_14 <=> ! [X0] : ~pred_attacker(X0)),
-  introduced(avatar_definition,[new_symbols(naming,[spl1_14])])).
-fof(f815,plain,(
-  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl1_14),
-  inference(avatar_component_clause,[],[f814])).
-fof(f817,plain,(
-  ( ! [X5,X3] : (~pred_attacker(X3) | pred_attacker(X5)) )),
-  inference(forward_demodulation,[],[f803,f795])).
-fof(f818,plain,(
-  spl1_12 | spl1_14),
-  inference(avatar_split_clause,[],[f817,f814,f811])).
-fof(f821,plain,(
-  $false | ~spl1_12),
-  inference(resolution,[],[f812,f724])).
-fof(f826,plain,(
-  ~spl1_12),
-  inference(avatar_contradiction_clause,[],[f821])).
-fof(f827,plain,(
-  $false | ~spl1_14),
-  inference(resolution,[],[f815,f700])).
-fof(f902,plain,(
-  ~spl1_14),
-  inference(avatar_contradiction_clause,[],[f827])).
-fof(f903,plain,(
+  inference(cnf_transformation,[],[f348])).
+fof(f707,plain,(
+  ( ! [X4,X5,X3] : (tuple_assoc_pair(X3,X4) = constr_assoc_pair_2_get_0x30_bitstring(tuple_assoc_pair(X3,tuple_assoc_pair(X4,X5)))) )),
+  inference(superposition,[],[f433,f431])).
+fof(f712,plain,(
+  ( ! [X19,X20,X18] : (~pred_attacker(tuple_assoc_pair(X18,tuple_assoc_pair(X19,X20))) | pred_attacker(X20)) )),
+  inference(superposition,[],[f493,f431])).
+fof(f715,plain,(
+  ( ! [X4,X3] : (tuple_assoc_pair(X3,X4) = X3) )),
+  inference(forward_demodulation,[],[f707,f433])).
+fof(f731,plain,(
+  spl1_8 <=> ! [X1] : pred_attacker(X1)),
+  introduced(avatar_definition,[new_symbols(naming,[spl1_8])])).
+fof(f732,plain,(
+  ( ! [X1] : (pred_attacker(X1)) ) | ~spl1_8),
+  inference(avatar_component_clause,[],[f731])).
+fof(f734,plain,(
+  spl1_10 <=> ! [X0] : ~pred_attacker(X0)),
+  introduced(avatar_definition,[new_symbols(naming,[spl1_10])])).
+fof(f735,plain,(
+  ( ! [X0] : (~pred_attacker(X0)) ) | ~spl1_10),
+  inference(avatar_component_clause,[],[f734])).
+fof(f744,plain,(
+  ( ! [X20,X18] : (~pred_attacker(X18) | pred_attacker(X20)) )),
+  inference(forward_demodulation,[],[f712,f715])).
+fof(f745,plain,(
+  spl1_8 | spl1_10),
+  inference(avatar_split_clause,[],[f744,f734,f731])).
+fof(f747,plain,(
+  $false | ~spl1_8),
+  inference(resolution,[],[f732,f524])).
+fof(f771,plain,(
+  ~spl1_8),
+  inference(avatar_contradiction_clause,[],[f747])).
+fof(f772,plain,(
+  $false | ~spl1_10),
+  inference(resolution,[],[f735,f500])).
+fof(f845,plain,(
+  ~spl1_10),
+  inference(avatar_contradiction_clause,[],[f772])).
+fof(f846,plain,(
   $false),
-  inference(avatar_sat_refutation,[],[f818,f826,f902])).
+  inference(avatar_sat_refutation,[],[f745,f771,f845])).
 % SZS output end Proof for NSLPK-modified-agree-A-to-B-secrecy
