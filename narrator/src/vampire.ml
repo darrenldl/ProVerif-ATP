@@ -1836,12 +1836,14 @@ module Protocol_step = struct
     | Data node -> (
         match node.classification with
         | ProtocolStep ->
+          (* Js_utils.console_log (Printf.sprintf "expr : %s" (Analyzed_expr.expr_to_string node.expr)); *)
           expr_to_steps node.expr
         | InteractiveProtocolStep ->
+          (* Js_utils.console_log (Printf.sprintf "expr : %s" (Analyzed_expr.expr_to_string node.expr)); *)
           let open Analyzed_expr in
           node.expr |> strip_quant |> split_on_impl
           |> (function None -> failwith "Unexpected None" | Some x -> x)
-          |> fun (pre, e) -> expr_to_steps pre @ expr_to_steps e
+          |> (fun (pre, e) -> (*Js_utils.console_log (Printf.sprintf "pre : %s, e : %s" (Analyzed_expr.expr_to_string pre) (Analyzed_expr.expr_to_string e));*) expr_to_steps pre @ expr_to_steps e)
         | _ ->
           [] )
 end
@@ -3036,9 +3038,10 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
         if
           classification = ProtocolStep
           || classification = InteractiveProtocolStep
-        then
+        then (
           let steps = Protocol_step.node_to_steps node in
           steps @ List.filter (fun s -> not (List.mem s steps)) acc
+        )
         else acc
       | _ ->
         acc
@@ -3084,8 +3087,18 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
             || (unwrap_data n).classification = InteractiveProtocolStep )
          m)
   in
+  (* List.iter (fun { proc_name; in_out; direction; step_num; expr } -> Js_utils.console_log (Printf.sprintf "%s %d %s" (match proc_name with | None -> "" | Some s -> s) step_num (Analyzed_expr.expr_to_string expr))) steps; *)
+  List.iter (fun (_, node) -> let n = unwrap_data node in Js_utils.console_log (Printf.sprintf "step node : %s" (Analyzed_expr.expr_to_string n.expr))) step_nodes;
   let paths =
-    List.concat (List.map (fun (id, _) -> paths_to_root id m) step_nodes)
+    List.concat (List.map (fun (id, _node) ->
+        Js_utils.console_log (Printf.sprintf "expr : %s, paths : [%s]"
+                                (Analyzed_expr.expr_to_string (unwrap_data _node).expr)
+                                (String.concat ", "
+                                   (List.map (fun l -> Printf.sprintf "[%s]"
+                                                 (String.concat ", " l)) (paths_to_root id m))
+                                )
+                             );
+        paths_to_root id m) step_nodes)
   in
   let steps =
     List.fold_left
