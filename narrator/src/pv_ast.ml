@@ -290,12 +290,15 @@ let query_to_string_debug qs =
 
 module Print_context = struct
   type process_structure_type =
-    | Let
-    | IfElse
-    | InOut
-    | Zero
+    | Null
+    | Macro
+    | Parallel
+    | Replicate
     | New
-    | Get
+    | Conditional
+    | In
+    | Out
+    | Eval
     | Insert
 
   type decl_structure_type =
@@ -543,3 +546,28 @@ let decl_to_string_debug d =
        | [] -> ""
        | l -> Printf.sprintf "%s;" (Misc_utils.map_list_to_string name_ty_to_string name_tys))
       (query_to_string_debug query)
+
+let process_to_string ?(ctx = Print_context.make ()) e =
+  let aux p =
+    match p with
+    | Proc_null ->
+      Print_context.set_proc_struct_ty ctx Print_context.Null;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx "0"
+    | Proc_macro (name, args) ->
+      Print_context.set_proc_struct_ty ctx Print_context.Macro;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx (Printf.sprintf "%s(%s)" name
+        (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string args))
+    | Proc_parallel (p1, p2) ->
+    | Proc_replicate p ->
+    | Proc_new {names; ty; next} ->
+    | Proc_conditional { cond; true_branch; false_branch } ->
+    | Proc_in { channel; message; next } ->
+    | Proc_out { channel; message; next } ->
+    | Proc_eval { let_bind_pat; let_bind_term; true_branch; false_branch } ->
+    | Proc_insert { name; terms; next } ->
+    | Proc_get { name; pats; next } -> (
+      )
+    | Proc_event { name; terms; next } -> (
+      )
