@@ -304,13 +304,16 @@ module Print_context = struct
     | Event
 
   type decl_structure_type =
-    | Const
+    | Ty
+    | Channel
     | Free
-    | Table
-    | FunDec
+    | Const
+    | Fun
     | Equation
+    | Pred
+    | Table
     | LetProc
-    | Process
+    | Event
     | Query
 
   let indent_space_count = 2
@@ -679,4 +682,94 @@ let process_to_string ?(ctx = Print_context.make ()) p =
           aux next
       )
   in
-  aux p
+  aux p;
+  Print_context.finish ctx
+
+let decl_to_string ?(ctx = Print_context.make ()) d =
+  let rec aux d =
+    match d with
+    | Decl_ty (ty, options) -> (
+        Print_context.set_decl_struct_ty ctx Print_context.Ty;
+        Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+        Print_context.push ctx
+          (Printf.sprintf "type %s%s."
+             ty
+             (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+          )
+      )
+    | Decl_channel l ->
+      Print_context.set_decl_struct_ty ctx Print_context.Channel;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "channel %s."
+           (String.concat ", " l)
+        )
+    | Decl_free { names; ty; options } ->
+      Print_context.set_decl_struct_ty ctx Print_context.Free;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "free %s : %s%s."
+           (String.concat ", " names)
+           ty
+           (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+        )
+    | Decl_const { names; ty; options } ->
+      Print_context.set_decl_struct_ty ctx Print_context.Const;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "const %s : %s%s."
+           (String.concat ", " names)
+           ty
+           (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+        )
+    | Decl_fun { name; arg_tys; ret_ty; options } ->
+      Print_context.set_decl_struct_ty ctx Print_context.Fun;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "fun %s(%s) : %s%s."
+           name
+           (String.concat ", " arg_tys)
+           ret_ty
+           (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+        )
+    | Decl_equation { eqs; options } ->
+      Print_context.set_decl_struct_ty ctx Print_context.Equation;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx "equation";
+      Print_context.incre_indent ctx;
+      List.iter (fun (name_tys, l, r) ->
+          match name_tys with
+          | [] ->
+            Print_context.push ctx
+              (Printf.sprintf "%s = %s;"
+                 (term_to_string l)
+                 (term_to_string r)
+              )
+          | _ ->
+            Print_context.push ctx
+              (Printf.sprintf "forall %s, %s = %s;"
+                 (Misc_utils.map_list_to_string name_ty_to_string name_tys)
+                 (term_to_string l)
+                 (term_to_string r)
+              )
+        ) eqs;
+      Print_context.decre_indent ctx;
+    | Decl_pred { name; arg_tys } ->
+      Print_context.set_decl_struct_ty ctx Print_context.Pred;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    | Decl_table { name; tys } ->
+      Print_context.set_decl_struct_ty ctx Print_context.Table;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    | Decl_let_proc { name; args; process } -> (
+        Print_context.set_decl_struct_ty ctx Print_context.LetProc;
+        Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      )
+    | Decl_event { name; args } ->
+      Print_context.set_decl_struct_ty ctx Print_context.Event;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    | Decl_query { name_tys; query } ->
+      Print_context.set_decl_struct_ty ctx Print_context.Query;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+  in
+  aux d;
+  Print_context.finish ctx
