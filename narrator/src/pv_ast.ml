@@ -564,13 +564,25 @@ let process_to_string ?(ctx = Print_context.make ()) p =
     | Proc_parallel (p1, p2) ->
       Print_context.set_proc_struct_ty ctx Print_context.Parallel;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.incre_indent ctx;
+      aux p1;
+      Print_context.decre_indent ctx;
+      Print_context.push ctx "|";
+      Print_context.incre_indent ctx;
+      aux p2;
+      Print_context.decre_indent ctx;
     | Proc_replicate p ->
       Print_context.set_proc_struct_ty ctx Print_context.Replicate;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx "!";
+      Print_context.incre_indent ctx;
+      aux p;
+      Print_context.decre_indent ctx;
     | Proc_new {names; ty; next} ->
       Print_context.set_proc_struct_ty ctx Print_context.New;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
-      Print_context.push ctx (Printf.sprintf "new %s" (String.concat ", " names))
+      Print_context.push ctx (Printf.sprintf "new %s : %s" (String.concat ", " names) ty);
+      aux next
     | Proc_conditional { cond; true_branch; false_branch } -> (
         Print_context.set_proc_struct_ty ctx Print_context.Conditional;
         Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
@@ -590,9 +602,17 @@ let process_to_string ?(ctx = Print_context.make ()) p =
     | Proc_in { channel; message; next } ->
       Print_context.set_proc_struct_ty ctx Print_context.In;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx (
+        Printf.sprintf "in(%s, %s);" (pterm_to_string channel)
+          (pattern_to_string message));
+      aux next
     | Proc_out { channel; message; next } ->
       Print_context.set_proc_struct_ty ctx Print_context.Out;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx (
+        Printf.sprintf "out(%s, %s);" (pterm_to_string channel)
+          (pterm_to_string message));
+      aux next
     | Proc_eval { let_bind_pat; let_bind_term; true_branch; false_branch } -> (
         Print_context.set_proc_struct_ty ctx Print_context.Eval;
         Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
@@ -634,7 +654,7 @@ let process_to_string ?(ctx = Print_context.make ()) p =
           );
         match next with
         | None -> ()
-        | Some (true_branch, None) ->
+        | Some (true_branch, None) | Some (true_branch, Some Proc_null)->
           aux true_branch;
         | Some (true_branch, Some false_branch) ->
           Print_context.incre_indent ctx;
