@@ -741,35 +741,74 @@ let decl_to_string ?(ctx = Print_context.make ()) d =
           match name_tys with
           | [] ->
             Print_context.push ctx
-              (Printf.sprintf "%s = %s;"
+              (Printf.sprintf "%s = %s%s."
                  (term_to_string l)
                  (term_to_string r)
+                 (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
               )
           | _ ->
             Print_context.push ctx
-              (Printf.sprintf "forall %s, %s = %s;"
+              (Printf.sprintf "forall %s; %s = %s%s."
                  (Misc_utils.map_list_to_string name_ty_to_string name_tys)
                  (term_to_string l)
                  (term_to_string r)
+                 (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
               )
         ) eqs;
       Print_context.decre_indent ctx;
     | Decl_pred { name; arg_tys } ->
       Print_context.set_decl_struct_ty ctx Print_context.Pred;
       Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "pred %s(%s)."
+           name
+           (String.concat ", " arg_tys)
+        )
     | Decl_table { name; tys } ->
       Print_context.set_decl_struct_ty ctx Print_context.Table;
       Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
-    | Decl_let_proc { name; args; process } -> (
-        Print_context.set_decl_struct_ty ctx Print_context.LetProc;
-        Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
-      )
+      Print_context.push ctx
+        (Printf.sprintf "table %s(%s)."
+           name
+           (String.concat ", " tys)
+        )
+    | Decl_let_proc { name; args; process } ->
+      Print_context.set_decl_struct_ty ctx Print_context.LetProc;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "let %s%s =" name
+           (Misc_utils.map_list_to_string_w_opt_paren name_ty_to_string args));
+      Print_context.incre_indent ctx;
+      process_to_string ~ctx process |> ignore;
+      Print_context.decre_indent ctx;
     | Decl_event { name; args } ->
       Print_context.set_decl_struct_ty ctx Print_context.Event;
       Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
-    | Decl_query { name_tys; query } ->
-      Print_context.set_decl_struct_ty ctx Print_context.Query;
-      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "event %s%s."
+           name
+           (Misc_utils.map_list_to_string_w_opt_paren name_ty_to_string args)
+        )
+    | Decl_query { name_tys; query } -> (
+        Print_context.set_decl_struct_ty ctx Print_context.Query;
+        Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+        Print_context.push ctx "query";
+        match name_tys with
+        | [] ->
+          Print_context.push ctx
+            (query_to_string_debug query)
+        | _ ->
+          Print_context.push ctx
+            (Printf.sprintf "%s; %s"
+               (Misc_utils.map_list_to_string name_ty_to_string name_tys)
+               (query_to_string_debug query)
+            )
+      )
   in
   aux d;
   Print_context.finish ctx
+
+let main_process_to_string p =
+  let ctx = Print_context.make () in
+  Print_context.incre_indent ctx;
+  process_to_string ~ctx p
