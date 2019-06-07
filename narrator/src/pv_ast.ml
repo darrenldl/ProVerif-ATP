@@ -562,7 +562,7 @@ let process_to_string ?(ctx = Print_context.make ()) p =
     | Proc_macro (name, args) ->
       Print_context.set_proc_struct_ty ctx Print_context.Macro;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
-      Print_context.push ctx (Printf.sprintf "%s(%s)" name
+      Print_context.push ctx (Printf.sprintf "%s%s" name
         (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string args))
     | Proc_parallel (p1, p2) ->
       Print_context.set_proc_struct_ty ctx Print_context.Parallel;
@@ -605,15 +605,22 @@ let process_to_string ?(ctx = Print_context.make ()) p =
     | Proc_in { channel; message; next } ->
       Print_context.set_proc_struct_ty ctx Print_context.In;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      let proc_name =
+        match ctx.proc_name with Some name -> name | None -> ""
+      in
       Print_context.push ctx (
-        Printf.sprintf "in(%s, %s);" (pterm_to_string channel)
+        Printf.sprintf "I -> %s IN  on %s : %s;" proc_name
+          (pterm_to_string channel)
           (pattern_to_string message));
       aux next
     | Proc_out { channel; message; next } ->
       Print_context.set_proc_struct_ty ctx Print_context.Out;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      let proc_name =
+        match ctx.proc_name with Some name -> name | None -> ""
+      in
       Print_context.push ctx (
-        Printf.sprintf "out(%s, %s);" (pterm_to_string channel)
+        Printf.sprintf "%s -> I OUT on %s : %s;" proc_name (pterm_to_string channel)
           (pterm_to_string message));
       aux next
     | Proc_eval { let_bind_pat; let_bind_term; true_branch; false_branch } -> (
@@ -779,7 +786,9 @@ let decl_to_string ?(ctx = Print_context.make ()) d =
         (Printf.sprintf "let %s%s =" name
            (Misc_utils.map_list_to_string_w_opt_paren name_ty_to_string args));
       Print_context.incre_indent ctx;
+      Print_context.set_proc_name ctx name;
       process_to_string ~ctx process |> ignore;
+      Print_context.set_proc_name_none ctx;
       Print_context.decre_indent ctx;
     | Decl_event { name; args } ->
       Print_context.set_decl_struct_ty ctx Print_context.Event;

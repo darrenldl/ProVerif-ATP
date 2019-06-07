@@ -19,7 +19,7 @@ let parse_pv_code (input : string) :
 
 let process_string s =
   match parse_pv_code s with
-  | Ok (decls, main_proc) -> Ok ((String.concat "\n" (List.map Pv_ast.decl_to_string decls)) ^ "\nprocess\n" ^ (Pv_ast.main_process_to_string main_proc))
+  | Ok (decls, main_proc) -> Ok ((String.concat "\n" (List.map Pv_ast.decl_to_string decls)) ^ "\nprocess" ^ (Pv_ast.main_process_to_string main_proc))
   | Error s -> Error s
 
 let str =
