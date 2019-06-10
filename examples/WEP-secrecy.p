@@ -128,11 +128,11 @@ fof(ax54, axiom,
 fof(ax55, axiom,
 pred_attacker(tuple_false)).
 fof(ax56, axiom,
-![VAR_V_38, VAR_V_39] : ((pred_attacker(VAR_V_38) & pred_attacker(VAR_V_39)) => pred_attacker(tuple_enc_oracle_out_1(VAR_V_38, VAR_V_39)))).
+![VAR_V_38, VAR_V_39] : ((pred_attacker(VAR_V_38) & pred_attacker(VAR_V_39)) => pred_attacker(tuple_enc_oracle_out_2(VAR_V_38, VAR_V_39)))).
 fof(ax57, axiom,
-![VAR_V_46, VAR_V_47] : (pred_attacker(tuple_enc_oracle_out_1(VAR_V_46, VAR_V_47)) => pred_attacker(VAR_V_46))).
+![VAR_V_46, VAR_V_47] : (pred_attacker(tuple_enc_oracle_out_2(VAR_V_46, VAR_V_47)) => pred_attacker(VAR_V_46))).
 fof(ax58, axiom,
-![VAR_V_49, VAR_V_50X30] : (pred_attacker(tuple_enc_oracle_out_1(VAR_V_49, VAR_V_50X30)) => pred_attacker(VAR_V_50X30))).
+![VAR_V_49, VAR_V_50X30] : (pred_attacker(tuple_enc_oracle_out_2(VAR_V_49, VAR_V_50X30)) => pred_attacker(VAR_V_50X30))).
 fof(ax59, axiom,
 ![VAR_V_53] : (pred_attacker(VAR_V_53) => pred_attacker(tuple_enc_oracle_in_1(VAR_V_53)))).
 fof(ax60, axiom,
@@ -178,7 +178,7 @@ fof(ax79, axiom,
 fof(ax80, axiom,
 ![VAR_V_110X30] : (pred_attacker(name_new0x2Dname(VAR_V_110X30)))).
 fof(ax81, axiom,
-![VAR_M_150X30] : (pred_attacker(tuple_enc_oracle_in_1(VAR_M_150X30)) => pred_attacker(tuple_enc_oracle_out_1(name_v, constr_xor(constr_concat(VAR_M_150X30, constr_C(VAR_M_150X30)), constr_RC4(name_v, name_Kab)))))).
+![VAR_M_150X30] : (pred_attacker(tuple_enc_oracle_in_1(VAR_M_150X30)) => pred_attacker(tuple_enc_oracle_out_2(name_v, constr_xor(constr_concat(VAR_M_150X30, constr_C(VAR_M_150X30)), constr_RC4(name_v, name_Kab)))))).
 fof(ax82, axiom,
 pred_attacker(tuple_B_out_1(name_v, constr_xor(constr_concat(name_objective, constr_C(name_objective)), constr_RC4(name_v, name_Kab))))).
 fof(co0, conjecture,

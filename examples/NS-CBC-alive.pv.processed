@@ -111,44 +111,44 @@ query
   attacker(objective).
 
 fun client_A_out_1(bitstring, bitstring, bitstring) : bitstring [data].
-fun client_A_in_1(bitstring) : bitstring [data].
-fun client_A_out_2(bitstring) : bitstring [data].
 fun client_A_in_2(bitstring) : bitstring [data].
 fun client_A_out_3(bitstring) : bitstring [data].
-fun client_A_in_3(bitstring) : bitstring [data].
-fun client_A_out_4(bitstring) : bitstring [data].
 fun client_A_in_4(bitstring) : bitstring [data].
 fun client_A_out_5(bitstring) : bitstring [data].
+fun client_A_in_6(bitstring) : bitstring [data].
+fun client_A_out_7(bitstring) : bitstring [data].
+fun client_A_in_8(bitstring) : bitstring [data].
+fun client_A_out_9(bitstring) : bitstring [data].
 
 let client_A(Kas : bitstring) =
   new Na : bitstring;
   out(c, client_A_out_1(A, B, Na));
-  in(c, client_A_in_1(enc_Na_B_enc_Kab_A : bitstring));
+  in(c, client_A_in_2(enc_Na_B_enc_Kab_A : bitstring));
   
   if eq_bitstring_bitstring(Na, tuple_4_get_0(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas))) then
   
   if eq_bitstring_bitstring(B, tuple_4_get_1(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas))) then
   let Kab : bitstring = tuple_4_get_2_bitstring(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
   let enc_Kab_A : bitstring = tuple_4_get_3_bitstring(cbc_dec_4(enc_Na_B_enc_Kab_A, Kas)) in
-  out(c, client_A_out_2(enc_Kab_A));
-  in(c, client_A_in_2(enc_Nb : bitstring));
+  out(c, client_A_out_3(enc_Kab_A));
+  in(c, client_A_in_4(enc_Nb : bitstring));
   let Nb = cbc_dec_1(enc_Nb, Kab) in
-  out(c, client_A_out_3(cbc_enc_1(succ(Nb), Kab)));
+  out(c, client_A_out_5(cbc_enc_1(succ(Nb), Kab)));
   new Na' : bitstring;
-  in(c, client_A_in_3(enc_Kab_A' : bitstring));
+  in(c, client_A_in_6(enc_Kab_A' : bitstring));
   let Kab' : bitstring = tuple_2_get_0_bitstring(cbc_dec_2(enc_Kab_A', Kas)) in
   
   if eq_bitstring_bitstring(A, tuple_2_get_1(cbc_dec_2(enc_Kab_A', Kas))) then
-  out(c, client_A_out_4(cbc_enc_1(Na', Kab')));
-  in(c, client_A_in_4(enc_succ_Na' : bitstring));
+  out(c, client_A_out_7(cbc_enc_1(Na', Kab')));
+  in(c, client_A_in_8(enc_succ_Na' : bitstring));
   
   if eq_bitstring_bitstring(succ(Na'), cbc_dec_1(enc_succ_Na', Kab')) then
-  out(c, client_A_out_5(objective));
+  out(c, client_A_out_9(objective));
   0.
 
 fun client_B_in_1(bitstring) : bitstring [data].
-fun client_B_out_1(bitstring) : bitstring [data].
-fun client_B_in_2(bitstring) : bitstring [data].
+fun client_B_out_2(bitstring) : bitstring [data].
+fun client_B_in_3(bitstring) : bitstring [data].
 
 let client_B(Kbs : bitstring) =
   new Nb : bitstring;
@@ -156,19 +156,19 @@ let client_B(Kbs : bitstring) =
   let Kab : bitstring = tuple_2_get_0_bitstring(cbc_dec_2(enc_Kab_A, Kbs)) in
   
   if eq_bitstring_bitstring(A, tuple_2_get_1(cbc_dec_2(enc_Kab_A, Kbs))) then
-  out(c, client_B_out_1(cbc_enc_1(Nb, Kab)));
-  in(c, client_B_in_2(enc_succ_Nb : bitstring));
+  out(c, client_B_out_2(cbc_enc_1(Nb, Kab)));
+  in(c, client_B_in_3(enc_succ_Nb : bitstring));
   
   if eq_bitstring_bitstring(succ(Nb), cbc_dec_1(enc_succ_Nb, Kab)) then
   0.
 
 fun server_S_in_1(bitstring, bitstring, bitstring) : bitstring [data].
-fun server_S_out_1(bitstring) : bitstring [data].
+fun server_S_out_2(bitstring) : bitstring [data].
 
 let server_S(Kas : bitstring, Kbs : bitstring) =
   new Kab : bitstring;
   in(c, server_S_in_1(A : bitstring, B : bitstring, Na : bitstring));
-  out(c, server_S_out_1(cbc_enc_4(Na, B, Kab, cbc_enc_2(Kab, A, Kbs), Kas)));
+  out(c, server_S_out_2(cbc_enc_4(Na, B, Kab, cbc_enc_2(Kab, A, Kbs), Kas)));
   0.
 
 process

@@ -36,22 +36,22 @@ query
   attacker(objective).
 
 fun R_out_1(bitstring, bitstring) : bitstring [data].
-fun R_in_1(bitstring, bitstring) : bitstring [data].
-fun R_out_2(bitstring) : bitstring [data].
+fun R_in_2(bitstring, bitstring) : bitstring [data].
 fun R_out_3(bitstring) : bitstring [data].
+fun R_out_4(bitstring) : bitstring [data].
 
 let R =
   new r1 : bitstring;
   out(c, R_out_1(QUERY, r1));
-  in(c, R_in_1(r2 : bitstring, left_xor_ID2_g : bitstring));
+  in(c, R_in_2(r2 : bitstring, left_xor_ID2_g : bitstring));
   let g = h(xor(xor(r1, r2), k)) in
   let ID2 = rotate(ID, g) in
   let left = split_L(xor(ID2, g)) in
   let right = split_R(xor(ID2, g)) in
   
   if left = left_xor_ID2_g then
-  out(c, R_out_2(right));
-  out(c, R_out_3(objective));
+  out(c, R_out_3(right));
+  out(c, R_out_4(objective));
   0.
 
 fun sess_1_out_1(bitstring) : bitstring [data].

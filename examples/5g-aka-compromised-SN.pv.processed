@@ -64,9 +64,9 @@ query
   attacker(objective).
 
 fun home_network_out_1(bitstring, bitstring, bitstring, bitstring) : bitstring [data].
-fun home_network_in_1(bitstring, bitstring) : bitstring [data].
-fun home_network_out_2(bitstring) : bitstring [data].
+fun home_network_in_2(bitstring, bitstring) : bitstring [data].
 fun home_network_out_3(bitstring) : bitstring [data].
+fun home_network_out_4(bitstring) : bitstring [data].
 
 let home_network =
   new R : bitstring;
@@ -80,32 +80,32 @@ let home_network =
   let K_SEAF = key_seed(K, R, SQN_HN, SNname) in
   let SQN_HN = inc(SQN_HN) in
   out(c_SN_HN, home_network_out_1(R, AUTN, HXRES, K_SEAF));
-  in(c_SN_HN, home_network_in_1(RES : bitstring, =SUCI));
+  in(c_SN_HN, home_network_in_2(RES : bitstring, =SUCI));
   
   if RES = xRES then
-  out(c_SN_HN, home_network_out_2(SUPI));
-  out(c_UE_SN, home_network_out_3(objective));
+  out(c_SN_HN, home_network_out_3(SUPI));
+  out(c_UE_SN, home_network_out_4(objective));
   0.
 
 fun serving_network_in_1(bitstring, bitstring, bitstring, bitstring) : bitstring [data].
-fun serving_network_out_1(bitstring, bitstring) : bitstring [data].
-fun serving_network_in_2(bitstring) : bitstring [data].
 fun serving_network_out_2(bitstring, bitstring) : bitstring [data].
 fun serving_network_in_3(bitstring) : bitstring [data].
+fun serving_network_out_4(bitstring, bitstring) : bitstring [data].
+fun serving_network_in_5(bitstring) : bitstring [data].
 
 let serving_network =
   in(c_SN_HN, serving_network_in_1(R : bitstring, AUTN : bitstring, HXRES : bitstring, K_SEAF : bitstring));
-  out(c_UE_SN, serving_network_out_1(R, AUTN));
-  in(c_UE_SN, serving_network_in_2(RES : bitstring));
+  out(c_UE_SN, serving_network_out_2(R, AUTN));
+  in(c_UE_SN, serving_network_in_3(RES : bitstring));
   
   if sha256((R, RES)) = HXRES then
-  out(c_SN_HN, serving_network_out_2(RES, SUCI));
-  in(c_SN_HN, serving_network_in_3(=SUPI));
+  out(c_SN_HN, serving_network_out_4(RES, SUCI));
+  in(c_SN_HN, serving_network_in_5(=SUPI));
   0.
 
 fun subscriber_in_1(bitstring, bitstring) : bitstring [data].
-fun subscriber_out_1(bitstring) : bitstring [data].
 fun subscriber_out_2(bitstring) : bitstring [data].
+fun subscriber_out_3(bitstring) : bitstring [data].
 
 let subscriber =
   new SQN_HN : bitstring;
@@ -120,8 +120,8 @@ let subscriber =
   let SQN_UE = xSQN_HN in
   let RES = challenge(K, R, SNname) in
   let K_SEAF = key_seed(K, R, SQN_HN, SNname) in
-  out(c_UE_SN, subscriber_out_1(RES));
-  out(c_UE_SN, subscriber_out_2(enc(objective, K_SEAF)));
+  out(c_UE_SN, subscriber_out_2(RES));
+  out(c_UE_SN, subscriber_out_3(enc(objective, K_SEAF)));
   0.
 
 process

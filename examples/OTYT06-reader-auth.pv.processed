@@ -31,16 +31,16 @@ query
   attacker(objective).
 
 fun T_in_1(bitstring) : bitstring [data].
-fun T_out_1(bitstring) : bitstring [data].
-fun T_in_2(bitstring) : bitstring [data].
 fun T_out_2(bitstring) : bitstring [data].
+fun T_in_3(bitstring) : bitstring [data].
+fun T_out_4(bitstring) : bitstring [data].
 
 let T =
   in(c, T_in_1(r1 : bitstring));
-  out(c, T_out_1(h(xor(k, r1))));
-  in(c, T_in_2(k_xor_k1 : bitstring));
+  out(c, T_out_2(h(xor(k, r1))));
+  in(c, T_in_3(k_xor_k1 : bitstring));
   let k1 = xor(k_xor_k1, k) in
-  out(c, T_out_2(objective));
+  out(c, T_out_4(objective));
   0.
 
 process

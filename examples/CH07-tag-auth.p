@@ -236,13 +236,13 @@ pred_attacker(tuple_false)).
 fof(ax109, axiom,
 pred_attacker(constr_ZERO)).
 fof(ax110, axiom,
-![VAR_V_71] : (pred_attacker(VAR_V_71) => pred_attacker(tuple_R_out_3(VAR_V_71)))).
+![VAR_V_71] : (pred_attacker(VAR_V_71) => pred_attacker(tuple_R_out_4(VAR_V_71)))).
 fof(ax111, axiom,
-![VAR_V_74] : (pred_attacker(tuple_R_out_3(VAR_V_74)) => pred_attacker(VAR_V_74))).
+![VAR_V_74] : (pred_attacker(tuple_R_out_4(VAR_V_74)) => pred_attacker(VAR_V_74))).
 fof(ax112, axiom,
-![VAR_V_77] : (pred_attacker(VAR_V_77) => pred_attacker(tuple_R_out_2(VAR_V_77)))).
+![VAR_V_77] : (pred_attacker(VAR_V_77) => pred_attacker(tuple_R_out_3(VAR_V_77)))).
 fof(ax113, axiom,
-![VAR_V_80X30] : (pred_attacker(tuple_R_out_2(VAR_V_80X30)) => pred_attacker(VAR_V_80X30))).
+![VAR_V_80X30] : (pred_attacker(tuple_R_out_3(VAR_V_80X30)) => pred_attacker(VAR_V_80X30))).
 fof(ax114, axiom,
 ![VAR_V_84, VAR_V_85] : ((pred_attacker(VAR_V_84) & pred_attacker(VAR_V_85)) => pred_attacker(tuple_R_out_1(VAR_V_84, VAR_V_85)))).
 fof(ax115, axiom,
@@ -250,11 +250,11 @@ fof(ax115, axiom,
 fof(ax116, axiom,
 ![VAR_V_95, VAR_V_96] : (pred_attacker(tuple_R_out_1(VAR_V_95, VAR_V_96)) => pred_attacker(VAR_V_96))).
 fof(ax117, axiom,
-![VAR_V_10X300X30, VAR_V_10X301] : ((pred_attacker(VAR_V_10X300X30) & pred_attacker(VAR_V_10X301)) => pred_attacker(tuple_R_in_1(VAR_V_10X300X30, VAR_V_10X301)))).
+![VAR_V_10X300X30, VAR_V_10X301] : ((pred_attacker(VAR_V_10X300X30) & pred_attacker(VAR_V_10X301)) => pred_attacker(tuple_R_in_2(VAR_V_10X300X30, VAR_V_10X301)))).
 fof(ax118, axiom,
-![VAR_V_10X308, VAR_V_10X309] : (pred_attacker(tuple_R_in_1(VAR_V_10X308, VAR_V_10X309)) => pred_attacker(VAR_V_10X308))).
+![VAR_V_10X308, VAR_V_10X309] : (pred_attacker(tuple_R_in_2(VAR_V_10X308, VAR_V_10X309)) => pred_attacker(VAR_V_10X308))).
 fof(ax119, axiom,
-![VAR_V_111, VAR_V_112] : (pred_attacker(tuple_R_in_1(VAR_V_111, VAR_V_112)) => pred_attacker(VAR_V_112))).
+![VAR_V_111, VAR_V_112] : (pred_attacker(tuple_R_in_2(VAR_V_111, VAR_V_112)) => pred_attacker(VAR_V_112))).
 fof(ax120, axiom,
 pred_attacker(constr_QUERY)).
 fof(ax121, axiom,
@@ -286,8 +286,8 @@ pred_attacker(tuple_sess_1_out_3(constr_split_R(constr_xor(constr_rotate(name_ID
 fof(ax134, axiom,
 pred_attacker(tuple_R_out_1(constr_QUERY, name_r1))).
 fof(ax135, axiom,
-![VAR_R2_297] : (pred_attacker(tuple_R_in_1(VAR_R2_297, constr_split_L(constr_xor(constr_rotate(name_ID, constr_h(constr_xor(constr_xor(name_r1, VAR_R2_297), name_k))), constr_h(constr_xor(constr_xor(name_r1, VAR_R2_297), name_k)))))) => pred_attacker(tuple_R_out_2(constr_split_R(constr_xor(constr_rotate(name_ID, constr_h(constr_xor(constr_xor(name_r1, VAR_R2_297), name_k))), constr_h(constr_xor(constr_xor(name_r1, VAR_R2_297), name_k)))))))).
+![VAR_R2_297] : (pred_attacker(tuple_R_in_2(VAR_R2_297, constr_split_L(constr_xor(constr_rotate(name_ID, constr_h(constr_xor(constr_xor(name_r1, VAR_R2_297), name_k))), constr_h(constr_xor(constr_xor(name_r1, VAR_R2_297), name_k)))))) => pred_attacker(tuple_R_out_3(constr_split_R(constr_xor(constr_rotate(name_ID, constr_h(constr_xor(constr_xor(name_r1, VAR_R2_297), name_k))), constr_h(constr_xor(constr_xor(name_r1, VAR_R2_297), name_k)))))))).
 fof(ax136, axiom,
-![VAR_R2_30X303] : (pred_attacker(tuple_R_in_1(VAR_R2_30X303, constr_split_L(constr_xor(constr_rotate(name_ID, constr_h(constr_xor(constr_xor(name_r1, VAR_R2_30X303), name_k))), constr_h(constr_xor(constr_xor(name_r1, VAR_R2_30X303), name_k)))))) => pred_attacker(tuple_R_out_3(name_objective)))).
+![VAR_R2_30X303] : (pred_attacker(tuple_R_in_2(VAR_R2_30X303, constr_split_L(constr_xor(constr_rotate(name_ID, constr_h(constr_xor(constr_xor(name_r1, VAR_R2_30X303), name_k))), constr_h(constr_xor(constr_xor(name_r1, VAR_R2_30X303), name_k)))))) => pred_attacker(tuple_R_out_4(name_objective)))).
 fof(co0, conjecture,
 pred_attacker(name_objective)).

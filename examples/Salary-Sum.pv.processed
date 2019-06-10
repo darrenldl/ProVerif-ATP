@@ -43,58 +43,58 @@ equation
 
 fun client_A_in_1(bitstring) : bitstring [data].
 fun client_A_in_2(bitstring) : bitstring [data].
-fun client_A_out_1(bitstring, bitstring) : bitstring [data].
-fun client_A_in_3(bitstring, bitstring) : bitstring [data].
-fun client_A_out_2(bitstring) : bitstring [data].
+fun client_A_out_3(bitstring, bitstring) : bitstring [data].
+fun client_A_in_4(bitstring, bitstring) : bitstring [data].
+fun client_A_out_5(bitstring) : bitstring [data].
 
 let client_A(skA : bitstring) =
   new Na : bitstring;
   in(c, client_A_in_1(pkNextT : bitstring));
   in(c, client_A_in_2(lastT : bitstring));
-  out(c, client_A_out_1(A, aenc(add(Na, Sa), pkNextT)));
-  in(c, client_A_in_3(=lastT, aenc_add_Na_Sa_Sb_Sc_Sd : bitstring));
+  out(c, client_A_out_3(A, aenc(add(Na, Sa), pkNextT)));
+  in(c, client_A_in_4(=lastT, aenc_add_Na_Sa_Sb_Sc_Sd : bitstring));
   let add_Na_Sa_Sb_Sc_Sd = adec(aenc_add_Na_Sa_Sb_Sc_Sd, skA) in
   let add_Sa_Sb_Sc_Sd = add(add_Na_Sa_Sb_Sc_Sd, neg(Na)) in
-  out(c, client_A_out_2(add_Sa_Sb_Sc_Sd));
+  out(c, client_A_out_5(add_Sa_Sb_Sc_Sd));
   0.
 
 fun client_B_in_1(bitstring) : bitstring [data].
 fun client_B_in_2(bitstring) : bitstring [data].
 fun client_B_in_3(bitstring, bitstring) : bitstring [data].
-fun client_B_out_1(bitstring, bitstring) : bitstring [data].
+fun client_B_out_4(bitstring, bitstring) : bitstring [data].
 
 let client_B(skB : bitstring) =
   in(c, client_B_in_1(prevT : bitstring));
   in(c, client_B_in_2(pkNextT : bitstring));
   in(c, client_B_in_3(=prevT, aenc_add_Na_Sa : bitstring));
   let add_Na_Sa = adec(aenc_add_Na_Sa, skB) in
-  out(c, client_B_out_1(B, aenc(add(add_Na_Sa, Sb), pkNextT)));
+  out(c, client_B_out_4(B, aenc(add(add_Na_Sa, Sb), pkNextT)));
   0.
 
 fun client_C_in_1(bitstring) : bitstring [data].
 fun client_C_in_2(bitstring) : bitstring [data].
 fun client_C_in_3(bitstring, bitstring) : bitstring [data].
-fun client_C_out_1(bitstring, bitstring) : bitstring [data].
+fun client_C_out_4(bitstring, bitstring) : bitstring [data].
 
 let client_C(skC : bitstring) =
   in(c, client_C_in_1(prevT : bitstring));
   in(c, client_C_in_2(pkNextT : bitstring));
   in(c, client_C_in_3(=prevT, aenc_add_Na_Sa_Sb : bitstring));
   let add_Na_Sa_Sb = adec(aenc_add_Na_Sa_Sb, skC) in
-  out(c, client_C_out_1(C, aenc(add(add_Na_Sa_Sb, Sc), pkNextT)));
+  out(c, client_C_out_4(C, aenc(add(add_Na_Sa_Sb, Sc), pkNextT)));
   0.
 
 fun client_D_in_1(bitstring) : bitstring [data].
 fun client_D_in_2(bitstring) : bitstring [data].
 fun client_D_in_3(bitstring, bitstring) : bitstring [data].
-fun client_D_out_1(bitstring, bitstring) : bitstring [data].
+fun client_D_out_4(bitstring, bitstring) : bitstring [data].
 
 let client_D(skD : bitstring) =
   in(c, client_D_in_1(prevT : bitstring));
   in(c, client_D_in_2(pkNextT : bitstring));
   in(c, client_D_in_3(=prevT, aenc_add_Na_Sa_Sb_Sc : bitstring));
   let add_Na_Sa_Sb_Sc = adec(aenc_add_Na_Sa_Sb_Sc, skD) in
-  out(c, client_D_out_1(D, aenc(add(add_Na_Sa_Sb_Sc, Sd), pkNextT)));
+  out(c, client_D_out_4(D, aenc(add(add_Na_Sa_Sb_Sc, Sd), pkNextT)));
   0.
 
 query 

@@ -27,27 +27,27 @@ query
   attacker(objective).
 
 fun A_out_1(bitstring) : bitstring [data].
-fun A_in_1(bitstring) : bitstring [data].
-fun A_out_2(bitstring) : bitstring [data].
+fun A_in_2(bitstring) : bitstring [data].
 fun A_out_3(bitstring) : bitstring [data].
+fun A_out_4(bitstring) : bitstring [data].
 
 let A =
   new m : bitstring;
   out(c, A_out_1(comm_enc(m, Ka)));
-  in(c, A_in_1(msg1 : bitstring));
+  in(c, A_in_2(msg1 : bitstring));
   let msg2 = comm_dec(msg1, Ka) in
-  out(c, A_out_2(msg2));
-  out(c, A_out_3(enc(objective, m)));
+  out(c, A_out_3(msg2));
+  out(c, A_out_4(enc(objective, m)));
   0.
 
 fun B_in_1(bitstring) : bitstring [data].
-fun B_out_1(bitstring) : bitstring [data].
-fun B_in_2(bitstring) : bitstring [data].
+fun B_out_2(bitstring) : bitstring [data].
+fun B_in_3(bitstring) : bitstring [data].
 
 let B =
   in(c, B_in_1(msg1 : bitstring));
-  out(c, B_out_1(comm_enc(msg1, Kb)));
-  in(c, B_in_2(msg2 : bitstring));
+  out(c, B_out_2(comm_enc(msg1, Kb)));
+  in(c, B_in_3(msg2 : bitstring));
   let m = comm_dec(msg2, Kb) in
   0.
 

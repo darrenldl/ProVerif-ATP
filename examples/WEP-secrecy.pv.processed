@@ -51,11 +51,11 @@ query
   attacker(objective).
 
 fun enc_oracle_in_1(bitstring) : bitstring [data].
-fun enc_oracle_out_1(bitstring, bitstring) : bitstring [data].
+fun enc_oracle_out_2(bitstring, bitstring) : bitstring [data].
 
 let enc_oracle =
   in(c, enc_oracle_in_1(M : bitstring));
-  out(c, enc_oracle_out_1(v, xor(concat(M, C(M)), RC4(v, Kab))));
+  out(c, enc_oracle_out_2(v, xor(concat(M, C(M)), RC4(v, Kab))));
   0.
 
 fun B_out_1(bitstring, bitstring) : bitstring [data].

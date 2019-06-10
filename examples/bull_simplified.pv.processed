@@ -46,13 +46,13 @@ query
   attacker(Kab).
 
 fun A_out_1(bitstring) : bitstring [data].
-fun A_in_1(bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun A_in_2(bitstring, bitstring, bitstring, bitstring) : bitstring [data].
 
 let A =
   new Na : bitstring;
   let Xa = (h(con3(idA, idB, Na), Kas), (idA, idB, Na)) in
   out(c, A_out_1(Xa));
-  in(c, A_in_1(idA1 : bitstring, idB1 : bitstring, xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring));
+  in(c, A_in_2(idA1 : bitstring, idB1 : bitstring, xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring));
   
   if idA1 = idA then
   
@@ -64,9 +64,9 @@ let A =
   0.
 
 fun B_in_1(bitstring, bitstring) : bitstring [data].
-fun B_out_1(bitstring) : bitstring [data].
-fun B_in_2(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
-fun B_out_2(bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun B_out_2(bitstring) : bitstring [data].
+fun B_in_3(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun B_out_4(bitstring, bitstring, bitstring, bitstring) : bitstring [data].
 
 let B =
   in(c, B_in_1(hsh : bitstring, (idSrc : bitstring, idDst : bitstring, Nounce : bitstring)));
@@ -81,8 +81,8 @@ let B =
   let Xa = (hsh, (idA, idB, Na)) in
   let Xa_con = con4(hsh, idA, idB, Na) in
   let Xb = (h(con4(idB, idC, Nb, Xa_con), Kbs), (idB, idC, Nb, Xa)) in
-  out(c, B_out_1(Xb));
-  in(c, B_in_2(idA1 : bitstring, idB1 : bitstring, xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring, idB2 : bitstring, idA2 : bitstring, xor_Kab_h_Nb_Kbs : bitstring, enc_idB_idA_Nb_Kab : bitstring, idB3 : bitstring, idC1 : bitstring, xor_Kbc_h_Nb_Kbs : bitstring, enc_idB_idC_Nb_Kbc : bitstring));
+  out(c, B_out_2(Xb));
+  in(c, B_in_3(idA1 : bitstring, idB1 : bitstring, xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring, idB2 : bitstring, idA2 : bitstring, xor_Kab_h_Nb_Kbs : bitstring, enc_idB_idA_Nb_Kab : bitstring, idB3 : bitstring, idC1 : bitstring, xor_Kbc_h_Nb_Kbs : bitstring, enc_idB_idC_Nb_Kbc : bitstring));
   
   if idA1 = idA then
   
@@ -103,15 +103,15 @@ let B =
   let idB_idA_Nb = dec(enc_idB_idA_Nb_Kab, Kab) in
   
   if idB_idA_Nb = con3(idB, idA, Nb) then
-  out(c, B_out_2(idA, idB, xor_Kab_h_Na_Kas, enc_idA_idB_Na_Kab));
+  out(c, B_out_4(idA, idB, xor_Kab_h_Na_Kas, enc_idA_idB_Na_Kab));
   0.
 
 fun C_in_1(bitstring, bitstring) : bitstring [data].
-fun C_out_1(bitstring) : bitstring [data].
 fun C_out_2(bitstring) : bitstring [data].
-fun C_in_2(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
 fun C_out_3(bitstring) : bitstring [data].
-fun C_out_4(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun C_in_4(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun C_out_5(bitstring) : bitstring [data].
+fun C_out_6(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
 
 let C =
   in(c, C_in_1(hsh1st : bitstring, (idSrc1st : bitstring, idDst1st : bitstring, Nounce1st : bitstring, (hsh2nd : bitstring, (idSrc2nd : bitstring, idDst2nd : bitstring, Nounce2nd : bitstring)))));
@@ -126,7 +126,7 @@ let C =
   
   if hsh1st = h(con4(idSrc1st, idDst1st, Nounce1st, con4(hsh2nd, idSrc2nd, idDst2nd, Nounce2nd)), Kbc) then
   new Nc : bitstring;
-  out(c, C_out_1(Nc));
+  out(c, C_out_2(Nc));
   let Na = Nounce2nd in
   let Xa = (hsh2nd, (idA, idB, Na)) in
   let Xa_con = con4(hsh2nd, idA, idB, Na) in
@@ -134,18 +134,18 @@ let C =
   let Xb = (hsh1st, (idB, idC, Nb, Xa)) in
   let Xb_con = con5(hsh1st, idB, idC, Nb, Xa_con) in
   let Xc = (h(con4(idC, idS, Nc, Xb), Kcs), (idC, idS, Nc, Xb)) in
-  out(c, C_out_2(Xc));
-  in(c, C_in_2(xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring, xor_Kab_h_Nb_Kbs : bitstring, enc_idB_idA_Nb_Kab : bitstring, xor_Kbc_h_Nb_Kbs : bitstring, enc_idB_idC_Nb_Kbc : bitstring, xor_Kbc_h_Nc_Kcs : bitstring, enc_idC_idB_Nc_Kbc : bitstring));
+  out(c, C_out_3(Xc));
+  in(c, C_in_4(xor_Kab_h_Na_Kas : bitstring, enc_idA_idB_Na_Kab : bitstring, xor_Kab_h_Nb_Kbs : bitstring, enc_idB_idA_Nb_Kab : bitstring, xor_Kbc_h_Nb_Kbs : bitstring, enc_idB_idC_Nb_Kbc : bitstring, xor_Kbc_h_Nc_Kcs : bitstring, enc_idC_idB_Nc_Kbc : bitstring));
   let Kbc = xor(xor_Kbc_h_Nc_Kcs, h(Nc, Kcs)) in
-  out(c, C_out_3(Kbc));
+  out(c, C_out_5(Kbc));
   let idC_idB_Nc = dec(enc_idC_idB_Nc_Kbc, Kbc) in
   
   if idC_idB_Nc = con3(idC, idB, Nc) then
-  out(c, C_out_4(idA, idB, xor_Kab_h_Na_Kas, enc_idA_idB_Na_Kab, idB, idA, xor_Kab_h_Nb_Kbs, enc_idB_idA_Nb_Kab, idB, idC, xor_Kbc_h_Nb_Kbs, enc_idB_idC_Nb_Kbc));
+  out(c, C_out_6(idA, idB, xor_Kab_h_Na_Kas, enc_idA_idB_Na_Kab, idB, idA, xor_Kab_h_Nb_Kbs, enc_idB_idA_Nb_Kab, idB, idC, xor_Kbc_h_Nb_Kbs, enc_idB_idC_Nb_Kbc));
   0.
 
 fun S_in_1(bitstring, bitstring) : bitstring [data].
-fun S_out_1(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
+fun S_out_2(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring, bitstring) : bitstring [data].
 
 let S =
   in(c, S_in_1(hsh1st : bitstring, (idSrc1st : bitstring, idDst1st : bitstring, Nounce1st : bitstring, (hsh2nd : bitstring, (idSrc2nd : bitstring, idDst2nd : bitstring, Nounce2nd : bitstring, (hsh3rd : bitstring, (idSrc3rd : bitstring, idDst3rd : bitstring, Nounce3rd : bitstring)))))));
@@ -172,7 +172,7 @@ let S =
   let Nc = Nounce1st in
   let Xc = (hsh1st, (idC, idS, Nc, Xb)) in
   let Xc_con = con5(hsh1st, idC, idS, Nc, Xb_con) in
-  out(c, S_out_1(xor(Kab, h(Na, Kas)), enc(con3(idA, idB, Na), Kab), xor(Kab, h(Nb, Kbs)), enc(con3(idB, idA, Nb), Kab), xor(Kbc, h(Nb, Kbs)), enc(con3(idB, idC, Nb), Kbc), xor(Kbc, h(Nc, Kcs)), enc(con3(idC, idB, Nc), Kbc)));
+  out(c, S_out_2(xor(Kab, h(Na, Kas)), enc(con3(idA, idB, Na), Kab), xor(Kab, h(Nb, Kbs)), enc(con3(idB, idA, Nb), Kab), xor(Kbc, h(Nb, Kbs)), enc(con3(idB, idC, Nb), Kbc), xor(Kbc, h(Nc, Kcs)), enc(con3(idC, idB, Nc), Kbc)));
   0.
 
 process

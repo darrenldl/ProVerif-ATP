@@ -74,58 +74,58 @@ query
   attacker((new Nb, objective)).
 
 fun client_A_out_1(bitstring, bitstring) : bitstring [data].
-fun client_A_in_1(bitstring) : bitstring [data].
-fun client_A_out_2(bitstring) : bitstring [data].
 fun client_A_in_2(bitstring) : bitstring [data].
 fun client_A_out_3(bitstring) : bitstring [data].
+fun client_A_in_4(bitstring) : bitstring [data].
+fun client_A_out_5(bitstring) : bitstring [data].
 
 let client_A(skA : bitstring, pkS : bitstring) =
   new Na : bitstring;
   out(c, client_A_out_1(A, I));
-  in(c, client_A_in_1(sign_I_pkI : bitstring));
+  in(c, client_A_in_2(sign_I_pkI : bitstring));
   
   if eq_bitstring_bitstring(I, tuple_2_get_0(checksign(sign_I_pkI, pkS))) then
   let pkI : bitstring = tuple_2_get_1_bitstring(checksign(sign_I_pkI, pkS)) in
-  out(c, client_A_out_2(aenc((Na, A), pkI)));
-  in(c, client_A_in_2(aenc_Na_Ni : bitstring));
+  out(c, client_A_out_3(aenc((Na, A), pkI)));
+  in(c, client_A_in_4(aenc_Na_Ni : bitstring));
   
   if eq_bitstring_bitstring(Na, tuple_2_get_0(adec(aenc_Na_Ni, skA))) then
   let Ni : bitstring = tuple_2_get_1_bitstring(adec(aenc_Na_Ni, skA)) in
-  out(c, client_A_out_3(aenc(Ni, pkI)));
+  out(c, client_A_out_5(aenc(Ni, pkI)));
   0.
 
 fun client_B_out_1(bitstring, bitstring) : bitstring [data].
-fun client_B_in_1(bitstring) : bitstring [data].
 fun client_B_in_2(bitstring) : bitstring [data].
-fun client_B_out_2(bitstring) : bitstring [data].
 fun client_B_in_3(bitstring) : bitstring [data].
-fun client_B_out_3(bitstring) : bitstring [data].
+fun client_B_out_4(bitstring) : bitstring [data].
+fun client_B_in_5(bitstring) : bitstring [data].
+fun client_B_out_6(bitstring) : bitstring [data].
 
 let client_B(skB : bitstring, pkS : bitstring) =
   new Nb : bitstring;
   out(c, client_B_out_1(B, A));
-  in(c, client_B_in_1(sign_A_pkA : bitstring));
+  in(c, client_B_in_2(sign_A_pkA : bitstring));
   
   if eq_bitstring_bitstring(A, tuple_2_get_0(checksign(sign_A_pkA, pkS))) then
   let pkA : bitstring = tuple_2_get_1_bitstring(checksign(sign_A_pkA, pkS)) in
-  in(c, client_B_in_2(aenc_Na_A : bitstring));
+  in(c, client_B_in_3(aenc_Na_A : bitstring));
   let Na : bitstring = tuple_2_get_0_bitstring(adec(aenc_Na_A, skB)) in
   
   if eq_bitstring_bitstring(A, tuple_2_get_1(adec(aenc_Na_A, skB))) then
-  out(c, client_B_out_2(aenc((Na, Nb), pkA)));
-  in(c, client_B_in_3(aenc_Nb : bitstring));
+  out(c, client_B_out_4(aenc((Na, Nb), pkA)));
+  in(c, client_B_in_5(aenc_Nb : bitstring));
   
   if eq_bitstring_bitstring(Nb, adec(aenc_Nb, skB)) then
-  out(c, client_B_out_3(objective));
+  out(c, client_B_out_6(objective));
   0.
 
 fun key_retrieval_server_in_1(bitstring, bitstring) : bitstring [data].
-fun key_retrieval_server_out_1(bitstring) : bitstring [data].
+fun key_retrieval_server_out_2(bitstring) : bitstring [data].
 
 let key_retrieval_server(skS : bitstring) =
   in(c, key_retrieval_server_in_1(src : bitstring, dst : bitstring));
   get keys(=dst, pkDst) in
-  out(c, key_retrieval_server_out_1(sign((dst, pkDst), skS)));
+  out(c, key_retrieval_server_out_2(sign((dst, pkDst), skS)));
   0.
 
 fun key_register_server_in_1(bitstring, bitstring) : bitstring [data].
