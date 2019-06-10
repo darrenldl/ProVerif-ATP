@@ -1931,6 +1931,16 @@ let classify_protocol_step (m : node_graph) : node_graph =
             | Quantified
                 ( _
                 , _
+                , Function ("attacker", [Function (name, _)])
+                ) -> (
+                match Protocol_step.break_down_step_string name with
+                | _, Some _, Some _ ->
+                  ProtocolStep
+                | _ ->
+                  data.classification )
+            | Quantified
+                ( _
+                , _
                 , BinaryOp
                     ( Imply
                     , Function ("attacker", [Function (name_1, _)])
