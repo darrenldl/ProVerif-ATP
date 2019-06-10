@@ -1840,8 +1840,9 @@ module Protocol_step = struct
     | Data node -> (
         match node.classification with
         | ProtocolStep ->
+          let open Analyzed_expr in
           (* Js_utils.console_log (Printf.sprintf "expr : %s" (Analyzed_expr.expr_to_string node.expr)); *)
-          expr_to_steps node.expr
+          node.expr |> strip_quant |> expr_to_steps
         | InteractiveProtocolStep ->
           (* Js_utils.console_log (Printf.sprintf "expr : %s" (Analyzed_expr.expr_to_string node.expr)); *)
           let open Analyzed_expr in
