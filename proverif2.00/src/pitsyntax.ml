@@ -3692,7 +3692,7 @@ module Tag_in_out_ctx = struct
           (match ctx.proc_name with
            | None -> ""
            | Some s -> Printf.sprintf "%s_" s)
-          ctx.in_count
+          (ctx.in_count + ctx.out_count)
       in
 
       ctx.in_count <- ctx.in_count + 1;
@@ -3746,7 +3746,7 @@ module Tag_in_out_ctx = struct
           (match ctx.proc_name with
            | None -> ""
            | Some s -> Printf.sprintf "%s_" s)
-          ctx.out_count
+          (ctx.in_count + ctx.out_count)
       in
 
       ctx.out_count <- ctx.out_count + 1;
