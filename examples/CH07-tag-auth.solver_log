@@ -26,13 +26,13 @@ fof(f106,axiom,(
   ! [X20] : (pred_attacker(tuple_sess_1_out_1(X20)) => pred_attacker(X20))),
   file('CH07-tag-auth.p',unknown)).
 fof(f112,axiom,(
-  ! [X25] : (pred_attacker(tuple_R_out_3(X25)) => pred_attacker(X25))),
+  ! [X25] : (pred_attacker(tuple_R_out_4(X25)) => pred_attacker(X25))),
   file('CH07-tag-auth.p',unknown)).
 fof(f117,axiom,(
   ! [X32,X33] : (pred_attacker(tuple_R_out_1(X32,X33)) => pred_attacker(X33))),
   file('CH07-tag-auth.p',unknown)).
 fof(f118,axiom,(
-  ! [X34,X35] : ((pred_attacker(X35) & pred_attacker(X34)) => pred_attacker(tuple_R_in_1(X34,X35)))),
+  ! [X34,X35] : ((pred_attacker(X35) & pred_attacker(X34)) => pred_attacker(tuple_R_in_2(X34,X35)))),
   file('CH07-tag-auth.p',unknown)).
 fof(f132,axiom,(
   pred_attacker(tuple_sess_1_out_1(name_r1_s1))),
@@ -44,7 +44,7 @@ fof(f135,axiom,(
   pred_attacker(tuple_R_out_1(constr_QUERY,name_r1))),
   file('CH07-tag-auth.p',unknown)).
 fof(f137,axiom,(
-  ! [X47] : (pred_attacker(tuple_R_in_1(X47,constr_split_L(constr_xor(constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X47),name_k))),constr_h(constr_xor(constr_xor(name_r1,X47),name_k)))))) => pred_attacker(tuple_R_out_3(name_objective)))),
+  ! [X47] : (pred_attacker(tuple_R_in_2(X47,constr_split_L(constr_xor(constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X47),name_k))),constr_h(constr_xor(constr_xor(name_r1,X47),name_k)))))) => pred_attacker(tuple_R_out_4(name_objective)))),
   file('CH07-tag-auth.p',unknown)).
 fof(f138,conjecture,(
   pred_attacker(name_objective)),
@@ -74,16 +74,16 @@ fof(f152,plain,(
   ! [X0] : (pred_attacker(tuple_sess_1_out_1(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f106])).
 fof(f156,plain,(
-  ! [X0] : (pred_attacker(tuple_R_out_3(X0)) => pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_R_out_4(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f112])).
 fof(f161,plain,(
   ! [X0,X1] : (pred_attacker(tuple_R_out_1(X0,X1)) => pred_attacker(X1))),
   inference(rectify,[],[f117])).
 fof(f162,plain,(
-  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_R_in_1(X0,X1)))),
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_R_in_2(X0,X1)))),
   inference(rectify,[],[f118])).
 fof(f170,plain,(
-  ! [X0] : (pred_attacker(tuple_R_in_1(X0,constr_split_L(constr_xor(constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X0),name_k))),constr_h(constr_xor(constr_xor(name_r1,X0),name_k)))))) => pred_attacker(tuple_R_out_3(name_objective)))),
+  ! [X0] : (pred_attacker(tuple_R_in_2(X0,constr_split_L(constr_xor(constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X0),name_k))),constr_h(constr_xor(constr_xor(name_r1,X0),name_k)))))) => pred_attacker(tuple_R_out_4(name_objective)))),
   inference(rectify,[],[f137])).
 fof(f171,plain,(
   ~pred_attacker(name_objective)),
@@ -104,19 +104,19 @@ fof(f184,plain,(
   ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_sess_1_out_1(X0)))),
   inference(ennf_transformation,[],[f152])).
 fof(f189,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_R_out_3(X0)))),
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_R_out_4(X0)))),
   inference(ennf_transformation,[],[f156])).
 fof(f195,plain,(
   ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_R_out_1(X0,X1)))),
   inference(ennf_transformation,[],[f161])).
 fof(f196,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_R_in_1(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  ! [X0,X1] : (pred_attacker(tuple_R_in_2(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
   inference(ennf_transformation,[],[f162])).
 fof(f197,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_R_in_1(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  ! [X0,X1] : (pred_attacker(tuple_R_in_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
   inference(flattening,[],[f196])).
 fof(f205,plain,(
-  ! [X0] : (pred_attacker(tuple_R_out_3(name_objective)) | ~pred_attacker(tuple_R_in_1(X0,constr_split_L(constr_xor(constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X0),name_k))),constr_h(constr_xor(constr_xor(name_r1,X0),name_k)))))))),
+  ! [X0] : (pred_attacker(tuple_R_out_4(name_objective)) | ~pred_attacker(tuple_R_in_2(X0,constr_split_L(constr_xor(constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X0),name_k))),constr_h(constr_xor(constr_xor(name_r1,X0),name_k)))))))),
   inference(ennf_transformation,[],[f170])).
 fof(f297,plain,(
   ( ! [X0] : (constr_ZERO = constr_xor(X0,X0)) )),
@@ -143,13 +143,13 @@ fof(f311,plain,(
   ( ! [X0] : (~pred_attacker(tuple_sess_1_out_1(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f184])).
 fof(f317,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_R_out_3(X0)) | pred_attacker(X0)) )),
+  ( ! [X0] : (~pred_attacker(tuple_R_out_4(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f189])).
 fof(f322,plain,(
   ( ! [X0,X1] : (~pred_attacker(tuple_R_out_1(X0,X1)) | pred_attacker(X1)) )),
   inference(cnf_transformation,[],[f195])).
 fof(f323,plain,(
-  ( ! [X0,X1] : (pred_attacker(tuple_R_in_1(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  ( ! [X0,X1] : (pred_attacker(tuple_R_in_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f197])).
 fof(f336,plain,(
   pred_attacker(tuple_sess_1_out_1(name_r1_s1))),
@@ -161,7 +161,7 @@ fof(f339,plain,(
   pred_attacker(tuple_R_out_1(constr_QUERY,name_r1))),
   inference(cnf_transformation,[],[f135])).
 fof(f341,plain,(
-  ( ! [X0] : (pred_attacker(tuple_R_out_3(name_objective)) | ~pred_attacker(tuple_R_in_1(X0,constr_split_L(constr_xor(constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X0),name_k))),constr_h(constr_xor(constr_xor(name_r1,X0),name_k))))))) )),
+  ( ! [X0] : (pred_attacker(tuple_R_out_4(name_objective)) | ~pred_attacker(tuple_R_in_2(X0,constr_split_L(constr_xor(constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X0),name_k))),constr_h(constr_xor(constr_xor(name_r1,X0),name_k))))))) )),
   inference(cnf_transformation,[],[f205])).
 fof(f342,plain,(
   ~pred_attacker(name_objective)),
@@ -173,22 +173,22 @@ fof(f344,plain,(
   pred_attacker(tuple_sess_1_out_2(name_r2_s1,constr_split_L(constr_xor(constr_h(constr_xor(name_k,constr_xor(name_r1_s1,name_r2_s1))),constr_rotate(name_ID,constr_h(constr_xor(name_k,constr_xor(name_r1_s1,name_r2_s1))))))))),
   inference(forward_demodulation,[],[f343,f299])).
 fof(f351,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_R_in_1(X0,constr_split_L(constr_xor(constr_h(constr_xor(constr_xor(name_r1,X0),name_k)),constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X0),name_k))))))) | pred_attacker(tuple_R_out_3(name_objective))) )),
+  ( ! [X0] : (~pred_attacker(tuple_R_in_2(X0,constr_split_L(constr_xor(constr_h(constr_xor(constr_xor(name_r1,X0),name_k)),constr_rotate(name_ID,constr_h(constr_xor(constr_xor(name_r1,X0),name_k))))))) | pred_attacker(tuple_R_out_4(name_objective))) )),
   inference(forward_demodulation,[],[f341,f299])).
 fof(f352,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_R_in_1(X0,constr_split_L(constr_xor(constr_h(constr_xor(name_k,constr_xor(name_r1,X0))),constr_rotate(name_ID,constr_h(constr_xor(name_k,constr_xor(name_r1,X0)))))))) | pred_attacker(tuple_R_out_3(name_objective))) )),
+  ( ! [X0] : (~pred_attacker(tuple_R_in_2(X0,constr_split_L(constr_xor(constr_h(constr_xor(name_k,constr_xor(name_r1,X0))),constr_rotate(name_ID,constr_h(constr_xor(name_k,constr_xor(name_r1,X0)))))))) | pred_attacker(tuple_R_out_4(name_objective))) )),
   inference(forward_demodulation,[],[f351,f299])).
 fof(f357,plain,(
-  spl0_0 <=> pred_attacker(tuple_R_out_3(name_objective))),
+  spl0_0 <=> pred_attacker(tuple_R_out_4(name_objective))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
 fof(f358,plain,(
-  pred_attacker(tuple_R_out_3(name_objective)) | ~spl0_0),
+  pred_attacker(tuple_R_out_4(name_objective)) | ~spl0_0),
   inference(avatar_component_clause,[],[f357])).
 fof(f360,plain,(
-  spl0_2 <=> ! [X0] : ~pred_attacker(tuple_R_in_1(X0,constr_split_L(constr_xor(constr_h(constr_xor(name_k,constr_xor(name_r1,X0))),constr_rotate(name_ID,constr_h(constr_xor(name_k,constr_xor(name_r1,X0))))))))),
+  spl0_2 <=> ! [X0] : ~pred_attacker(tuple_R_in_2(X0,constr_split_L(constr_xor(constr_h(constr_xor(name_k,constr_xor(name_r1,X0))),constr_rotate(name_ID,constr_h(constr_xor(name_k,constr_xor(name_r1,X0))))))))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
 fof(f361,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_R_in_1(X0,constr_split_L(constr_xor(constr_h(constr_xor(name_k,constr_xor(name_r1,X0))),constr_rotate(name_ID,constr_h(constr_xor(name_k,constr_xor(name_r1,X0))))))))) ) | ~spl0_2),
+  ( ! [X0] : (~pred_attacker(tuple_R_in_2(X0,constr_split_L(constr_xor(constr_h(constr_xor(name_k,constr_xor(name_r1,X0))),constr_rotate(name_ID,constr_h(constr_xor(name_k,constr_xor(name_r1,X0))))))))) ) | ~spl0_2),
   inference(avatar_component_clause,[],[f360])).
 fof(f362,plain,(
   spl0_0 | spl0_2),
