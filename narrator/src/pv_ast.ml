@@ -324,6 +324,7 @@ module Print_context = struct
     ; mutable cur_decl_struct_ty : decl_structure_type option
     ; mutable prev_proc_struct_ty : process_structure_type option
     ; mutable cur_proc_struct_ty : process_structure_type option
+    ; mutable in_count : int
     ; mutable out_count : int
     ; mutable indent : int
     ; mutable buffer : (int * string) list }
@@ -334,6 +335,7 @@ module Print_context = struct
     ; cur_decl_struct_ty = None
     ; prev_proc_struct_ty = None
     ; cur_proc_struct_ty = None
+    ; in_count = 0
     ; out_count = 0
     ; indent = 0
     ; buffer = [] }
@@ -360,17 +362,21 @@ module Print_context = struct
     ctx.proc_name <- Some x;
     ctx.prev_proc_struct_ty <- None;
     ctx.cur_proc_struct_ty <- None;
+    ctx.in_count <- 0;
     ctx.out_count <- 0
 
   let set_proc_name_none ctx =
     ctx.proc_name <- None;
     ctx.prev_proc_struct_ty <- None;
     ctx.cur_proc_struct_ty <- None;
+    ctx.in_count <- 0;
     ctx.out_count <- 0
 
   let incre_indent ctx = ctx.indent <- ctx.indent + 1
 
   let decre_indent ctx = ctx.indent <- ctx.indent - 1
+
+  let incre_in_count ctx = ctx.in_count <- ctx.in_count + 1
 
   let incre_out_count ctx = ctx.out_count <- ctx.out_count + 1
 
@@ -605,22 +611,26 @@ let process_to_string ?(ctx = Print_context.make ()) p =
     | Proc_in { channel; message; next } ->
       Print_context.set_proc_struct_ty ctx Print_context.In;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.incre_in_count ctx;
       let proc_name =
         match ctx.proc_name with Some name -> name | None -> ""
       in
+      let proc_step = ctx.in_count + ctx.out_count in
       Print_context.push ctx (
-        Printf.sprintf "I -> %s IN  on %s : %s;" proc_name
+        Printf.sprintf "%d. I -> %s IN  on %s : %s;" proc_step proc_name
           (pterm_to_string channel)
           (pattern_to_string message));
       aux next
     | Proc_out { channel; message; next } ->
       Print_context.set_proc_struct_ty ctx Print_context.Out;
       Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.incre_in_count ctx;
       let proc_name =
         match ctx.proc_name with Some name -> name | None -> ""
       in
+      let proc_step = ctx.in_count + ctx.out_count in
       Print_context.push ctx (
-        Printf.sprintf "%s -> I OUT on %s : %s;" proc_name (pterm_to_string channel)
+        Printf.sprintf "%d. %s -> I OUT on %s : %s;" proc_step proc_name (pterm_to_string channel)
           (pterm_to_string message));
       aux next
     | Proc_eval { let_bind_pat; let_bind_term; true_branch; false_branch } -> (
