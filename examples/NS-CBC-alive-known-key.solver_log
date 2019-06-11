@@ -17,7 +17,7 @@ fof(f96,axiom,(
   ! [X62,X63] : pred_eq_bitstring_bitstring(X62,X63)),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f107,axiom,(
-  ! [X73] : (pred_attacker(tuple_server_S_out_1(X73)) => pred_attacker(X73))),
+  ! [X73] : (pred_attacker(tuple_server_S_out_2(X73)) => pred_attacker(X73))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f108,axiom,(
   ! [X74,X75,X76] : ((pred_attacker(X76) & pred_attacker(X75) & pred_attacker(X74)) => pred_attacker(tuple_server_S_in_1(X74,X75,X76)))),
@@ -26,22 +26,22 @@ fof(f114,axiom,(
   ! [X88,X89] : ((pred_attacker(X89) & pred_attacker(X88)) => pred_attacker(constr_dec(X88,X89)))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f122,axiom,(
-  ! [X97] : (pred_attacker(tuple_client_A_out_6(X97)) => pred_attacker(X97))),
+  ! [X97] : (pred_attacker(tuple_client_A_out_9(X97)) => pred_attacker(X97))),
   file('NS-CBC-alive-known-key.p',unknown)).
-fof(f124,axiom,(
-  ! [X99] : (pred_attacker(tuple_client_A_out_5(X99)) => pred_attacker(X99))),
+fof(f130,axiom,(
+  ! [X105] : (pred_attacker(tuple_client_A_out_10(X105)) => pred_attacker(X105))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f135,axiom,(
-  ! [X118] : (pred_attacker(X118) => pred_attacker(tuple_client_A_in_4(X118)))),
+  ! [X118] : (pred_attacker(X118) => pred_attacker(tuple_client_A_in_8(X118)))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f137,axiom,(
-  ! [X120] : (pred_attacker(X120) => pred_attacker(tuple_client_A_in_3(X120)))),
+  ! [X120] : (pred_attacker(X120) => pred_attacker(tuple_client_A_in_6(X120)))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f139,axiom,(
-  ! [X122] : (pred_attacker(X122) => pred_attacker(tuple_client_A_in_2(X122)))),
+  ! [X122] : (pred_attacker(X122) => pred_attacker(tuple_client_A_in_4(X122)))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f141,axiom,(
-  ! [X124] : (pred_attacker(X124) => pred_attacker(tuple_client_A_in_1(X124)))),
+  ! [X124] : (pred_attacker(X124) => pred_attacker(tuple_client_A_in_2(X124)))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f152,axiom,(
   ! [X149] : (pred_attacker(X149) => pred_attacker(constr_cbc_4_get_2_prefixes(X149)))),
@@ -53,13 +53,13 @@ fof(f171,axiom,(
   ! [X186,X187] : ((pred_attacker(X187) & pred_attacker(X186)) => pred_attacker(tuple_2(X186,X187)))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f186,axiom,(
-  ! [X208,X209,X210,X211,X212] : ((pred_attacker(tuple_client_A_in_1(X210)) & pred_eq_bitstring_bitstring(name_Na(X208),constr_tuple_4_get_0x30(constr_cbc_dec_4(X210,name_Kas))) & pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X210,name_Kas))) & pred_attacker(tuple_client_A_in_2(X211)) & pred_attacker(tuple_client_A_in_3(X209)) & pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X209,name_Kas))) & pred_attacker(tuple_client_A_in_4(X212)) & pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X211,X210,X208)),constr_cbc_dec_1(X212,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X209,name_Kas))))) => pred_attacker(tuple_client_A_out_5(name_objective1)))),
+  ! [X208,X209,X210,X211,X212] : ((pred_attacker(tuple_client_A_in_2(X210)) & pred_eq_bitstring_bitstring(name_Na(X208),constr_tuple_4_get_0x30(constr_cbc_dec_4(X210,name_Kas))) & pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X210,name_Kas))) & pred_attacker(tuple_client_A_in_4(X211)) & pred_attacker(tuple_client_A_in_6(X209)) & pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X209,name_Kas))) & pred_attacker(tuple_client_A_in_8(X212)) & pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X211,X210,X208)),constr_cbc_dec_1(X212,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X209,name_Kas))))) => pred_attacker(tuple_client_A_out_9(name_objective1)))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f187,axiom,(
-  ! [X213,X214,X215,X216,X217] : ((pred_attacker(tuple_client_A_in_1(X215)) & pred_eq_bitstring_bitstring(name_Na(X213),constr_tuple_4_get_0x30(constr_cbc_dec_4(X215,name_Kas))) & pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X215,name_Kas))) & pred_attacker(tuple_client_A_in_2(X216)) & pred_attacker(tuple_client_A_in_3(X214)) & pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X214,name_Kas))) & pred_attacker(tuple_client_A_in_4(X217)) & pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X216,X215,X213)),constr_cbc_dec_1(X217,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X214,name_Kas))))) => pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X214,name_Kas))))))),
+  ! [X213,X214,X215,X216,X217] : ((pred_attacker(tuple_client_A_in_2(X215)) & pred_eq_bitstring_bitstring(name_Na(X213),constr_tuple_4_get_0x30(constr_cbc_dec_4(X215,name_Kas))) & pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X215,name_Kas))) & pred_attacker(tuple_client_A_in_4(X216)) & pred_attacker(tuple_client_A_in_6(X214)) & pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X214,name_Kas))) & pred_attacker(tuple_client_A_in_8(X217)) & pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X216,X215,X213)),constr_cbc_dec_1(X217,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X214,name_Kas))))) => pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X214,name_Kas))))))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f189,axiom,(
-  ! [X220,X221,X222,X223] : (pred_attacker(tuple_server_S_in_1(X221,X222,X223)) => pred_attacker(tuple_server_S_out_1(constr_cbc_enc_4(X223,X222,name_Kab_66(X220),constr_cbc_enc_2(name_Kab_66(X220),X221,name_Kbs),name_Kas))))),
+  ! [X220,X221,X222,X223] : (pred_attacker(tuple_server_S_in_1(X221,X222,X223)) => pred_attacker(tuple_server_S_out_2(constr_cbc_enc_4(X223,X222,name_Kab_66(X220),constr_cbc_enc_2(name_Kab_66(X220),X221,name_Kbs),name_Kas))))),
   file('NS-CBC-alive-known-key.p',unknown)).
 fof(f190,conjecture,(
   pred_attacker(tuple_2(name_objective1,name_objective2))),
@@ -83,7 +83,7 @@ fof(f208,plain,(
   ! [X0,X1] : pred_eq_bitstring_bitstring(X0,X1)),
   inference(rectify,[],[f96])).
 fof(f218,plain,(
-  ! [X0] : (pred_attacker(tuple_server_S_out_1(X0)) => pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_server_S_out_2(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f107])).
 fof(f219,plain,(
   ! [X0,X1,X2] : ((pred_attacker(X2) & pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_server_S_in_1(X0,X1,X2)))),
@@ -92,22 +92,22 @@ fof(f224,plain,(
   ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_dec(X0,X1)))),
   inference(rectify,[],[f114])).
 fof(f232,plain,(
-  ! [X0] : (pred_attacker(tuple_client_A_out_6(X0)) => pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_client_A_out_9(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f122])).
-fof(f234,plain,(
-  ! [X0] : (pred_attacker(tuple_client_A_out_5(X0)) => pred_attacker(X0))),
-  inference(rectify,[],[f124])).
+fof(f240,plain,(
+  ! [X0] : (pred_attacker(tuple_client_A_out_10(X0)) => pred_attacker(X0))),
+  inference(rectify,[],[f130])).
 fof(f245,plain,(
-  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_4(X0)))),
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_8(X0)))),
   inference(rectify,[],[f135])).
 fof(f247,plain,(
-  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_3(X0)))),
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_6(X0)))),
   inference(rectify,[],[f137])).
 fof(f249,plain,(
-  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_2(X0)))),
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_4(X0)))),
   inference(rectify,[],[f139])).
 fof(f251,plain,(
-  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_1(X0)))),
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_2(X0)))),
   inference(rectify,[],[f141])).
 fof(f262,plain,(
   ! [X0] : (pred_attacker(X0) => pred_attacker(constr_cbc_4_get_2_prefixes(X0)))),
@@ -116,19 +116,19 @@ fof(f276,plain,(
   ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_2(X0,X1)))),
   inference(rectify,[],[f171])).
 fof(f287,plain,(
-  ! [X0,X1,X2,X3,X4] : ((pred_attacker(tuple_client_A_in_1(X2)) & pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) & pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) & pred_attacker(tuple_client_A_in_2(X3)) & pred_attacker(tuple_client_A_in_3(X1)) & pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) & pred_attacker(tuple_client_A_in_4(X4)) & pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) => pred_attacker(tuple_client_A_out_5(name_objective1)))),
+  ! [X0,X1,X2,X3,X4] : ((pred_attacker(tuple_client_A_in_2(X2)) & pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) & pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) & pred_attacker(tuple_client_A_in_4(X3)) & pred_attacker(tuple_client_A_in_6(X1)) & pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) & pred_attacker(tuple_client_A_in_8(X4)) & pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) => pred_attacker(tuple_client_A_out_9(name_objective1)))),
   inference(rectify,[],[f186])).
 fof(f288,plain,(
-  ! [X0,X1,X2,X3,X4] : ((pred_attacker(tuple_client_A_in_1(X2)) & pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) & pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) & pred_attacker(tuple_client_A_in_2(X3)) & pred_attacker(tuple_client_A_in_3(X1)) & pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) & pred_attacker(tuple_client_A_in_4(X4)) & pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) => pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))))),
+  ! [X0,X1,X2,X3,X4] : ((pred_attacker(tuple_client_A_in_2(X2)) & pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) & pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) & pred_attacker(tuple_client_A_in_4(X3)) & pred_attacker(tuple_client_A_in_6(X1)) & pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) & pred_attacker(tuple_client_A_in_8(X4)) & pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) => pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))))),
   inference(rectify,[],[f187])).
 fof(f290,plain,(
-  ! [X0,X1,X2,X3] : (pred_attacker(tuple_server_S_in_1(X1,X2,X3)) => pred_attacker(tuple_server_S_out_1(constr_cbc_enc_4(X3,X2,name_Kab_66(X0),constr_cbc_enc_2(name_Kab_66(X0),X1,name_Kbs),name_Kas))))),
+  ! [X0,X1,X2,X3] : (pred_attacker(tuple_server_S_in_1(X1,X2,X3)) => pred_attacker(tuple_server_S_out_2(constr_cbc_enc_4(X3,X2,name_Kab_66(X0),constr_cbc_enc_2(name_Kab_66(X0),X1,name_Kbs),name_Kas))))),
   inference(rectify,[],[f189])).
 fof(f291,plain,(
   ~pred_attacker(tuple_2(name_objective1,name_objective2))),
   inference(flattening,[],[f191])).
 fof(f302,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_server_S_out_1(X0)))),
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_server_S_out_2(X0)))),
   inference(ennf_transformation,[],[f218])).
 fof(f303,plain,(
   ! [X0,X1,X2] : (pred_attacker(tuple_server_S_in_1(X0,X1,X2)) | (~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0)))),
@@ -143,22 +143,22 @@ fof(f311,plain,(
   ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
   inference(flattening,[],[f310])).
 fof(f319,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_client_A_out_6(X0)))),
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_client_A_out_9(X0)))),
   inference(ennf_transformation,[],[f232])).
-fof(f321,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_client_A_out_5(X0)))),
-  inference(ennf_transformation,[],[f234])).
+fof(f327,plain,(
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_client_A_out_10(X0)))),
+  inference(ennf_transformation,[],[f240])).
 fof(f333,plain,(
-  ! [X0] : (pred_attacker(tuple_client_A_in_4(X0)) | ~pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_client_A_in_8(X0)) | ~pred_attacker(X0))),
   inference(ennf_transformation,[],[f245])).
 fof(f335,plain,(
-  ! [X0] : (pred_attacker(tuple_client_A_in_3(X0)) | ~pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_client_A_in_6(X0)) | ~pred_attacker(X0))),
   inference(ennf_transformation,[],[f247])).
 fof(f337,plain,(
-  ! [X0] : (pred_attacker(tuple_client_A_in_2(X0)) | ~pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_client_A_in_4(X0)) | ~pred_attacker(X0))),
   inference(ennf_transformation,[],[f249])).
 fof(f339,plain,(
-  ! [X0] : (pred_attacker(tuple_client_A_in_1(X0)) | ~pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_client_A_in_2(X0)) | ~pred_attacker(X0))),
   inference(ennf_transformation,[],[f251])).
 fof(f358,plain,(
   ! [X0] : (pred_attacker(constr_cbc_4_get_2_prefixes(X0)) | ~pred_attacker(X0))),
@@ -170,19 +170,19 @@ fof(f375,plain,(
   ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
   inference(flattening,[],[f374])).
 fof(f388,plain,(
-  ! [X0,X1,X2,X3,X4] : (pred_attacker(tuple_client_A_out_5(name_objective1)) | (~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))))),
+  ! [X0,X1,X2,X3,X4] : (pred_attacker(tuple_client_A_out_9(name_objective1)) | (~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))))),
   inference(ennf_transformation,[],[f287])).
 fof(f389,plain,(
-  ! [X0,X1,X2,X3,X4] : (pred_attacker(tuple_client_A_out_5(name_objective1)) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas)))))),
+  ! [X0,X1,X2,X3,X4] : (pred_attacker(tuple_client_A_out_9(name_objective1)) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas)))))),
   inference(flattening,[],[f388])).
 fof(f390,plain,(
-  ! [X0,X1,X2,X3,X4] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | (~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))))),
+  ! [X0,X1,X2,X3,X4] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | (~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))))),
   inference(ennf_transformation,[],[f288])).
 fof(f391,plain,(
-  ! [X0,X1,X2,X3,X4] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas)))))),
+  ! [X0,X1,X2,X3,X4] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas)))))),
   inference(flattening,[],[f390])).
 fof(f394,plain,(
-  ! [X0,X1,X2,X3] : (pred_attacker(tuple_server_S_out_1(constr_cbc_enc_4(X3,X2,name_Kab_66(X0),constr_cbc_enc_2(name_Kab_66(X0),X1,name_Kbs),name_Kas))) | ~pred_attacker(tuple_server_S_in_1(X1,X2,X3)))),
+  ! [X0,X1,X2,X3] : (pred_attacker(tuple_server_S_out_2(constr_cbc_enc_4(X3,X2,name_Kab_66(X0),constr_cbc_enc_2(name_Kab_66(X0),X1,name_Kbs),name_Kas))) | ~pred_attacker(tuple_server_S_in_1(X1,X2,X3)))),
   inference(ennf_transformation,[],[f290])).
 fof(f475,plain,(
   ( ! [X2,X0,X1] : (constr_cbc_dec_2(constr_cbc_enc_2(X1,X2,X0),X0) = tuple_2(X1,X2)) )),
@@ -200,7 +200,7 @@ fof(f490,plain,(
   ( ! [X0,X1] : (pred_eq_bitstring_bitstring(X0,X1)) )),
   inference(cnf_transformation,[],[f208])).
 fof(f501,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_server_S_out_1(X0)) | pred_attacker(X0)) )),
+  ( ! [X0] : (~pred_attacker(tuple_server_S_out_2(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f302])).
 fof(f502,plain,(
   ( ! [X2,X0,X1] : (pred_attacker(tuple_server_S_in_1(X0,X1,X2)) | ~pred_attacker(X2) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
@@ -209,22 +209,22 @@ fof(f508,plain,(
   ( ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f311])).
 fof(f516,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_client_A_out_6(X0)) | pred_attacker(X0)) )),
+  ( ! [X0] : (~pred_attacker(tuple_client_A_out_9(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f319])).
-fof(f518,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_client_A_out_5(X0)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f321])).
+fof(f524,plain,(
+  ( ! [X0] : (~pred_attacker(tuple_client_A_out_10(X0)) | pred_attacker(X0)) )),
+  inference(cnf_transformation,[],[f327])).
 fof(f529,plain,(
-  ( ! [X0] : (pred_attacker(tuple_client_A_in_4(X0)) | ~pred_attacker(X0)) )),
+  ( ! [X0] : (pred_attacker(tuple_client_A_in_8(X0)) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f333])).
 fof(f531,plain,(
-  ( ! [X0] : (pred_attacker(tuple_client_A_in_3(X0)) | ~pred_attacker(X0)) )),
+  ( ! [X0] : (pred_attacker(tuple_client_A_in_6(X0)) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f335])).
 fof(f533,plain,(
-  ( ! [X0] : (pred_attacker(tuple_client_A_in_2(X0)) | ~pred_attacker(X0)) )),
+  ( ! [X0] : (pred_attacker(tuple_client_A_in_4(X0)) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f337])).
 fof(f535,plain,(
-  ( ! [X0] : (pred_attacker(tuple_client_A_in_1(X0)) | ~pred_attacker(X0)) )),
+  ( ! [X0] : (pred_attacker(tuple_client_A_in_2(X0)) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f339])).
 fof(f546,plain,(
   ( ! [X0] : (pred_attacker(constr_cbc_4_get_2_prefixes(X0)) | ~pred_attacker(X0)) )),
@@ -236,79 +236,79 @@ fof(f565,plain,(
   ( ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f375])).
 fof(f579,plain,(
-  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_5(name_objective1)) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_9(name_objective1)) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
   inference(cnf_transformation,[],[f389])).
 fof(f580,plain,(
-  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_eq_bitstring_bitstring(name_Na(X0),constr_tuple_4_get_0x30(constr_cbc_dec_4(X2,name_Kas))) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
   inference(cnf_transformation,[],[f391])).
 fof(f582,plain,(
-  ( ! [X2,X0,X3,X1] : (pred_attacker(tuple_server_S_out_1(constr_cbc_enc_4(X3,X2,name_Kab_66(X0),constr_cbc_enc_2(name_Kab_66(X0),X1,name_Kbs),name_Kas))) | ~pred_attacker(tuple_server_S_in_1(X1,X2,X3))) )),
+  ( ! [X2,X0,X3,X1] : (pred_attacker(tuple_server_S_out_2(constr_cbc_enc_4(X3,X2,name_Kab_66(X0),constr_cbc_enc_2(name_Kab_66(X0),X1,name_Kbs),name_Kas))) | ~pred_attacker(tuple_server_S_in_1(X1,X2,X3))) )),
   inference(cnf_transformation,[],[f394])).
 fof(f583,plain,(
   ~pred_attacker(tuple_2(name_objective1,name_objective2))),
   inference(cnf_transformation,[],[f291])).
 fof(f591,plain,(
-  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_5(name_objective1)) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_9(name_objective1)) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
   inference(subsumption_resolution,[],[f579,f490])).
 fof(f592,plain,(
-  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_5(name_objective1)) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_9(name_objective1)) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
   inference(subsumption_resolution,[],[f591,f490])).
 fof(f593,plain,(
-  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_5(name_objective1)) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_9(name_objective1)) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
   inference(subsumption_resolution,[],[f592,f490])).
 fof(f594,plain,(
-  ( ! [X4,X2,X3,X1] : (pred_attacker(tuple_client_A_out_5(name_objective1)) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_attacker(tuple_client_A_in_4(X4))) )),
+  ( ! [X4,X2,X3,X1] : (pred_attacker(tuple_client_A_out_9(name_objective1)) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_attacker(tuple_client_A_in_8(X4))) )),
   inference(subsumption_resolution,[],[f593,f490])).
 fof(f596,plain,(
-  spl0_0 <=> ! [X4] : ~pred_attacker(tuple_client_A_in_4(X4))),
+  spl0_0 <=> ! [X4] : ~pred_attacker(tuple_client_A_in_8(X4))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
 fof(f597,plain,(
-  ( ! [X4] : (~pred_attacker(tuple_client_A_in_4(X4))) ) | ~spl0_0),
+  ( ! [X4] : (~pred_attacker(tuple_client_A_in_8(X4))) ) | ~spl0_0),
   inference(avatar_component_clause,[],[f596])).
 fof(f599,plain,(
-  spl0_2 <=> ! [X1] : ~pred_attacker(tuple_client_A_in_3(X1))),
+  spl0_2 <=> ! [X1] : ~pred_attacker(tuple_client_A_in_6(X1))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
 fof(f600,plain,(
-  ( ! [X1] : (~pred_attacker(tuple_client_A_in_3(X1))) ) | ~spl0_2),
+  ( ! [X1] : (~pred_attacker(tuple_client_A_in_6(X1))) ) | ~spl0_2),
   inference(avatar_component_clause,[],[f599])).
 fof(f602,plain,(
-  spl0_4 <=> ! [X3] : ~pred_attacker(tuple_client_A_in_2(X3))),
+  spl0_4 <=> ! [X3] : ~pred_attacker(tuple_client_A_in_4(X3))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_4])])).
 fof(f603,plain,(
-  ( ! [X3] : (~pred_attacker(tuple_client_A_in_2(X3))) ) | ~spl0_4),
+  ( ! [X3] : (~pred_attacker(tuple_client_A_in_4(X3))) ) | ~spl0_4),
   inference(avatar_component_clause,[],[f602])).
 fof(f605,plain,(
-  spl0_6 <=> ! [X2] : ~pred_attacker(tuple_client_A_in_1(X2))),
+  spl0_6 <=> ! [X2] : ~pred_attacker(tuple_client_A_in_2(X2))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_6])])).
 fof(f606,plain,(
-  ( ! [X2] : (~pred_attacker(tuple_client_A_in_1(X2))) ) | ~spl0_6),
+  ( ! [X2] : (~pred_attacker(tuple_client_A_in_2(X2))) ) | ~spl0_6),
   inference(avatar_component_clause,[],[f605])).
 fof(f611,plain,(
-  spl0_8 <=> pred_attacker(tuple_client_A_out_5(name_objective1))),
+  spl0_8 <=> pred_attacker(tuple_client_A_out_9(name_objective1))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_8])])).
 fof(f612,plain,(
-  pred_attacker(tuple_client_A_out_5(name_objective1)) | ~spl0_8),
+  pred_attacker(tuple_client_A_out_9(name_objective1)) | ~spl0_8),
   inference(avatar_component_clause,[],[f611])).
 fof(f613,plain,(
   spl0_0 | spl0_2 | spl0_4 | spl0_6 | spl0_8),
   inference(avatar_split_clause,[],[f594,f611,f605,f602,f599,f596])).
 fof(f614,plain,(
-  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_eq_bitstring_bitstring(name_B,constr_tuple_4_get_1(constr_cbc_dec_4(X2,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
   inference(subsumption_resolution,[],[f580,f490])).
 fof(f615,plain,(
-  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_eq_bitstring_bitstring(name_A,constr_tuple_2_get_1(constr_cbc_dec_2(X1,name_Kas))) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
   inference(subsumption_resolution,[],[f614,f490])).
 fof(f616,plain,(
-  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_attacker(tuple_client_A_in_4(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
+  ( ! [X4,X2,X0,X3,X1] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_attacker(tuple_client_A_in_8(X4)) | ~pred_eq_bitstring_bitstring(tuple_succ(name_Na0x27(X3,X2,X0)),constr_cbc_dec_1(X4,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) )),
   inference(subsumption_resolution,[],[f615,f490])).
 fof(f617,plain,(
-  ( ! [X4,X2,X3,X1] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X3)) | ~pred_attacker(tuple_client_A_in_3(X1)) | ~pred_attacker(tuple_client_A_in_4(X4))) )),
+  ( ! [X4,X2,X3,X1] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_2(X2)) | ~pred_attacker(tuple_client_A_in_4(X3)) | ~pred_attacker(tuple_client_A_in_6(X1)) | ~pred_attacker(tuple_client_A_in_8(X4))) )),
   inference(subsumption_resolution,[],[f616,f490])).
 fof(f619,plain,(
-  spl0_10 <=> ! [X1] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_3(X1)))),
+  spl0_10 <=> ! [X1] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_6(X1)))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_10])])).
 fof(f620,plain,(
-  ( ! [X1] : (pred_attacker(tuple_client_A_out_6(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_3(X1))) ) | ~spl0_10),
+  ( ! [X1] : (pred_attacker(tuple_client_A_out_10(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X1,name_Kas))))) | ~pred_attacker(tuple_client_A_in_6(X1))) ) | ~spl0_10),
   inference(avatar_component_clause,[],[f619])).
 fof(f621,plain,(
   spl0_0 | spl0_4 | spl0_6 | spl0_10),
@@ -342,7 +342,7 @@ fof(f769,plain,(
   inference(avatar_contradiction_clause,[],[f726])).
 fof(f770,plain,(
   pred_attacker(name_objective1) | ~spl0_8),
-  inference(resolution,[],[f612,f518])).
+  inference(resolution,[],[f612,f516])).
 fof(f783,plain,(
   ( ! [X0,X1] : (~pred_attacker(constr_enc(X0,X1)) | ~pred_attacker(X1) | pred_attacker(X0)) )),
   inference(superposition,[],[f508,f483])).
@@ -353,19 +353,19 @@ fof(f788,plain,(
   ~pred_attacker(name_objective2) | ~spl0_8),
   inference(subsumption_resolution,[],[f785,f770])).
 fof(f809,plain,(
-  ( ! [X0] : (pred_attacker(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X0,name_Kas)))) | ~pred_attacker(tuple_client_A_in_3(X0))) ) | ~spl0_10),
-  inference(resolution,[],[f620,f516])).
+  ( ! [X0] : (pred_attacker(constr_enc(name_objective2,constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X0,name_Kas)))) | ~pred_attacker(tuple_client_A_in_6(X0))) ) | ~spl0_10),
+  inference(resolution,[],[f620,f524])).
 fof(f812,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_client_A_in_3(X0)) | ~pred_attacker(constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X0,name_Kas))) | pred_attacker(name_objective2)) ) | ~spl0_10),
+  ( ! [X0] : (~pred_attacker(tuple_client_A_in_6(X0)) | ~pred_attacker(constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X0,name_Kas))) | pred_attacker(name_objective2)) ) | ~spl0_10),
   inference(resolution,[],[f809,f783])).
 fof(f814,plain,(
-  ( ! [X0] : (~pred_attacker(constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X0,name_Kas))) | ~pred_attacker(tuple_client_A_in_3(X0))) ) | (~spl0_8 | ~spl0_10)),
+  ( ! [X0] : (~pred_attacker(constr_tuple_2_get_0x30_bitstring(constr_cbc_dec_2(X0,name_Kas))) | ~pred_attacker(tuple_client_A_in_6(X0))) ) | (~spl0_8 | ~spl0_10)),
   inference(subsumption_resolution,[],[f812,f788])).
 fof(f818,plain,(
-  ( ! [X0,X1] : (~pred_attacker(constr_tuple_2_get_0x30_bitstring(tuple_2(X0,X1))) | ~pred_attacker(tuple_client_A_in_3(constr_cbc_enc_2(X0,X1,name_Kas)))) ) | (~spl0_8 | ~spl0_10)),
+  ( ! [X0,X1] : (~pred_attacker(constr_tuple_2_get_0x30_bitstring(tuple_2(X0,X1))) | ~pred_attacker(tuple_client_A_in_6(constr_cbc_enc_2(X0,X1,name_Kas)))) ) | (~spl0_8 | ~spl0_10)),
   inference(superposition,[],[f814,f475])).
 fof(f819,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_in_3(constr_cbc_enc_2(X0,X1,name_Kas))) | ~pred_attacker(X0)) ) | (~spl0_8 | ~spl0_10)),
+  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_in_6(constr_cbc_enc_2(X0,X1,name_Kas))) | ~pred_attacker(X0)) ) | (~spl0_8 | ~spl0_10)),
   inference(forward_demodulation,[],[f818,f486])).
 fof(f820,plain,(
   ( ! [X4,X2,X0,X3,X1] : (~pred_attacker(constr_cbc_enc_4(X0,X1,X2,X3,X4)) | pred_attacker(constr_cbc_enc_2(X0,X1,X4))) )),

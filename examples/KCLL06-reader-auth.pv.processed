@@ -68,30 +68,30 @@ query
   attacker(objective).
 
 fun T_in_1(bitstring) : bitstring [data].
-fun T_out_1(bitstring) : bitstring [data].
-fun T_in_2(bitstring, bitstring) : bitstring [data].
 fun T_out_2(bitstring) : bitstring [data].
-fun T_in_3(bitstring) : bitstring [data].
-fun T_out_3(bitstring) : bitstring [data].
+fun T_in_3(bitstring, bitstring) : bitstring [data].
+fun T_out_4(bitstring) : bitstring [data].
+fun T_in_5(bitstring) : bitstring [data].
+fun T_out_6(bitstring) : bitstring [data].
 
 let T =
   in(c, T_in_1(=QUERY_REQ));
   new r1 : bitstring;
   let M1 = xor(r1, PIN1) in
-  out(c, T_out_1(M1));
-  in(c, T_in_2(ACK_M1 : bitstring, r2 : bitstring));
+  out(c, T_out_2(M1));
+  in(c, T_in_3(ACK_M1 : bitstring, r2 : bitstring));
   
   if ACK_M1 = ACK(M1) then
   let M2 = xor(xor(r2, PIN2), r1) in
   let M3 = f(M2) in
   let T = concat(ZERO, concat(r1, concat(M2, M3))) in
   let E = xor(add(T, S), EPC) in
-  out(c, T_out_2(E));
-  in(c, T_in_3(PIN_xor_f_r2_xor_PIN2_xor_r1 : bitstring));
+  out(c, T_out_4(E));
+  in(c, T_in_5(PIN_xor_f_r2_xor_PIN2_xor_r1 : bitstring));
   let f_r2_xor_PIN2_xor_r1 = xor(PIN_xor_f_r2_xor_PIN2_xor_r1, PIN1) in
   
   if f_r2_xor_PIN2_xor_r1 = f(xor(r2, xor(PIN2, r1))) then
-  out(c, T_out_3(objective));
+  out(c, T_out_6(objective));
   0.
 
 fun knowledge_from_1st_round_out_1(bitstring) : bitstring [data].

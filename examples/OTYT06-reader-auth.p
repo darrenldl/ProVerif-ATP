@@ -106,17 +106,17 @@ pred_attacker(tuple_false)).
 fof(ax44, axiom,
 pred_attacker(constr_ZERO)).
 fof(ax45, axiom,
-![VAR_V_32] : (pred_attacker(VAR_V_32) => pred_attacker(tuple_T_out_2(VAR_V_32)))).
+![VAR_V_32] : (pred_attacker(VAR_V_32) => pred_attacker(tuple_T_out_4(VAR_V_32)))).
 fof(ax46, axiom,
-![VAR_V_35] : (pred_attacker(tuple_T_out_2(VAR_V_35)) => pred_attacker(VAR_V_35))).
+![VAR_V_35] : (pred_attacker(tuple_T_out_4(VAR_V_35)) => pred_attacker(VAR_V_35))).
 fof(ax47, axiom,
-![VAR_V_38] : (pred_attacker(VAR_V_38) => pred_attacker(tuple_T_out_1(VAR_V_38)))).
+![VAR_V_38] : (pred_attacker(VAR_V_38) => pred_attacker(tuple_T_out_2(VAR_V_38)))).
 fof(ax48, axiom,
-![VAR_V_41] : (pred_attacker(tuple_T_out_1(VAR_V_41)) => pred_attacker(VAR_V_41))).
+![VAR_V_41] : (pred_attacker(tuple_T_out_2(VAR_V_41)) => pred_attacker(VAR_V_41))).
 fof(ax49, axiom,
-![VAR_V_44] : (pred_attacker(VAR_V_44) => pred_attacker(tuple_T_in_2(VAR_V_44)))).
+![VAR_V_44] : (pred_attacker(VAR_V_44) => pred_attacker(tuple_T_in_3(VAR_V_44)))).
 fof(ax50, axiom,
-![VAR_V_47] : (pred_attacker(tuple_T_in_2(VAR_V_47)) => pred_attacker(VAR_V_47))).
+![VAR_V_47] : (pred_attacker(tuple_T_in_3(VAR_V_47)) => pred_attacker(VAR_V_47))).
 fof(ax51, axiom,
 ![VAR_V_50X30] : (pred_attacker(VAR_V_50X30) => pred_attacker(tuple_T_in_1(VAR_V_50X30)))).
 fof(ax52, axiom,
@@ -142,8 +142,8 @@ fof(ax61, axiom,
 fof(ax62, axiom,
 ![VAR_V_65] : (pred_attacker(name_new0x2Dname(VAR_V_65)))).
 fof(ax63, axiom,
-![VAR_R1_85] : (pred_attacker(tuple_T_in_1(VAR_R1_85)) => pred_attacker(tuple_T_out_1(constr_h(constr_xor(name_k, VAR_R1_85)))))).
+![VAR_R1_85] : (pred_attacker(tuple_T_in_1(VAR_R1_85)) => pred_attacker(tuple_T_out_2(constr_h(constr_xor(name_k, VAR_R1_85)))))).
 fof(ax64, axiom,
-![VAR_K_XOR_K1_10X305, VAR_R1_10X306] : ((pred_attacker(tuple_T_in_2(VAR_K_XOR_K1_10X305)) & pred_attacker(tuple_T_in_1(VAR_R1_10X306))) => pred_attacker(tuple_T_out_2(name_objective)))).
+![VAR_K_XOR_K1_10X305, VAR_R1_10X306] : ((pred_attacker(tuple_T_in_3(VAR_K_XOR_K1_10X305)) & pred_attacker(tuple_T_in_1(VAR_R1_10X306))) => pred_attacker(tuple_T_out_4(name_objective)))).
 fof(co0, conjecture,
 pred_attacker(name_objective)).

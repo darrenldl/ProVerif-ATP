@@ -14,25 +14,25 @@ fof(f58,axiom,(
   pred_attacker(constr_CONST_0x30)),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
 fof(f66,axiom,(
-  ! [X19] : (pred_attacker(tuple_A_out_3(X19)) => pred_attacker(X19))),
+  ! [X19] : (pred_attacker(tuple_A_out_4(X19)) => pred_attacker(X19))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
 fof(f68,axiom,(
-  ! [X21] : (pred_attacker(tuple_A_out_2(X21)) => pred_attacker(X21))),
+  ! [X21] : (pred_attacker(tuple_A_out_3(X21)) => pred_attacker(X21))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
 fof(f70,axiom,(
   ! [X23] : (pred_attacker(tuple_A_out_1(X23)) => pred_attacker(X23))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
 fof(f71,axiom,(
-  ! [X24] : (pred_attacker(X24) => pred_attacker(tuple_A_in_1(X24)))),
+  ! [X24] : (pred_attacker(X24) => pred_attacker(tuple_A_in_2(X24)))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
 fof(f78,axiom,(
   pred_attacker(tuple_A_out_1(constr_comm_enc(name_m_9,name_Ka)))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
 fof(f79,axiom,(
-  ! [X32] : (pred_attacker(tuple_A_in_1(X32)) => pred_attacker(tuple_A_out_2(constr_comm_dec(X32,name_Ka))))),
+  ! [X32] : (pred_attacker(tuple_A_in_2(X32)) => pred_attacker(tuple_A_out_3(constr_comm_dec(X32,name_Ka))))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
 fof(f80,axiom,(
-  ! [X33] : (pred_attacker(tuple_A_in_1(X33)) => pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))))),
+  ! [X33] : (pred_attacker(tuple_A_in_2(X33)) => pred_attacker(tuple_A_out_4(constr_enc(name_objective,name_m_9))))),
   file('Shamir-Rivest-Adleman-Three-Pass.p',unknown)).
 fof(f82,conjecture,(
   pred_attacker(name_objective)),
@@ -47,22 +47,22 @@ fof(f86,plain,(
   ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_dec(X0,X1)))),
   inference(rectify,[],[f51])).
 fof(f96,plain,(
-  ! [X0] : (pred_attacker(tuple_A_out_3(X0)) => pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_A_out_4(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f66])).
 fof(f98,plain,(
-  ! [X0] : (pred_attacker(tuple_A_out_2(X0)) => pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_A_out_3(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f68])).
 fof(f100,plain,(
   ! [X0] : (pred_attacker(tuple_A_out_1(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f70])).
 fof(f101,plain,(
-  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_A_in_1(X0)))),
+  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_A_in_2(X0)))),
   inference(rectify,[],[f71])).
 fof(f107,plain,(
-  ! [X0] : (pred_attacker(tuple_A_in_1(X0)) => pred_attacker(tuple_A_out_2(constr_comm_dec(X0,name_Ka))))),
+  ! [X0] : (pred_attacker(tuple_A_in_2(X0)) => pred_attacker(tuple_A_out_3(constr_comm_dec(X0,name_Ka))))),
   inference(rectify,[],[f79])).
 fof(f108,plain,(
-  ! [X0] : (pred_attacker(tuple_A_in_1(X0)) => pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))))),
+  ! [X0] : (pred_attacker(tuple_A_in_2(X0)) => pred_attacker(tuple_A_out_4(constr_enc(name_objective,name_m_9))))),
   inference(rectify,[],[f80])).
 fof(f110,plain,(
   ~pred_attacker(name_objective)),
@@ -74,22 +74,22 @@ fof(f115,plain,(
   ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
   inference(flattening,[],[f114])).
 fof(f127,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_3(X0)))),
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_4(X0)))),
   inference(ennf_transformation,[],[f96])).
 fof(f129,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_2(X0)))),
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_3(X0)))),
   inference(ennf_transformation,[],[f98])).
 fof(f131,plain,(
   ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_1(X0)))),
   inference(ennf_transformation,[],[f100])).
 fof(f132,plain,(
-  ! [X0] : (pred_attacker(tuple_A_in_1(X0)) | ~pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_A_in_2(X0)) | ~pred_attacker(X0))),
   inference(ennf_transformation,[],[f101])).
 fof(f138,plain,(
-  ! [X0] : (pred_attacker(tuple_A_out_2(constr_comm_dec(X0,name_Ka))) | ~pred_attacker(tuple_A_in_1(X0)))),
+  ! [X0] : (pred_attacker(tuple_A_out_3(constr_comm_dec(X0,name_Ka))) | ~pred_attacker(tuple_A_in_2(X0)))),
   inference(ennf_transformation,[],[f107])).
 fof(f139,plain,(
-  ! [X0] : (pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))) | ~pred_attacker(tuple_A_in_1(X0)))),
+  ! [X0] : (pred_attacker(tuple_A_out_4(constr_enc(name_objective,name_m_9))) | ~pred_attacker(tuple_A_in_2(X0)))),
   inference(ennf_transformation,[],[f108])).
 fof(f186,plain,(
   ( ! [X0,X1] : (constr_dec(constr_enc(X1,X0),X0) = X1) )),
@@ -104,40 +104,40 @@ fof(f198,plain,(
   pred_attacker(constr_CONST_0x30)),
   inference(cnf_transformation,[],[f58])).
 fof(f206,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_A_out_3(X0)) | pred_attacker(X0)) )),
+  ( ! [X0] : (~pred_attacker(tuple_A_out_4(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f127])).
 fof(f208,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_A_out_2(X0)) | pred_attacker(X0)) )),
+  ( ! [X0] : (~pred_attacker(tuple_A_out_3(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f129])).
 fof(f210,plain,(
   ( ! [X0] : (~pred_attacker(tuple_A_out_1(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f131])).
 fof(f211,plain,(
-  ( ! [X0] : (pred_attacker(tuple_A_in_1(X0)) | ~pred_attacker(X0)) )),
+  ( ! [X0] : (pred_attacker(tuple_A_in_2(X0)) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f132])).
 fof(f217,plain,(
   pred_attacker(tuple_A_out_1(constr_comm_enc(name_m_9,name_Ka)))),
   inference(cnf_transformation,[],[f78])).
 fof(f218,plain,(
-  ( ! [X0] : (pred_attacker(tuple_A_out_2(constr_comm_dec(X0,name_Ka))) | ~pred_attacker(tuple_A_in_1(X0))) )),
+  ( ! [X0] : (pred_attacker(tuple_A_out_3(constr_comm_dec(X0,name_Ka))) | ~pred_attacker(tuple_A_in_2(X0))) )),
   inference(cnf_transformation,[],[f138])).
 fof(f219,plain,(
-  ( ! [X0] : (pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))) | ~pred_attacker(tuple_A_in_1(X0))) )),
+  ( ! [X0] : (pred_attacker(tuple_A_out_4(constr_enc(name_objective,name_m_9))) | ~pred_attacker(tuple_A_in_2(X0))) )),
   inference(cnf_transformation,[],[f139])).
 fof(f221,plain,(
   ~pred_attacker(name_objective)),
   inference(cnf_transformation,[],[f110])).
 fof(f223,plain,(
-  spl0_0 <=> ! [X0] : ~pred_attacker(tuple_A_in_1(X0))),
+  spl0_0 <=> ! [X0] : ~pred_attacker(tuple_A_in_2(X0))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
 fof(f224,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_A_in_1(X0))) ) | ~spl0_0),
+  ( ! [X0] : (~pred_attacker(tuple_A_in_2(X0))) ) | ~spl0_0),
   inference(avatar_component_clause,[],[f223])).
 fof(f229,plain,(
-  spl0_2 <=> pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9)))),
+  spl0_2 <=> pred_attacker(tuple_A_out_4(constr_enc(name_objective,name_m_9)))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
 fof(f230,plain,(
-  pred_attacker(tuple_A_out_3(constr_enc(name_objective,name_m_9))) | ~spl0_2),
+  pred_attacker(tuple_A_out_4(constr_enc(name_objective,name_m_9))) | ~spl0_2),
   inference(avatar_component_clause,[],[f229])).
 fof(f231,plain,(
   spl0_0 | spl0_2),
@@ -152,7 +152,7 @@ fof(f243,plain,(
   ( ! [X0,X1] : (~pred_attacker(constr_enc(X0,X1)) | ~pred_attacker(X1) | pred_attacker(X0)) )),
   inference(superposition,[],[f191,f186])).
 fof(f246,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_A_in_1(constr_comm_enc(X0,name_Ka))) | pred_attacker(tuple_A_out_2(X0))) )),
+  ( ! [X0] : (~pred_attacker(tuple_A_in_2(constr_comm_enc(X0,name_Ka))) | pred_attacker(tuple_A_out_3(X0))) )),
   inference(superposition,[],[f218,f187])).
 fof(f249,plain,(
   ~pred_attacker(name_m_9) | pred_attacker(name_objective) | ~spl0_2),
@@ -161,10 +161,10 @@ fof(f252,plain,(
   ~pred_attacker(name_m_9) | ~spl0_2),
   inference(subsumption_resolution,[],[f249,f221])).
 fof(f258,plain,(
-  ( ! [X0] : (~pred_attacker(constr_comm_enc(X0,name_Ka)) | pred_attacker(tuple_A_out_2(X0))) )),
+  ( ! [X0] : (~pred_attacker(constr_comm_enc(X0,name_Ka)) | pred_attacker(tuple_A_out_3(X0))) )),
   inference(resolution,[],[f246,f211])).
 fof(f260,plain,(
-  pred_attacker(tuple_A_out_2(name_m_9))),
+  pred_attacker(tuple_A_out_3(name_m_9))),
   inference(resolution,[],[f258,f239])).
 fof(f262,plain,(
   pred_attacker(name_m_9)),

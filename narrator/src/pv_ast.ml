@@ -290,22 +290,30 @@ let query_to_string_debug qs =
 
 module Print_context = struct
   type process_structure_type =
-    | Let
-    | IfElse
-    | InOut
-    | Zero
+    | Null
+    | Macro
+    | Parallel
+    | Replicate
     | New
-    | Get
+    | Conditional
+    | In
+    | Out
+    | Eval
     | Insert
+    | Get
+    | Event
 
   type decl_structure_type =
-    | Const
+    | Ty
+    | Channel
     | Free
-    | Table
-    | FunDec
+    | Const
+    | Fun
     | Equation
+    | Pred
+    | Table
     | LetProc
-    | Process
+    | Event
     | Query
 
   let indent_space_count = 2
@@ -316,6 +324,7 @@ module Print_context = struct
     ; mutable cur_decl_struct_ty : decl_structure_type option
     ; mutable prev_proc_struct_ty : process_structure_type option
     ; mutable cur_proc_struct_ty : process_structure_type option
+    ; mutable in_count : int
     ; mutable out_count : int
     ; mutable indent : int
     ; mutable buffer : (int * string) list }
@@ -326,6 +335,7 @@ module Print_context = struct
     ; cur_decl_struct_ty = None
     ; prev_proc_struct_ty = None
     ; cur_proc_struct_ty = None
+    ; in_count = 0
     ; out_count = 0
     ; indent = 0
     ; buffer = [] }
@@ -352,17 +362,21 @@ module Print_context = struct
     ctx.proc_name <- Some x;
     ctx.prev_proc_struct_ty <- None;
     ctx.cur_proc_struct_ty <- None;
+    ctx.in_count <- 0;
     ctx.out_count <- 0
 
   let set_proc_name_none ctx =
     ctx.proc_name <- None;
     ctx.prev_proc_struct_ty <- None;
     ctx.cur_proc_struct_ty <- None;
+    ctx.in_count <- 0;
     ctx.out_count <- 0
 
   let incre_indent ctx = ctx.indent <- ctx.indent + 1
 
   let decre_indent ctx = ctx.indent <- ctx.indent - 1
+
+  let incre_in_count ctx = ctx.in_count <- ctx.in_count + 1
 
   let incre_out_count ctx = ctx.out_count <- ctx.out_count + 1
 
@@ -543,3 +557,278 @@ let decl_to_string_debug d =
        | [] -> ""
        | l -> Printf.sprintf "%s;" (Misc_utils.map_list_to_string name_ty_to_string name_tys))
       (query_to_string_debug query)
+
+let process_to_string ?(ctx = Print_context.make ()) p =
+  let rec aux p =
+    match p with
+    | Proc_null ->
+      Print_context.set_proc_struct_ty ctx Print_context.Null;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx "0"
+    | Proc_macro (name, args) ->
+      Print_context.set_proc_struct_ty ctx Print_context.Macro;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx (Printf.sprintf "%s%s" name
+        (Misc_utils.map_list_to_string_w_opt_paren pterm_to_string args))
+    | Proc_parallel (p1, p2) ->
+      Print_context.set_proc_struct_ty ctx Print_context.Parallel;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.incre_indent ctx;
+      aux p1;
+      Print_context.decre_indent ctx;
+      Print_context.push ctx "|";
+      Print_context.incre_indent ctx;
+      aux p2;
+      Print_context.decre_indent ctx;
+    | Proc_replicate p ->
+      Print_context.set_proc_struct_ty ctx Print_context.Replicate;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx "!";
+      Print_context.incre_indent ctx;
+      aux p;
+      Print_context.decre_indent ctx;
+    | Proc_new {names; ty; next} ->
+      Print_context.set_proc_struct_ty ctx Print_context.New;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx (Printf.sprintf "new %s : %s" (String.concat ", " names) ty);
+      aux next
+    | Proc_conditional { cond; true_branch; false_branch } -> (
+        Print_context.set_proc_struct_ty ctx Print_context.Conditional;
+        Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+        Print_context.push ctx (Printf.sprintf "if %s then" (pterm_to_string cond));
+        match false_branch with
+        | Proc_null ->
+          aux true_branch
+        | _ ->
+          Print_context.incre_indent ctx;
+          aux true_branch;
+          Print_context.decre_indent ctx;
+          Print_context.push ctx "else";
+          Print_context.incre_indent ctx;
+          aux false_branch;
+          Print_context.decre_indent ctx;
+      )
+    | Proc_in { channel; message; next } ->
+      Print_context.set_proc_struct_ty ctx Print_context.In;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.incre_in_count ctx;
+      let proc_name =
+        match ctx.proc_name with Some name -> name | None -> ""
+      in
+      let proc_step = ctx.in_count + ctx.out_count in
+      Print_context.push ctx (
+        Printf.sprintf "%d. I -> %s IN  on %s : %s;" proc_step proc_name
+          (pterm_to_string channel)
+          (pattern_to_string message));
+      aux next
+    | Proc_out { channel; message; next } ->
+      Print_context.set_proc_struct_ty ctx Print_context.Out;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.incre_in_count ctx;
+      let proc_name =
+        match ctx.proc_name with Some name -> name | None -> ""
+      in
+      let proc_step = ctx.in_count + ctx.out_count in
+      Print_context.push ctx (
+        Printf.sprintf "%d. %s -> I OUT on %s : %s;" proc_step proc_name (pterm_to_string channel)
+          (pterm_to_string message));
+      aux next
+    | Proc_eval { let_bind_pat; let_bind_term; true_branch; false_branch } -> (
+        Print_context.set_proc_struct_ty ctx Print_context.Eval;
+        Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+        Print_context.push ctx
+          (Printf.sprintf "let %s = %s in"
+             (pattern_to_string let_bind_pat)
+             (pterm_to_string let_bind_term)
+          );
+        match false_branch with
+        | Proc_null ->
+          aux true_branch
+        | _ ->
+          Print_context.incre_indent ctx;
+          aux true_branch;
+          Print_context.decre_indent ctx;
+          Print_context.push ctx "else";
+          Print_context.incre_indent ctx;
+          aux false_branch;
+          Print_context.decre_indent ctx;
+      )
+    | Proc_insert { name; terms; next } ->
+      Print_context.set_proc_struct_ty ctx Print_context.Insert;
+      Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "insert %s(%s)" name
+           (String.concat ", "
+              (List.map pterm_to_string terms)
+           )
+        );
+      aux next
+    | Proc_get { name; pats; next } -> (
+        Print_context.set_proc_struct_ty ctx Print_context.Get;
+        Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+        Print_context.push ctx
+          (Printf.sprintf "get %s(%s)" name
+             (String.concat ", "
+                (List.map pattern_to_string pats)
+             )
+          );
+        match next with
+        | None -> ()
+        | Some (true_branch, None) | Some (true_branch, Some Proc_null)->
+          aux true_branch;
+        | Some (true_branch, Some false_branch) ->
+          Print_context.incre_indent ctx;
+          aux true_branch;
+          Print_context.decre_indent ctx;
+          Print_context.push ctx "else";
+          Print_context.incre_indent ctx;
+          aux false_branch;
+          Print_context.decre_indent ctx;
+      )
+    | Proc_event { name; terms; next } -> (
+        Print_context.set_proc_struct_ty ctx Print_context.Event;
+        Print_context.insert_blank_line_if_diff_proc_struct_ty ctx;
+        Print_context.push ctx
+          (Printf.sprintf "event %s(%s)" name
+             (String.concat ", "
+                (List.map pterm_to_string terms))
+          );
+        match next with
+        | None -> ()
+        | Some next ->
+          aux next
+      )
+  in
+  aux p;
+  Print_context.finish ctx
+
+let decl_to_string ?(ctx = Print_context.make ()) d =
+  match d with
+  | Decl_ty (ty, options) -> (
+      Print_context.set_decl_struct_ty ctx Print_context.Ty;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx
+        (Printf.sprintf "type %s%s."
+           ty
+           (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+        )
+    )
+  | Decl_channel l ->
+    Print_context.set_decl_struct_ty ctx Print_context.Channel;
+    Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    Print_context.push ctx
+      (Printf.sprintf "channel %s."
+         (String.concat ", " l)
+      )
+  | Decl_free { names; ty; options } ->
+    Print_context.set_decl_struct_ty ctx Print_context.Free;
+    Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    Print_context.push ctx
+      (Printf.sprintf "free %s : %s%s."
+         (String.concat ", " names)
+         ty
+         (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+      )
+  | Decl_const { names; ty; options } ->
+    Print_context.set_decl_struct_ty ctx Print_context.Const;
+    Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    Print_context.push ctx
+      (Printf.sprintf "const %s : %s%s."
+         (String.concat ", " names)
+         ty
+         (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+      )
+  | Decl_fun { name; arg_tys; ret_ty; options } ->
+    Print_context.set_decl_struct_ty ctx Print_context.Fun;
+    Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    Print_context.push ctx
+      (Printf.sprintf "fun %s(%s) : %s%s."
+         name
+         (String.concat ", " arg_tys)
+         ret_ty
+         (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+      )
+  | Decl_equation { eqs; options } ->
+    Print_context.set_decl_struct_ty ctx Print_context.Equation;
+    Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    Print_context.push ctx "equation";
+    Print_context.incre_indent ctx;
+    List.iter (fun (name_tys, l, r) ->
+        match name_tys with
+        | [] ->
+          Print_context.push ctx
+            (Printf.sprintf "%s = %s%s."
+               (term_to_string l)
+               (term_to_string r)
+               (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+            )
+        | _ ->
+          Print_context.push ctx
+            (Printf.sprintf "forall %s; %s = %s%s."
+               (Misc_utils.map_list_to_string name_ty_to_string name_tys)
+               (term_to_string l)
+               (term_to_string r)
+               (Misc_utils.map_list_to_string_w_opt_brack Misc_utils.id options)
+            )
+      ) eqs;
+    Print_context.decre_indent ctx;
+  | Decl_pred { name; arg_tys } ->
+    Print_context.set_decl_struct_ty ctx Print_context.Pred;
+    Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    Print_context.push ctx
+      (Printf.sprintf "pred %s(%s)."
+         name
+         (String.concat ", " arg_tys)
+      )
+  | Decl_table { name; tys } ->
+    Print_context.set_decl_struct_ty ctx Print_context.Table;
+    Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    Print_context.push ctx
+      (Printf.sprintf "table %s(%s)."
+         name
+         (String.concat ", " tys)
+      )
+  | Decl_let_proc { name; args; process } ->
+    Print_context.set_decl_struct_ty ctx Print_context.LetProc;
+    Print_context.insert_blank_line_anyway_decl_struct_ty ctx;
+    Print_context.push ctx
+      (Printf.sprintf "let %s%s =" name
+         (Misc_utils.map_list_to_string_w_opt_paren name_ty_to_string args));
+    Print_context.incre_indent ctx;
+    Print_context.set_proc_name ctx name;
+    process_to_string ~ctx process |> ignore;
+    Print_context.set_proc_name_none ctx;
+    Print_context.decre_indent ctx;
+  | Decl_event { name; args } ->
+    Print_context.set_decl_struct_ty ctx Print_context.Event;
+    Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+    Print_context.push ctx
+      (Printf.sprintf "event %s%s."
+         name
+         (Misc_utils.map_list_to_string_w_opt_paren name_ty_to_string args)
+      )
+  | Decl_query { name_tys; query } -> (
+      Print_context.set_decl_struct_ty ctx Print_context.Query;
+      Print_context.insert_blank_line_if_diff_decl_struct_ty ctx;
+      Print_context.push ctx "query";
+      match name_tys with
+      | [] ->
+        Print_context.push ctx
+          (query_to_string_debug query)
+      | _ ->
+        Print_context.push ctx
+          (Printf.sprintf "%s; %s"
+             (Misc_utils.map_list_to_string name_ty_to_string name_tys)
+             (query_to_string_debug query)
+          )
+    )
+
+let decls_to_string decls =
+  let ctx = Print_context.make () in
+  List.iter (decl_to_string ~ctx) decls;
+  Print_context.finish ctx
+
+let main_process_to_string p =
+  let ctx = Print_context.make () in
+  Print_context.incre_indent ctx;
+  process_to_string ~ctx p

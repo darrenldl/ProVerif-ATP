@@ -3659,8 +3659,8 @@ module Tag_in_out_ctx = struct
 
   let make (decl : tdecl list) : t =
     { decl;
-      in_count = 1;
-      out_count = 1;
+      in_count = 0;
+      out_count = 0;
       proc_name = None;
     }
 
@@ -3678,24 +3678,24 @@ module Tag_in_out_ctx = struct
 
   let set_proc_name (ctx : t) (name : string) : unit =
     ctx.proc_name <- Some name;
-    ctx.in_count <- 1;
-    ctx.out_count <- 1
+    ctx.in_count <- 0;
+    ctx.out_count <- 0
 
   let clear_proc_name (ctx : t) : unit =
     ctx.proc_name <- None;
-    ctx.in_count <- 1;
-    ctx.out_count <- 1
+    ctx.in_count <- 0;
+    ctx.out_count <- 0
 
   let tag_in_pat (ctx : t) (pat : tpattern) (vb : string Binder.t) : tpattern =
     let gen_in_tag (ctx : t) : string =
+      ctx.in_count <- ctx.in_count + 1;
+
       let tag = Printf.sprintf "%sin_%d"
           (match ctx.proc_name with
            | None -> ""
            | Some s -> Printf.sprintf "%s_" s)
-          ctx.in_count
+          (ctx.in_count + ctx.out_count)
       in
-
-      ctx.in_count <- ctx.in_count + 1;
 
       tag
     in
@@ -3742,14 +3742,14 @@ module Tag_in_out_ctx = struct
 
   let tag_out_term (ctx : t) (term_e : pterm_e) (vb : string Binder.t) : pterm_e =
     let gen_out_tag (ctx : t) : string =
+      ctx.out_count <- ctx.out_count + 1;
+
       let tag = Printf.sprintf "%sout_%d"
           (match ctx.proc_name with
            | None -> ""
            | Some s -> Printf.sprintf "%s_" s)
-          ctx.out_count
+          (ctx.in_count + ctx.out_count)
       in
-
-      ctx.out_count <- ctx.out_count + 1;
 
       tag
     in

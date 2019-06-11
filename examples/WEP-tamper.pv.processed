@@ -70,7 +70,7 @@ let A =
   0.
 
 fun B_in_1(bitstring, bitstring) : bitstring [data].
-fun B_out_1(bitstring) : bitstring [data].
+fun B_out_2(bitstring) : bitstring [data].
 
 let B =
   in(c, B_in_1(=v, M_CM_xor_RC4_v_Kab : bitstring));
@@ -79,7 +79,7 @@ let B =
   let CM : bitstring = tuple_2_get_1_bitstring(split(M_CM)) in
   
   if C(inM) = CM && inM <> M then
-  out(c, B_out_1(objective));
+  out(c, B_out_2(objective));
   0.
 
 process

@@ -20,13 +20,13 @@ fof(f205,axiom,(
   ! [X17] : (pred_attacker(tuple_out_1(X17)) => pred_attacker(X17))),
   file('Salary-Sum.p',unknown)).
 fof(f239,axiom,(
-  ! [X68] : (pred_attacker(tuple_client_A_out_2(X68)) => pred_attacker(X68))),
+  ! [X68] : (pred_attacker(tuple_client_A_out_5(X68)) => pred_attacker(X68))),
   file('Salary-Sum.p',unknown)).
 fof(f242,axiom,(
-  ! [X73,X74] : (pred_attacker(tuple_client_A_out_1(X73,X74)) => pred_attacker(X74))),
+  ! [X73,X74] : (pred_attacker(tuple_client_A_out_3(X73,X74)) => pred_attacker(X74))),
   file('Salary-Sum.p',unknown)).
 fof(f243,axiom,(
-  ! [X75,X76] : ((pred_attacker(X76) & pred_attacker(X75)) => pred_attacker(tuple_client_A_in_3(X75,X76)))),
+  ! [X75,X76] : ((pred_attacker(X76) & pred_attacker(X75)) => pred_attacker(tuple_client_A_in_4(X75,X76)))),
   file('Salary-Sum.p',unknown)).
 fof(f246,axiom,(
   ! [X81] : (pred_attacker(X81) => pred_attacker(tuple_client_A_in_2(X81)))),
@@ -44,10 +44,10 @@ fof(f268,axiom,(
   pred_attacker(tuple_out_1(constr_pkey(name_skA)))),
   file('Salary-Sum.p',unknown)).
 fof(f272,axiom,(
-  ! [X97,X98] : ((pred_attacker(tuple_client_A_in_1(X98)) & pred_attacker(tuple_client_A_in_2(X97))) => pred_attacker(tuple_client_A_out_1(name_A,constr_aenc(constr_add(name_Na,name_Sa),X98))))),
+  ! [X97,X98] : ((pred_attacker(tuple_client_A_in_1(X98)) & pred_attacker(tuple_client_A_in_2(X97))) => pred_attacker(tuple_client_A_out_3(name_A,constr_aenc(constr_add(name_Na,name_Sa),X98))))),
   file('Salary-Sum.p',unknown)).
 fof(f273,axiom,(
-  ! [X99,X100,X101] : ((pred_attacker(tuple_client_A_in_1(X101)) & pred_attacker(tuple_client_A_in_2(X100)) & pred_attacker(tuple_client_A_in_3(X100,X99))) => pred_attacker(tuple_client_A_out_2(constr_add(constr_adec(X99,name_skA),constr_neg(name_Na)))))),
+  ! [X99,X100,X101] : ((pred_attacker(tuple_client_A_in_1(X101)) & pred_attacker(tuple_client_A_in_2(X100)) & pred_attacker(tuple_client_A_in_4(X100,X99))) => pred_attacker(tuple_client_A_out_5(constr_add(constr_adec(X99,name_skA),constr_neg(name_Na)))))),
   file('Salary-Sum.p',unknown)).
 fof(f277,conjecture,(
   pred_attacker(name_Sa)),
@@ -71,13 +71,13 @@ fof(f291,plain,(
   ! [X0] : (pred_attacker(tuple_out_1(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f205])).
 fof(f324,plain,(
-  ! [X0] : (pred_attacker(tuple_client_A_out_2(X0)) => pred_attacker(X0))),
+  ! [X0] : (pred_attacker(tuple_client_A_out_5(X0)) => pred_attacker(X0))),
   inference(rectify,[],[f239])).
 fof(f327,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_client_A_out_1(X0,X1)) => pred_attacker(X1))),
+  ! [X0,X1] : (pred_attacker(tuple_client_A_out_3(X0,X1)) => pred_attacker(X1))),
   inference(rectify,[],[f242])).
 fof(f328,plain,(
-  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_client_A_in_3(X0,X1)))),
+  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_client_A_in_4(X0,X1)))),
   inference(rectify,[],[f243])).
 fof(f331,plain,(
   ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_2(X0)))),
@@ -89,10 +89,10 @@ fof(f333,plain,(
   ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_client_A_in_1(X0)))),
   inference(rectify,[],[f248])).
 fof(f342,plain,(
-  ! [X0,X1] : ((pred_attacker(tuple_client_A_in_1(X1)) & pred_attacker(tuple_client_A_in_2(X0))) => pred_attacker(tuple_client_A_out_1(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))))),
+  ! [X0,X1] : ((pred_attacker(tuple_client_A_in_1(X1)) & pred_attacker(tuple_client_A_in_2(X0))) => pred_attacker(tuple_client_A_out_3(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))))),
   inference(rectify,[],[f272])).
 fof(f343,plain,(
-  ! [X0,X1,X2] : ((pred_attacker(tuple_client_A_in_1(X2)) & pred_attacker(tuple_client_A_in_2(X1)) & pred_attacker(tuple_client_A_in_3(X1,X0))) => pred_attacker(tuple_client_A_out_2(constr_add(constr_adec(X0,name_skA),constr_neg(name_Na)))))),
+  ! [X0,X1,X2] : ((pred_attacker(tuple_client_A_in_1(X2)) & pred_attacker(tuple_client_A_in_2(X1)) & pred_attacker(tuple_client_A_in_4(X1,X0))) => pred_attacker(tuple_client_A_out_5(constr_add(constr_adec(X0,name_skA),constr_neg(name_Na)))))),
   inference(rectify,[],[f273])).
 fof(f347,plain,(
   ~pred_attacker(name_Sa)),
@@ -101,16 +101,16 @@ fof(f357,plain,(
   ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_out_1(X0)))),
   inference(ennf_transformation,[],[f291])).
 fof(f396,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_client_A_out_2(X0)))),
+  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_client_A_out_5(X0)))),
   inference(ennf_transformation,[],[f324])).
 fof(f400,plain,(
-  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_client_A_out_1(X0,X1)))),
+  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_client_A_out_3(X0,X1)))),
   inference(ennf_transformation,[],[f327])).
 fof(f401,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_client_A_in_3(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
+  ! [X0,X1] : (pred_attacker(tuple_client_A_in_4(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
   inference(ennf_transformation,[],[f328])).
 fof(f402,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_client_A_in_3(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
+  ! [X0,X1] : (pred_attacker(tuple_client_A_in_4(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
   inference(flattening,[],[f401])).
 fof(f405,plain,(
   ! [X0] : (pred_attacker(tuple_client_A_in_2(X0)) | ~pred_attacker(X0))),
@@ -122,16 +122,16 @@ fof(f407,plain,(
   ! [X0] : (pred_attacker(tuple_client_A_in_1(X0)) | ~pred_attacker(X0))),
   inference(ennf_transformation,[],[f333])).
 fof(f419,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_client_A_out_1(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | (~pred_attacker(tuple_client_A_in_1(X1)) | ~pred_attacker(tuple_client_A_in_2(X0))))),
+  ! [X0,X1] : (pred_attacker(tuple_client_A_out_3(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | (~pred_attacker(tuple_client_A_in_1(X1)) | ~pred_attacker(tuple_client_A_in_2(X0))))),
   inference(ennf_transformation,[],[f342])).
 fof(f420,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_client_A_out_1(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | ~pred_attacker(tuple_client_A_in_1(X1)) | ~pred_attacker(tuple_client_A_in_2(X0)))),
+  ! [X0,X1] : (pred_attacker(tuple_client_A_out_3(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | ~pred_attacker(tuple_client_A_in_1(X1)) | ~pred_attacker(tuple_client_A_in_2(X0)))),
   inference(flattening,[],[f419])).
 fof(f421,plain,(
-  ! [X0,X1,X2] : (pred_attacker(tuple_client_A_out_2(constr_add(constr_adec(X0,name_skA),constr_neg(name_Na)))) | (~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_3(X1,X0))))),
+  ! [X0,X1,X2] : (pred_attacker(tuple_client_A_out_5(constr_add(constr_adec(X0,name_skA),constr_neg(name_Na)))) | (~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_4(X1,X0))))),
   inference(ennf_transformation,[],[f343])).
 fof(f422,plain,(
-  ! [X0,X1,X2] : (pred_attacker(tuple_client_A_out_2(constr_add(constr_adec(X0,name_skA),constr_neg(name_Na)))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_3(X1,X0)))),
+  ! [X0,X1,X2] : (pred_attacker(tuple_client_A_out_5(constr_add(constr_adec(X0,name_skA),constr_neg(name_Na)))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_4(X1,X0)))),
   inference(flattening,[],[f421])).
 fof(f619,plain,(
   ( ! [X0,X1] : (constr_adec(constr_aenc(X1,constr_pkey(X0)),X0) = X1) )),
@@ -152,13 +152,13 @@ fof(f633,plain,(
   ( ! [X0] : (~pred_attacker(tuple_out_1(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f357])).
 fof(f667,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_client_A_out_2(X0)) | pred_attacker(X0)) )),
+  ( ! [X0] : (~pred_attacker(tuple_client_A_out_5(X0)) | pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f396])).
 fof(f670,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_out_1(X0,X1)) | pred_attacker(X1)) )),
+  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_out_3(X0,X1)) | pred_attacker(X1)) )),
   inference(cnf_transformation,[],[f400])).
 fof(f671,plain,(
-  ( ! [X0,X1] : (pred_attacker(tuple_client_A_in_3(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
+  ( ! [X0,X1] : (pred_attacker(tuple_client_A_in_4(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f402])).
 fof(f674,plain,(
   ( ! [X0] : (pred_attacker(tuple_client_A_in_2(X0)) | ~pred_attacker(X0)) )),
@@ -176,10 +176,10 @@ fof(f695,plain,(
   pred_attacker(tuple_out_1(constr_pkey(name_skA)))),
   inference(cnf_transformation,[],[f268])).
 fof(f699,plain,(
-  ( ! [X0,X1] : (pred_attacker(tuple_client_A_out_1(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | ~pred_attacker(tuple_client_A_in_1(X1)) | ~pred_attacker(tuple_client_A_in_2(X0))) )),
+  ( ! [X0,X1] : (pred_attacker(tuple_client_A_out_3(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | ~pred_attacker(tuple_client_A_in_1(X1)) | ~pred_attacker(tuple_client_A_in_2(X0))) )),
   inference(cnf_transformation,[],[f420])).
 fof(f700,plain,(
-  ( ! [X2,X0,X1] : (pred_attacker(tuple_client_A_out_2(constr_add(constr_adec(X0,name_skA),constr_neg(name_Na)))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_3(X1,X0))) )),
+  ( ! [X2,X0,X1] : (pred_attacker(tuple_client_A_out_5(constr_add(constr_adec(X0,name_skA),constr_neg(name_Na)))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_4(X1,X0))) )),
   inference(cnf_transformation,[],[f422])).
 fof(f704,plain,(
   ~pred_attacker(name_Sa)),
@@ -191,16 +191,16 @@ fof(f707,plain,(
   ( ! [X0] : (~pred_attacker(tuple_client_A_in_2(X0))) ) | ~spl0_0),
   inference(avatar_component_clause,[],[f706])).
 fof(f709,plain,(
-  spl0_2 <=> ! [X1] : (pred_attacker(tuple_client_A_out_1(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | ~pred_attacker(tuple_client_A_in_1(X1)))),
+  spl0_2 <=> ! [X1] : (pred_attacker(tuple_client_A_out_3(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | ~pred_attacker(tuple_client_A_in_1(X1)))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
 fof(f710,plain,(
-  ( ! [X1] : (pred_attacker(tuple_client_A_out_1(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | ~pred_attacker(tuple_client_A_in_1(X1))) ) | ~spl0_2),
+  ( ! [X1] : (pred_attacker(tuple_client_A_out_3(name_A,constr_aenc(constr_add(name_Na,name_Sa),X1))) | ~pred_attacker(tuple_client_A_in_1(X1))) ) | ~spl0_2),
   inference(avatar_component_clause,[],[f709])).
 fof(f711,plain,(
   spl0_0 | spl0_2),
   inference(avatar_split_clause,[],[f699,f709,f706])).
 fof(f712,plain,(
-  ( ! [X2,X0,X1] : (pred_attacker(tuple_client_A_out_2(constr_add(constr_neg(name_Na),constr_adec(X0,name_skA)))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_3(X1,X0))) )),
+  ( ! [X2,X0,X1] : (pred_attacker(tuple_client_A_out_5(constr_add(constr_neg(name_Na),constr_adec(X0,name_skA)))) | ~pred_attacker(tuple_client_A_in_1(X2)) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_4(X1,X0))) )),
   inference(forward_demodulation,[],[f700,f622])).
 fof(f714,plain,(
   spl0_4 <=> ! [X2] : ~pred_attacker(tuple_client_A_in_1(X2))),
@@ -209,10 +209,10 @@ fof(f715,plain,(
   ( ! [X2] : (~pred_attacker(tuple_client_A_in_1(X2))) ) | ~spl0_4),
   inference(avatar_component_clause,[],[f714])).
 fof(f717,plain,(
-  spl0_6 <=> ! [X1,X0] : (pred_attacker(tuple_client_A_out_2(constr_add(constr_neg(name_Na),constr_adec(X0,name_skA)))) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_3(X1,X0)))),
+  spl0_6 <=> ! [X1,X0] : (pred_attacker(tuple_client_A_out_5(constr_add(constr_neg(name_Na),constr_adec(X0,name_skA)))) | ~pred_attacker(tuple_client_A_in_2(X1)) | ~pred_attacker(tuple_client_A_in_4(X1,X0)))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_6])])).
 fof(f718,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_in_3(X1,X0)) | ~pred_attacker(tuple_client_A_in_2(X1)) | pred_attacker(tuple_client_A_out_2(constr_add(constr_neg(name_Na),constr_adec(X0,name_skA))))) ) | ~spl0_6),
+  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_in_4(X1,X0)) | ~pred_attacker(tuple_client_A_in_2(X1)) | pred_attacker(tuple_client_A_out_5(constr_add(constr_neg(name_Na),constr_adec(X0,name_skA))))) ) | ~spl0_6),
   inference(avatar_component_clause,[],[f717])).
 fof(f719,plain,(
   spl0_4 | spl0_6),
@@ -248,16 +248,16 @@ fof(f872,plain,(
   ( ! [X0] : (pred_attacker(constr_aenc(constr_add(name_Na,name_Sa),X0)) | ~pred_attacker(tuple_client_A_in_1(X0))) ) | ~spl0_2),
   inference(resolution,[],[f710,f670])).
 fof(f878,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_in_2(X0)) | pred_attacker(tuple_client_A_out_2(constr_add(constr_neg(name_Na),constr_adec(X1,name_skA)))) | ~pred_attacker(X1) | ~pred_attacker(X0)) ) | ~spl0_6),
+  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_in_2(X0)) | pred_attacker(tuple_client_A_out_5(constr_add(constr_neg(name_Na),constr_adec(X1,name_skA)))) | ~pred_attacker(X1) | ~pred_attacker(X0)) ) | ~spl0_6),
   inference(resolution,[],[f718,f671])).
 fof(f879,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_in_2(X0)) | pred_attacker(tuple_client_A_out_2(constr_add(constr_neg(name_Na),constr_adec(X1,name_skA)))) | ~pred_attacker(X1)) ) | ~spl0_6),
+  ( ! [X0,X1] : (~pred_attacker(tuple_client_A_in_2(X0)) | pred_attacker(tuple_client_A_out_5(constr_add(constr_neg(name_Na),constr_adec(X1,name_skA)))) | ~pred_attacker(X1)) ) | ~spl0_6),
   inference(subsumption_resolution,[],[f878,f675])).
 fof(f881,plain,(
-  spl0_8 <=> ! [X1] : (pred_attacker(tuple_client_A_out_2(constr_add(constr_neg(name_Na),constr_adec(X1,name_skA)))) | ~pred_attacker(X1))),
+  spl0_8 <=> ! [X1] : (pred_attacker(tuple_client_A_out_5(constr_add(constr_neg(name_Na),constr_adec(X1,name_skA)))) | ~pred_attacker(X1))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_8])])).
 fof(f882,plain,(
-  ( ! [X1] : (pred_attacker(tuple_client_A_out_2(constr_add(constr_neg(name_Na),constr_adec(X1,name_skA)))) | ~pred_attacker(X1)) ) | ~spl0_8),
+  ( ! [X1] : (pred_attacker(tuple_client_A_out_5(constr_add(constr_neg(name_Na),constr_adec(X1,name_skA)))) | ~pred_attacker(X1)) ) | ~spl0_8),
   inference(avatar_component_clause,[],[f881])).
 fof(f883,plain,(
   spl0_8 | spl0_0 | ~spl0_6),

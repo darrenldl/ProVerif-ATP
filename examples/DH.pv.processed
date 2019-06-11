@@ -26,8 +26,8 @@ query
 
 fun A_out_1(bitstring, bitstring) : bitstring [data].
 fun A_out_2(bitstring) : bitstring [data].
-fun A_in_1(bitstring) : bitstring [data].
-fun A_out_3(bitstring) : bitstring [data].
+fun A_in_3(bitstring) : bitstring [data].
+fun A_out_4(bitstring) : bitstring [data].
 
 let A =
   new P : bitstring;
@@ -35,20 +35,20 @@ let A =
   new Na : bitstring;
   out(c, A_out_1(P, G));
   out(c, A_out_2(mod(exp(G, Na), P)));
-  in(c, A_in_1(B : bitstring));
+  in(c, A_in_3(B : bitstring));
   let s = mod(exp(B, Na), P) in
-  out(c, A_out_3(enc(objective, s)));
+  out(c, A_out_4(enc(objective, s)));
   0.
 
 fun B_in_1(bitstring, bitstring) : bitstring [data].
 fun B_in_2(bitstring) : bitstring [data].
-fun B_out_1(bitstring) : bitstring [data].
+fun B_out_3(bitstring) : bitstring [data].
 
 let B =
   new Nb : bitstring;
   in(c, B_in_1(P : bitstring, G : bitstring));
   in(c, B_in_2(A : bitstring));
-  out(c, B_out_1(mod(exp(G, Nb), P)));
+  out(c, B_out_3(mod(exp(G, Nb), P)));
   let s = mod(exp(A, Nb), P) in
   0.
 

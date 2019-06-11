@@ -29,7 +29,7 @@ fof(f55,axiom,(
   ! [X17] : (pred_attacker(X17) => pred_attacker(constr_split(X17)))),
   file('WEP-secrecy.p',unknown)).
 fof(f59,axiom,(
-  ! [X22,X23] : (pred_attacker(tuple_enc_oracle_out_1(X22,X23)) => pred_attacker(X23))),
+  ! [X22,X23] : (pred_attacker(tuple_enc_oracle_out_2(X22,X23)) => pred_attacker(X23))),
   file('WEP-secrecy.p',unknown)).
 fof(f60,axiom,(
   ! [X24] : (pred_attacker(X24) => pred_attacker(tuple_enc_oracle_in_1(X24)))),
@@ -44,7 +44,7 @@ fof(f75,axiom,(
   ! [X39,X40] : (pred_attacker(tuple_2(X39,X40)) => pred_attacker(X39))),
   file('WEP-secrecy.p',unknown)).
 fof(f82,axiom,(
-  ! [X49] : (pred_attacker(tuple_enc_oracle_in_1(X49)) => pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_concat(X49,constr_C(X49)),constr_RC4(name_v,name_Kab)))))),
+  ! [X49] : (pred_attacker(tuple_enc_oracle_in_1(X49)) => pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_concat(X49,constr_C(X49)),constr_RC4(name_v,name_Kab)))))),
   file('WEP-secrecy.p',unknown)).
 fof(f83,axiom,(
   pred_attacker(tuple_B_out_1(name_v,constr_xor(constr_concat(name_objective,constr_C(name_objective)),constr_RC4(name_v,name_Kab))))),
@@ -80,7 +80,7 @@ fof(f93,plain,(
   ! [X0] : (pred_attacker(X0) => pred_attacker(constr_split(X0)))),
   inference(rectify,[],[f55])).
 fof(f96,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_enc_oracle_out_1(X0,X1)) => pred_attacker(X1))),
+  ! [X0,X1] : (pred_attacker(tuple_enc_oracle_out_2(X0,X1)) => pred_attacker(X1))),
   inference(rectify,[],[f59])).
 fof(f97,plain,(
   ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_enc_oracle_in_1(X0)))),
@@ -92,7 +92,7 @@ fof(f106,plain,(
   ! [X0,X1] : (pred_attacker(tuple_2(X0,X1)) => pred_attacker(X0))),
   inference(rectify,[],[f75])).
 fof(f112,plain,(
-  ! [X0] : (pred_attacker(tuple_enc_oracle_in_1(X0)) => pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab)))))),
+  ! [X0] : (pred_attacker(tuple_enc_oracle_in_1(X0)) => pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab)))))),
   inference(rectify,[],[f82])).
 fof(f113,plain,(
   ~pred_attacker(name_objective)),
@@ -107,7 +107,7 @@ fof(f117,plain,(
   ! [X0] : (pred_attacker(constr_split(X0)) | ~pred_attacker(X0))),
   inference(ennf_transformation,[],[f93])).
 fof(f121,plain,(
-  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_enc_oracle_out_1(X0,X1)))),
+  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_enc_oracle_out_2(X0,X1)))),
   inference(ennf_transformation,[],[f96])).
 fof(f122,plain,(
   ! [X0] : (pred_attacker(tuple_enc_oracle_in_1(X0)) | ~pred_attacker(X0))),
@@ -119,7 +119,7 @@ fof(f135,plain,(
   ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1)))),
   inference(ennf_transformation,[],[f106])).
 fof(f141,plain,(
-  ! [X0] : (pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab)))) | ~pred_attacker(tuple_enc_oracle_in_1(X0)))),
+  ! [X0] : (pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab)))) | ~pred_attacker(tuple_enc_oracle_in_1(X0)))),
   inference(ennf_transformation,[],[f112])).
 fof(f187,plain,(
   ( ! [X0,X1] : (constr_split(constr_concat(X0,X1)) = tuple_2(X0,X1)) )),
@@ -149,7 +149,7 @@ fof(f196,plain,(
   ( ! [X0] : (pred_attacker(constr_split(X0)) | ~pred_attacker(X0)) )),
   inference(cnf_transformation,[],[f117])).
 fof(f200,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_enc_oracle_out_1(X0,X1)) | pred_attacker(X1)) )),
+  ( ! [X0,X1] : (~pred_attacker(tuple_enc_oracle_out_2(X0,X1)) | pred_attacker(X1)) )),
   inference(cnf_transformation,[],[f121])).
 fof(f201,plain,(
   ( ! [X0] : (pred_attacker(tuple_enc_oracle_in_1(X0)) | ~pred_attacker(X0)) )),
@@ -164,7 +164,7 @@ fof(f216,plain,(
   ( ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_2(X0,X1))) )),
   inference(cnf_transformation,[],[f135])).
 fof(f222,plain,(
-  ( ! [X0] : (pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab)))) | ~pred_attacker(tuple_enc_oracle_in_1(X0))) )),
+  ( ! [X0] : (pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_concat(X0,constr_C(X0)),constr_RC4(name_v,name_Kab)))) | ~pred_attacker(tuple_enc_oracle_in_1(X0))) )),
   inference(cnf_transformation,[],[f141])).
 fof(f223,plain,(
   pred_attacker(tuple_B_out_1(name_v,constr_xor(constr_concat(name_objective,constr_C(name_objective)),constr_RC4(name_v,name_Kab))))),
@@ -176,7 +176,7 @@ fof(f226,plain,(
   ( ! [X0,X1] : (~pred_attacker(constr_split(constr_concat(X0,X1))) | pred_attacker(X0)) )),
   inference(definition_unfolding,[],[f216,f187])).
 fof(f228,plain,(
-  ( ! [X0] : (pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(X0,constr_C(X0))))) | ~pred_attacker(tuple_enc_oracle_in_1(X0))) )),
+  ( ! [X0] : (pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(X0,constr_C(X0))))) | ~pred_attacker(tuple_enc_oracle_in_1(X0))) )),
   inference(forward_demodulation,[],[f222,f192])).
 fof(f229,plain,(
   pred_attacker(tuple_B_out_1(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(name_objective,constr_C(name_objective)))))),
@@ -203,10 +203,10 @@ fof(f290,plain,(
   pred_attacker(constr_xor(constr_RC4(name_v,name_Kab),constr_concat(name_objective,constr_C(name_objective))))),
   inference(resolution,[],[f229,f214])).
 fof(f294,plain,(
-  pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(constr_ZERO,constr_ZERO)))) | ~pred_attacker(tuple_enc_oracle_in_1(constr_ZERO))),
+  pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_RC4(name_v,name_Kab),constr_concat(constr_ZERO,constr_ZERO)))) | ~pred_attacker(tuple_enc_oracle_in_1(constr_ZERO))),
   inference(superposition,[],[f228,f264])).
 fof(f295,plain,(
-  pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_concat(constr_ZERO,constr_ZERO),constr_RC4(name_v,name_Kab)))) | ~pred_attacker(tuple_enc_oracle_in_1(constr_ZERO))),
+  pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_concat(constr_ZERO,constr_ZERO),constr_RC4(name_v,name_Kab)))) | ~pred_attacker(tuple_enc_oracle_in_1(constr_ZERO))),
   inference(forward_demodulation,[],[f294,f192])).
 fof(f300,plain,(
   spl0_1 <=> ~pred_attacker(tuple_enc_oracle_in_1(constr_ZERO))),
@@ -215,10 +215,10 @@ fof(f301,plain,(
   ~pred_attacker(tuple_enc_oracle_in_1(constr_ZERO)) | ~spl0_1),
   inference(avatar_component_clause,[],[f300])).
 fof(f306,plain,(
-  spl0_2 <=> pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_concat(constr_ZERO,constr_ZERO),constr_RC4(name_v,name_Kab))))),
+  spl0_2 <=> pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_concat(constr_ZERO,constr_ZERO),constr_RC4(name_v,name_Kab))))),
   introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
 fof(f307,plain,(
-  pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_concat(constr_ZERO,constr_ZERO),constr_RC4(name_v,name_Kab)))) | ~spl0_2),
+  pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_concat(constr_ZERO,constr_ZERO),constr_RC4(name_v,name_Kab)))) | ~spl0_2),
   inference(avatar_component_clause,[],[f306])).
 fof(f308,plain,(
   ~spl0_1 | spl0_2),
@@ -242,10 +242,10 @@ fof(f321,plain,(
   constr_ZERO = constr_concat(constr_ZERO,constr_ZERO)),
   inference(forward_demodulation,[],[f320,f190])).
 fof(f322,plain,(
-  pred_attacker(tuple_enc_oracle_out_1(name_v,constr_xor(constr_ZERO,constr_RC4(name_v,name_Kab)))) | ~spl0_2),
+  pred_attacker(tuple_enc_oracle_out_2(name_v,constr_xor(constr_ZERO,constr_RC4(name_v,name_Kab)))) | ~spl0_2),
   inference(backward_demodulation,[],[f321,f307])).
 fof(f323,plain,(
-  pred_attacker(tuple_enc_oracle_out_1(name_v,constr_RC4(name_v,name_Kab))) | ~spl0_2),
+  pred_attacker(tuple_enc_oracle_out_2(name_v,constr_RC4(name_v,name_Kab))) | ~spl0_2),
   inference(forward_demodulation,[],[f322,f231])).
 fof(f341,plain,(
   pred_attacker(constr_RC4(name_v,name_Kab)) | ~spl0_2),

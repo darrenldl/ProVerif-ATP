@@ -286,27 +286,27 @@ fof(ax133, axiom,
 fof(ax134, axiom,
 pred_attacker(constr_ZERO)).
 fof(ax135, axiom,
-![VAR_V_97] : (pred_attacker(VAR_V_97) => pred_attacker(tuple_T_out_3(VAR_V_97)))).
+![VAR_V_97] : (pred_attacker(VAR_V_97) => pred_attacker(tuple_T_out_6(VAR_V_97)))).
 fof(ax136, axiom,
-![VAR_V_10X300X30] : (pred_attacker(tuple_T_out_3(VAR_V_10X300X30)) => pred_attacker(VAR_V_10X300X30))).
+![VAR_V_10X300X30] : (pred_attacker(tuple_T_out_6(VAR_V_10X300X30)) => pred_attacker(VAR_V_10X300X30))).
 fof(ax137, axiom,
-![VAR_V_10X303] : (pred_attacker(VAR_V_10X303) => pred_attacker(tuple_T_out_2(VAR_V_10X303)))).
+![VAR_V_10X303] : (pred_attacker(VAR_V_10X303) => pred_attacker(tuple_T_out_4(VAR_V_10X303)))).
 fof(ax138, axiom,
-![VAR_V_10X306] : (pred_attacker(tuple_T_out_2(VAR_V_10X306)) => pred_attacker(VAR_V_10X306))).
+![VAR_V_10X306] : (pred_attacker(tuple_T_out_4(VAR_V_10X306)) => pred_attacker(VAR_V_10X306))).
 fof(ax139, axiom,
-![VAR_V_10X309] : (pred_attacker(VAR_V_10X309) => pred_attacker(tuple_T_out_1(VAR_V_10X309)))).
+![VAR_V_10X309] : (pred_attacker(VAR_V_10X309) => pred_attacker(tuple_T_out_2(VAR_V_10X309)))).
 fof(ax140, axiom,
-![VAR_V_112] : (pred_attacker(tuple_T_out_1(VAR_V_112)) => pred_attacker(VAR_V_112))).
+![VAR_V_112] : (pred_attacker(tuple_T_out_2(VAR_V_112)) => pred_attacker(VAR_V_112))).
 fof(ax141, axiom,
-![VAR_V_115] : (pred_attacker(VAR_V_115) => pred_attacker(tuple_T_in_3(VAR_V_115)))).
+![VAR_V_115] : (pred_attacker(VAR_V_115) => pred_attacker(tuple_T_in_5(VAR_V_115)))).
 fof(ax142, axiom,
-![VAR_V_118] : (pred_attacker(tuple_T_in_3(VAR_V_118)) => pred_attacker(VAR_V_118))).
+![VAR_V_118] : (pred_attacker(tuple_T_in_5(VAR_V_118)) => pred_attacker(VAR_V_118))).
 fof(ax143, axiom,
-![VAR_V_122, VAR_V_123] : ((pred_attacker(VAR_V_122) & pred_attacker(VAR_V_123)) => pred_attacker(tuple_T_in_2(VAR_V_122, VAR_V_123)))).
+![VAR_V_122, VAR_V_123] : ((pred_attacker(VAR_V_122) & pred_attacker(VAR_V_123)) => pred_attacker(tuple_T_in_3(VAR_V_122, VAR_V_123)))).
 fof(ax144, axiom,
-![VAR_V_130X30, VAR_V_131] : (pred_attacker(tuple_T_in_2(VAR_V_130X30, VAR_V_131)) => pred_attacker(VAR_V_130X30))).
+![VAR_V_130X30, VAR_V_131] : (pred_attacker(tuple_T_in_3(VAR_V_130X30, VAR_V_131)) => pred_attacker(VAR_V_130X30))).
 fof(ax145, axiom,
-![VAR_V_133, VAR_V_134] : (pred_attacker(tuple_T_in_2(VAR_V_133, VAR_V_134)) => pred_attacker(VAR_V_134))).
+![VAR_V_133, VAR_V_134] : (pred_attacker(tuple_T_in_3(VAR_V_133, VAR_V_134)) => pred_attacker(VAR_V_134))).
 fof(ax146, axiom,
 ![VAR_V_137] : (pred_attacker(VAR_V_137) => pred_attacker(tuple_T_in_1(VAR_V_137)))).
 fof(ax147, axiom,
@@ -346,8 +346,8 @@ pred_attacker(tuple_knowledge_from_1st_round_out_4(constr_xor(constr_add(constr_
 fof(ax164, axiom,
 pred_attacker(tuple_knowledge_from_1st_round_out_5(constr_xor(name_PIN1, constr_f(constr_xor(name_r2_from_1st_round, constr_xor(name_PIN2, name_r1_from_1st_round))))))).
 fof(ax165, axiom,
-pred_attacker(tuple_T_in_1(constr_QUERY_REQ)) => pred_attacker(tuple_T_out_1(constr_xor(name_r1, name_PIN1)))).
+pred_attacker(tuple_T_in_1(constr_QUERY_REQ)) => pred_attacker(tuple_T_out_2(constr_xor(name_r1, name_PIN1)))).
 fof(ax166, axiom,
-![VAR_R2_421] : ((pred_attacker(tuple_T_in_2(constr_ACK(constr_xor(name_r1, name_PIN1)), VAR_R2_421)) & pred_attacker(tuple_T_in_1(constr_QUERY_REQ))) => pred_attacker(tuple_T_out_2(constr_xor(constr_add(constr_concat(constr_ZERO, constr_concat(name_r1, constr_concat(constr_xor(constr_xor(VAR_R2_421, name_PIN2), name_r1), constr_f(constr_xor(constr_xor(VAR_R2_421, name_PIN2), name_r1))))), name_S), name_EPC))))).
+![VAR_R2_421] : ((pred_attacker(tuple_T_in_3(constr_ACK(constr_xor(name_r1, name_PIN1)), VAR_R2_421)) & pred_attacker(tuple_T_in_1(constr_QUERY_REQ))) => pred_attacker(tuple_T_out_4(constr_xor(constr_add(constr_concat(constr_ZERO, constr_concat(name_r1, constr_concat(constr_xor(constr_xor(VAR_R2_421, name_PIN2), name_r1), constr_f(constr_xor(constr_xor(VAR_R2_421, name_PIN2), name_r1))))), name_S), name_EPC))))).
 fof(co0, conjecture,
 pred_attacker(name_objective)).

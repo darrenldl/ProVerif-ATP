@@ -1807,16 +1807,23 @@ module Protocol_step = struct
       | ["in"; n] ->
         aux [] proc_name_parts (Some In) (int_of_string_opt n)
       | x :: xs ->
-        aux xs (x :: proc_name_parts) in_out n
+        if x = "tuple" then
+          aux xs proc_name_parts in_out n
+        else
+          aux xs (x :: proc_name_parts) in_out n
     in
     aux (String.split_on_char '_' s) [] None None
 
   let node_to_steps (node : node) : t list =
     let expr_to_steps e =
       match Analyzed_expr.(e |> strip_att) with
-      | Function (name, [expr]) -> (
+      | Function (name, exprs) -> (
           match break_down_step_string name with
           | proc_name, Some in_out, Some step_num ->
+            let expr = match exprs with
+              | [e] -> e
+              | es -> Function (Printf.sprintf "tuple_%d" (List.length es), es)
+            in
             [ { proc_name
               ; in_out
               ; step_num
@@ -1833,12 +1840,15 @@ module Protocol_step = struct
     | Data node -> (
         match node.classification with
         | ProtocolStep ->
-          expr_to_steps node.expr
+          let open Analyzed_expr in
+          (* Js_utils.console_log (Printf.sprintf "expr : %s" (Analyzed_expr.expr_to_string node.expr)); *)
+          node.expr |> strip_quant |> expr_to_steps
         | InteractiveProtocolStep ->
+          (* Js_utils.console_log (Printf.sprintf "expr : %s" (Analyzed_expr.expr_to_string node.expr)); *)
           let open Analyzed_expr in
           node.expr |> strip_quant |> split_on_impl
           |> (function None -> failwith "Unexpected None" | Some x -> x)
-          |> fun (pre, e) -> expr_to_steps pre @ expr_to_steps e
+          |> (fun (pre, e) -> (*Js_utils.console_log (Printf.sprintf "pre : %s, e : %s" (Analyzed_expr.expr_to_string pre) (Analyzed_expr.expr_to_string e));*) expr_to_steps pre @ expr_to_steps e)
         | _ ->
           [] )
 end
@@ -1914,6 +1924,16 @@ let classify_protocol_step (m : node_graph) : node_graph =
           let classification =
             match data.expr with
             | Function ("attacker", [Function (name, _)]) -> (
+                match Protocol_step.break_down_step_string name with
+                | _, Some _, Some _ ->
+                  ProtocolStep
+                | _ ->
+                  data.classification )
+            | Quantified
+                ( _
+                , _
+                , Function ("attacker", [Function (name, _)])
+                ) -> (
                 match Protocol_step.break_down_step_string name with
                 | _, Some _, Some _ ->
                   ProtocolStep
@@ -3033,9 +3053,10 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
         if
           classification = ProtocolStep
           || classification = InteractiveProtocolStep
-        then
+        then (
           let steps = Protocol_step.node_to_steps node in
           steps @ List.filter (fun s -> not (List.mem s steps)) acc
+        )
         else acc
       | _ ->
         acc
@@ -3048,13 +3069,13 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
       | x :: xs ->
         (* check if any other path upward (i.e. a turn) to take *)
         let choices_upward =
-          List.filter
-            (fun x ->
-               match last_id with
-               | None ->
-                 true
-               | Some last_id ->
-                 x <> last_id )
+          (* List.filter
+           *   (fun x ->
+           *      match last_id with
+           *      | None ->
+           *        true
+           *      | Some last_id ->
+           *        x <> last_id ) *)
             (find_parents x m)
         in
         (* collect steps reachable from the paths upward *)
@@ -3081,9 +3102,24 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
             || (unwrap_data n).classification = InteractiveProtocolStep )
          m)
   in
+  List.iter (fun (_, node) -> let n = unwrap_data node in Js_utils.console_log (Printf.sprintf "step node : %s" (Analyzed_expr.expr_to_string n.expr))) step_nodes;
   let paths =
-    List.concat (List.map (fun (id, _) -> paths_to_root id m) step_nodes)
+    List.concat (List.map (fun (id, _node) ->
+        Js_utils.console_log (Printf.sprintf "expr : %s, paths : [%s]"
+                                (Analyzed_expr.expr_to_string (unwrap_data _node).expr)
+                                (String.concat ", "
+                                   (List.map (fun l -> Printf.sprintf "[%s]"
+                                                 (String.concat ", " l)) (paths_to_root id m))
+                                )
+                             );
+        paths_to_root id m) step_nodes)
   in
+  let steps =
+    List.concat
+    (List.map (fun path -> steps_reachable path m) paths)
+  in
+  List.iter (fun { proc_name; in_out; direction; step_num; expr } ->
+      Js_utils.console_log (Printf.sprintf "test0 : %s, %d, %s" (match proc_name with | None -> "" | Some s -> s) step_num (Analyzed_expr.expr_to_string expr))) steps;
   let steps =
     List.fold_left
       (fun acc l ->
@@ -3096,10 +3132,12 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
                          (match x.proc_name with None -> "" | Some x -> x)
                          x.step_num )
                     l)));
-         Misc_utils.zip l acc )
+         Misc_utils.zip l acc
+      )
       []
       (List.map (fun path -> steps_reachable path m) paths)
   in
+  List.iter (fun { proc_name; in_out; direction; step_num; expr } -> Js_utils.console_log (Printf.sprintf "test100 : %s, %d, %s" (match proc_name with | None -> "" | Some s -> s) step_num (Analyzed_expr.expr_to_string expr))) steps;
   let steps =
     List.fold_left
       (* if there are multiple occurances of a step, only keep the later ones *)

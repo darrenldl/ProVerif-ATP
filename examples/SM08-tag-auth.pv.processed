@@ -37,20 +37,20 @@ query
   attacker(objective).
 
 fun R_out_1(bitstring) : bitstring [data].
-fun R_in_1(bitstring, bitstring) : bitstring [data].
-fun R_out_2(bitstring) : bitstring [data].
+fun R_in_2(bitstring, bitstring) : bitstring [data].
 fun R_out_3(bitstring) : bitstring [data].
+fun R_out_4(bitstring) : bitstring [data].
 
 let R =
   new r1 : bitstring;
   out(c, R_out_1(r1));
-  in(c, R_in_1(M1_in : bitstring, M2_in : bitstring));
+  in(c, R_in_2(M1_in : bitstring, M2_in : bitstring));
   let r2 = xor(M1_in, t) in
   
   if M2_in = f(xor(r1, r2), t) then
   let M3 = xor(u, cyc_shr_half_len(r2)) in
-  out(c, R_out_2(M3));
-  out(c, R_out_3(objective));
+  out(c, R_out_3(M3));
+  out(c, R_out_4(objective));
   0.
 
 fun knowledge_from_1st_round_out_1(bitstring) : bitstring [data].

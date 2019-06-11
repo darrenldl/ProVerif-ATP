@@ -107,13 +107,13 @@ let attack_trace node_map =
             else ""
           in
           let expr = Vampire.Analyzed_expr.expr_to_string s.expr in
-          match s.direction with
-          | Client_to_intruder ->
+          match s.in_out with
+          | Out ->
             Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
               global_step_num proc_name s.step_num proc_name_padding_on_right
               proc_name_padding_on_left proc_name intruder_name
               intruder_name_padding_on_right expr
-          | Intruder_to_client ->
+          | In ->
             Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
               global_step_num proc_name s.step_num proc_name_padding_on_right
               intruder_name_padding_on_left intruder_name proc_name

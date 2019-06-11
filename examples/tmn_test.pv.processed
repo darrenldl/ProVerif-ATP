@@ -79,17 +79,17 @@ let session_i(pkS : bitstring) =
   0.
 
 fun server_S_in_1(bitstring, bitstring) : bitstring [data].
-fun server_S_out_1(bitstring) : bitstring [data].
-fun server_S_in_2(bitstring, bitstring) : bitstring [data].
 fun server_S_out_2(bitstring) : bitstring [data].
+fun server_S_in_3(bitstring, bitstring) : bitstring [data].
+fun server_S_out_4(bitstring) : bitstring [data].
 
 let server_S(skS : bitstring, pkS : bitstring) =
   in(c, server_S_in_1(=B, enc_Ka_pkS : bitstring));
   let Ka = pk_dec(enc_Ka_pkS, skS) in
-  out(c, server_S_out_1(A));
-  in(c, server_S_in_2(=A, enc_Kb_pkS : bitstring));
+  out(c, server_S_out_2(A));
+  in(c, server_S_in_3(=A, enc_Kb_pkS : bitstring));
   let Kb = pk_dec(enc_Kb_pkS, skS) in
-  out(c, server_S_out_2(xor(Kb, Ka)));
+  out(c, server_S_out_4(xor(Kb, Ka)));
   0.
 
 process

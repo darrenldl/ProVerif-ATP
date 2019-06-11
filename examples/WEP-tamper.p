@@ -154,9 +154,9 @@ pred_attacker(constr_CONST_0x30)).
 fof(ax68, axiom,
 ![VAR_V_58] : (pred_attacker(VAR_V_58) => pred_attacker(constr_C(VAR_V_58)))).
 fof(ax69, axiom,
-![VAR_V_60X30] : (pred_attacker(VAR_V_60X30) => pred_attacker(tuple_B_out_1(VAR_V_60X30)))).
+![VAR_V_60X30] : (pred_attacker(VAR_V_60X30) => pred_attacker(tuple_B_out_2(VAR_V_60X30)))).
 fof(ax70, axiom,
-![VAR_V_63] : (pred_attacker(tuple_B_out_1(VAR_V_63)) => pred_attacker(VAR_V_63))).
+![VAR_V_63] : (pred_attacker(tuple_B_out_2(VAR_V_63)) => pred_attacker(VAR_V_63))).
 fof(ax71, axiom,
 ![VAR_V_67, VAR_V_68] : ((pred_attacker(VAR_V_67) & pred_attacker(VAR_V_68)) => pred_attacker(tuple_B_in_1(VAR_V_67, VAR_V_68)))).
 fof(ax72, axiom,

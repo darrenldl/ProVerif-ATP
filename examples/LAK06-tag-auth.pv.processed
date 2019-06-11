@@ -32,18 +32,18 @@ query
   attacker(objective_R).
 
 fun R_out_1(bitstring) : bitstring [data].
-fun R_in_1(bitstring, bitstring) : bitstring [data].
-fun R_out_2(bitstring) : bitstring [data].
+fun R_in_2(bitstring, bitstring) : bitstring [data].
 fun R_out_3(bitstring) : bitstring [data].
+fun R_out_4(bitstring) : bitstring [data].
 
 let R =
   new r0 : bitstring;
   out(c, R_out_1(r0));
-  in(c, R_in_1(r1_in : bitstring, h_res : bitstring));
+  in(c, R_in_2(r1_in : bitstring, h_res : bitstring));
   
   if h_res = h(xor(xor(r0, r1_in), k)) then
-  out(c, R_out_2(h(xor(xor(h_res, k), r0))));
-  out(c, R_out_3(objective_R));
+  out(c, R_out_3(h(xor(xor(h_res, k), r0))));
+  out(c, R_out_4(objective_R));
   0.
 
 fun knowledge_from_1st_round_out_1(bitstring) : bitstring [data].

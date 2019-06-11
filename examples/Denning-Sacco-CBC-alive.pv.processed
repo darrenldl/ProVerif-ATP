@@ -85,7 +85,7 @@ query
   attacker(objective).
 
 fun client_B_in_1(bitstring) : bitstring [data].
-fun client_B_out_1(bitstring) : bitstring [data].
+fun client_B_out_2(bitstring) : bitstring [data].
 
 let client_B(Kbs : bitstring) =
   new Nb : bitstring;
@@ -94,12 +94,12 @@ let client_B(Kbs : bitstring) =
   if eq_bitstring_bitstring(A, tuple_3_get_0(cbc_dec_3(enc_A_Kab_T, Kbs))) then
   let Kab : bitstring = tuple_3_get_1_bitstring(cbc_dec_3(enc_A_Kab_T, Kbs)) in
   let T : bitstring = tuple_3_get_2_bitstring(cbc_dec_3(enc_A_Kab_T, Kbs)) in
-  out(c, client_B_out_1(objective));
+  out(c, client_B_out_2(objective));
   0.
 
 fun server_S_in_1(bitstring, bitstring) : bitstring [data].
-fun server_S_out_1(bitstring) : bitstring [data].
 fun server_S_out_2(bitstring) : bitstring [data].
+fun server_S_out_3(bitstring) : bitstring [data].
 
 let server_S(Kas : bitstring, Kbs : bitstring) =
   new Kab : bitstring;
@@ -107,12 +107,12 @@ let server_S(Kas : bitstring, Kbs : bitstring) =
   in(c, server_S_in_1(src : bitstring, dst : bitstring));
   
   if src = A && dst = B then (
-    out(c, server_S_out_2(cbc_enc_4(B, Kab, T, cbc_enc_3(A, Kab, T, Kbs), Kas)));
+    out(c, server_S_out_3(cbc_enc_4(B, Kab, T, cbc_enc_3(A, Kab, T, Kbs), Kas)));
     0
   ) else (
     
     if src = B && dst = A then
-    out(c, server_S_out_1(cbc_enc_4(A, Kab, T, cbc_enc_3(B, Kab, T, Kas), Kbs)));
+    out(c, server_S_out_2(cbc_enc_4(A, Kab, T, cbc_enc_3(B, Kab, T, Kas), Kbs)));
     0
   ).
 
