@@ -239,7 +239,7 @@ let rec pterm_to_string t =
       (binary_op_to_string op)
       ( match r with
         | PT_name _ | PT_app _ | PT_unaryOp _ ->
-          pterm_to_string l
+          pterm_to_string r
         | _ ->
           Printf.sprintf "(%s)" (pterm_to_string r) )
   | PT_new {name; next} ->
