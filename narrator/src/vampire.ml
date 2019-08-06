@@ -2225,76 +2225,76 @@ let rewrite_conclusion (m : node_graph) : node_graph =
     (* replace contradiction with goal *)
     add_node Overwrite goal_id goal ~children:[] ~parents m
 
-let classify_nodes (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify_node () (id : id) (node : node) (m : node_graph) =
-    let parents = find_parents id m in
-    let new_node =
-      match parents with
-      | [] ->
-        let data = unwrap_data node in
-        let is_negated_goal = data.derive_descr = "negated conjecture" in
-        let func_names = Analyzed_expr.get_function_names data.expr in
-        let is_axiom =
-          match data.expr with
-          | Analyzed_expr.Quantified _ ->
-            true
-          | _ ->
-            false
-        in
-        let is_knowledge_possibly =
-          List.filter (fun x -> x = "attacker") func_names <> []
-        in
-        { data with
-          classification =
-            ( if is_negated_goal then NegatedGoal
-              else if is_axiom then Axiom
-              else if is_knowledge_possibly then InitialKnowledge
-              else Unsure ) }
-      | parents ->
-        let data = unwrap_data node in
-        let is_negated_goal = data.derive_descr = "negated conjecture" in
-        let is_contradiction = data.expr = False in
-        let parents = find_nodes parents m in
-        let any_parent_negated_goal =
-          List.filter
-            (fun (x : node) -> (unwrap_data x).classification = NegatedGoal)
-            parents
-          <> []
-        in
-        let all_parents_rewrite =
-          List.filter
-            (fun (x : node) ->
-               let data = unwrap_data x in
-               data.classification = Axiom || data.classification = Rewriting)
-            parents
-          = parents
-          && parents <> []
-        in
-        let any_parent_knowledge =
-          List.filter
-            (fun (x : node) ->
-               let data = unwrap_data x in
-               data.classification = InitialKnowledge
-               || data.classification = Knowledge)
-            parents
-          <> []
-        in
-        { data with
-          classification =
-            ( if is_contradiction then Contradiction
-              else if is_negated_goal then NegatedGoal
-              else if all_parents_rewrite then Rewriting
-              else if any_parent_knowledge then Knowledge
-              else if any_parent_negated_goal then NegatedGoal
-              else Unsure ) }
-    in
-    ((), Analyzed_graph.add_node Overwrite id (Data new_node) m)
-  in
-  let (), m =
-    Analyzed_graph.linear_traverse () (Full_traversal classify_node) m
-  in
-  m
+(* let classify_nodes (m : node_graph) : node_graph =
+ *   let open Analyzed_graph in
+ *   let classify_node () (id : id) (node : node) (m : node_graph) =
+ *     let parents = find_parents id m in
+ *     let new_node =
+ *       match parents with
+ *       | [] ->
+ *         let data = unwrap_data node in
+ *         let is_negated_goal = data.derive_descr = "negated conjecture" in
+ *         let func_names = Analyzed_expr.get_function_names data.expr in
+ *         let is_axiom =
+ *           match data.expr with
+ *           | Analyzed_expr.Quantified _ ->
+ *             true
+ *           | _ ->
+ *             false
+ *         in
+ *         let is_knowledge_possibly =
+ *           List.filter (fun x -> x = "attacker") func_names <> []
+ *         in
+ *         { data with
+ *           classification =
+ *             ( if is_negated_goal then NegatedGoal
+ *               else if is_axiom then Axiom
+ *               else if is_knowledge_possibly then InitialKnowledge
+ *               else Unsure ) }
+ *       | parents ->
+ *         let data = unwrap_data node in
+ *         let is_negated_goal = data.derive_descr = "negated conjecture" in
+ *         let is_contradiction = data.expr = False in
+ *         let parents = find_nodes parents m in
+ *         let any_parent_negated_goal =
+ *           List.filter
+ *             (fun (x : node) -> (unwrap_data x).classification = NegatedGoal)
+ *             parents
+ *           <> []
+ *         in
+ *         let all_parents_rewrite =
+ *           List.filter
+ *             (fun (x : node) ->
+ *                let data = unwrap_data x in
+ *                data.classification = Axiom || data.classification = Rewriting)
+ *             parents
+ *           = parents
+ *           && parents <> []
+ *         in
+ *         let any_parent_knowledge =
+ *           List.filter
+ *             (fun (x : node) ->
+ *                let data = unwrap_data x in
+ *                data.classification = InitialKnowledge
+ *                || data.classification = Knowledge)
+ *             parents
+ *           <> []
+ *         in
+ *         { data with
+ *           classification =
+ *             ( if is_contradiction then Contradiction
+ *               else if is_negated_goal then NegatedGoal
+ *               else if all_parents_rewrite then Rewriting
+ *               else if any_parent_knowledge then Knowledge
+ *               else if any_parent_negated_goal then NegatedGoal
+ *               else Unsure ) }
+ *     in
+ *     ((), Analyzed_graph.add_node Overwrite id (Data new_node) m)
+ *   in
+ *   let (), m =
+ *     Analyzed_graph.linear_traverse () (Full_traversal classify_node) m
+ *   in
+ *   m *)
 
 let remove_goal (m : node_graph) : node_graph =
   let open Analyzed_graph in
