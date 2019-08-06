@@ -183,7 +183,7 @@ let zoom_out_by (cy : t Js.t) (level : float) : unit =
   let level_old = zoom_get cy in
   zoom cy (level_old -. level)
 
-let add_node (cy : t Js.t) ~(id : string) ~ (* ~(label : string) *)
+let add_node (cy : t Js.t) ~(id : string) ~(* ~(label : string) *)
     (x : int) ~(y : int) : unit =
   let data =
     object%js
@@ -252,7 +252,9 @@ let on ?(selector : string option) (cy : t Js.t) ~(event : string)
     ~(handler : event Js.t -> unit) : unit =
   let handler : event Js.t -> unit =
     fun ev ->
-      Js_of_ocaml_lwt.Lwt_js.yield () >>= (fun () -> handler ev; Lwt.return_unit) |> ignore
+      Js_of_ocaml_lwt.Lwt_js.yield ()
+      >>= (fun () -> handler ev; Lwt.return_unit)
+      |> ignore
   in
   match selector with
   | None ->

@@ -631,7 +631,7 @@ struct
                | None ->
                  None
                | Some n ->
-                 Some (id, n) )
+                 Some (id, n))
             ids))
 
   let find_group (id : id) (m : t) : id =
@@ -882,7 +882,7 @@ struct
       linear_traverse None
         (Partial_traversal_pure
            (fun _acc id node m ->
-              if pred id node m then (true, Some id) else (false, None) ))
+              if pred id node m then (true, Some id) else (false, None)))
         m
     in
     res
@@ -921,7 +921,7 @@ struct
       in
       List.fold_left
         (fun res ((id1, n1), (id2, n2)) ->
-           res && label id1 n1 m1 = label id2 n2 m2 )
+           res && label id1 n1 m1 = label id2 n2 m2)
         true combined
     in
     let rec remove_common (id1 : id) (n1 : node) (m1 : t) (id2 : id)
@@ -940,7 +940,7 @@ struct
         in
         List.fold_left
           (fun (m1, m2) ((id1, n1), (id2, n2)) ->
-             remove_common id1 n1 m1 id2 n2 m2 )
+             remove_common id1 n1 m1 id2 n2 m2)
           (m1, m2) combined
       else (m1, m2)
     in
@@ -1006,7 +1006,7 @@ struct
                    && IdMap.find id prev.parents_lookup
                       <> IdMap.find id cur.parents_lookup
               in
-              if different then id :: acc else acc ))
+              if different then id :: acc else acc))
         prev
     in
     (* move new invisible nodes to changed_ids if needed *)
@@ -1017,7 +1017,7 @@ struct
              (fun (removed_ids, changed_ids) id _ cur ->
                 let visible = IdMap.find id cur.node_visibility in
                 if visible then (removed_ids, id :: changed_ids)
-                else (id :: removed_ids, changed_ids) ))
+                else (id :: removed_ids, changed_ids)))
           cur
         |> Misc_utils.unwrap_tuple_0
       else (removed_ids, changed_ids)
@@ -1064,7 +1064,7 @@ struct
                     group_lookup
                   ; group_members_lookup
                   ; children_lookup
-                  ; parents_lookup } ) ))
+                  ; parents_lookup } )))
           m
       in
       (* collect parents and children *)
@@ -1082,7 +1082,7 @@ struct
                   List.filter (fun x -> not (IdSet.mem x id_set)) children
                   :: children_acc
                 in
-                (parents_acc, children_acc) ))
+                (parents_acc, children_acc)))
           m
       in
       let parents = List.concat parents in
@@ -1133,7 +1133,7 @@ struct
                     | _ ->
                       id :: acc
                 in
-                (acc, m) ))
+                (acc, m)))
           m
       in
       let ids = id :: ids in
@@ -1159,10 +1159,10 @@ struct
                         (Full_traversal_pure
                            (fun acc id _node m ->
                               if IdMap.mem id m.group_lookup then id :: acc
-                              else acc ))
+                              else acc))
                         m
                     in
-                    ids :: acc ))
+                    ids :: acc))
               m
           in
           let ids = List.sort_uniq compare (List.concat ids) in
@@ -1204,10 +1204,10 @@ struct
                         (Full_traversal_pure
                            (fun acc id _node m ->
                               if IdMap.mem id m.group_lookup then id :: acc
-                              else acc ))
+                              else acc))
                         m
                     in
-                    ids :: acc ))
+                    ids :: acc))
               m
           in
           let ids = List.sort_uniq compare (List.concat ids) in
@@ -1266,7 +1266,7 @@ struct
         (fun (id_src, id_dst) ->
            let id_src_str = id_to_string id_src in
            let id_dst_str = id_to_string id_dst in
-           Dagre.set_edge dagre ~source:id_src_str ~target:id_dst_str )
+           Dagre.set_edge dagre ~source:id_src_str ~target:id_dst_str)
         edges
     in
     let sync_dagre_xy_to_table () (id : id) (_node : node) (_m : t) : unit =
@@ -1296,7 +1296,7 @@ struct
            let id_src_str = id_to_string id_src in
            let id_dst_str = id_to_string id_dst in
            let id = Printf.sprintf "%s_%s" id_src_str id_dst_str in
-           Cytoscape.add_edge cy ~id ~source:id_src_str ~target:id_dst_str )
+           Cytoscape.add_edge cy ~id ~source:id_src_str ~target:id_dst_str)
         edges
     in
     let sync_node_xy_to_cy () (id : id) (_node : node) (_m : t) : unit =
@@ -1340,7 +1340,7 @@ struct
             |> Misc_utils.unwrap_tuple_1
             (* ask Dagre to compute the layout *)
             |> fun m -> Dagre.layout dagre; m )
-          else m )
+          else m)
       (* sync x, y of all nodes from Dagre to map  *)
       |> linear_traverse ~ids:all_cur_ids ()
         (Full_traversal_pure sync_dagre_xy_to_table)
@@ -1366,7 +1366,7 @@ struct
             @ List.concat (List.map (fun id -> edges_of_node id m) new_nodes)
           in
           let edges = List.sort_uniq compare edges in
-          add_edges_to_cy edges; m )
+          add_edges_to_cy edges; m)
       (* |> linear_traverse            ~ids:changed_nodes () (Full_traversal_pure add_node_edges_to_cy) |> Misc_utils.unwrap_tuple_1 *)
       (* |> linear_traverse            ~ids:new_nodes     () (Full_traversal_pure add_node_edges_to_cy) |> Misc_utils.unwrap_tuple_1 *)
 
@@ -1405,7 +1405,7 @@ struct
       List.iter
         (fun child_id ->
            let child_id = id_to_string child_id in
-           Dagre.set_edge dagre ~source:id_str ~target:child_id )
+           Dagre.set_edge dagre ~source:id_str ~target:child_id)
         children
     in
     let sync_dagre_xy_to_node () (id : id) (_node : node) (_m : t) : unit =
@@ -1434,7 +1434,7 @@ struct
            let source = id_to_string id in
            let target = child_id in
            let id = Printf.sprintf "%s_%s" (id_to_string id) child_id in
-           Cytoscape.add_edge cy ~id ~source ~target )
+           Cytoscape.add_edge cy ~id ~source ~target)
         children
     in
     m
@@ -1444,7 +1444,7 @@ struct
         | None ->
           m
         | Some v ->
-          update_label_visibility v m )
+          update_label_visibility v m)
     |> (fun m -> Cytoscape.clear cy; m)
     |> (fun m ->
         if label_affect_dag then
@@ -1456,7 +1456,7 @@ struct
           |> (fun m -> Dagre.layout dagre; m)
           |> linear_traverse () (Full_traversal_pure sync_dagre_xy_to_node)
           |> Misc_utils.unwrap_tuple_1
-        else m )
+        else m)
     |> linear_traverse () (Full_traversal_pure add_node_to_cy)
     |> Misc_utils.unwrap_tuple_1
     |> linear_traverse () (Full_traversal_pure add_edge_to_cy)

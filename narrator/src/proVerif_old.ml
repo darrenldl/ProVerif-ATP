@@ -260,7 +260,7 @@ module Raw_expr = struct
         (List.fold_left
            (fun acc (indent, s) ->
               let padding = String.make (indent * indent_space_count) ' ' in
-              Printf.sprintf "%s%s" padding s :: acc )
+              Printf.sprintf "%s%s" padding s :: acc)
            [] ctx.buffer)
   end
 
@@ -280,7 +280,7 @@ module Raw_expr = struct
                     | Ident_ty (i, ty) ->
                       Printf.sprintf "%s : %s" i ty
                     | Pat e ->
-                      Printf.sprintf "=%s" (expr_to_string e) )
+                      Printf.sprintf "=%s" (expr_to_string e))
                   args))
             (expr_to_string e) )
     | IfElse x -> (
@@ -308,7 +308,7 @@ module Raw_expr = struct
                  | Ident_ty (i, ty) ->
                    Printf.sprintf "%s:%s" i ty
                  | Pat e ->
-                   Printf.sprintf "=%s" (expr_to_string e) )
+                   Printf.sprintf "=%s" (expr_to_string e))
               args))
     | Out (ident, e) ->
       Printf.sprintf "out(%s, %s);" ident (expr_to_string e)
@@ -326,7 +326,7 @@ module Raw_expr = struct
                 | Ident_ty (i, ty) ->
                   Printf.sprintf "%s : %s" i ty
                 | Pat e ->
-                  Printf.sprintf "=%s" (expr_to_string e) )
+                  Printf.sprintf "=%s" (expr_to_string e))
               args))
     | Insert (ident, args) ->
       Printf.sprintf "insert %s(%s)" ident
@@ -338,7 +338,7 @@ module Raw_expr = struct
                 | Ident_ty (i, ty) ->
                   Printf.sprintf "%s : %s" i ty
                 | Pat e ->
-                  Printf.sprintf "=%s" (expr_to_string e) )
+                  Printf.sprintf "=%s" (expr_to_string e))
               args))
 
   and pv_proc_exprs_to_string_debug es =
@@ -409,7 +409,7 @@ module Raw_expr = struct
                      | Multi ->
                        Printf.sprintf "(! (%s))"
                          (String.concat "\n"
-                            (List.map pv_proc_expr_to_string_debug p)) ) )
+                            (List.map pv_proc_expr_to_string_debug p)) ))
               ps))
     | Query e ->
       Printf.sprintf "query %s." (expr_to_string e)
@@ -437,7 +437,7 @@ module Raw_expr = struct
                         | Ident_ty (i, ty) ->
                           Printf.sprintf "%s : %s" i ty
                         | Pat e ->
-                          Printf.sprintf "=%s" (expr_to_string e) )
+                          Printf.sprintf "=%s" (expr_to_string e))
                       args))
                 (expr_to_string e) )
       | IfElse x -> (
@@ -479,7 +479,7 @@ module Raw_expr = struct
                       | Ident_ty (i, ty) ->
                         Printf.sprintf "%s:%s" i ty
                       | Pat e ->
-                        Printf.sprintf "=%s" (expr_to_string e) )
+                        Printf.sprintf "=%s" (expr_to_string e))
                    args)))
       | Out (_, e) ->
         Print_context.set_proc_struct_ty ctx Print_context.InOut;
@@ -519,7 +519,7 @@ module Raw_expr = struct
                      | Ident_ty (i, ty) ->
                        Printf.sprintf "%s : %s" i ty
                      | Pat e ->
-                       Printf.sprintf "=%s" (expr_to_string e) )
+                       Printf.sprintf "=%s" (expr_to_string e))
                    args)))
       | Insert (ident, args) ->
         Print_context.set_proc_struct_ty ctx Print_context.Get;
@@ -534,7 +534,7 @@ module Raw_expr = struct
                      | Ident_ty (i, ty) ->
                        Printf.sprintf "%s : %s" i ty
                      | Pat e ->
-                       Printf.sprintf "=%s" (expr_to_string e) )
+                       Printf.sprintf "=%s" (expr_to_string e))
                    args)))
     and aux_s es = List.iter aux es in
     aux e
@@ -632,7 +632,7 @@ module Raw_expr = struct
                Print_context.incre_indent ctx;
                pv_proc_exprs_to_string ctx es;
                Print_context.push ctx ")";
-               Print_context.decre_indent ctx )
+               Print_context.decre_indent ctx)
           ps;
         Print_context.decre_indent ctx
       | Query e ->
@@ -774,7 +774,7 @@ module Raw_expr = struct
                  >> Expr_parser.expr_p
                  >>= fun f ->
                  ignore_space (skip_string "in")
-                 >> return (Let ([Ident ident], f)) )
+                 >> return (Let ([Ident ident], f)))
                  <|> ( ignore_space (skip_char '(')
                        >> sep_by ident_or_ident_ty_or_pat_p
                          (ignore_space (skip_char ','))
@@ -863,8 +863,7 @@ module Raw_expr = struct
           >> ignore_space (skip_char '=')
           >> proc_exprs_p
           >>= fun es ->
-          ignore_space (skip_char '.') >> return (LetProc (ident, args, es))
-        )
+          ignore_space (skip_char '.') >> return (LetProc (ident, args, es)))
           <|> ( ignore_space (skip_char '=')
                 >> proc_exprs_p
                 >>= fun es ->
