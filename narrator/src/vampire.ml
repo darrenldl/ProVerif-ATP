@@ -2495,25 +2495,43 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
       failwith "Unexpected case"
   in
   let rec aux (id : id) (m : node_graph) : info_source list =
+    let open Analyzed_expr in
     match find_parents id m with
     | [] -> (
         let data = unwrap_data (find_node id m) in
         match data.expr with
-        | Function
-            ("attacker", [Function ("tuple_2", [_; Variable (Free, tag)])])
-          when check_tag tag ->
-          [Step (reformat_tag tag)]
+        | Function ("attacker", [Function (name, _)]) -> (
+            match Protocol_step.break_down_step_string name with
+            | _, Some _, Some _ ->
+              [Step (reformat_tag name)]
+            | _ ->
+              [Axiom data.expr] )
+        | Quantified (_, _, Function ("attacker", [Function (name, _)])) -> (
+            match Protocol_step.break_down_step_string name with
+            | _, Some _, Some _ ->
+              [Step (reformat_tag name)]
+            | _ ->
+              [Axiom data.expr] )
         | Quantified
             ( _
             , _
             , BinaryOp
-                ( Imply
-                , _
-                , Function
-                    ( "attacker"
-                    , [Function ("tuple_2", [_; Variable (Free, tag)])] ) ) )
-          when check_tag tag ->
-          [Step (reformat_tag tag)]
+                (Imply, antecedent, Function ("attacker", [Function (name, _)]))
+            ) ->
+          let premises = Analyzed_expr.split_on_and antecedent in
+          let is_step f =
+            match f with
+            | Function ("attacker", [Function (name, _)]) -> (
+                match Protocol_step.break_down_step_string name with
+                | _, Some _, Some _ ->
+                  true
+                | _ ->
+                  false )
+            | _ ->
+              false
+          in
+          if List.exists is_step premises then [Step (reformat_tag name)]
+          else [Axiom data.expr]
         | _ ->
           [Axiom data.expr] )
     | ps ->
@@ -2837,11 +2855,11 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
             (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
             srcs_from))
       (* (String.concat "\n"
-                                                       *    (List.map
-                                                       *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                                       *       old_knowledge
-                                                       *    )
-                                                       * ) *)
+                                                     *    (List.map
+                                                     *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                                     *       old_knowledge
+                                                     *    )
+                                                     * ) *)
       (String.concat "\n"
          (List.map
             (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
