@@ -1941,37 +1941,20 @@ let classify_protocol_step (m : node_graph) : node_graph =
                     data.classification )
             | Quantified (_, _, BinaryOp (Imply, antecedent, consequent)) ->
               let premises = Analyzed_expr.split_on_and antecedent in
-              let all_are_steps =
-                List.for_all
-                  (fun x ->
-                     match x with
-                     | Function ("attacker", [Function (name, _)]) -> (
-                         match Protocol_step.break_down_step_string name with
-                         | _, Some _, Some _ ->
-                           true
-                         | _ ->
-                           false )
-                     | _ ->
-                       false)
-                  (consequent :: premises)
-              in
-              if all_are_steps then InteractiveProtocolStep
-              else data.classification
-            | Quantified
-                ( _
-                , _
-                , BinaryOp
-                    ( Imply
-                    , Function ("attacker", [Function (name_1, _)])
-                    , Function ("attacker", [Function (name_2, _)]) ) ) -> (
-                match
-                  ( Protocol_step.break_down_step_string name_1
-                  , Protocol_step.break_down_step_string name_2 )
-                with
-                | (_, Some _, Some _), (_, Some _, Some _) ->
-                  InteractiveProtocolStep
+              let is_step f =
+                match f with
+                | Function ("attacker", [Function (name, _)]) -> (
+                    match Protocol_step.break_down_step_string name with
+                    | _, Some _, Some _ ->
+                      true
+                    | _ ->
+                      false )
                 | _ ->
-                  data.classification )
+                  false
+              in
+              if List.exists is_step premises && is_step consequent then
+                InteractiveProtocolStep
+              else data.classification
             | _ ->
               data.classification
           in
@@ -2854,11 +2837,11 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
             (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
             srcs_from))
       (* (String.concat "\n"
-                                                         *    (List.map
-                                                         *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                                         *       old_knowledge
-                                                         *    )
-                                                         * ) *)
+                                                       *    (List.map
+                                                       *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                                       *       old_knowledge
+                                                       *    )
+                                                       * ) *)
       (String.concat "\n"
          (List.map
             (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
