@@ -1927,13 +1927,13 @@ let classify_protocol_step (m : node_graph) : node_graph =
           let classification =
             match data.expr with
             | Function ("attacker", [Function (name, _)])
-            | Quantified (_, _, Function ("attacker", [Function (name, _)])) ->
-                (
-                match Protocol_step.break_down_step_string name with
-                | _, Some _, Some _ ->
-                  ProtocolStep
-                | _ ->
-                  data.classification )
+            | Quantified (_, _, Function ("attacker", [Function (name, _)]))
+              -> (
+                  match Protocol_step.break_down_step_string name with
+                  | _, Some _, Some _ ->
+                    ProtocolStep
+                  | _ ->
+                    data.classification )
             (* | Quantified (_, _, Function ("attacker", [Function (name, _)]))
              *   -> (
              *       match Protocol_step.break_down_step_string name with
@@ -2862,11 +2862,11 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
             (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
             srcs_from))
       (* (String.concat "\n"
-                                                   *    (List.map
-                                                   *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                                   *       old_knowledge
-                                                   *    )
-                                                   * ) *)
+                                                 *    (List.map
+                                                 *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                                 *       old_knowledge
+                                                 *    )
+                                                 * ) *)
       (String.concat "\n"
          (List.map
             (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
