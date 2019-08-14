@@ -1926,19 +1926,22 @@ let classify_protocol_step (m : node_graph) : node_graph =
         | [] ->
           let classification =
             match data.expr with
-            | Function ("attacker", [Function (name, _)]) -> (
+            | Function ("attacker", [Function (name, _)])
+            | Quantified (_, _, Function ("attacker", [Function (name, _)])) ->
+                (
                 match Protocol_step.break_down_step_string name with
                 | _, Some _, Some _ ->
                   ProtocolStep
                 | _ ->
                   data.classification )
-            | Quantified (_, _, Function ("attacker", [Function (name, _)]))
-              -> (
-                  match Protocol_step.break_down_step_string name with
-                  | _, Some _, Some _ ->
-                    ProtocolStep
-                  | _ ->
-                    data.classification )
+            (* | Quantified (_, _, Function ("attacker", [Function (name, _)]))
+             *   -> (
+             *       match Protocol_step.break_down_step_string name with
+             *       | _, Some _, Some _ ->
+             *         ProtocolStep
+             *       | _ ->
+             *         data.classification ) *)
+            | BinaryOp (Imply, antecedent, consequent)
             | Quantified (_, _, BinaryOp (Imply, antecedent, consequent)) ->
               let premises = Analyzed_expr.split_on_and antecedent in
               let is_step f =
