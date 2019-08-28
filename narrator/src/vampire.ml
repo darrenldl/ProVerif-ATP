@@ -263,7 +263,7 @@ module Raw_line = struct
         parents
         |> List.fold_left
           (fun acc p ->
-             match p with GT_single (GD_word s) -> s :: acc | _ -> acc )
+             match p with GT_single (GD_word s) -> s :: acc | _ -> acc)
           []
         |> List.rev
       in
@@ -712,7 +712,7 @@ module Analyzed_expr = struct
          | None ->
            true
          | Some c ->
-           VarMap.find k smaller = c )
+           VarMap.find k smaller = c)
       true keys
 
   let fill_in_pattern ~(pattern : expr) (var_bindings : expr VarMap.t) : expr =
@@ -1017,7 +1017,7 @@ module Analyzed_expr = struct
             (List.map
                (fun v ->
                   let cur = ExprMap.add k v cur in
-                  aux ks m cur )
+                  aux ks m cur)
                vals)
       in
       let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
@@ -1090,7 +1090,7 @@ module Analyzed_expr = struct
       expr ExprMap.t list =
       List.sort
         (fun m1 m2 ->
-           Misc_utils.compare_rev (solution_score m1) (solution_score m2) )
+           Misc_utils.compare_rev (solution_score m1) (solution_score m2))
         solutions
     in
     let valid_combinations =
@@ -1312,7 +1312,7 @@ module Analyzed_expr = struct
         let res =
           List.fold_left
             (fun x (original, replacement) ->
-               replace_id original replacement x )
+               replace_id original replacement x)
             x name_map
         in
         aux gen_id replace_id get_exprs (res :: acc) xs
@@ -1327,7 +1327,7 @@ module Analyzed_expr = struct
       (fun m (k, v) ->
          m
          |> (fun m -> var_bindings_in_pattern_match ~m ~pattern:k v)
-         |> fun m -> var_bindings_in_pattern_match ~m ~pattern:v k )
+         |> fun m -> var_bindings_in_pattern_match ~m ~pattern:v k)
       m pairs
 
   let var_bindings_in_pairs ?(m : expr VarMap.t = VarMap.empty)
@@ -1336,7 +1336,7 @@ module Analyzed_expr = struct
       (fun m (k, v) ->
          m
          |> (fun m -> var_bindings_in_pattern_match ~m ~pattern:k v)
-         |> fun m -> var_bindings_in_pattern_match ~m ~pattern:v k )
+         |> fun m -> var_bindings_in_pattern_match ~m ~pattern:v k)
       m pairs
 
   type data = {expr_str : string}
@@ -1625,8 +1625,7 @@ let uniquify_universal_var_names_derive_explanations
       List.map
         (fun (k, v) ->
            ( Analyzed_expr.replace_universal_var_name original replacement k
-           , Analyzed_expr.replace_universal_var_name original replacement v )
-        )
+           , Analyzed_expr.replace_universal_var_name original replacement v ))
         pairs
     in
     match explanation with
@@ -1646,7 +1645,7 @@ let uniquify_universal_var_names_derive_explanations
                    (Analyzed_expr.replace_universal_var_name original
                       replacement e)
                | _ ->
-                 info )
+                 info)
             infos
         , List.map
             (Analyzed_expr.replace_universal_var_name original replacement)
@@ -1672,7 +1671,7 @@ let uniquify_universal_var_names_derive_explanations
     | Combine_knowledge (infos, es) ->
       List.map
         (fun info ->
-           match info with Expr e -> e | _ -> failwith "Unexpected case" )
+           match info with Expr e -> e | _ -> failwith "Unexpected case")
         (List.filter
            (fun info ->
               match info with
@@ -1681,7 +1680,7 @@ let uniquify_universal_var_names_derive_explanations
               | Axiom _ ->
                 false
               | Expr _ ->
-                true )
+                true)
            infos)
       @ es
     (* | Combine_knowledge (_, _)              -> [] *)
@@ -1807,10 +1806,8 @@ module Protocol_step = struct
       | ["in"; n] ->
         aux [] proc_name_parts (Some In) (int_of_string_opt n)
       | x :: xs ->
-        if x = "tuple" then
-          aux xs proc_name_parts in_out n
-        else
-          aux xs (x :: proc_name_parts) in_out n
+        if x = "tuple" then aux xs proc_name_parts in_out n
+        else aux xs (x :: proc_name_parts) in_out n
     in
     aux (String.split_on_char '_' s) [] None None
 
@@ -1820,9 +1817,12 @@ module Protocol_step = struct
       | Function (name, exprs) -> (
           match break_down_step_string name with
           | proc_name, Some in_out, Some step_num ->
-            let expr = match exprs with
-              | [e] -> e
-              | es -> Function (Printf.sprintf "tuple_%d" (List.length es), es)
+            let expr =
+              match exprs with
+              | [e] ->
+                e
+              | es ->
+                Function (Printf.sprintf "tuple_%d" (List.length es), es)
             in
             [ { proc_name
               ; in_out
@@ -1848,7 +1848,9 @@ module Protocol_step = struct
           let open Analyzed_expr in
           node.expr |> strip_quant |> split_on_impl
           |> (function None -> failwith "Unexpected None" | Some x -> x)
-          |> (fun (pre, e) -> (*Js_utils.console_log (Printf.sprintf "pre : %s, e : %s" (Analyzed_expr.expr_to_string pre) (Analyzed_expr.expr_to_string e));*) expr_to_steps pre @ expr_to_steps e)
+          |> fun (pre, e) ->
+          (*Js_utils.console_log (Printf.sprintf "pre : %s, e : %s" (Analyzed_expr.expr_to_string pre) (Analyzed_expr.expr_to_string e));*)
+          expr_to_steps pre @ expr_to_steps e
         | _ ->
           [] )
 end
@@ -1916,6 +1918,7 @@ let classify_protocol_step (m : node_graph) : node_graph =
   in
   let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
     =
+    let open Analyzed_expr in
     let data = unwrap_data node in
     match data.classification with
     | Unsure -> (
@@ -1923,37 +1926,38 @@ let classify_protocol_step (m : node_graph) : node_graph =
         | [] ->
           let classification =
             match data.expr with
-            | Function ("attacker", [Function (name, _)]) -> (
-                match Protocol_step.break_down_step_string name with
-                | _, Some _, Some _ ->
-                  ProtocolStep
+            | Function ("attacker", [Function (name, _)])
+            | Quantified (_, _, Function ("attacker", [Function (name, _)]))
+              -> (
+                  match Protocol_step.break_down_step_string name with
+                  | _, Some _, Some _ ->
+                    ProtocolStep
+                  | _ ->
+                    data.classification )
+            (* | Quantified (_, _, Function ("attacker", [Function (name, _)]))
+             *   -> (
+             *       match Protocol_step.break_down_step_string name with
+             *       | _, Some _, Some _ ->
+             *         ProtocolStep
+             *       | _ ->
+             *         data.classification ) *)
+            | BinaryOp (Imply, antecedent, consequent)
+            | Quantified (_, _, BinaryOp (Imply, antecedent, consequent)) ->
+              let premises = Analyzed_expr.split_on_and antecedent in
+              let is_step f =
+                match f with
+                | Function ("attacker", [Function (name, _)]) -> (
+                    match Protocol_step.break_down_step_string name with
+                    | _, Some _, Some _ ->
+                      true
+                    | _ ->
+                      false )
                 | _ ->
-                  data.classification )
-            | Quantified
-                ( _
-                , _
-                , Function ("attacker", [Function (name, _)])
-                ) -> (
-                match Protocol_step.break_down_step_string name with
-                | _, Some _, Some _ ->
-                  ProtocolStep
-                | _ ->
-                  data.classification )
-            | Quantified
-                ( _
-                , _
-                , BinaryOp
-                    ( Imply
-                    , Function ("attacker", [Function (name_1, _)])
-                    , Function ("attacker", [Function (name_2, _)]) ) ) -> (
-                match
-                  ( Protocol_step.break_down_step_string name_1
-                  , Protocol_step.break_down_step_string name_2 )
-                with
-                | (_, Some _, Some _), (_, Some _, Some _) ->
-                  InteractiveProtocolStep
-                | _ ->
-                  data.classification )
+                  false
+              in
+              if List.exists is_step premises && is_step consequent then
+                InteractiveProtocolStep
+              else data.classification
             | _ ->
               data.classification
           in
@@ -2005,7 +2009,7 @@ let classify_rewriting (m : node_graph) : node_graph =
         List.for_all
           (fun x ->
              (unwrap_data x).classification = Axiom
-             || (unwrap_data x).classification = Rewriting )
+             || (unwrap_data x).classification = Rewriting)
           parents
       in
       let classification =
@@ -2079,7 +2083,7 @@ let classify_knowledge (m : node_graph) : node_graph =
              (unwrap_data x).classification = InteractiveProtocolStep
              || (unwrap_data x).classification = ProtocolStep
              || (unwrap_data x).classification = InitialKnowledge
-             || (unwrap_data x).classification = Knowledge )
+             || (unwrap_data x).classification = Knowledge)
           parents
       in
       let classification =
@@ -2123,7 +2127,7 @@ let classify_alias (m : node_graph) : node_graph =
               let aliases =
                 List.filter
                   (fun id ->
-                     (unwrap_data (find_node id m)).classification = Alias )
+                     (unwrap_data (find_node id m)).classification = Alias)
                   parent_ids
               in
               let alias = List.nth aliases 0 in
@@ -2160,7 +2164,7 @@ let redraw_alias_arrows (m : node_graph) : node_graph =
                    (fun n -> (unwrap_data n).classification = Alias)
                    parents)
             in
-            alias_count > 1 )
+            alias_count > 1)
          m)
   in
   (* redraw arrows *)
@@ -2177,7 +2181,7 @@ let redraw_alias_arrows (m : node_graph) : node_graph =
        in
        let children = find_children id m @ connected_aliases in
        (* let children = connected_aliases in *)
-       add_node Overwrite id n ~children ~parents m )
+       add_node Overwrite id n ~children ~parents m)
     m nodes
 
 let rewrite_conclusion (m : node_graph) : node_graph =
@@ -2224,77 +2228,76 @@ let rewrite_conclusion (m : node_graph) : node_graph =
     (* replace contradiction with goal *)
     add_node Overwrite goal_id goal ~children:[] ~parents m
 
-let classify_nodes (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify_node () (id : id) (node : node) (m : node_graph) =
-    let parents = find_parents id m in
-    let new_node =
-      match parents with
-      | [] ->
-        let data = unwrap_data node in
-        let is_negated_goal = data.derive_descr = "negated conjecture" in
-        let func_names = Analyzed_expr.get_function_names data.expr in
-        let is_axiom =
-          match data.expr with
-          | Analyzed_expr.Quantified _ ->
-            true
-          | _ ->
-            false
-        in
-        let is_knowledge_possibly =
-          List.filter (fun x -> x = "attacker") func_names <> []
-        in
-        { data with
-          classification =
-            ( if is_negated_goal then NegatedGoal
-              else if is_axiom then Axiom
-              else if is_knowledge_possibly then InitialKnowledge
-              else Unsure ) }
-      | parents ->
-        let data = unwrap_data node in
-        let is_negated_goal = data.derive_descr = "negated conjecture" in
-        let is_contradiction = data.expr = False in
-        let parents = find_nodes parents m in
-        let any_parent_negated_goal =
-          List.filter
-            (fun (x : node) -> (unwrap_data x).classification = NegatedGoal)
-            parents
-          <> []
-        in
-        let all_parents_rewrite =
-          List.filter
-            (fun (x : node) ->
-               let data = unwrap_data x in
-               data.classification = Axiom || data.classification = Rewriting
-            )
-            parents
-          = parents
-          && parents <> []
-        in
-        let any_parent_knowledge =
-          List.filter
-            (fun (x : node) ->
-               let data = unwrap_data x in
-               data.classification = InitialKnowledge
-               || data.classification = Knowledge )
-            parents
-          <> []
-        in
-        { data with
-          classification =
-            ( if is_contradiction then Contradiction
-              else if is_negated_goal then NegatedGoal
-              else if all_parents_rewrite then Rewriting
-              else if any_parent_knowledge then Knowledge
-              else if any_parent_negated_goal then NegatedGoal
-              else Unsure ) }
-    in
-    ((), Analyzed_graph.add_node Overwrite id (Data new_node) m)
-  in
-  let (), m =
-    Analyzed_graph.linear_traverse () (Full_traversal classify_node) m
-  in
-  m
+(* let classify_nodes (m : node_graph) : node_graph =
+ *   let open Analyzed_graph in
+ *   let classify_node () (id : id) (node : node) (m : node_graph) =
+ *     let parents = find_parents id m in
+ *     let new_node =
+ *       match parents with
+ *       | [] ->
+ *         let data = unwrap_data node in
+ *         let is_negated_goal = data.derive_descr = "negated conjecture" in
+ *         let func_names = Analyzed_expr.get_function_names data.expr in
+ *         let is_axiom =
+ *           match data.expr with
+ *           | Analyzed_expr.Quantified _ ->
+ *             true
+ *           | _ ->
+ *             false
+ *         in
+ *         let is_knowledge_possibly =
+ *           List.filter (fun x -> x = "attacker") func_names <> []
+ *         in
+ *         { data with
+ *           classification =
+ *             ( if is_negated_goal then NegatedGoal
+ *               else if is_axiom then Axiom
+ *               else if is_knowledge_possibly then InitialKnowledge
+ *               else Unsure ) }
+ *       | parents ->
+ *         let data = unwrap_data node in
+ *         let is_negated_goal = data.derive_descr = "negated conjecture" in
+ *         let is_contradiction = data.expr = False in
+ *         let parents = find_nodes parents m in
+ *         let any_parent_negated_goal =
+ *           List.filter
+ *             (fun (x : node) -> (unwrap_data x).classification = NegatedGoal)
+ *             parents
+ *           <> []
+ *         in
+ *         let all_parents_rewrite =
+ *           List.filter
+ *             (fun (x : node) ->
+ *                let data = unwrap_data x in
+ *                data.classification = Axiom || data.classification = Rewriting)
+ *             parents
+ *           = parents
+ *           && parents <> []
+ *         in
+ *         let any_parent_knowledge =
+ *           List.filter
+ *             (fun (x : node) ->
+ *                let data = unwrap_data x in
+ *                data.classification = InitialKnowledge
+ *                || data.classification = Knowledge)
+ *             parents
+ *           <> []
+ *         in
+ *         { data with
+ *           classification =
+ *             ( if is_contradiction then Contradiction
+ *               else if is_negated_goal then NegatedGoal
+ *               else if all_parents_rewrite then Rewriting
+ *               else if any_parent_knowledge then Knowledge
+ *               else if any_parent_negated_goal then NegatedGoal
+ *               else Unsure ) }
+ *     in
+ *     ((), Analyzed_graph.add_node Overwrite id (Data new_node) m)
+ *   in
+ *   let (), m =
+ *     Analyzed_graph.linear_traverse () (Full_traversal classify_node) m
+ *   in
+ *   m *)
 
 let remove_goal (m : node_graph) : node_graph =
   let open Analyzed_graph in
@@ -2312,7 +2315,7 @@ let remove_goal (m : node_graph) : node_graph =
         List.filter
           (fun (x : node) ->
              let data = unwrap_data x in
-             data.classification = NegatedGoal )
+             data.classification = NegatedGoal)
           children
         <> []
       in
@@ -2495,25 +2498,47 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
       failwith "Unexpected case"
   in
   let rec aux (id : id) (m : node_graph) : info_source list =
+    let open Analyzed_expr in
     match find_parents id m with
     | [] -> (
         let data = unwrap_data (find_node id m) in
         match data.expr with
-        | Function
-            ("attacker", [Function ("tuple_2", [_; Variable (Free, tag)])])
-          when check_tag tag ->
-          [Step (reformat_tag tag)]
+        | Function ("attacker", [Function (name, _)]) -> (
+            match Protocol_step.break_down_step_string name with
+            | _, Some _, Some _ ->
+              [Step (reformat_tag name)]
+            | _ ->
+              [Axiom data.expr] )
+        | Quantified (_, _, Function ("attacker", [Function (name, _)])) -> (
+            match Protocol_step.break_down_step_string name with
+            | _, Some _, Some _ ->
+              [Step (reformat_tag name)]
+            | _ ->
+              [Axiom data.expr] )
         | Quantified
             ( _
             , _
             , BinaryOp
-                ( Imply
-                , _
-                , Function
-                    ( "attacker"
-                    , [Function ("tuple_2", [_; Variable (Free, tag)])] ) ) )
-          when check_tag tag ->
-          [Step (reformat_tag tag)]
+                (Imply, antecedent, Function ("attacker", [Function (name, _)]))
+            ) -> (
+            let premises = Analyzed_expr.split_on_and antecedent in
+            let is_step f =
+              match f with
+              | Function ("attacker", [Function (name, _)]) -> (
+                  match Protocol_step.break_down_step_string name with
+                  | _, Some _, Some _ ->
+                    true
+                  | _ ->
+                    false )
+              | _ ->
+                false
+            in
+            match Protocol_step.break_down_step_string name with
+            | _, Some _, Some _ ->
+              if List.exists is_step premises then [Step (reformat_tag name)]
+              else [Axiom data.expr]
+            | _ ->
+              [Axiom data.expr] )
         | _ ->
           [Axiom data.expr] )
     | ps ->
@@ -2700,7 +2725,7 @@ let group_derive_explanations (explanations : derive_explanation list) :
                    let new_hd =
                      List.assoc (ExprMap.find hd match_map) pairs
                    in
-                   new_hd :: hd :: tl )
+                   new_hd :: hd :: tl)
               buckets
         in
         match_into_buckets buckets rest
@@ -2712,7 +2737,7 @@ let group_derive_explanations (explanations : derive_explanation list) :
            | Rewrite pairs ->
              pairs
            | _ ->
-             failwith "Incorrect case" )
+             failwith "Incorrect case")
         explanations
     in
     Rewrites (match_into_buckets [] match_pairs_list)
@@ -2726,7 +2751,7 @@ let group_derive_explanations (explanations : derive_explanation list) :
              Combine_knowledge (info_src, es)
            | _ ->
              failwith "Incorrect case"
-             : grouped_derive_explanations ) )
+             : grouped_derive_explanations ))
       explanations
   in
   let convert_gain_knowledge (explanations : derive_explanation list) :
@@ -2739,7 +2764,7 @@ let group_derive_explanations (explanations : derive_explanation list) :
                (info_src, List.map (fun (k, _) -> k) new_knowledge)
            | _ ->
              failwith "Incorrect case"
-             : grouped_derive_explanations ) )
+             : grouped_derive_explanations ))
       explanations
   in
   let convert_to_grouped (grouped_explanations : derive_explanation list list)
@@ -2773,12 +2798,12 @@ let group_derive_explanations (explanations : derive_explanation list) :
   let explanations =
     explanations |> uniquify_universal_var_names_derive_explanations
     |> List.filter (fun (x : derive_explanation) ->
-        x <> Nothing_to_explain && x <> Dont_know_how )
+        x <> Nothing_to_explain && x <> Dont_know_how)
   in
   let var_bindings = var_bindings_in_explanations explanations in
   List.iter
     (fun (k, v) ->
-       Js_utils.console_log (Printf.sprintf "%s -> %s" k (expr_to_string v)) )
+       Js_utils.console_log (Printf.sprintf "%s -> %s" k (expr_to_string v)))
     (VarMap.bindings var_bindings);
   let grouped_explanations = group_into_list explanations in
   convert_to_grouped grouped_explanations
@@ -2813,7 +2838,7 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
          (List.map
             (fun (e_from, e_to) ->
                Printf.sprintf "  %s\nto\n  %s" (expr_to_string e_from)
-                 (expr_to_string e_to) )
+                 (expr_to_string e_to))
             rewrites))
   | Combine_knowledge (srcs_from, es_gain) ->
     Printf.sprintf
@@ -2837,11 +2862,11 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
             (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
             srcs_from))
       (* (String.concat "\n"
-                                                           *    (List.map
-                                                           *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                                           *       old_knowledge
-                                                           *    )
-                                                           * ) *)
+                                                 *    (List.map
+                                                 *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                                 *       old_knowledge
+                                                 *    )
+                                                 * ) *)
       (String.concat "\n"
          (List.map
             (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
@@ -2862,7 +2887,7 @@ let grouped_derive_explanations_to_string
             (fun b ->
                Printf.sprintf "Attacker rewrites %s"
                  (String.concat " to\n"
-                    (List.map Analyzed_expr.expr_to_string b)) )
+                    (List.map Analyzed_expr.expr_to_string b)))
             buckets))
   | Combine_knowledge (srcs_from, es_gain) ->
     Printf.sprintf
@@ -2935,7 +2960,7 @@ let write_map_debug (out : out_channel) (m : node_graph) : unit =
   linear_traverse ()
     (Full_traversal_pure
        (fun () id node m ->
-          Printf.fprintf out "%s\n" (node_to_string_debug id node m) ))
+          Printf.fprintf out "%s\n" (node_to_string_debug id node m)))
     m
   |> ignore
 
@@ -3053,10 +3078,9 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
         if
           classification = ProtocolStep
           || classification = InteractiveProtocolStep
-        then (
+        then
           let steps = Protocol_step.node_to_steps node in
           steps @ List.filter (fun s -> not (List.mem s steps)) acc
-        )
         else acc
       | _ ->
         acc
@@ -3076,7 +3100,7 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
            *        true
            *      | Some last_id ->
            *        x <> last_id ) *)
-            (find_parents x m)
+          find_parents x m
         in
         (* collect steps reachable from the paths upward *)
         let acc =
@@ -3086,7 +3110,7 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
                  bfs_traverse parent acc Bottom_to_top
                    (Full_traversal_pure find_steps_at_top) m
                in
-               r )
+               r)
             acc choices_upward
         in
         aux acc (Some x) xs m
@@ -3099,27 +3123,40 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
       (filter
          (fun _id n _m ->
             (unwrap_data n).classification = ProtocolStep
-            || (unwrap_data n).classification = InteractiveProtocolStep )
+            || (unwrap_data n).classification = InteractiveProtocolStep)
          m)
   in
-  List.iter (fun (_, node) -> let n = unwrap_data node in Js_utils.console_log (Printf.sprintf "step node : %s" (Analyzed_expr.expr_to_string n.expr))) step_nodes;
+  List.iter
+    (fun (_, node) ->
+       let n = unwrap_data node in
+       Js_utils.console_log
+         (Printf.sprintf "step node : %s" (Analyzed_expr.expr_to_string n.expr)))
+    step_nodes;
   let paths =
-    List.concat (List.map (fun (id, _node) ->
-        Js_utils.console_log (Printf.sprintf "expr : %s, paths : [%s]"
-                                (Analyzed_expr.expr_to_string (unwrap_data _node).expr)
-                                (String.concat ", "
-                                   (List.map (fun l -> Printf.sprintf "[%s]"
-                                                 (String.concat ", " l)) (paths_to_root id m))
-                                )
-                             );
-        paths_to_root id m) step_nodes)
+    List.concat
+      (List.map
+         (fun (id, _node) ->
+            Js_utils.console_log
+              (Printf.sprintf "expr : %s, paths : [%s]"
+                 (Analyzed_expr.expr_to_string (unwrap_data _node).expr)
+                 (String.concat ", "
+                    (List.map
+                       (fun l -> Printf.sprintf "[%s]" (String.concat ", " l))
+                       (paths_to_root id m))));
+            paths_to_root id m)
+         step_nodes)
   in
   let steps =
-    List.concat
-    (List.map (fun path -> steps_reachable path m) paths)
+    List.concat (List.map (fun path -> steps_reachable path m) paths)
   in
-  List.iter (fun { proc_name; in_out; direction; step_num; expr } ->
-      Js_utils.console_log (Printf.sprintf "test0 : %s, %d, %s" (match proc_name with | None -> "" | Some s -> s) step_num (Analyzed_expr.expr_to_string expr))) steps;
+  List.iter
+    (fun {proc_name; in_out; direction; step_num; expr} ->
+       Js_utils.console_log
+         (Printf.sprintf "test0 : %s, %d, %s"
+            (match proc_name with None -> "" | Some s -> s)
+            step_num
+            (Analyzed_expr.expr_to_string expr)))
+    steps;
   let steps =
     List.fold_left
       (fun acc l ->
@@ -3130,18 +3167,24 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
                     (fun x ->
                        Printf.sprintf "%s.%d"
                          (match x.proc_name with None -> "" | Some x -> x)
-                         x.step_num )
+                         x.step_num)
                     l)));
-         Misc_utils.zip l acc
-      )
+         Misc_utils.zip l acc)
       []
       (List.map (fun path -> steps_reachable path m) paths)
   in
-  List.iter (fun { proc_name; in_out; direction; step_num; expr } -> Js_utils.console_log (Printf.sprintf "test100 : %s, %d, %s" (match proc_name with | None -> "" | Some s -> s) step_num (Analyzed_expr.expr_to_string expr))) steps;
+  List.iter
+    (fun {proc_name; in_out; direction; step_num; expr} ->
+       Js_utils.console_log
+         (Printf.sprintf "test100 : %s, %d, %s"
+            (match proc_name with None -> "" | Some s -> s)
+            step_num
+            (Analyzed_expr.expr_to_string expr)))
+    steps;
   let steps =
     List.fold_left
       (* if there are multiple occurances of a step, only keep the later ones *)
-      (fun acc s -> if List.mem s acc then acc else s :: acc )
+      (fun acc s -> if List.mem s acc then acc else s :: acc)
       [] (List.rev steps)
   in
   (* let steps = List.hd (List.map (fun path -> steps_reachable path m) paths) in *)

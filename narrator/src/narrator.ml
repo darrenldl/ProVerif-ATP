@@ -62,7 +62,7 @@ let attack_trace node_map =
          | Client_to_intruder, Some s ->
            max cur_max (String.length s)
          | _ ->
-           cur_max )
+           cur_max)
       0 steps
   in
   let max_proc_name_len_on_right =
@@ -72,7 +72,7 @@ let attack_trace node_map =
          | Intruder_to_client, Some s ->
            max cur_max (String.length s)
          | _ ->
-           cur_max )
+           cur_max)
       0 steps
   in
   let intruder_name = "I" in
@@ -117,7 +117,7 @@ let attack_trace node_map =
             Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
               global_step_num proc_name s.step_num proc_name_padding_on_right
               intruder_name_padding_on_left intruder_name proc_name
-              proc_name_padding_on_right expr )
+              proc_name_padding_on_right expr)
        steps)
 
 let () =
@@ -266,19 +266,19 @@ let () =
       Js_of_ocaml_lwt.Lwt_js.yield ()
       >>= (fun () ->
           js_ctx.box_selected_nodes <- [];
-          return_unit )
-      |> ignore );
+          return_unit)
+      |> ignore);
   Cytoscape.on cy_main ~event:"box" ~selector:"node" ~handler:(fun ev ->
       Js_of_ocaml_lwt.Lwt_js.yield ()
       >>= (fun () ->
           let target_id = Js.to_string ev##.target_node##id in
           js_ctx.box_selected_nodes <- target_id :: js_ctx.box_selected_nodes;
-          return_unit )
-      |> ignore );
+          return_unit)
+      |> ignore);
   Cytoscape.on cy_main ~event:"tap" ~handler:(fun ev ->
       if ev##.target_cy = ev##.cy then (
         disable_border_prev_selected_node ();
-        js_ctx.selected_node <- None ) );
+        js_ctx.selected_node <- None ));
   Cytoscape.on cy_main ~event:"tap" ~selector:"node" ~handler:(fun ev ->
       Js_utils.set_display ~id:single_formula_box_ID ~on:true;
       Js_utils.set_display ~id:single_nodeAST_ID ~on:true;
@@ -316,7 +316,7 @@ let () =
                 (Vampire.derive_explanation_to_string
                    (Vampire.explain_construction_single target_id m))
           | Group ->
-            () ) );
+            () ));
   Cytoscape.on cy_main ~event:"tap" ~selector:"edge" ~handler:(fun ev ->
       Js_utils.set_display ~id:single_formula_box_ID ~on:false;
       Js_utils.set_display ~id:single_nodeAST_ID ~on:false;
@@ -358,29 +358,27 @@ let () =
             Vampire.Analyzed_expr_graph.linear_traverse ()
               (Full_traversal_pure
                  (fun () id _node _m ->
-                    Cytoscape.set_node_color cy_nodeAST1 ~id ~color:"#ff0000"
-                 ))
+                    Cytoscape.set_node_color cy_nodeAST1 ~id ~color:"#ff0000"))
               souce_diff
             |> ignore;
             Vampire.Analyzed_expr_graph.linear_traverse ()
               (Full_traversal_pure
                  (fun () id _node _m ->
-                    Cytoscape.set_node_color cy_nodeAST2 ~id ~color:"#0000ff"
-                 ))
+                    Cytoscape.set_node_color cy_nodeAST2 ~id ~color:"#0000ff"))
               target_diff
-            |> ignore ) );
+            |> ignore ));
   Cytoscape.on cy_nodeAST1 ~event:"pan" ~handler:(fun _ev ->
       let pos = cy_nodeAST1##pan_get in
-      cy_nodeAST2##pan pos );
+      cy_nodeAST2##pan pos);
   Cytoscape.on cy_nodeAST1 ~event:"zoom" ~handler:(fun _ev ->
       let zoom = cy_nodeAST1##zoom_get in
-      cy_nodeAST2##zoom zoom );
+      cy_nodeAST2##zoom zoom);
   Cytoscape.on cy_nodeAST2 ~event:"zoom" ~handler:(fun _ev ->
       let zoom = cy_nodeAST2##zoom_get in
-      cy_nodeAST1##zoom zoom );
+      cy_nodeAST1##zoom zoom);
   Cytoscape.on cy_nodeAST2 ~event:"pan" ~handler:(fun _ev ->
       let pos = cy_nodeAST2##pan_get in
-      cy_nodeAST1##pan pos );
+      cy_nodeAST1##pan pos);
   let compress_button = Dom_html.getElementById_exn "compressButton" in
   compress_button##.onclick :=
     Dom_html.handler (fun _ev ->
@@ -399,7 +397,7 @@ let () =
               cy_main old_m new_m
             |> ignore;
             js_ctx.box_selected_nodes <- [] );
-        Js._true );
+        Js._true);
   let decompress_button = Dom_html.getElementById_exn "decompressButton" in
   decompress_button##.onclick
   := Dom_html.handler (fun _ev ->
@@ -422,7 +420,7 @@ let () =
                 (Misc_utils.unwrap_opt !dagre_main)
                 cy_main old_m new_m
               |> ignore ) );
-      Js._true );
+      Js._true);
   let recompress_button = Dom_html.getElementById_exn "recompressButton" in
   recompress_button##.onclick
   := Dom_html.handler (fun _ev ->
@@ -443,7 +441,7 @@ let () =
                 (Misc_utils.unwrap_opt !dagre_main)
                 cy_main old_m new_m
               |> ignore ) );
-      Js._true );
+      Js._true);
   let toggle_label_button = Dom_html.getElementById_exn "toggleLabelButton" in
   toggle_label_button##.onclick
   := Dom_html.handler (fun _ev ->
@@ -465,7 +463,7 @@ let () =
                 (Misc_utils.unwrap_opt !dagre_main)
                 cy_main old_m new_m
               |> ignore ) );
-      Js._true );
+      Js._true);
   let toggle_label_skip_layout_calc_button =
     Dom_html.getElementById_exn "toggleLabelSkipLayoutCalcButton"
   in
@@ -489,7 +487,7 @@ let () =
                 (Misc_utils.unwrap_opt !dagre_main)
                 cy_main old_m new_m
               |> ignore ) );
-      Js._true );
+      Js._true);
   let explain_chain_button =
     Dom_html.getElementById_exn "explainChainButton"
   in
@@ -517,7 +515,7 @@ let () =
               let explanations =
                 List.filter
                   (fun (e : derive_explanation) ->
-                     e <> Nothing_to_explain && e <> Dont_know_how )
+                     e <> Nothing_to_explain && e <> Dont_know_how)
                   (explain_construction_single_chained id old_m)
               in
               let explanation_str =
@@ -530,17 +528,17 @@ let () =
               in
               chain_explanation_box##.innerHTML := Js.string explanation_str )
       );
-      Js._true );
+      Js._true);
   let zoom_in_button = Dom_html.getElementById_exn "zoomInButton" in
   zoom_in_button##.onclick :=
     Dom_html.handler (fun _ev ->
         Cytoscape.zoom_in_by cy_main 0.05;
-        Js._true );
+        Js._true);
   let zoom_in_button = Dom_html.getElementById_exn "zoomOutButton" in
   zoom_in_button##.onclick :=
     Dom_html.handler (fun _ev ->
         Cytoscape.zoom_out_by cy_main 0.05;
-        Js._true );
+        Js._true);
   let pv_raw_attack_trace_button =
     Dom_html.getElementById_exn "pvRawAttackTraceButton"
   in
@@ -572,7 +570,7 @@ let () =
           attack_trace_box##.innerHTML := Js.string text
         | _ ->
           () );
-      Js._true );
+      Js._true);
   let pv_processed_attack_trace_button =
     Dom_html.getElementById_exn "pvProcessedAttackTraceButton"
   in
@@ -604,7 +602,7 @@ let () =
           attack_trace_box##.innerHTML := Js.string text
         | _ ->
           () );
-      Js._true );
+      Js._true);
   let knowledge_graph_button =
     Dom_html.getElementById_exn "knowledgeGraphButton"
   in
@@ -619,7 +617,7 @@ let () =
       Js_utils.set_display ~id:main_graph_display_ID ~on:true;
       Js_utils.set_display ~id:main_text_display_ID ~on:false;
       Js_utils.set_display ~id:single_explanation_box_ID ~on:true;
-      Js._true );
+      Js._true);
   (* let load_example_button = Dom_html.getElementById_exn "loadExample" in
    * load_example_button##.onclick := Dom_html.handler
    *     (fun _ev ->
