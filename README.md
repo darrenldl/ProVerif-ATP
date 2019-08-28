@@ -32,7 +32,7 @@ See the [user manual](doc/manual/README.md) for more details and an example
 This project was accepted for CADE-27.
 The pre-printed copy with appendix is available in this repository here [here](paper/CADE-27_paper-42_Di_Long_Li_and_Alwen_Tiu_full.pdf).
 
-The final authenticated publication is available online at [https://doi.org/10.1007/978-3-030-29436-6\_21](10.1007/978-3-030-29436-6_21)
+The final authenticated publication is available online at [https://doi.org/10.1007/978-3-030-29436-6\_21](https://doi.org/10.1007/978-3-030-29436-6_21)
 
 ## Index and licenses
 
