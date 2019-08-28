@@ -5,8 +5,8 @@ Combining ProVerif and Automated Theorem Provers for Security Protocol Verificat
 Authors : [Di Long Li](https://github.com/darrenldl) and Alwen Tiu, at The Australian National University, Canberra ACT 2600, Australia
 
 ## Paper
-This project was accepted for CADE-27.
-The pre-printed copy with appendix is available in this repository [here](paper/CADE-27_paper-42_Di_Long_Li_and_Alwen_Tiu_full.pdf).
+The paper which this project was a part of was accepted for CADE-27.
+The pre-printed copy of the paper with appendix is available in this repository [here](paper/CADE-27_paper-42_Di_Long_Li_and_Alwen_Tiu_full.pdf).
 
 The final authenticated publication is available online at [https://doi.org/10.1007/978-3-030-29436-6\_21](https://doi.org/10.1007/978-3-030-29436-6_21)
 
