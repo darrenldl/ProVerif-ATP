@@ -1850,7 +1850,7 @@ module Protocol_step = struct
           |> (function None -> failwith "Unexpected None" | Some x -> x)
           |> fun (pre, e) ->
           (*Js_utils.console_log (Printf.sprintf "pre : %s, e : %s" (Analyzed_expr.expr_to_string pre) (Analyzed_expr.expr_to_string e));*)
-          expr_to_steps pre @ expr_to_steps e
+          (pre |> split_on_and |> List.map expr_to_steps |> List.concat) @ expr_to_steps e
         | _ ->
           [] )
 end
