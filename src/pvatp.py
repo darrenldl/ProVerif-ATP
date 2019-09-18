@@ -63,7 +63,7 @@ if process_files:
   print("")
   print("ProVerif - Reprint")
   try:
-    subprocess.run([local_proverif_path, "-in", "pitype", "-log-pv-only", full_input_path], check=True, capture_output=True)
+    subprocess.run([local_proverif_path, "-in", "pitype", "-log-pv-only", full_input_path], check=True)
   except subprocess.CalledProcessError as e:
     print("pvatp : ProVerif indicated an error, output is shown below")
     print("")
@@ -78,7 +78,7 @@ if process_files:
 
   print("ProVerif - Translate to TPTP")
   try:
-    subprocess.run([local_proverif_path, "-in", "pitype", "-out", "tptp", "-log-pv", "-tag-in-out", "-o", tptp_output_path, full_input_path], check=True, capture_output=True)
+    subprocess.run([local_proverif_path, "-in", "pitype", "-out", "tptp", "-log-pv", "-tag-in-out", "-o", tptp_output_path, full_input_path], check=True)
   except subprocess.CalledProcessError as e:
     print("pvatp : ProVerif indicated an error, output is shown below")
     print("")
