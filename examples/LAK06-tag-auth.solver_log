@@ -1,253 +1,87 @@
 % Refutation found. Thanks to Tanya!
 % SZS status Theorem for LAK06-tag-auth
 % SZS output start Proof for LAK06-tag-auth
-fof(f67,axiom,(
-  ! [X0] : constr_ZERO = constr_xor(X0,X0)),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f68,axiom,(
-  ! [X1] : constr_xor(X1,constr_ZERO) = X1),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f69,axiom,(
-  ! [X2,X3] : constr_xor(X2,X3) = constr_xor(X3,X2)),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f70,axiom,(
-  ! [X4,X5,X6] : constr_xor(X4,constr_xor(X5,X6)) = constr_xor(constr_xor(X4,X5),X6)),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f71,axiom,(
-  ! [X7,X8] : ((pred_attacker(X8) & pred_attacker(X7)) => pred_attacker(constr_xor(X7,X8)))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f76,axiom,(
-  ! [X13,X14] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(X13,X14)) => pred_attacker(X13))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f77,axiom,(
-  ! [X15,X16] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(X15,X16)) => pred_attacker(X16))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f79,axiom,(
-  ! [X18] : (pred_attacker(tuple_knowledge_from_1st_round_out_1(X18)) => pred_attacker(X18))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f84,axiom,(
-  ! [X21] : (pred_attacker(tuple_R_out_4(X21)) => pred_attacker(X21))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f88,axiom,(
-  ! [X25] : (pred_attacker(tuple_R_out_1(X25)) => pred_attacker(X25))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f89,axiom,(
-  ! [X26,X27] : ((pred_attacker(X27) & pred_attacker(X26)) => pred_attacker(tuple_R_in_2(X26,X27)))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f102,axiom,(
-  pred_attacker(tuple_knowledge_from_1st_round_out_1(name_r0x30_from_1st))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f103,axiom,(
-  pred_attacker(tuple_knowledge_from_1st_round_out_2(name_r1_from_1st,constr_h(constr_xor(constr_xor(name_r0x30_from_1st,name_r1_from_1st),name_k))))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f105,axiom,(
-  pred_attacker(tuple_R_out_1(name_r0x30))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f107,axiom,(
-  ! [X39] : (pred_attacker(tuple_R_in_2(X39,constr_h(constr_xor(constr_xor(name_r0x30,X39),name_k)))) => pred_attacker(tuple_R_out_4(name_objective_R)))),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f108,conjecture,(
-  pred_attacker(name_objective_R)),
-  file('LAK06-tag-auth.p',unknown)).
-fof(f109,negated_conjecture,(
-  ~pred_attacker(name_objective_R)),
-  inference(negated_conjecture,[],[f108])).
-fof(f110,plain,(
-  ! [X0] : constr_xor(X0,constr_ZERO) = X0),
-  inference(rectify,[],[f68])).
-fof(f111,plain,(
-  ! [X0,X1] : constr_xor(X0,X1) = constr_xor(X1,X0)),
-  inference(rectify,[],[f69])).
-fof(f112,plain,(
-  ! [X0,X1,X2] : constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2)),
-  inference(rectify,[],[f70])).
-fof(f113,plain,(
-  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_xor(X0,X1)))),
-  inference(rectify,[],[f71])).
-fof(f117,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)) => pred_attacker(X0))),
-  inference(rectify,[],[f76])).
-fof(f118,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)) => pred_attacker(X1))),
-  inference(rectify,[],[f77])).
-fof(f120,plain,(
-  ! [X0] : (pred_attacker(tuple_knowledge_from_1st_round_out_1(X0)) => pred_attacker(X0))),
-  inference(rectify,[],[f79])).
-fof(f123,plain,(
-  ! [X0] : (pred_attacker(tuple_R_out_4(X0)) => pred_attacker(X0))),
-  inference(rectify,[],[f84])).
-fof(f127,plain,(
-  ! [X0] : (pred_attacker(tuple_R_out_1(X0)) => pred_attacker(X0))),
-  inference(rectify,[],[f88])).
-fof(f128,plain,(
-  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_R_in_2(X0,X1)))),
-  inference(rectify,[],[f89])).
-fof(f136,plain,(
-  ! [X0] : (pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(constr_xor(name_r0x30,X0),name_k)))) => pred_attacker(tuple_R_out_4(name_objective_R)))),
-  inference(rectify,[],[f107])).
-fof(f137,plain,(
-  ~pred_attacker(name_objective_R)),
-  inference(flattening,[],[f109])).
-fof(f139,plain,(
-  ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
-  inference(ennf_transformation,[],[f113])).
-fof(f140,plain,(
-  ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
-  inference(flattening,[],[f139])).
-fof(f145,plain,(
-  ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)))),
-  inference(ennf_transformation,[],[f117])).
-fof(f146,plain,(
-  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)))),
-  inference(ennf_transformation,[],[f118])).
-fof(f148,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_knowledge_from_1st_round_out_1(X0)))),
-  inference(ennf_transformation,[],[f120])).
-fof(f151,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_R_out_4(X0)))),
-  inference(ennf_transformation,[],[f123])).
-fof(f155,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_R_out_1(X0)))),
-  inference(ennf_transformation,[],[f127])).
-fof(f156,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_R_in_2(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
-  inference(ennf_transformation,[],[f128])).
-fof(f157,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_R_in_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
-  inference(flattening,[],[f156])).
-fof(f165,plain,(
-  ! [X0] : (pred_attacker(tuple_R_out_4(name_objective_R)) | ~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(constr_xor(name_r0x30,X0),name_k)))))),
-  inference(ennf_transformation,[],[f136])).
-fof(f232,plain,(
-  ( ! [X0] : (constr_ZERO = constr_xor(X0,X0)) )),
-  inference(cnf_transformation,[],[f67])).
-fof(f233,plain,(
-  ( ! [X0] : (constr_xor(X0,constr_ZERO) = X0) )),
-  inference(cnf_transformation,[],[f110])).
-fof(f234,plain,(
-  ( ! [X0,X1] : (constr_xor(X0,X1) = constr_xor(X1,X0)) )),
-  inference(cnf_transformation,[],[f111])).
-fof(f235,plain,(
-  ( ! [X2,X0,X1] : (constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2)) )),
-  inference(cnf_transformation,[],[f112])).
-fof(f236,plain,(
-  ( ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f140])).
-fof(f241,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f145])).
-fof(f242,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)) | pred_attacker(X1)) )),
-  inference(cnf_transformation,[],[f146])).
-fof(f244,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_knowledge_from_1st_round_out_1(X0)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f148])).
-fof(f249,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_R_out_4(X0)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f151])).
-fof(f253,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_R_out_1(X0)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f155])).
-fof(f254,plain,(
-  ( ! [X0,X1] : (pred_attacker(tuple_R_in_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f157])).
-fof(f266,plain,(
-  pred_attacker(tuple_knowledge_from_1st_round_out_1(name_r0x30_from_1st))),
-  inference(cnf_transformation,[],[f102])).
-fof(f267,plain,(
-  pred_attacker(tuple_knowledge_from_1st_round_out_2(name_r1_from_1st,constr_h(constr_xor(constr_xor(name_r0x30_from_1st,name_r1_from_1st),name_k))))),
-  inference(cnf_transformation,[],[f103])).
-fof(f269,plain,(
-  pred_attacker(tuple_R_out_1(name_r0x30))),
-  inference(cnf_transformation,[],[f105])).
-fof(f271,plain,(
-  ( ! [X0] : (pred_attacker(tuple_R_out_4(name_objective_R)) | ~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(constr_xor(name_r0x30,X0),name_k))))) )),
-  inference(cnf_transformation,[],[f165])).
-fof(f272,plain,(
-  ~pred_attacker(name_objective_R)),
-  inference(cnf_transformation,[],[f137])).
-fof(f273,plain,(
-  pred_attacker(tuple_knowledge_from_1st_round_out_2(name_r1_from_1st,constr_h(constr_xor(name_k,constr_xor(name_r0x30_from_1st,name_r1_from_1st)))))),
-  inference(forward_demodulation,[],[f267,f234])).
-fof(f281,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(name_k,constr_xor(name_r0x30,X0))))) | pred_attacker(tuple_R_out_4(name_objective_R))) )),
-  inference(forward_demodulation,[],[f271,f234])).
-fof(f286,plain,(
-  spl0_0 <=> pred_attacker(tuple_R_out_4(name_objective_R))),
-  introduced(avatar_definition,[new_symbols(naming,[spl0_0])])).
-fof(f287,plain,(
-  pred_attacker(tuple_R_out_4(name_objective_R)) | ~spl0_0),
-  inference(avatar_component_clause,[],[f286])).
-fof(f289,plain,(
-  spl0_2 <=> ! [X0] : ~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(name_k,constr_xor(name_r0x30,X0)))))),
-  introduced(avatar_definition,[new_symbols(naming,[spl0_2])])).
-fof(f290,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(name_k,constr_xor(name_r0x30,X0)))))) ) | ~spl0_2),
-  inference(avatar_component_clause,[],[f289])).
-fof(f291,plain,(
-  spl0_0 | spl0_2),
-  inference(avatar_split_clause,[],[f281,f289,f286])).
-fof(f293,plain,(
-  pred_attacker(name_r0x30_from_1st)),
-  inference(resolution,[],[f244,f266])).
-fof(f297,plain,(
-  pred_attacker(name_r0x30)),
-  inference(resolution,[],[f253,f269])).
-fof(f299,plain,(
-  ( ! [X1] : (constr_xor(constr_ZERO,X1) = X1) )),
-  inference(superposition,[],[f234,f233])).
-fof(f319,plain,(
-  pred_attacker(constr_h(constr_xor(name_k,constr_xor(name_r0x30_from_1st,name_r1_from_1st))))),
-  inference(resolution,[],[f273,f242])).
-fof(f320,plain,(
-  pred_attacker(name_r1_from_1st)),
-  inference(resolution,[],[f273,f241])).
-fof(f321,plain,(
-  ( ! [X0] : (~pred_attacker(constr_h(constr_xor(name_k,constr_xor(name_r0x30,X0)))) | ~pred_attacker(X0)) ) | ~spl0_2),
-  inference(resolution,[],[f290,f254])).
-fof(f329,plain,(
-  ( ! [X0,X1] : (constr_xor(constr_ZERO,X1) = constr_xor(X0,constr_xor(X0,X1))) )),
-  inference(superposition,[],[f235,f232])).
-fof(f341,plain,(
-  ( ! [X6,X4,X5] : (pred_attacker(constr_xor(X4,constr_xor(X5,X6))) | ~pred_attacker(X6) | ~pred_attacker(constr_xor(X4,X5))) )),
-  inference(superposition,[],[f236,f235])).
-fof(f344,plain,(
-  ( ! [X0,X1] : (constr_xor(X0,constr_xor(X0,X1)) = X1) )),
-  inference(forward_demodulation,[],[f329,f299])).
-fof(f377,plain,(
-  ( ! [X2] : (~pred_attacker(constr_h(constr_xor(name_k,X2))) | ~pred_attacker(constr_xor(name_r0x30,X2))) ) | ~spl0_2),
-  inference(superposition,[],[f321,f344])).
-fof(f791,plain,(
-  ~pred_attacker(constr_xor(name_r0x30,constr_xor(name_r0x30_from_1st,name_r1_from_1st))) | ~spl0_2),
-  inference(resolution,[],[f377,f319])).
-fof(f805,plain,(
-  ~pred_attacker(name_r1_from_1st) | ~pred_attacker(constr_xor(name_r0x30,name_r0x30_from_1st)) | ~spl0_2),
-  inference(resolution,[],[f791,f341])).
-fof(f807,plain,(
-  ~pred_attacker(constr_xor(name_r0x30,name_r0x30_from_1st)) | ~spl0_2),
-  inference(subsumption_resolution,[],[f805,f320])).
-fof(f863,plain,(
-  ~pred_attacker(name_r0x30_from_1st) | ~pred_attacker(name_r0x30) | ~spl0_2),
-  inference(resolution,[],[f807,f236])).
-fof(f864,plain,(
-  ~pred_attacker(name_r0x30) | ~spl0_2),
-  inference(subsumption_resolution,[],[f863,f293])).
-fof(f865,plain,(
-  $false | ~spl0_2),
-  inference(subsumption_resolution,[],[f864,f297])).
-fof(f866,plain,(
-  ~spl0_2),
-  inference(avatar_contradiction_clause,[],[f865])).
-fof(f868,plain,(
-  pred_attacker(name_objective_R) | ~spl0_0),
-  inference(resolution,[],[f287,f249])).
-fof(f869,plain,(
-  $false | ~spl0_0),
-  inference(subsumption_resolution,[],[f868,f272])).
-fof(f870,plain,(
-  ~spl0_0),
-  inference(avatar_contradiction_clause,[],[f869])).
-fof(f871,plain,(
-  $false),
-  inference(avatar_sat_refutation,[],[f291,f866,f870])).
+67. ! [X0] : constr_ZERO = constr_xor(X0,X0) [input]
+68. ! [X1] : constr_xor(X1,constr_ZERO) = X1 [input]
+69. ! [X2,X3] : constr_xor(X2,X3) = constr_xor(X3,X2) [input]
+70. ! [X4,X5,X6] : constr_xor(X4,constr_xor(X5,X6)) = constr_xor(constr_xor(X4,X5),X6) [input]
+71. ! [X7,X8] : ((pred_attacker(X8) & pred_attacker(X7)) => pred_attacker(constr_xor(X7,X8))) [input]
+76. ! [X13,X14] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(X13,X14)) => pred_attacker(X13)) [input]
+77. ! [X15,X16] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(X15,X16)) => pred_attacker(X16)) [input]
+79. ! [X18] : (pred_attacker(tuple_knowledge_from_1st_round_out_1(X18)) => pred_attacker(X18)) [input]
+84. ! [X21] : (pred_attacker(tuple_R_out_4(X21)) => pred_attacker(X21)) [input]
+88. ! [X25] : (pred_attacker(tuple_R_out_1(X25)) => pred_attacker(X25)) [input]
+89. ! [X26,X27] : ((pred_attacker(X27) & pred_attacker(X26)) => pred_attacker(tuple_R_in_2(X26,X27))) [input]
+102. pred_attacker(tuple_knowledge_from_1st_round_out_1(name_r0x30_from_1st)) [input]
+103. pred_attacker(tuple_knowledge_from_1st_round_out_2(name_r1_from_1st,constr_h(constr_xor(constr_xor(name_r0x30_from_1st,name_r1_from_1st),name_k)))) [input]
+105. pred_attacker(tuple_R_out_1(name_r0x30)) [input]
+107. ! [X39] : (pred_attacker(tuple_R_in_2(X39,constr_h(constr_xor(constr_xor(name_r0x30,X39),name_k)))) => pred_attacker(tuple_R_out_4(name_objective_R))) [input]
+108. pred_attacker(name_objective_R) [input]
+109. ~pred_attacker(name_objective_R) [negated conjecture 108]
+110. ! [X0] : constr_xor(X0,constr_ZERO) = X0 [rectify 68]
+111. ! [X0,X1] : constr_xor(X0,X1) = constr_xor(X1,X0) [rectify 69]
+112. ! [X0,X1,X2] : constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2) [rectify 70]
+113. ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_xor(X0,X1))) [rectify 71]
+117. ! [X0,X1] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)) => pred_attacker(X0)) [rectify 76]
+118. ! [X0,X1] : (pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)) => pred_attacker(X1)) [rectify 77]
+120. ! [X0] : (pred_attacker(tuple_knowledge_from_1st_round_out_1(X0)) => pred_attacker(X0)) [rectify 79]
+123. ! [X0] : (pred_attacker(tuple_R_out_4(X0)) => pred_attacker(X0)) [rectify 84]
+127. ! [X0] : (pred_attacker(tuple_R_out_1(X0)) => pred_attacker(X0)) [rectify 88]
+128. ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(tuple_R_in_2(X0,X1))) [rectify 89]
+136. ! [X0] : (pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(constr_xor(name_r0x30,X0),name_k)))) => pred_attacker(tuple_R_out_4(name_objective_R))) [rectify 107]
+137. ~pred_attacker(name_objective_R) [flattening 109]
+139. ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0))) [ennf transformation 113]
+140. ! [X0,X1] : (pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) [flattening 139]
+145. ! [X0,X1] : (pred_attacker(X0) | ~pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1))) [ennf transformation 117]
+146. ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1))) [ennf transformation 118]
+148. ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_knowledge_from_1st_round_out_1(X0))) [ennf transformation 120]
+151. ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_R_out_4(X0))) [ennf transformation 123]
+155. ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_R_out_1(X0))) [ennf transformation 127]
+156. ! [X0,X1] : (pred_attacker(tuple_R_in_2(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0))) [ennf transformation 128]
+157. ! [X0,X1] : (pred_attacker(tuple_R_in_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) [flattening 156]
+165. ! [X0] : (pred_attacker(tuple_R_out_4(name_objective_R)) | ~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(constr_xor(name_r0x30,X0),name_k))))) [ennf transformation 136]
+232. constr_ZERO = constr_xor(X0,X0) (0:5:1) [cnf transformation 67]
+233. constr_xor(X0,constr_ZERO) = X0 (0:5:1) [cnf transformation 110]
+234. constr_xor(X0,X1) = constr_xor(X1,X0) (0:7:1) [cnf transformation 111]
+235. constr_xor(X0,constr_xor(X1,X2)) = constr_xor(constr_xor(X0,X1),X2) (0:11:1) [cnf transformation 112]
+236. pred_attacker(constr_xor(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0) (0:8:1) [cnf transformation 140]
+241. ~pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)) | pred_attacker(X0) (0:6:1) [cnf transformation 145]
+242. ~pred_attacker(tuple_knowledge_from_1st_round_out_2(X0,X1)) | pred_attacker(X1) (0:6:1) [cnf transformation 146]
+244. ~pred_attacker(tuple_knowledge_from_1st_round_out_1(X0)) | pred_attacker(X0) (0:5:1) [cnf transformation 148]
+249. ~pred_attacker(tuple_R_out_4(X0)) | pred_attacker(X0) (0:5:1) [cnf transformation 151]
+253. ~pred_attacker(tuple_R_out_1(X0)) | pred_attacker(X0) (0:5:1) [cnf transformation 155]
+254. pred_attacker(tuple_R_in_2(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0) (0:8:1) [cnf transformation 157]
+266. pred_attacker(tuple_knowledge_from_1st_round_out_1(name_r0x30_from_1st)) (0:3:1) [cnf transformation 102]
+267. pred_attacker(tuple_knowledge_from_1st_round_out_2(name_r1_from_1st,constr_h(constr_xor(constr_xor(name_r0x30_from_1st,name_r1_from_1st),name_k)))) (0:9) [cnf transformation 103]
+269. pred_attacker(tuple_R_out_1(name_r0x30)) (0:3:1) [cnf transformation 105]
+271. pred_attacker(tuple_R_out_4(name_objective_R)) | ~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(constr_xor(name_r0x30,X0),name_k)))) (0:12) [cnf transformation 165]
+272. ~pred_attacker(name_objective_R) (0:2:1) [cnf transformation 137]
+273. pred_attacker(tuple_knowledge_from_1st_round_out_2(name_r1_from_1st,constr_h(constr_xor(name_k,constr_xor(name_r0x30_from_1st,name_r1_from_1st))))) (0:9:1) [forward demodulation 267,234]
+281. ~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(name_k,constr_xor(name_r0x30,X0))))) | pred_attacker(tuple_R_out_4(name_objective_R)) (0:12) [forward demodulation 271,234]
+286. 0 <=> pred_attacker(tuple_R_out_4(name_objective_R)) [avatar definition]
+287. pred_attacker(tuple_R_out_4(name_objective_R)) <- {0} (0:3:1) [avatar component clause 286]
+289. 2 <=> ! [X0] : ~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(name_k,constr_xor(name_r0x30,X0))))) [avatar definition]
+290. ~pred_attacker(tuple_R_in_2(X0,constr_h(constr_xor(name_k,constr_xor(name_r0x30,X0))))) <- {2} (0:9:1) [avatar component clause 289]
+291. 0 | 2 [avatar split clause 281,289,286]
+293. pred_attacker(name_r0x30_from_1st) (1:2:1) [resolution 244,266]
+297. pred_attacker(name_r0x30) (1:2:1) [resolution 253,269]
+299. constr_xor(constr_ZERO,X1) = X1 (1:5:1) [superposition 234,233, 233 into 234, unify on (0).2 in 233 and (0).1 in 234]
+319. pred_attacker(constr_h(constr_xor(name_k,constr_xor(name_r0x30_from_1st,name_r1_from_1st)))) (1:7:1) [resolution 273,242]
+320. pred_attacker(name_r1_from_1st) (1:2:1) [resolution 273,241]
+321. ~pred_attacker(constr_h(constr_xor(name_k,constr_xor(name_r0x30,X0)))) | ~pred_attacker(X0) <- {2} (1:9:1) [resolution 290,254]
+329. constr_xor(constr_ZERO,X1) = constr_xor(X0,constr_xor(X0,X1)) (1:9) [superposition 235,232, 232 into 235, unify on (0).2 in 232 and (0).2.1 in 235]
+341. pred_attacker(constr_xor(X4,constr_xor(X5,X6))) | ~pred_attacker(X6) | ~pred_attacker(constr_xor(X4,X5)) (1:12:1) [superposition 236,235, 235 into 236, unify on (0).2 in 235 and (0).1 in 236]
+344. constr_xor(X0,constr_xor(X0,X1)) = X1 (1:7:1) [forward demodulation 329,299]
+377. ~pred_attacker(constr_h(constr_xor(name_k,X2))) | ~pred_attacker(constr_xor(name_r0x30,X2)) <- {2} (2:9:1) [superposition 321,344, 344 into 321, unify on (0).2 in 344 and (0).1.1.2 in 321]
+791. ~pred_attacker(constr_xor(name_r0x30,constr_xor(name_r0x30_from_1st,name_r1_from_1st))) <- {2} (3:6:1) [resolution 377,319]
+805. ~pred_attacker(name_r1_from_1st) | ~pred_attacker(constr_xor(name_r0x30,name_r0x30_from_1st)) <- {2} (4:6) [resolution 791,341]
+807. ~pred_attacker(constr_xor(name_r0x30,name_r0x30_from_1st)) <- {2} (4:4:1) [subsumption resolution 805,320]
+863. ~pred_attacker(name_r0x30_from_1st) | ~pred_attacker(name_r0x30) <- {2} (5:4) [resolution 807,236]
+864. ~pred_attacker(name_r0x30) <- {2} (5:2) [subsumption resolution 863,293]
+865. $false <- {2} (5:0) [subsumption resolution 864,297]
+866. ~2 [avatar contradiction clause 865]
+868. pred_attacker(name_objective_R) <- {0} (1:2) [resolution 287,249]
+869. $false <- {0} (1:0) [subsumption resolution 868,272]
+870. ~0 [avatar contradiction clause 869]
+871. $false (0:0) [avatar sat refutation 291,866,870]
 % SZS output end Proof for LAK06-tag-auth

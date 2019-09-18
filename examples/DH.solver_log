@@ -1,136 +1,48 @@
 % Refutation found. Thanks to Tanya!
 % SZS status Theorem for DH
 % SZS output start Proof for DH
-fof(f56,axiom,(
-  ! [X0,X1] : constr_dec(constr_enc(X1,X0),X0) = X1),
-  file('DH.p',unknown)).
-fof(f63,axiom,(
-  ! [X12,X13] : ((pred_attacker(X13) & pred_attacker(X12)) => pred_attacker(constr_dec(X12,X13)))),
-  file('DH.p',unknown)).
-fof(f77,axiom,(
-  ! [X25] : (pred_attacker(tuple_A_out_4(X25)) => pred_attacker(X25))),
-  file('DH.p',unknown)).
-fof(f79,axiom,(
-  ! [X27] : (pred_attacker(tuple_A_out_2(X27)) => pred_attacker(X27))),
-  file('DH.p',unknown)).
-fof(f82,axiom,(
-  ! [X32,X33] : (pred_attacker(tuple_A_out_1(X32,X33)) => pred_attacker(X33))),
-  file('DH.p',unknown)).
-fof(f83,axiom,(
-  ! [X34] : (pred_attacker(X34) => pred_attacker(tuple_A_in_3(X34)))),
-  file('DH.p',unknown)).
-fof(f90,axiom,(
-  pred_attacker(tuple_A_out_1(name_P_7,name_G_8))),
-  file('DH.p',unknown)).
-fof(f91,axiom,(
-  pred_attacker(tuple_A_out_2(constr_mod(constr_exp(name_G_8,name_Na),name_P_7)))),
-  file('DH.p',unknown)).
-fof(f92,axiom,(
-  ! [X42] : (pred_attacker(tuple_A_in_3(X42)) => pred_attacker(tuple_A_out_4(constr_enc(name_objective,constr_mod(constr_exp(X42,name_Na),name_P_7)))))),
-  file('DH.p',unknown)).
-fof(f94,conjecture,(
-  pred_attacker(name_objective)),
-  file('DH.p',unknown)).
-fof(f95,negated_conjecture,(
-  ~pred_attacker(name_objective)),
-  inference(negated_conjecture,[],[f94])).
-fof(f100,plain,(
-  ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_dec(X0,X1)))),
-  inference(rectify,[],[f63])).
-fof(f109,plain,(
-  ! [X0] : (pred_attacker(tuple_A_out_4(X0)) => pred_attacker(X0))),
-  inference(rectify,[],[f77])).
-fof(f111,plain,(
-  ! [X0] : (pred_attacker(tuple_A_out_2(X0)) => pred_attacker(X0))),
-  inference(rectify,[],[f79])).
-fof(f114,plain,(
-  ! [X0,X1] : (pred_attacker(tuple_A_out_1(X0,X1)) => pred_attacker(X1))),
-  inference(rectify,[],[f82])).
-fof(f115,plain,(
-  ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_A_in_3(X0)))),
-  inference(rectify,[],[f83])).
-fof(f121,plain,(
-  ! [X0] : (pred_attacker(tuple_A_in_3(X0)) => pred_attacker(tuple_A_out_4(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_7)))))),
-  inference(rectify,[],[f92])).
-fof(f123,plain,(
-  ~pred_attacker(name_objective)),
-  inference(flattening,[],[f95])).
-fof(f131,plain,(
-  ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0)))),
-  inference(ennf_transformation,[],[f100])).
-fof(f132,plain,(
-  ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0))),
-  inference(flattening,[],[f131])).
-fof(f142,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_4(X0)))),
-  inference(ennf_transformation,[],[f109])).
-fof(f144,plain,(
-  ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_2(X0)))),
-  inference(ennf_transformation,[],[f111])).
-fof(f148,plain,(
-  ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_A_out_1(X0,X1)))),
-  inference(ennf_transformation,[],[f114])).
-fof(f149,plain,(
-  ! [X0] : (pred_attacker(tuple_A_in_3(X0)) | ~pred_attacker(X0))),
-  inference(ennf_transformation,[],[f115])).
-fof(f155,plain,(
-  ! [X0] : (pred_attacker(tuple_A_out_4(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_7)))) | ~pred_attacker(tuple_A_in_3(X0)))),
-  inference(ennf_transformation,[],[f121])).
-fof(f213,plain,(
-  ( ! [X0,X1] : (constr_dec(constr_enc(X1,X0),X0) = X1) )),
-  inference(cnf_transformation,[],[f56])).
-fof(f220,plain,(
-  ( ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f132])).
-fof(f234,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_A_out_4(X0)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f142])).
-fof(f236,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_A_out_2(X0)) | pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f144])).
-fof(f239,plain,(
-  ( ! [X0,X1] : (~pred_attacker(tuple_A_out_1(X0,X1)) | pred_attacker(X1)) )),
-  inference(cnf_transformation,[],[f148])).
-fof(f240,plain,(
-  ( ! [X0] : (pred_attacker(tuple_A_in_3(X0)) | ~pred_attacker(X0)) )),
-  inference(cnf_transformation,[],[f149])).
-fof(f246,plain,(
-  pred_attacker(tuple_A_out_1(name_P_7,name_G_8))),
-  inference(cnf_transformation,[],[f90])).
-fof(f247,plain,(
-  pred_attacker(tuple_A_out_2(constr_mod(constr_exp(name_G_8,name_Na),name_P_7)))),
-  inference(cnf_transformation,[],[f91])).
-fof(f248,plain,(
-  ( ! [X0] : (pred_attacker(tuple_A_out_4(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_7)))) | ~pred_attacker(tuple_A_in_3(X0))) )),
-  inference(cnf_transformation,[],[f155])).
-fof(f250,plain,(
-  ~pred_attacker(name_objective)),
-  inference(cnf_transformation,[],[f123])).
-fof(f264,plain,(
-  pred_attacker(name_G_8)),
-  inference(resolution,[],[f239,f246])).
-fof(f267,plain,(
-  pred_attacker(constr_mod(constr_exp(name_G_8,name_Na),name_P_7))),
-  inference(resolution,[],[f247,f236])).
-fof(f268,plain,(
-  ( ! [X0,X1] : (~pred_attacker(constr_enc(X0,X1)) | ~pred_attacker(X1) | pred_attacker(X0)) )),
-  inference(superposition,[],[f220,f213])).
-fof(f276,plain,(
-  ( ! [X0] : (pred_attacker(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_7))) | ~pred_attacker(tuple_A_in_3(X0))) )),
-  inference(resolution,[],[f248,f234])).
-fof(f285,plain,(
-  ( ! [X0] : (~pred_attacker(tuple_A_in_3(X0)) | ~pred_attacker(constr_mod(constr_exp(X0,name_Na),name_P_7)) | pred_attacker(name_objective)) )),
-  inference(resolution,[],[f276,f268])).
-fof(f288,plain,(
-  ( ! [X0] : (~pred_attacker(constr_mod(constr_exp(X0,name_Na),name_P_7)) | ~pred_attacker(tuple_A_in_3(X0))) )),
-  inference(subsumption_resolution,[],[f285,f250])).
-fof(f292,plain,(
-  ~pred_attacker(tuple_A_in_3(name_G_8))),
-  inference(resolution,[],[f288,f267])).
-fof(f300,plain,(
-  ~pred_attacker(name_G_8)),
-  inference(resolution,[],[f292,f240])).
-fof(f301,plain,(
-  $false),
-  inference(subsumption_resolution,[],[f300,f264])).
+56. ! [X0,X1] : constr_dec(constr_enc(X1,X0),X0) = X1 [input]
+63. ! [X12,X13] : ((pred_attacker(X13) & pred_attacker(X12)) => pred_attacker(constr_dec(X12,X13))) [input]
+77. ! [X25] : (pred_attacker(tuple_A_out_4(X25)) => pred_attacker(X25)) [input]
+79. ! [X27] : (pred_attacker(tuple_A_out_2(X27)) => pred_attacker(X27)) [input]
+82. ! [X32,X33] : (pred_attacker(tuple_A_out_1(X32,X33)) => pred_attacker(X33)) [input]
+83. ! [X34] : (pred_attacker(X34) => pred_attacker(tuple_A_in_3(X34))) [input]
+90. pred_attacker(tuple_A_out_1(name_P_7,name_G_8)) [input]
+91. pred_attacker(tuple_A_out_2(constr_mod(constr_exp(name_G_8,name_Na),name_P_7))) [input]
+92. ! [X42] : (pred_attacker(tuple_A_in_3(X42)) => pred_attacker(tuple_A_out_4(constr_enc(name_objective,constr_mod(constr_exp(X42,name_Na),name_P_7))))) [input]
+94. pred_attacker(name_objective) [input]
+95. ~pred_attacker(name_objective) [negated conjecture 94]
+100. ! [X0,X1] : ((pred_attacker(X1) & pred_attacker(X0)) => pred_attacker(constr_dec(X0,X1))) [rectify 63]
+109. ! [X0] : (pred_attacker(tuple_A_out_4(X0)) => pred_attacker(X0)) [rectify 77]
+111. ! [X0] : (pred_attacker(tuple_A_out_2(X0)) => pred_attacker(X0)) [rectify 79]
+114. ! [X0,X1] : (pred_attacker(tuple_A_out_1(X0,X1)) => pred_attacker(X1)) [rectify 82]
+115. ! [X0] : (pred_attacker(X0) => pred_attacker(tuple_A_in_3(X0))) [rectify 83]
+121. ! [X0] : (pred_attacker(tuple_A_in_3(X0)) => pred_attacker(tuple_A_out_4(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_7))))) [rectify 92]
+123. ~pred_attacker(name_objective) [flattening 95]
+131. ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | (~pred_attacker(X1) | ~pred_attacker(X0))) [ennf transformation 100]
+132. ! [X0,X1] : (pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0)) [flattening 131]
+142. ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_4(X0))) [ennf transformation 109]
+144. ! [X0] : (pred_attacker(X0) | ~pred_attacker(tuple_A_out_2(X0))) [ennf transformation 111]
+148. ! [X0,X1] : (pred_attacker(X1) | ~pred_attacker(tuple_A_out_1(X0,X1))) [ennf transformation 114]
+149. ! [X0] : (pred_attacker(tuple_A_in_3(X0)) | ~pred_attacker(X0)) [ennf transformation 115]
+155. ! [X0] : (pred_attacker(tuple_A_out_4(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_7)))) | ~pred_attacker(tuple_A_in_3(X0))) [ennf transformation 121]
+213. constr_dec(constr_enc(X1,X0),X0) = X1 (0:7:1) [cnf transformation 56]
+220. pred_attacker(constr_dec(X0,X1)) | ~pred_attacker(X1) | ~pred_attacker(X0) (0:8:1) [cnf transformation 132]
+234. ~pred_attacker(tuple_A_out_4(X0)) | pred_attacker(X0) (0:5:1) [cnf transformation 142]
+236. ~pred_attacker(tuple_A_out_2(X0)) | pred_attacker(X0) (0:5:1) [cnf transformation 144]
+239. ~pred_attacker(tuple_A_out_1(X0,X1)) | pred_attacker(X1) (0:6:1) [cnf transformation 148]
+240. pred_attacker(tuple_A_in_3(X0)) | ~pred_attacker(X0) (0:5:1) [cnf transformation 149]
+246. pred_attacker(tuple_A_out_1(name_P_7,name_G_8)) (0:4:1) [cnf transformation 90]
+247. pred_attacker(tuple_A_out_2(constr_mod(constr_exp(name_G_8,name_Na),name_P_7))) (0:7:1) [cnf transformation 91]
+248. pred_attacker(tuple_A_out_4(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_7)))) | ~pred_attacker(tuple_A_in_3(X0)) (0:12:1) [cnf transformation 155]
+250. ~pred_attacker(name_objective) (0:2:1) [cnf transformation 123]
+264. pred_attacker(name_G_8) (1:2:1) [resolution 239,246]
+267. pred_attacker(constr_mod(constr_exp(name_G_8,name_Na),name_P_7)) (1:6:1) [resolution 247,236]
+268. ~pred_attacker(constr_enc(X0,X1)) | ~pred_attacker(X1) | pred_attacker(X0) (1:8:1) [superposition 220,213, 213 into 220, unify on (0).2 in 213 and (0).1 in 220]
+276. pred_attacker(constr_enc(name_objective,constr_mod(constr_exp(X0,name_Na),name_P_7))) | ~pred_attacker(tuple_A_in_3(X0)) (1:11:1) [resolution 248,234]
+285. ~pred_attacker(tuple_A_in_3(X0)) | ~pred_attacker(constr_mod(constr_exp(X0,name_Na),name_P_7)) | pred_attacker(name_objective) (2:11) [resolution 276,268]
+288. ~pred_attacker(constr_mod(constr_exp(X0,name_Na),name_P_7)) | ~pred_attacker(tuple_A_in_3(X0)) (2:9:1) [subsumption resolution 285,250]
+292. ~pred_attacker(tuple_A_in_3(name_G_8)) (3:3:1) [resolution 288,267]
+300. ~pred_attacker(name_G_8) (4:2) [resolution 292,240]
+301. $false (4:0) [subsumption resolution 300,264]
 % SZS output end Proof for DH
