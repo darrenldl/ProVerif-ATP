@@ -2,8 +2,8 @@ open Graph
 open Misc_utils
 
 module Raw_expr = struct
-  (* open Parser_components *)
-  (* open MParser *)
+  open Parser_components
+  open MParser
   open Misc_utils
   open Printf
   open Expr_components
@@ -64,240 +64,242 @@ module Raw_expr = struct
     | InsertedF l ->
       String.concat "" (List.map string_of_int l)
 
-  let rec of_tptp_fof_formula (f : Tptp_ast.fof_formula) =
-    let open Tptp_ast in
-    let rec aux f =
-      match f with
-      | FOF_F_binary (b_op, l, r) ->
-        BinaryOp (b_op, aux l, aux r)
-      | FOF_F_unary (u_op, f) ->
-        UnaryOp (u_op, aux f)
-      | FOF_F_quantified (q, vars, f) ->
-        Quantified (q, vars, aux f)
-      | FOF_F_atomic t ->
-        of_tptp_fof_term t
-    in
-    aux f
+  (* let rec of_tptp_fof_formula (f : Tptp_ast.fof_formula) =
+   *   let open Tptp_ast in
+   *   let rec aux f =
+   *     match f with
+   *     | FOF_F_binary (b_op, l, r) ->
+   *       BinaryOp (b_op, aux l, aux r)
+   *     | FOF_F_unary (u_op, f) ->
+   *       UnaryOp (u_op, aux f)
+   *     | FOF_F_quantified (q, vars, f) ->
+   *       Quantified (q, vars, aux f)
+   *     | FOF_F_atomic t ->
+   *       of_tptp_fof_term t
+   *   in
+   *   aux f
+   * 
+   * and of_tptp_fof_term (t : Tptp_ast.fof_term) =
+   *   let open Tptp_ast in
+   *   let rec aux t =
+   *     match t with
+   *     | FOF_T_var "$false" ->
+   *       False
+   *     | FOF_T_var v ->
+   *       Variable v
+   *     | FOF_T_const "$false" ->
+   *       False
+   *     | FOF_T_const c ->
+   *       Variable c
+   *     | FOF_T_fun_app (f, args) ->
+   *       Function (f, List.map aux args)
+   *   in
+   *   aux t *)
 
-  and of_tptp_fof_term (t : Tptp_ast.fof_term) =
-    let open Tptp_ast in
-    let rec aux t =
-      match t with
-      | FOF_T_var "$false" ->
-        False
-      | FOF_T_var v ->
-        Variable v
-      | FOF_T_const "$false" ->
-        False
-      | FOF_T_const c ->
-        Variable c
-      | FOF_T_fun_app (f, args) ->
-        Function (f, List.map aux args)
-    in
-    aux t
-
-  (* module Parser : sig
-   * 
-   *   val expr_p : expr stateless_p
-   * 
-   * end = struct
-   *   let parens (p : expr stateless_p) : expr stateless_p =
-   *     skip_char '(' >> p >>= (fun x -> skip_char ')' >> return x)
-   * 
-   *   let prefix (sym : string) (op : unary_op) : (expr, unit) operator =
-   *     Prefix (attempt (spaces >> skip_string sym >> spaces >> return (fun x -> UnaryOp (op, x))))
-   * 
-   *   let infix (sym : string) (op : binary_op) : (expr, unit) operator =
-   *     Infix (attempt (spaces >> skip_string sym >> spaces >> return (fun a b -> BinaryOp (op, a, b))),
-   *            Assoc_left)
-   * 
-   *   let operators =
-   *     [
-   *       [prefix "~"  Not];
-   *       [infix  "&"  And];
-   *       [infix  "|"  Or];
-   *       [infix  "=>" Impl; infix "<=>" Iff];
-   *       [infix  "="  Eq];
-   *       [infix  "!=" Neq];
-   *       [infix  "<-" Subsume];
-   *     ]
-   * 
-   *   let false_p =
-   *     ignore_space (string "$false" >> return False)
-   * 
-   *   let solver_inserted_p =
-   *     (ignore_space (char '{' >>
-   *                    sep_by (ignore_space (many1_chars digit)) (char ',') >>=
-   *                    (fun l -> char '}' >> return (InsertedF (List.map int_of_string l))))) <|>
-   *     (ignore_space (many1_chars digit >>=
-   *                    (fun x -> return (InsertedF ([int_of_string x])))))
-   * 
-   *   let rec
-   *     atom_p s = (ignore_space
-   *                   (ident_p >>= (fun ident -> return (Variable ident)))) s
-   *   and
-   *     func_p s = (ignore_space
-   *                   (ident_p >>= (fun ident -> char '(' >>
-   *                                  sep_by1 expr_p (char ',') >>=
-   *                                  (fun params -> char ')' >>
-   *                                    return (Function (ident, params)))))) s
-   *   and
-   *     quant_p s = (choice [char '!' >> return Forall;
-   *                          char '?' >> return Exists;] >>=
-   *                  (fun quantifier ->
-   *                     spaces >> char '[' >>
-   *                     sep_by ident_p (char ',') >>=
-   *                     (fun idents ->
-   *                        char ']' >> spaces >> char ':' >> spaces >>
-   *                        expr_p >>=
-   *                        (fun expr ->
-   *                           return (Quantified (quantifier, idents, expr)))))) s
-   *   and
-   *     sub_expr_p s = choice [attempt quant_p;
-   *                            attempt func_p;
-   *                            attempt (parens expr_p);
-   *                            attempt atom_p;
-   *                            attempt false_p;
-   *                            attempt solver_inserted_p;
-   *                           ] s
-   *   and
-   *     expr_p s     = expression operators sub_expr_p s
-   * end *)
+  module Parser : sig
+  
+    val expr_p : expr stateless_p
+  
+  end = struct
+    let parens (p : expr stateless_p) : expr stateless_p =
+      skip_char '(' >> p >>= (fun x -> skip_char ')' >> return x)
+  
+    let prefix (sym : string) (op : unary_op) : (expr, unit) operator =
+      Prefix (attempt (spaces >> skip_string sym >> spaces >> return (fun x -> UnaryOp (op, x))))
+  
+    let infix (sym : string) (op : binary_op) : (expr, unit) operator =
+      Infix (attempt (spaces >> skip_string sym >> spaces >> return (fun a b -> BinaryOp (op, a, b))),
+             Assoc_left)
+  
+    let operators =
+      [
+        [prefix "~"  Not];
+        [infix  "&"  And];
+        [infix  "|"  Or];
+        [infix  "=>" Impl; infix "<=>" Iff];
+        [infix  "="  Eq];
+        [infix  "!=" Neq];
+        [infix  "<-" Subsume];
+      ]
+  
+    let false_p =
+      ignore_space (string "$false" >> return False)
+  
+    let solver_inserted_p =
+      (ignore_space (char '{' >>
+                     sep_by (ignore_space (many1_chars digit)) (char ',') >>=
+                     (fun l -> char '}' >> return (InsertedF (List.map int_of_string l))))) <|>
+      (ignore_space (many1_chars digit >>=
+                     (fun x -> return (InsertedF ([int_of_string x])))))
+  
+    let rec
+      atom_p s = (ignore_space
+                    (ident_p >>= (fun ident -> return (Variable ident)))) s
+    and
+      func_p s = (ignore_space
+                    (ident_p >>= (fun ident -> char '(' >>
+                                   sep_by1 expr_p (char ',') >>=
+                                   (fun params -> char ')' >>
+                                     return (Function (ident, params)))))) s
+    and
+      quant_p s = (choice [char '!' >> return Forall;
+                           char '?' >> return Exists;] >>=
+                   (fun quantifier ->
+                      spaces >> char '[' >>
+                      sep_by ident_p (char ',') >>=
+                      (fun idents ->
+                         char ']' >> spaces >> char ':' >> spaces >>
+                         expr_p >>=
+                         (fun expr ->
+                            return (Quantified (quantifier, idents, expr)))))) s
+    and
+      sub_expr_p s = choice [attempt quant_p;
+                             attempt func_p;
+                             attempt (parens expr_p);
+                             attempt atom_p;
+                             attempt false_p;
+                             attempt solver_inserted_p;
+                            ] s
+    and
+      expr_p s     = expression operators sub_expr_p s
+  end
 end
 
 module Raw_line = struct
-  (* open MParser *)
-  (* open Parser_components *)
+  open MParser
+  open Parser_components
   open Printf
 
-  type line = string * Raw_expr.expr * string * string list
+  (* type line = string * Raw_expr.expr * string * string list *)
 
-  (* let node_no : int stateless_p =
-   *   many1_chars digit |>> int_of_string >>=
-   *   (fun x -> char '.' >> return x)
-   * 
-   * let non_digit_p =
-   *   many_chars (letter <|> space)
-   * 
-   * let int_p =
-   *   many1_chars digit |>> int_of_string
-   * 
-   * let parent_brack : (string * int list) stateless_p =
-   *   spaces >> char '[' >> non_digit_p >>=
-   *   (fun descr ->
-   *      sep_by int_p (char ',') >>=
-   *      (fun x ->
-   *         char ']' >> return (Core_kernel.String.strip descr, x)
-   *      )
-   *   )
-   * 
-   * let line_p : line option stateless_p =
-   *   choice [attempt (node_no >>=
-   *                    (fun node_no ->
-   *                       spaces >> Raw_expr.Parser.expr_p >>=
-   *                       (fun expr ->
-   *                          spaces >> parent_brack >>=
-   *                          (fun (descr, parent_no_s) ->
-   *                             many newline >>
-   *                             return (Some (node_no, expr, descr, parent_no_s))
-   *                          )
-   *                       )
-   *                    ));
-   *           attempt (newline >> return None);
-   *           attempt (spaces >> newline >> return None);
-   *           attempt (char '%' >> many_until any_char newline >> return None);
-   *           attempt (string "//" >> many_until any_char newline >> return None);
-   *           attempt (string "----" >> many_until any_char eof >> return None);
-   *          ] *)
+  type line = int * Raw_expr.expr * string * int list
+
+  let node_no : int stateless_p =
+    many1_chars digit |>> int_of_string >>=
+    (fun x -> char '.' >> return x)
+  
+  let non_digit_p =
+    many_chars (letter <|> space)
+  
+  let int_p =
+    many1_chars digit |>> int_of_string
+  
+  let parent_brack : (string * int list) stateless_p =
+    spaces >> char '[' >> non_digit_p >>=
+    (fun descr ->
+       sep_by int_p (char ',') >>=
+       (fun x ->
+          char ']' >> return (Core_kernel.String.strip descr, x)
+       )
+    )
+  
+  let line_p : line option stateless_p =
+    choice [attempt (node_no >>=
+                     (fun node_no ->
+                        spaces >> Raw_expr.Parser.expr_p >>=
+                        (fun expr ->
+                           spaces >> parent_brack >>=
+                           (fun (descr, parent_no_s) ->
+                              many newline >>
+                              return (Some (node_no, expr, descr, parent_no_s))
+                           )
+                        )
+                     ));
+            attempt (newline >> return None);
+            attempt (spaces >> newline >> return None);
+            attempt (char '%' >> many_until any_char newline >> return None);
+            attempt (string "//" >> many_until any_char newline >> return None);
+            attempt (string "----" >> many_until any_char eof >> return None);
+           ]
 
   let line_to_string (line : line option) : string =
     match line with
     | None ->
       "Blank line"
     | Some (node_no, expr, derive_descr, parent_no_s) ->
-      sprintf "%s. %s (%s) [%s]" node_no
+      sprintf "%d. %s (%s) [%s]" node_no
         (Raw_expr.expr_to_string expr)
         derive_descr
-        (Misc_utils.join_with_comma parent_no_s)
+        (Misc_utils.join_with_comma (List.map string_of_int parent_no_s))
 
-  let rec of_tptp_decl (decl : Tptp_ast.decl) =
-    let open Tptp_ast in
-    let aux decl =
-      match decl with
-      | Include _ ->
-        None
-      | Annotated_formula (Fof_annotated f) ->
-        let {name; formula; annotations; _} = f in
-        let descr, parent_ids =
-          match annotations_to_descr_parent_ids annotations with
-          | None ->
-            ("", [])
-          | Some p ->
-            p
-        in
-        Some (name, Raw_expr.of_tptp_fof_formula formula, descr, parent_ids)
-    in
-    aux decl
+  (* let rec of_tptp_decl (decl : Tptp_ast.decl) =
+   *   let open Tptp_ast in
+   *   let aux decl =
+   *     match decl with
+   *     | Include _ ->
+   *       None
+   *     | Annotated_formula (Fof_annotated f) ->
+   *       let {name; formula; annotations; _} = f in
+   *       let descr, parent_ids =
+   *         match annotations_to_descr_parent_ids annotations with
+   *         | None ->
+   *           ("", [])
+   *         | Some p ->
+   *           p
+   *       in
+   *       Some (name, Raw_expr.of_tptp_fof_formula formula, descr, parent_ids)
+   *   in
+   *   aux decl *)
 
-  and annotations_to_descr_parent_ids ann =
-    match ann with
-    | None ->
-      None
-    | Some t ->
-      collect_descr_parent_ids_from_general_term t
+  (* and annotations_to_descr_parent_ids ann =
+   *   match ann with
+   *   | None ->
+   *     None
+   *   | Some t ->
+   *     collect_descr_parent_ids_from_general_term t *)
 
-  and collect_descr_parent_ids_from_general_term t =
-    let open Tptp_ast in
-    match t with
-    | GT_single d ->
-      collect_descr_parent_ids_from_general_data d
-    | _ ->
-      None
+  (* and collect_descr_parent_ids_from_general_term t =
+   *   let open Tptp_ast in
+   *   match t with
+   *   | GT_single d ->
+   *     collect_descr_parent_ids_from_general_data d
+   *   | _ ->
+   *     None *)
 
-  and collect_descr_parent_ids_from_general_data d =
-    let open Tptp_ast in
-    match d with
-    | GD_fun ("inference", [GT_single (GD_word descr); _; GT_list parents]) ->
-      Js_utils.console_log descr;
-      let parents =
-        parents
-        |> List.fold_left
-          (fun acc p ->
-             match p with GT_single (GD_word s) -> s :: acc | _ -> acc)
-          []
-        |> List.rev
-      in
-      Some (descr, parents)
-    | _ ->
-      None
+  (* and collect_descr_parent_ids_from_general_data d =
+   *   let open Tptp_ast in
+   *   match d with
+   *   | GD_fun ("inference", [GT_single (GD_word descr); _; GT_list parents]) ->
+   *     Js_utils.console_log descr;
+   *     let parents =
+   *       parents
+   *       |> List.fold_left
+   *         (fun acc p ->
+   *            match p with GT_single (GD_word s) -> s :: acc | _ -> acc)
+   *         []
+   *       |> List.rev
+   *     in
+   *     Some (descr, parents)
+   *   | _ ->
+   *     None *)
+end
+
+module File_parser = struct
+  open MParser
+
+  let refutation_proof_p =
+    many Raw_line.line_p >>=
+    (fun x ->
+       eof >> return x
+    )
+
+  let parse_refutation_proof_channel (ic : in_channel) : Raw_line.line option list MParser.result =
+    parse_channel refutation_proof_p ic ()
+
+  let parse_refutation_proof_string (input : string) : Raw_line.line option list MParser.result =
+    parse_string refutation_proof_p input ()
 end
 
 (* module File_parser = struct
- *   open MParser
- * 
- *   let refutation_proof_p =
- *     many Raw_line.line_p >>=
- *     (fun x ->
- *        eof >> return x
- *     )
- * 
- *   let parse_refutation_proof_channel (ic : in_channel) : Raw_line.line option list MParser.result =
- *     parse_channel refutation_proof_p ic ()
- * 
- *   let parse_refutation_proof_string (input : string) : Raw_line.line option list MParser.result =
- *     parse_string refutation_proof_p input ()
+ *   let parse_refutation_proof_string (input : string) :
+ *     (Raw_line.line option list, string) result =
+ *     let lexbuf = Lexing.from_string input in
+ *     match Tptp.parse_with_error lexbuf with
+ *     | Ok l ->
+ *       Ok (List.map (fun x -> Raw_line.of_tptp_decl x) l)
+ *     | Error msg ->
+ *       Error msg
  * end *)
-
-module File_parser = struct
-  let parse_refutation_proof_string (input : string) :
-    (Raw_line.line option list, string) result =
-    let lexbuf = Lexing.from_string input in
-    match Tptp.parse_with_error lexbuf with
-    | Ok l ->
-      Ok (List.map (fun x -> Raw_line.of_tptp_decl x) l)
-    | Error msg ->
-      Error msg
-end
 
 module Analyzed_expr = struct
   open Expr_components
@@ -378,9 +380,9 @@ module Analyzed_expr = struct
           match is_quantified ctx ident with
           | None ->
             Variable (Unsure, ident)
-          | Some `Exists ->
+          | Some Exists ->
             Variable (Existential, ident)
-          | Some `Forall ->
+          | Some Forall ->
             Variable (Universal, ident) )
       | Function (name, params) ->
         Function (name, List.map (aux ctx) params)
@@ -450,7 +452,8 @@ module Analyzed_expr = struct
             sprintf "(%s)" (expr_to_string e) )
     | BinaryOp (op, l, r) -> (
         match op with
-        | And | Or | Imply | Left_imply | Not_or | Not_and ->
+        (* | And | Or | Imply | Left_imply | Not_or | Not_and -> *)
+        | And | Or | Impl | Neq ->
           sprintf "%s %s %s"
             ( match l with
               | Variable _ as e ->
@@ -471,7 +474,7 @@ module Analyzed_expr = struct
                 expr_to_string e
               | _ as e ->
                 sprintf "(%s)" (expr_to_string e) )
-        | Eq | Iff | Xor ->
+        | Eq | Iff | Subsume ->
           sprintf "%s %s %s" (expr_to_string l) (binary_op_to_string op)
             (expr_to_string r) )
     | Quantified (q, idents, e) ->
@@ -612,9 +615,9 @@ module Analyzed_expr = struct
         raise Unexpected_existential_var
       | _, Variable (Existential, _) ->
         raise Unexpected_existential_var
-      | Quantified (`Exists, _, _), _ ->
+      | Quantified (Exists, _, _), _ ->
         raise Unexpected_exists_quantifier
-      | _, Quantified (`Exists, _, _) ->
+      | _, Quantified (Exists, _, _) ->
         raise Unexpected_exists_quantifier
       | (Variable (Free, _) as v1), (Variable (Free, _) as v2) ->
         if v1 = v2 then true else false

@@ -1,5 +1,5 @@
-(* type quantifier = Exists | Forall *)
-type quantifier = Tptp_ast.fof_quantifier
+type quantifier = Exists | Forall
+(* type quantifier = Tptp_ast.fof_quantifier *)
 
 type boundedness =
   | Unsure
@@ -24,20 +24,29 @@ type unary_op = Tptp_ast.unary_op
  *   | Not_or
  *   | Not_and *)
 
-type binary_op = Tptp_ast.binary_op
+(* type binary_op = Tptp_ast.binary_op *)
 
-(* type binary_op = And | Or | Impl | Eq | Neq | Iff | Subsume *)
+type binary_op = And | Or | Impl | Eq | Neq | Iff | Subsume
 
-(* let quantifier_to_string = function
- *   | Forall -> "!"
- *   | Exists -> "?" *)
+let quantifier_to_string = function
+  | Forall -> "!"
+  | Exists -> "?"
 
-let quantifier_to_string = Tptp_ast.quantifier_to_string
+(* let quantifier_to_string = Tptp_ast.quantifier_to_string *)
 
 (* let unary_op_to_string = function
  *   | Not -> "~" *)
 
 let unary_op_to_string = Tptp_ast.unary_op_to_string
+
+let binary_op_to_string = function
+  | And  -> "&"
+  | Or   -> "|"
+  | Eq   -> "="
+  | Iff  -> "<=>"
+  | Impl -> "=>"
+  | Neq -> "!="
+  | Subsume -> "<~>"
 
 (* let binary_op_to_string = function
  *   | And  -> "&"
@@ -50,4 +59,4 @@ let unary_op_to_string = Tptp_ast.unary_op_to_string
  *   | Not_or -> "~|"
  *   | Not_and -> "~&" *)
 
-let binary_op_to_string = Tptp_ast.binary_op_to_string
+(* let binary_op_to_string = Tptp_ast.binary_op_to_string *)
