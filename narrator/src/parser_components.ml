@@ -10,7 +10,7 @@ let ident_char : char stateless_p = choice [letter; digit; char '_']
 let rec ident_p s =
   choice
     [ attempt (string "constr_" >> begin_with_letter)
-    ; attempt (string "pred_attacker" >> return "att")
+    ; attempt (string "pred_attacker" >> return "attacker")
     ; attempt (string "name_" >> begin_with_letter)
     ; attempt begin_with_letter ]
     s

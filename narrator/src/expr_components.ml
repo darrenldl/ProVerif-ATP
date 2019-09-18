@@ -46,7 +46,7 @@ let binary_op_to_string = function
   | Iff  -> "<=>"
   | Imply -> "=>"
   | Neq -> "!="
-  | Subsume -> "<~>"
+  | Subsume -> "<-"
 
 (* let binary_op_to_string = function
  *   | And  -> "&"
