@@ -116,7 +116,7 @@ module Raw_expr = struct
         [prefix "~"  Not];
         [infix  "&"  And];
         [infix  "|"  Or];
-        [infix  "=>" Impl; infix "<=>" Iff];
+        [infix  "=>" Imply; infix "<=>" Iff];
         [infix  "="  Eq];
         [infix  "!=" Neq];
         [infix  "<-" Subsume];
@@ -170,24 +170,22 @@ module Raw_line = struct
   open Parser_components
   open Printf
 
-  (* type line = string * Raw_expr.expr * string * string list *)
+  type line = string * Raw_expr.expr * string * string list
 
-  type line = int * Raw_expr.expr * string * int list
-
-  let node_no : int stateless_p =
-    many1_chars digit |>> int_of_string >>=
+  let node_no : string stateless_p =
+    many1_chars digit >>=
     (fun x -> char '.' >> return x)
   
   let non_digit_p =
     many_chars (letter <|> space)
   
-  let int_p =
-    many1_chars digit |>> int_of_string
+  (* let int_p =
+   *   many1_chars digit |>> int_of_string *)
   
-  let parent_brack : (string * int list) stateless_p =
+  let parent_brack : (string * string list) stateless_p =
     spaces >> char '[' >> non_digit_p >>=
     (fun descr ->
-       sep_by int_p (char ',') >>=
+       sep_by (many1_chars digit) (char ',') >>=
        (fun x ->
           char ']' >> return (Core_kernel.String.strip descr, x)
        )
@@ -217,10 +215,10 @@ module Raw_line = struct
     | None ->
       "Blank line"
     | Some (node_no, expr, derive_descr, parent_no_s) ->
-      sprintf "%d. %s (%s) [%s]" node_no
+      sprintf "%s. %s (%s) [%s]" node_no
         (Raw_expr.expr_to_string expr)
         derive_descr
-        (Misc_utils.join_with_comma (List.map string_of_int parent_no_s))
+        (Misc_utils.join_with_comma parent_no_s)
 
   (* let rec of_tptp_decl (decl : Tptp_ast.decl) =
    *   let open Tptp_ast in
@@ -453,7 +451,7 @@ module Analyzed_expr = struct
     | BinaryOp (op, l, r) -> (
         match op with
         (* | And | Or | Imply | Left_imply | Not_or | Not_and -> *)
-        | And | Or | Impl | Neq ->
+        | And | Or | Imply | Neq ->
           sprintf "%s %s %s"
             ( match l with
               | Variable _ as e ->
@@ -630,9 +628,9 @@ module Analyzed_expr = struct
         if op1 = op2 then aux e1 e2 else false
       | BinaryOp (op1, e1a, e1b), BinaryOp (op2, e2a, e2b) ->
         if op1 = op2 then aux e1a e2a && aux e1b e2b else false
-      | Quantified (`Forall, _, e1), Quantified (`Forall, _, e2) ->
+      | Quantified (Forall, _, e1), Quantified (Forall, _, e2) ->
         aux e1 e2
-      | Quantified (`Forall, _, e1), (_ as e2) ->
+      | Quantified (Forall, _, e1), (_ as e2) ->
         aux e1 e2
       | False, False ->
         true
@@ -788,24 +786,22 @@ module Analyzed_expr = struct
         BinaryOp (Or, aux e1, aux e2)
       | BinaryOp (Or, e1, e2) ->
         BinaryOp (And, aux e1, aux e2)
-      | BinaryOp (Eq, _, _) ->
-        UnaryOp (Not, e)
+      | BinaryOp (Eq, e1, e2) ->
+        BinaryOp (Neq, e1, e2)
+      | BinaryOp (Neq, e1, e2) ->
+        BinaryOp (Eq, e1, e2)
       | BinaryOp (Iff, e1, e2) ->
-        BinaryOp (Xor, e1, e2)
+        BinaryOp (Or,
+                  BinaryOp (And, UnaryOp(Not, e1), e2),
+                  BinaryOp (And, e1, UnaryOp(Not, e2)))
       | BinaryOp (Imply, e1, e2) ->
         BinaryOp (And, e1, aux e2)
-      | BinaryOp (Left_imply, e1, e2) ->
-        BinaryOp (And, aux e1, e2)
-      | BinaryOp (Xor, e1, e2) ->
-        BinaryOp (Iff, e1, e2)
-      | BinaryOp (Not_or, e1, e2) ->
-        BinaryOp (Or, e1, e2)
-      | BinaryOp (Not_and, e1, e2) ->
-        BinaryOp (And, e1, e2)
-      | Quantified (`Forall, vars, e) ->
-        Quantified (`Exists, vars, aux e)
-      | Quantified (`Exists, vars, e) ->
-        Quantified (`Forall, vars, aux e)
+      | BinaryOp (Subsume, _, _) ->
+        UnaryOp (Not, e)
+      | Quantified (Forall, vars, e) ->
+        Quantified (Exists, vars, aux e)
+      | Quantified (Exists, vars, e) ->
+        Quantified (Forall, vars, aux e)
       | False ->
         UnaryOp (Not, False)
       | InsertedF _ ->
@@ -1984,9 +1980,9 @@ let classify_axiom (m : node_graph) : node_graph =
         | [] ->
           let classification =
             match data.expr with
-            | Quantified (`Forall, _, BinaryOp (Eq, _, _)) ->
+            | Quantified (Forall, _, BinaryOp (Eq, _, _)) ->
               (Axiom : classification)
-            | Quantified (`Forall, _, BinaryOp (Imply, _, _)) ->
+            | Quantified (Forall, _, BinaryOp (Imply, _, _)) ->
               Axiom
             | _ ->
               data.classification
@@ -3020,7 +3016,7 @@ let lines_to_node_map (lines : Raw_line.line option list) : node_graph =
 
 let process_string (input : string) : (node_graph, string) result =
   match File_parser.parse_refutation_proof_string input with
-  | Ok x ->
+  | Success x ->
     x |> lines_to_node_map
     (* |> Analyzed_graph.(filter (fun _id node _m ->
      *     match node with
@@ -3032,7 +3028,7 @@ let process_string (input : string) : (node_graph, string) result =
      *     | Group  -> true
      *   )) *)
     |> fun x -> Ok x
-  | Error msg ->
+  | Failed (msg, _) ->
     Error msg
 
 let collect_steps (m : node_graph) : Protocol_step.t list =

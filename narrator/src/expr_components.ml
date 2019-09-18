@@ -26,7 +26,7 @@ type unary_op = Tptp_ast.unary_op
 
 (* type binary_op = Tptp_ast.binary_op *)
 
-type binary_op = And | Or | Impl | Eq | Neq | Iff | Subsume
+type binary_op = And | Or | Imply | Eq | Neq | Iff | Subsume
 
 let quantifier_to_string = function
   | Forall -> "!"
@@ -44,7 +44,7 @@ let binary_op_to_string = function
   | Or   -> "|"
   | Eq   -> "="
   | Iff  -> "<=>"
-  | Impl -> "=>"
+  | Imply -> "=>"
   | Neq -> "!="
   | Subsume -> "<~>"
 
