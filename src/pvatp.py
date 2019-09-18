@@ -101,7 +101,7 @@ if process_files:
   print("The output of Vampire is stored as :")
   print("    " + solver_log_output_path)
   with open(solver_log_output_path, "w") as log_output:
-    subprocess.run([local_vampire_path, "-t", "86400", "-stat", "none", "-p", "tptp", tptp_output_path], stdout=log_output)
+    subprocess.run([local_vampire_path, "-t", "86400", "-stat", "none", tptp_output_path], stdout=log_output)
 
 print("Generating Narrator interface of the output file")
 temp_dir = tempfile.gettempdir()
