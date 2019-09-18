@@ -64,38 +64,6 @@ module Raw_expr = struct
     | InsertedF l ->
       String.concat "" (List.map string_of_int l)
 
-  (* let rec of_tptp_fof_formula (f : Tptp_ast.fof_formula) =
-   *   let open Tptp_ast in
-   *   let rec aux f =
-   *     match f with
-   *     | FOF_F_binary (b_op, l, r) ->
-   *       BinaryOp (b_op, aux l, aux r)
-   *     | FOF_F_unary (u_op, f) ->
-   *       UnaryOp (u_op, aux f)
-   *     | FOF_F_quantified (q, vars, f) ->
-   *       Quantified (q, vars, aux f)
-   *     | FOF_F_atomic t ->
-   *       of_tptp_fof_term t
-   *   in
-   *   aux f
-   * 
-   * and of_tptp_fof_term (t : Tptp_ast.fof_term) =
-   *   let open Tptp_ast in
-   *   let rec aux t =
-   *     match t with
-   *     | FOF_T_var "$false" ->
-   *       False
-   *     | FOF_T_var v ->
-   *       Variable v
-   *     | FOF_T_const "$false" ->
-   *       False
-   *     | FOF_T_const c ->
-   *       Variable c
-   *     | FOF_T_fun_app (f, args) ->
-   *       Function (f, List.map aux args)
-   *   in
-   *   aux t *)
-
   module Parser : sig
   
     val expr_p : expr stateless_p
@@ -219,57 +187,6 @@ module Raw_line = struct
         (Raw_expr.expr_to_string expr)
         derive_descr
         (Misc_utils.join_with_comma parent_no_s)
-
-  (* let rec of_tptp_decl (decl : Tptp_ast.decl) =
-   *   let open Tptp_ast in
-   *   let aux decl =
-   *     match decl with
-   *     | Include _ ->
-   *       None
-   *     | Annotated_formula (Fof_annotated f) ->
-   *       let {name; formula; annotations; _} = f in
-   *       let descr, parent_ids =
-   *         match annotations_to_descr_parent_ids annotations with
-   *         | None ->
-   *           ("", [])
-   *         | Some p ->
-   *           p
-   *       in
-   *       Some (name, Raw_expr.of_tptp_fof_formula formula, descr, parent_ids)
-   *   in
-   *   aux decl *)
-
-  (* and annotations_to_descr_parent_ids ann =
-   *   match ann with
-   *   | None ->
-   *     None
-   *   | Some t ->
-   *     collect_descr_parent_ids_from_general_term t *)
-
-  (* and collect_descr_parent_ids_from_general_term t =
-   *   let open Tptp_ast in
-   *   match t with
-   *   | GT_single d ->
-   *     collect_descr_parent_ids_from_general_data d
-   *   | _ ->
-   *     None *)
-
-  (* and collect_descr_parent_ids_from_general_data d =
-   *   let open Tptp_ast in
-   *   match d with
-   *   | GD_fun ("inference", [GT_single (GD_word descr); _; GT_list parents]) ->
-   *     Js_utils.console_log descr;
-   *     let parents =
-   *       parents
-   *       |> List.fold_left
-   *         (fun acc p ->
-   *            match p with GT_single (GD_word s) -> s :: acc | _ -> acc)
-   *         []
-   *       |> List.rev
-   *     in
-   *     Some (descr, parents)
-   *   | _ ->
-   *     None *)
 end
 
 module File_parser = struct
@@ -287,17 +204,6 @@ module File_parser = struct
   let parse_refutation_proof_string (input : string) : Raw_line.line option list MParser.result =
     parse_string refutation_proof_p input ()
 end
-
-(* module File_parser = struct
- *   let parse_refutation_proof_string (input : string) :
- *     (Raw_line.line option list, string) result =
- *     let lexbuf = Lexing.from_string input in
- *     match Tptp.parse_with_error lexbuf with
- *     | Ok l ->
- *       Ok (List.map (fun x -> Raw_line.of_tptp_decl x) l)
- *     | Error msg ->
- *       Error msg
- * end *)
 
 module Analyzed_expr = struct
   open Expr_components
@@ -1473,8 +1379,6 @@ type classification =
   | InteractiveProtocolStep
   | Alias
 
-(* |  *)
-
 let classification_to_string (c : classification) : string =
   match c with
   | Unsure ->
@@ -2226,77 +2130,6 @@ let rewrite_conclusion (m : node_graph) : node_graph =
     let m = remove_nodes remove_ids m in
     (* replace contradiction with goal *)
     add_node Overwrite goal_id goal ~children:[] ~parents m
-
-(* let classify_nodes (m : node_graph) : node_graph =
- *   let open Analyzed_graph in
- *   let classify_node () (id : id) (node : node) (m : node_graph) =
- *     let parents = find_parents id m in
- *     let new_node =
- *       match parents with
- *       | [] ->
- *         let data = unwrap_data node in
- *         let is_negated_goal = data.derive_descr = "negated conjecture" in
- *         let func_names = Analyzed_expr.get_function_names data.expr in
- *         let is_axiom =
- *           match data.expr with
- *           | Analyzed_expr.Quantified _ ->
- *             true
- *           | _ ->
- *             false
- *         in
- *         let is_knowledge_possibly =
- *           List.filter (fun x -> x = "attacker") func_names <> []
- *         in
- *         { data with
- *           classification =
- *             ( if is_negated_goal then NegatedGoal
- *               else if is_axiom then Axiom
- *               else if is_knowledge_possibly then InitialKnowledge
- *               else Unsure ) }
- *       | parents ->
- *         let data = unwrap_data node in
- *         let is_negated_goal = data.derive_descr = "negated conjecture" in
- *         let is_contradiction = data.expr = False in
- *         let parents = find_nodes parents m in
- *         let any_parent_negated_goal =
- *           List.filter
- *             (fun (x : node) -> (unwrap_data x).classification = NegatedGoal)
- *             parents
- *           <> []
- *         in
- *         let all_parents_rewrite =
- *           List.filter
- *             (fun (x : node) ->
- *                let data = unwrap_data x in
- *                data.classification = Axiom || data.classification = Rewriting)
- *             parents
- *           = parents
- *           && parents <> []
- *         in
- *         let any_parent_knowledge =
- *           List.filter
- *             (fun (x : node) ->
- *                let data = unwrap_data x in
- *                data.classification = InitialKnowledge
- *                || data.classification = Knowledge)
- *             parents
- *           <> []
- *         in
- *         { data with
- *           classification =
- *             ( if is_contradiction then Contradiction
- *               else if is_negated_goal then NegatedGoal
- *               else if all_parents_rewrite then Rewriting
- *               else if any_parent_knowledge then Knowledge
- *               else if any_parent_negated_goal then NegatedGoal
- *               else Unsure ) }
- *     in
- *     ((), Analyzed_graph.add_node Overwrite id (Data new_node) m)
- *   in
- *   let (), m =
- *     Analyzed_graph.linear_traverse () (Full_traversal classify_node) m
- *   in
- *   m *)
 
 let remove_goal (m : node_graph) : node_graph =
   let open Analyzed_graph in
