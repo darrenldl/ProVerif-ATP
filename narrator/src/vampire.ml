@@ -164,7 +164,7 @@ module Raw_line = struct
    *   many1_chars digit |>> int_of_string *)
 
   let age_weight_selected_p =
-    char '(' >> many1_chars digit >> char ':' >> many1_chars digit >> char ':' >> char ')'
+    char '(' >> sep_by (many1_chars digit) (char ':') >> char ')'
   
   let parent_brack : (string * string list) stateless_p =
     spaces >> char '[' >> non_digit_p >>=
@@ -178,19 +178,21 @@ module Raw_line = struct
   let info_p : info stateless_p =
     spaces >> char '[' >> non_digit_p >>=
     (fun descr ->
-       sep_by (many1_chars digit) (char ',') >>=
+       let descr = Core_kernel.String.strip descr in
+       (if descr = "superposition" then many1_chars digit >>= (fun e1 -> char ',' >> many1_chars digit >>= (fun e2 -> return [e1; e2]))
+        else sep_by (many1_chars digit) (char ',')) >>=
        (fun parents ->
           (char ']' >> return { descr; parents; extra = None })
           <|>
-          (spaces >> non_digit_p >>=
+          (char ',' >> spaces >> many1_chars digit >>=
           (fun l_node ->
-             string "into" >> non_digit_p >>=
+             spaces >> string "into" >> spaces >> many1_chars digit >>=
              (fun r_node ->
                 char ',' >> spaces >> string "unify on" >> spaces >> string "(0)." >> sep_by (many1_chars digit) (char '.') >>=
                 (fun l_ast_indices ->
-                   string "in" >> many1_chars digit >> spaces >> string "and" >> spaces >> string "(0)." >> sep_by (many1_chars digit) (char '.') >>=
+                   spaces >> string "in" >> spaces >> many1_chars digit >> spaces >> string "and" >> spaces >> string "(0)." >> sep_by (many1_chars digit) (char '.') >>=
                    (fun r_ast_indices ->
-                      string "in" >> many1_chars digit >> char ']' >>
+                      spaces >> string "in" >> spaces >> many1_chars digit >> char ']' >>
                       let l_ast_indices = l_ast_indices |> List.map int_of_string in
                       let r_ast_indices = r_ast_indices |> List.map int_of_string in
                       return { descr; parents; extra = Some {l_node; r_node; l_ast_indices; r_ast_indices} }
@@ -206,7 +208,7 @@ module Raw_line = struct
                      (fun node_no ->
                         spaces >> Raw_expr.Parser.expr_p >>=
                         (fun expr ->
-                           spaces >> age_weight_selected_p >> info_p >>=
+                           spaces >> optional age_weight_selected_p >> info_p >>=
                            (fun info ->
                               many newline >>
                               return (Some (node_no, expr, info))
