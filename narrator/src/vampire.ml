@@ -138,8 +138,6 @@ module Raw_line = struct
   open Parser_components
   open Printf
 
-  type line = string * Raw_expr.expr * string * string list
-
   type info = {
     descr : string;
     parents : string list;
@@ -148,6 +146,8 @@ module Raw_line = struct
     l_ast_indices : int list;
     r_ast_indices : int list;
   }
+
+  type line = string * Raw_expr.expr * info
 
   let node_no : string stateless_p =
     many1_chars digit >>=
@@ -199,11 +199,10 @@ module Raw_line = struct
                      (fun node_no ->
                         spaces >> Raw_expr.Parser.expr_p >>=
                         (fun expr ->
-                           spaces >> extra_info_p >> parent_brack >>=
-                           (fun (descr, parent_no_s) ->
-                              spaces >> 
+                           spaces >> age_weight_selected_p >> info_p >>=
+                           (fun info ->
                               many newline >>
-                              return (Some (node_no, expr, descr, parent_no_s))
+                              return (Some (node_no, expr, info))
                            )
                         )
                      ));
@@ -218,11 +217,11 @@ module Raw_line = struct
     match line with
     | None ->
       "Blank line"
-    | Some (node_no, expr, derive_descr, parent_no_s) ->
+    | Some (node_no, expr, info) ->
       sprintf "%s. %s (%s) [%s]" node_no
         (Raw_expr.expr_to_string expr)
-        derive_descr
-        (Misc_utils.join_with_comma parent_no_s)
+        info.descr
+        (Misc_utils.join_with_comma info.parents)
 end
 
 module File_parser = struct
@@ -1513,16 +1512,16 @@ end
 module Analyzed_graph = Graph.Make (Analyzed_graph_base)
 
 let line_to_node_record (line : Raw_line.line) : Analyzed_graph.node_record =
-  let id, raw_expr, derive_descr, parents = line in
+  let id, raw_expr, info = line in
   { id
   ; children = Some []
-  ; parents = Some parents
+  ; parents = Some info.parents
   ; node =
       Some
         (Data
            { expr = Analyzed_expr.raw_expr_to_analyzed_expr raw_expr
            ; classification = Unsure
-           ; derive_descr
+           ; derive_descr = info.descr
            ; chain = (id, id, [id]) })
   ; group = None
   ; node_visible = Some true
