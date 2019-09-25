@@ -140,6 +140,15 @@ module Raw_line = struct
 
   type line = string * Raw_expr.expr * string * string list
 
+  type info = {
+    descr : string;
+    parents : string list;
+    l_node : string;
+    r_node : string;
+    l_ast_indices : int list;
+    r_ast_indices : int list;
+  }
+
   let node_no : string stateless_p =
     many1_chars digit >>=
     (fun x -> char '.' >> return x)
@@ -149,6 +158,9 @@ module Raw_line = struct
   
   (* let int_p =
    *   many1_chars digit |>> int_of_string *)
+
+  let age_weight_selected_p =
+    char '(' >> many1_chars digit >> char ':' >> many1_chars digit >> char ':' >> char ')'
   
   let parent_brack : (string * string list) stateless_p =
     spaces >> char '[' >> non_digit_p >>=
@@ -158,14 +170,38 @@ module Raw_line = struct
           char ']' >> return (Core_kernel.String.strip descr, x)
        )
     )
+
+  let info_p : info stateless_p =
+    spaces >> char '[' >> non_digit_p >>=
+    (fun descr ->
+       sep_by (many1_chars digit) (char ',') >>=
+       (fun parents ->
+          spaces >> non_digit_p >>=
+          (fun l_node ->
+             string "into" >> non_digit_p >>=
+             (fun r_node ->
+                char ',' >> spaces >> string "unify on" >> spaces >> string "(0)." >> sep_by (many1_chars digit) (char '.') >>=
+                (fun l_ast_indices ->
+                   spaces >> string "and" >> spaces >> string "(0)." >> sep_by (many1_chars digit) (char '.') >>=
+                   (fun r_ast_indices ->
+                      let l_ast_indices = l_ast_indices |> List.map int_of_string in
+                      let r_ast_indices = r_ast_indices |> List.map int_of_string in
+                      return { descr; parents; l_node; r_node; l_ast_indices; r_ast_indices}
+                   )
+                )
+             )
+          )
+       )
+    )
   
   let line_p : line option stateless_p =
     choice [attempt (node_no >>=
                      (fun node_no ->
                         spaces >> Raw_expr.Parser.expr_p >>=
                         (fun expr ->
-                           spaces >> parent_brack >>=
+                           spaces >> extra_info_p >> parent_brack >>=
                            (fun (descr, parent_no_s) ->
+                              spaces >> 
                               many newline >>
                               return (Some (node_no, expr, descr, parent_no_s))
                            )
