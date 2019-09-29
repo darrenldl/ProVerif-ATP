@@ -52,74 +52,6 @@ open Lwt
 
 (* let () = Term.(exit @@ eval cmd) *)
 
-let attack_trace node_map =
-  let open Vampire.Protocol_step in
-  let steps = Vampire.collect_steps node_map in
-  let max_proc_name_len_on_left =
-    List.fold_left
-      (fun cur_max s ->
-         match (s.direction, s.proc_name) with
-         | Client_to_intruder, Some s ->
-           max cur_max (String.length s)
-         | _ ->
-           cur_max)
-      0 steps
-  in
-  let max_proc_name_len_on_right =
-    List.fold_left
-      (fun cur_max s ->
-         match (s.direction, s.proc_name) with
-         | Intruder_to_client, Some s ->
-           max cur_max (String.length s)
-         | _ ->
-           cur_max)
-      0 steps
-  in
-  let intruder_name = "I" in
-  let intruder_name_len = String.length intruder_name in
-  let intruder_name_padding_on_left =
-    if max_proc_name_len_on_left >= intruder_name_len then
-      String.make (max_proc_name_len_on_left - intruder_name_len) ' '
-    else ""
-  in
-  let intruder_name_padding_on_right =
-    if max_proc_name_len_on_right >= intruder_name_len then
-      String.make (max_proc_name_len_on_right - intruder_name_len) ' '
-    else ""
-  in
-  String.concat "\n"
-    (List.mapi
-       (fun global_step_num s ->
-          let global_step_num = global_step_num + 1 in
-          let open Vampire.Protocol_step in
-          let proc_name =
-            match s.proc_name with None -> "GLOBAL" | Some x -> x
-          in
-          let proc_name_len = String.length proc_name in
-          let proc_name_padding_on_left =
-            if max_proc_name_len_on_left >= proc_name_len then
-              String.make (max_proc_name_len_on_left - proc_name_len) ' '
-            else ""
-          in
-          let proc_name_padding_on_right =
-            if max_proc_name_len_on_right >= proc_name_len then
-              String.make (max_proc_name_len_on_right - proc_name_len) ' '
-            else ""
-          in
-          let expr = Vampire_analyzed_expr.expr_to_string s.expr in
-          match s.in_out with
-          | Out ->
-            Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
-              global_step_num proc_name s.step_num proc_name_padding_on_right
-              proc_name_padding_on_left proc_name intruder_name
-              intruder_name_padding_on_right expr
-          | In ->
-            Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
-              global_step_num proc_name s.step_num proc_name_padding_on_right
-              intruder_name_padding_on_left intruder_name proc_name
-              proc_name_padding_on_right expr)
-       steps)
-
 let () =
   (* Set up the file loading code *)
   (* let pv_file_input             = Js.Unsafe.global##.document##getElementById (Js.string "pvFileInput") in *)
@@ -172,7 +104,7 @@ let () =
         let attack_trace_box =
           Js.Unsafe.global##.document##getElementById attack_trace_box_ID
         in
-        let text = attack_trace node_map in
+        let text = Vampire.attack_trace node_map in
         attack_trace_box##.innerHTML := Js.string text;
         (* let base_node    = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node 67 node_map) in
          * let base_expr    = base_node.expr in
@@ -566,7 +498,7 @@ let () =
           let attack_trace_box =
             Js.Unsafe.global##.document##getElementById attack_trace_box_ID
           in
-          let text = attack_trace node_map in
+          let text = Vampire.attack_trace node_map in
           attack_trace_box##.innerHTML := Js.string text
         | _ ->
           () );
@@ -598,7 +530,7 @@ let () =
           let attack_trace_box =
             Js.Unsafe.global##.document##getElementById attack_trace_box_ID
           in
-          let text = attack_trace node_map in
+          let text = Vampire.attack_trace node_map in
           attack_trace_box##.innerHTML := Js.string text
         | _ ->
           () );
