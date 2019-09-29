@@ -65,71 +65,78 @@ module Raw_expr = struct
       String.concat "" (List.map string_of_int l)
 
   module Parser : sig
-  
     val expr_p : expr stateless_p
-  
   end = struct
     let parens (p : expr stateless_p) : expr stateless_p =
-      skip_char '(' >> p >>= (fun x -> skip_char ')' >> return x)
-  
+      skip_char '(' >> p >>= fun x -> skip_char ')' >> return x
+
     let prefix (sym : string) (op : unary_op) : (expr, unit) operator =
-      Prefix (attempt (spaces >> skip_string sym >> spaces >> return (fun x -> UnaryOp (op, x))))
-  
+      Prefix
+        (attempt
+           ( spaces >> skip_string sym >> spaces
+             >> return (fun x -> UnaryOp (op, x)) ))
+
     let infix (sym : string) (op : binary_op) : (expr, unit) operator =
-      Infix (attempt (spaces >> skip_string sym >> spaces >> return (fun a b -> BinaryOp (op, a, b))),
-             Assoc_left)
-  
+      Infix
+        ( attempt
+            ( spaces >> skip_string sym >> spaces
+              >> return (fun a b -> BinaryOp (op, a, b)) )
+        , Assoc_left )
+
     let operators =
-      [
-        [prefix "~"  Not];
-        [infix  "&"  And];
-        [infix  "|"  Or];
-        [infix  "=>" Imply; infix "<=>" Iff];
-        [infix  "="  Eq];
-        [infix  "!=" Neq];
-        [infix  "<-" Subsume];
-      ]
-  
-    let false_p =
-      ignore_space (string "$false" >> return False)
-  
+      [ [prefix "~" Not]
+      ; [infix "&" And]
+      ; [infix "|" Or]
+      ; [infix "=>" Imply; infix "<=>" Iff]
+      ; [infix "=" Eq]
+      ; [infix "!=" Neq]
+      ; [infix "<-" Subsume] ]
+
+    let false_p = ignore_space (string "$false" >> return False)
+
     let solver_inserted_p =
-      (ignore_space (char '{' >>
-                     sep_by (ignore_space (many1_chars digit)) (char ',') >>=
-                     (fun l -> char '}' >> return (InsertedF (List.map int_of_string l))))) <|>
-      (ignore_space (many1_chars digit >>=
-                     (fun x -> return (InsertedF ([int_of_string x])))))
-  
-    let rec
-      atom_p s = (ignore_space
-                    (ident_p >>= (fun ident -> return (Variable ident)))) s
-    and
-      func_p s = (ignore_space
-                    (ident_p >>= (fun ident -> char '(' >>
-                                   sep_by1 expr_p (char ',') >>=
-                                   (fun params -> char ')' >>
-                                     return (Function (ident, params)))))) s
-    and
-      quant_p s = (choice [char '!' >> return Forall;
-                           char '?' >> return Exists;] >>=
-                   (fun quantifier ->
-                      spaces >> char '[' >>
-                      sep_by ident_p (char ',') >>=
-                      (fun idents ->
-                         char ']' >> spaces >> char ':' >> spaces >>
-                         expr_p >>=
-                         (fun expr ->
-                            return (Quantified (quantifier, idents, expr)))))) s
-    and
-      sub_expr_p s = choice [attempt quant_p;
-                             attempt func_p;
-                             attempt (parens expr_p);
-                             attempt atom_p;
-                             attempt false_p;
-                             attempt solver_inserted_p;
-                            ] s
-    and
-      expr_p s     = expression operators sub_expr_p s
+      ignore_space
+        ( char '{'
+          >> sep_by (ignore_space (many1_chars digit)) (char ',')
+          >>= fun l -> char '}' >> return (InsertedF (List.map int_of_string l))
+        )
+      <|> ignore_space
+        ( many1_chars digit
+          >>= fun x -> return (InsertedF [int_of_string x]) )
+
+    let rec atom_p s =
+      (ignore_space (ident_p >>= fun ident -> return (Variable ident))) s
+
+    and func_p s =
+      (ignore_space
+         ( ident_p
+           >>= fun ident ->
+           char '('
+           >> sep_by1 expr_p (char ',')
+           >>= fun params -> char ')' >> return (Function (ident, params)) ))
+        s
+
+    and quant_p s =
+      ( choice [char '!' >> return Forall; char '?' >> return Exists]
+        >>= fun quantifier ->
+        spaces >> char '['
+        >> sep_by ident_p (char ',')
+        >>= fun idents ->
+        char ']' >> spaces >> char ':' >> spaces >> expr_p
+        >>= fun expr -> return (Quantified (quantifier, idents, expr)) )
+        s
+
+    and sub_expr_p s =
+      choice
+        [ attempt quant_p
+        ; attempt func_p
+        ; attempt (parens expr_p)
+        ; attempt atom_p
+        ; attempt false_p
+        ; attempt solver_inserted_p ]
+        s
+
+    and expr_p s = expression operators sub_expr_p s
   end
 end
 
@@ -138,89 +145,84 @@ module Raw_line = struct
   open Parser_components
   open Printf
 
-  type extra_info = {
-    l_node : string;
-    r_node : string;
-    l_ast_indices : int list;
-    r_ast_indices : int list;
-  }
+  type extra_info =
+    { l_node : string
+    ; r_node : string
+    ; l_ast_indices : int list
+    ; r_ast_indices : int list }
 
-  type info = {
-    descr : string;
-    parents : string list;
-    extra : extra_info option;
-  }
+  type info =
+    { descr : string
+    ; parents : string list
+    ; extra : extra_info option }
 
   type line = string * Raw_expr.expr * info
 
   let node_no : string stateless_p =
-    many1_chars digit >>=
-    (fun x -> char '.' >> return x)
-  
-  let non_digit_p =
-    many_chars (letter <|> space)
-  
+    many1_chars digit >>= fun x -> char '.' >> return x
+
+  let non_digit_p = many_chars (letter <|> space)
+
   (* let int_p =
    *   many1_chars digit |>> int_of_string *)
 
   let age_weight_selected_p =
     char '(' >> sep_by (many1_chars digit) (char ':') >> char ')'
-  
+
   let parent_brack : (string * string list) stateless_p =
-    spaces >> char '[' >> non_digit_p >>=
-    (fun descr ->
-       sep_by (many1_chars digit) (char ',') >>=
-       (fun x ->
-          char ']' >> return (Core_kernel.String.strip descr, x)
-       )
-    )
+    spaces >> char '[' >> non_digit_p
+    >>= fun descr ->
+    sep_by (many1_chars digit) (char ',')
+    >>= fun x -> char ']' >> return (Core_kernel.String.strip descr, x)
 
   let info_p : info stateless_p =
-    spaces >> char '[' >> non_digit_p >>=
-    (fun descr ->
-       let descr = Core_kernel.String.strip descr in
-       (if descr = "superposition" then many1_chars digit >>= (fun e1 -> char ',' >> many1_chars digit >>= (fun e2 -> return [e1; e2]))
-        else sep_by (many1_chars digit) (char ',')) >>=
-       (fun parents ->
-          (char ']' >> return { descr; parents; extra = None })
-          <|>
-          (char ',' >> spaces >> many1_chars digit >>=
-          (fun l_node ->
-             spaces >> string "into" >> spaces >> many1_chars digit >>=
-             (fun r_node ->
-                char ',' >> spaces >> string "unify on" >> spaces >> string "(0)." >> sep_by (many1_chars digit) (char '.') >>=
-                (fun l_ast_indices ->
-                   spaces >> string "in" >> spaces >> many1_chars digit >> spaces >> string "and" >> spaces >> string "(0)." >> sep_by (many1_chars digit) (char '.') >>=
-                   (fun r_ast_indices ->
-                      spaces >> string "in" >> spaces >> many1_chars digit >> char ']' >>
-                      let l_ast_indices = l_ast_indices |> List.map int_of_string in
-                      let r_ast_indices = r_ast_indices |> List.map int_of_string in
-                      return { descr; parents; extra = Some {l_node; r_node; l_ast_indices; r_ast_indices} }
-                   )
-                )
-             )
-          ))
-       )
-    )
-  
+    spaces >> char '[' >> non_digit_p
+    >>= fun descr ->
+    let descr = Core_kernel.String.strip descr in
+    ( if descr = "superposition" then
+        many1_chars digit
+        >>= fun e1 -> char ',' >> many1_chars digit >>= fun e2 -> return [e1; e2]
+      else sep_by (many1_chars digit) (char ',') )
+    >>= fun parents ->
+    char ']'
+    >> return {descr; parents; extra = None}
+       <|> ( char ',' >> spaces >> many1_chars digit
+             >>= fun l_node ->
+             spaces >> string "into" >> spaces >> many1_chars digit
+             >>= fun r_node ->
+             char ',' >> spaces >> string "unify on" >> spaces >> string "(0)."
+             >> sep_by (many1_chars digit) (char '.')
+             >>= fun l_ast_indices ->
+             spaces >> string "in" >> spaces >> many1_chars digit >> spaces
+             >> string "and" >> spaces >> string "(0)."
+             >> sep_by (many1_chars digit) (char '.')
+             >>= fun r_ast_indices ->
+             spaces >> string "in" >> spaces >> many1_chars digit >> char ']'
+             >>
+             let l_ast_indices = l_ast_indices |> List.map int_of_string in
+             let r_ast_indices = r_ast_indices |> List.map int_of_string in
+             return
+               { descr
+               ; parents
+               ; extra = Some {l_node; r_node; l_ast_indices; r_ast_indices} } )
+
   let line_p : line option stateless_p =
-    choice [attempt (node_no >>=
-                     (fun node_no ->
-                        spaces >> Raw_expr.Parser.expr_p >>=
-                        (fun expr ->
-                           spaces >> optional age_weight_selected_p >> info_p >>=
-                           (fun info ->
-                              many newline >>
-                              return (Some (node_no, expr, info))
-                           )
-                        )
-                     ));
-            attempt (newline >> return None);
-            attempt (spaces >> newline >> return None);
-            attempt (char '%' >> many_until any_char newline >> return None);
-            attempt (string "//" >> many_until any_char newline >> return None);
-            attempt (string "----" >> many_until any_char eof >> return None);
-           ]
+    choice
+      [ attempt
+          ( node_no
+            >>= fun node_no ->
+            spaces >> Raw_expr.Parser.expr_p
+            >>= fun expr ->
+            spaces
+            >> optional age_weight_selected_p
+            >> info_p
+            >>= fun info -> many newline >> return (Some (node_no, expr, info))
+          )
+      ; attempt (newline >> return None)
+      ; attempt (spaces >> newline >> return None)
+      ; attempt (char '%' >> many_until any_char newline >> return None)
+      ; attempt (string "//" >> many_until any_char newline >> return None)
+      ; attempt (string "----" >> many_until any_char eof >> return None) ]
 
   let line_to_string (line : line option) : string =
     match line with
@@ -236,16 +238,14 @@ end
 module File_parser = struct
   open MParser
 
-  let refutation_proof_p =
-    many Raw_line.line_p >>=
-    (fun x ->
-       eof >> return x
-    )
+  let refutation_proof_p = many Raw_line.line_p >>= fun x -> eof >> return x
 
-  let parse_refutation_proof_channel (ic : in_channel) : Raw_line.line option list MParser.result =
+  let parse_refutation_proof_channel (ic : in_channel) :
+    Raw_line.line option list MParser.result =
     parse_channel refutation_proof_p ic ()
 
-  let parse_refutation_proof_string (input : string) : Raw_line.line option list MParser.result =
+  let parse_refutation_proof_string (input : string) :
+    Raw_line.line option list MParser.result =
     parse_string refutation_proof_p input ()
 end
 
@@ -492,7 +492,8 @@ module Analyzed_expr = struct
               | x, Unsure ->
                 Variable (x, v)
               | _, _h ->
-                Variable (b, v) (* only update when unsure *) ) )
+                Variable (b, v)
+                (* only update when unsure *) ) )
       | Function (name, params) ->
         Function (name, List.map aux params)
       | UnaryOp (op, e) ->
@@ -741,9 +742,10 @@ module Analyzed_expr = struct
       | BinaryOp (Neq, e1, e2) ->
         BinaryOp (Eq, e1, e2)
       | BinaryOp (Iff, e1, e2) ->
-        BinaryOp (Or,
-                  BinaryOp (And, UnaryOp(Not, e1), e2),
-                  BinaryOp (And, e1, UnaryOp(Not, e2)))
+        BinaryOp
+          ( Or
+          , BinaryOp (And, UnaryOp (Not, e1), e2)
+          , BinaryOp (And, e1, UnaryOp (Not, e2)) )
       | BinaryOp (Imply, e1, e2) ->
         BinaryOp (And, e1, aux e2)
       | BinaryOp (Subsume, _, _) ->
@@ -1797,7 +1799,8 @@ module Protocol_step = struct
           |> (function None -> failwith "Unexpected None" | Some x -> x)
           |> fun (pre, e) ->
           (*Js_utils.console_log (Printf.sprintf "pre : %s, e : %s" (Analyzed_expr.expr_to_string pre) (Analyzed_expr.expr_to_string e));*)
-          (pre |> split_on_and |> List.map expr_to_steps |> List.concat) @ expr_to_steps e
+          (pre |> split_on_and |> List.map expr_to_steps |> List.concat)
+          @ expr_to_steps e
         | _ ->
           [] )
 end
@@ -2738,11 +2741,11 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
             (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
             srcs_from))
       (* (String.concat "\n"
-                                                 *    (List.map
-                                                 *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                                 *       old_knowledge
-                                                 *    )
-                                                 * ) *)
+                                               *    (List.map
+                                               *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                               *       old_knowledge
+                                               *    )
+                                               * ) *)
       (String.concat "\n"
          (List.map
             (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
