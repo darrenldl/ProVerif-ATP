@@ -106,7 +106,7 @@ let attack_trace node_map =
               String.make (max_proc_name_len_on_right - proc_name_len) ' '
             else ""
           in
-          let expr = Vampire.Analyzed_expr.expr_to_string s.expr in
+          let expr = Vampire_analyzed_expr.expr_to_string s.expr in
           match s.in_out with
           | Out ->
             Printf.sprintf "%d.    %s.%d%s    %s%s -> %s%s : %s\n"
@@ -297,7 +297,7 @@ let () =
           let node = Vampire.Analyzed_graph.find_node target_id m in
           match node with
           | Data data ->
-            let expr_str = Vampire.Analyzed_expr.expr_to_string data.expr in
+            let expr_str = Vampire_analyzed_expr.expr_to_string data.expr in
             let single_formula_box =
               Js.Unsafe.global##.document##getElementById
                 single_formula_box_ID
