@@ -1041,388 +1041,394 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
   in
   List.sort_uniq compare (aux id m)
 
-let info_source_to_string (x : info_source) : string =
-  match x with
-  | Step tag ->
-    Printf.sprintf "step %s" tag
-  | Axiom ax ->
-    Printf.sprintf "axiom %s" (Vampire_analyzed_expr.expr_to_string ax)
-  | Expr e ->
-    Printf.sprintf "%s" (Vampire_analyzed_expr.expr_to_string e)
+module Explain = struct
+  let info_source_to_string (x : info_source) : string =
+    match x with
+    | Step tag ->
+      Printf.sprintf "step %s" tag
+    | Axiom ax ->
+      Printf.sprintf "axiom %s" (Vampire_analyzed_expr.expr_to_string ax)
+    | Expr e ->
+      Printf.sprintf "%s" (Vampire_analyzed_expr.expr_to_string e)
 
-let explain_construction_single (id : Analyzed_graph.id) (m : node_graph) :
-  derive_explanation =
-  let open Analyzed_graph in
-  let open Vampire_analyzed_expr in
-  let is_rewrite (e : expr) : bool =
-    match e with BinaryOp (Eq, _, _) -> true | _ -> false
-  in
-  let base = unwrap_data (find_node id m) in
-  match find_children id m with
-  | [] ->
-    Nothing_to_explain
-  | [result_id] -> (
-      let result = unwrap_data (find_node result_id m) in
-      match List.filter (fun x -> x <> id) (find_parents result_id m) with
-      | [] ->
-        Nothing_to_explain
-      | [agent_id] -> (
-          (* explain single base, agent, and result *)
-          let agent = unwrap_data (find_node agent_id m) in
-          let base_expr = remove_subsumptions base.expr in
-          let agent_expr = remove_subsumptions agent.expr in
-          let result_expr = remove_subsumptions result.expr in
-          (* let base_expr   = unwrap_subsume base.expr   in
-           * let agent_expr  = unwrap_subsume agent.expr  in
-           * let result_expr = unwrap_subsume result.expr in *)
-          let base_expr =
-            base_expr |> Vampire_analyzed_expr.negate |> strip_quant
-          in
-          let agent_expr =
-            agent_expr |> Vampire_analyzed_expr.negate |> strip_quant
-          in
-          let result_expr =
-            result_expr |> Vampire_analyzed_expr.negate |> strip_quant
-          in
-          let base_exprs = split_on_and base_expr in
-          let agent_exprs = split_on_and agent_expr in
-          let result_exprs = split_on_and result_expr in
-          let base_exprs =
-            base_exprs |> List.map strip_not
-            |> List.map strip_pred_attacker
-            |> List.filter (fun x -> x <> False)
-          in
-          let agent_exprs =
-            agent_exprs |> List.map strip_not
-            |> List.map strip_pred_attacker
-            |> List.filter (fun x -> x <> False)
-          in
-          let result_exprs =
-            result_exprs |> List.map strip_not
-            |> List.map strip_pred_attacker
-            |> List.filter (fun x -> x <> False)
-          in
-          match (base_exprs, agent_exprs, result_exprs) with
-          | [b_expr], [a_expr], [r_expr] when is_rewrite a_expr ->
-            Rewrite [(r_expr, b_expr)]
-          | [b_expr], _, r_exprs ->
-            Combine_knowledge
-              ( trace_sources agent_id m @ List.map (fun x -> Expr x) r_exprs
-              , [b_expr] )
-          | b_exprs, [a_expr], r_exprs
-            when is_rewrite a_expr && List.length b_exprs = List.length r_exprs
-            ->
-            let match_map = pattern_multi_match_map r_exprs b_exprs in
-            Js_utils.console_log
-              (Printf.sprintf "match_map size : %d"
-                 (List.length (ExprMap.bindings (unwrap_opt match_map))));
-            Rewrite (ExprMap.bindings (unwrap_opt match_map))
-          | b_exprs, a_exprs, r_exprs
-            when List.length b_exprs
-                 = List.length a_exprs + List.length r_exprs ->
-            let match_map =
-              unwrap_opt
-                (pattern_multi_match_map (a_exprs @ r_exprs) b_exprs)
-            in
-            let new_knowledge =
-              ExprMap.bindings match_map
-              |> List.filter (fun (k, _) -> List.mem k a_exprs)
-            in
-            let old_knowledge =
-              ExprMap.bindings match_map
-              |> List.filter (fun (k, _) -> List.mem k r_exprs)
-            in
-            Gain_knowledge
-              (trace_sources agent_id m, new_knowledge, old_knowledge)
-          | _ ->
-            Dont_know_how )
-      | _ ->
-        Dont_know_how )
-  | _ ->
-    Dont_know_how
-
-let explain_construction_single_chained (id : Analyzed_graph.id)
-    (m : node_graph) : derive_explanation list =
-  let open Analyzed_graph in
-  let open Vampire_analyzed_expr in
-  let get_chain (id : id) (m : node_graph) : id list =
-    let rec aux (acc : id list) (id : id) : id list =
-      let acc = id :: acc in
-      match find_children id m with [] -> acc | c :: _ -> aux acc c
+  let explain_construction_single (id : Analyzed_graph.id) (m : node_graph) :
+    derive_explanation =
+    let open Analyzed_graph in
+    let open Vampire_analyzed_expr in
+    let is_rewrite (e : expr) : bool =
+      match e with BinaryOp (Eq, _, _) -> true | _ -> false
     in
-    aux [] id
-  in
-  List.map (fun id -> explain_construction_single id m) (get_chain id m)
-
-let group_derive_explanations (explanations : derive_explanation list) :
-  grouped_derive_explanations list =
-  let open Vampire_analyzed_expr in
-  let same_group (e1 : derive_explanation) (e2 : derive_explanation) : bool =
-    match (e1, e2) with
-    | Nothing_to_explain, Nothing_to_explain ->
-      true
-    | Dont_know_how, Dont_know_how ->
-      true
-    | Rewrite _, Rewrite _ ->
-      true
-    | Combine_knowledge _, Combine_knowledge _ ->
-      true
-    | Gain_knowledge _, Gain_knowledge _ ->
-      true
+    let base = unwrap_data (find_node id m) in
+    match find_children id m with
+    | [] ->
+      Nothing_to_explain
+    | [result_id] -> (
+        let result = unwrap_data (find_node result_id m) in
+        match List.filter (fun x -> x <> id) (find_parents result_id m) with
+        | [] ->
+          Nothing_to_explain
+        | [agent_id] -> (
+            (* explain single base, agent, and result *)
+            let agent = unwrap_data (find_node agent_id m) in
+            let base_expr = remove_subsumptions base.expr in
+            let agent_expr = remove_subsumptions agent.expr in
+            let result_expr = remove_subsumptions result.expr in
+            (* let base_expr   = unwrap_subsume base.expr   in
+             * let agent_expr  = unwrap_subsume agent.expr  in
+             * let result_expr = unwrap_subsume result.expr in *)
+            let base_expr =
+              base_expr |> Vampire_analyzed_expr.negate |> strip_quant
+            in
+            let agent_expr =
+              agent_expr |> Vampire_analyzed_expr.negate |> strip_quant
+            in
+            let result_expr =
+              result_expr |> Vampire_analyzed_expr.negate |> strip_quant
+            in
+            let base_exprs = split_on_and base_expr in
+            let agent_exprs = split_on_and agent_expr in
+            let result_exprs = split_on_and result_expr in
+            let base_exprs =
+              base_exprs |> List.map strip_not
+              |> List.map strip_pred_attacker
+              |> List.filter (fun x -> x <> False)
+            in
+            let agent_exprs =
+              agent_exprs |> List.map strip_not
+              |> List.map strip_pred_attacker
+              |> List.filter (fun x -> x <> False)
+            in
+            let result_exprs =
+              result_exprs |> List.map strip_not
+              |> List.map strip_pred_attacker
+              |> List.filter (fun x -> x <> False)
+            in
+            match (base_exprs, agent_exprs, result_exprs) with
+            | [b_expr], [a_expr], [r_expr] when is_rewrite a_expr ->
+              Rewrite [(r_expr, b_expr)]
+            | [b_expr], _, r_exprs ->
+              Combine_knowledge
+                ( trace_sources agent_id m
+                  @ List.map (fun x -> Expr x) r_exprs
+                , [b_expr] )
+            | b_exprs, [a_expr], r_exprs
+              when is_rewrite a_expr
+                && List.length b_exprs = List.length r_exprs ->
+              let match_map = pattern_multi_match_map r_exprs b_exprs in
+              Js_utils.console_log
+                (Printf.sprintf "match_map size : %d"
+                   (List.length (ExprMap.bindings (unwrap_opt match_map))));
+              Rewrite (ExprMap.bindings (unwrap_opt match_map))
+            | b_exprs, a_exprs, r_exprs
+              when List.length b_exprs
+                   = List.length a_exprs + List.length r_exprs ->
+              let match_map =
+                unwrap_opt
+                  (pattern_multi_match_map (a_exprs @ r_exprs) b_exprs)
+              in
+              let new_knowledge =
+                ExprMap.bindings match_map
+                |> List.filter (fun (k, _) -> List.mem k a_exprs)
+              in
+              let old_knowledge =
+                ExprMap.bindings match_map
+                |> List.filter (fun (k, _) -> List.mem k r_exprs)
+              in
+              Gain_knowledge
+                (trace_sources agent_id m, new_knowledge, old_knowledge)
+            | _ ->
+              Dont_know_how )
+        | _ ->
+          Dont_know_how )
     | _ ->
-      false
-  in
-  let group_into_list (explanations : derive_explanation list) :
-    derive_explanation list list =
-    let rec aux (acc : derive_explanation list list)
-        (explanations : derive_explanation list) : derive_explanation list list
-      =
-      match explanations with
-      | [] ->
-        List.rev (List.map List.rev acc)
-      | e :: es ->
-        let acc : derive_explanation list list =
-          match acc with
-          | [] ->
-            [[e]]
-          | last_es :: acc -> (
-              match last_es with
-              | [] ->
-                [e] :: acc
-              | last_e :: last_es ->
-                if same_group e last_e then (e :: last_e :: last_es) :: acc
-                else [e] :: (last_e :: last_es) :: acc )
-        in
-        aux acc es
+      Dont_know_how
+
+  let explain_construction_single_chained (id : Analyzed_graph.id)
+      (m : node_graph) : derive_explanation list =
+    let open Analyzed_graph in
+    let open Vampire_analyzed_expr in
+    let get_chain (id : id) (m : node_graph) : id list =
+      let rec aux (acc : id list) (id : id) : id list =
+        let acc = id :: acc in
+        match find_children id m with [] -> acc | c :: _ -> aux acc c
+      in
+      aux [] id
     in
-    aux [] explanations
-  in
-  let convert_rewrite (explanations : derive_explanation list) :
-    grouped_derive_explanations =
-    let rec match_into_buckets (buckets : expr list list)
-        (pairs_list : (expr * expr) list list) : expr list list =
-      match pairs_list with
-      | [] ->
-        List.map List.rev buckets
-      | pairs :: rest ->
-        let buckets =
-          match buckets with
-          | [] ->
-            List.map (fun (k, v) -> [k; v]) pairs
-          | buckets ->
-            let pair_heads = List.map (fun (k, _) -> k) pairs in
-            let bucket_heads = List.map List.hd buckets in
-            let match_map =
-              unwrap_opt (pattern_multi_match_map bucket_heads pair_heads)
-            in
-            List.map
-              (fun l ->
-                 match l with
-                 | [] ->
-                   []
-                 | hd :: tl ->
-                   let new_hd =
-                     List.assoc (ExprMap.find hd match_map) pairs
-                   in
-                   new_hd :: hd :: tl)
-              buckets
-        in
-        match_into_buckets buckets rest
+    List.map (fun id -> explain_construction_single id m) (get_chain id m)
+
+  let group_derive_explanations (explanations : derive_explanation list) :
+    grouped_derive_explanations list =
+    let open Vampire_analyzed_expr in
+    let same_group (e1 : derive_explanation) (e2 : derive_explanation) : bool =
+      match (e1, e2) with
+      | Nothing_to_explain, Nothing_to_explain ->
+        true
+      | Dont_know_how, Dont_know_how ->
+        true
+      | Rewrite _, Rewrite _ ->
+        true
+      | Combine_knowledge _, Combine_knowledge _ ->
+        true
+      | Gain_knowledge _, Gain_knowledge _ ->
+        true
+      | _ ->
+        false
     in
-    let match_pairs_list : (expr * expr) list list =
+    let group_into_list (explanations : derive_explanation list) :
+      derive_explanation list list =
+      let rec aux (acc : derive_explanation list list)
+          (explanations : derive_explanation list) :
+        derive_explanation list list =
+        match explanations with
+        | [] ->
+          List.rev (List.map List.rev acc)
+        | e :: es ->
+          let acc : derive_explanation list list =
+            match acc with
+            | [] ->
+              [[e]]
+            | last_es :: acc -> (
+                match last_es with
+                | [] ->
+                  [e] :: acc
+                | last_e :: last_es ->
+                  if same_group e last_e then (e :: last_e :: last_es) :: acc
+                  else [e] :: (last_e :: last_es) :: acc )
+          in
+          aux acc es
+      in
+      aux [] explanations
+    in
+    let convert_rewrite (explanations : derive_explanation list) :
+      grouped_derive_explanations =
+      let rec match_into_buckets (buckets : expr list list)
+          (pairs_list : (expr * expr) list list) : expr list list =
+        match pairs_list with
+        | [] ->
+          List.map List.rev buckets
+        | pairs :: rest ->
+          let buckets =
+            match buckets with
+            | [] ->
+              List.map (fun (k, v) -> [k; v]) pairs
+            | buckets ->
+              let pair_heads = List.map (fun (k, _) -> k) pairs in
+              let bucket_heads = List.map List.hd buckets in
+              let match_map =
+                unwrap_opt
+                  (pattern_multi_match_map bucket_heads pair_heads)
+              in
+              List.map
+                (fun l ->
+                   match l with
+                   | [] ->
+                     []
+                   | hd :: tl ->
+                     let new_hd =
+                       List.assoc (ExprMap.find hd match_map) pairs
+                     in
+                     new_hd :: hd :: tl)
+                buckets
+          in
+          match_into_buckets buckets rest
+      in
+      let match_pairs_list : (expr * expr) list list =
+        List.map
+          (fun x ->
+             match x with
+             | Rewrite pairs ->
+               pairs
+             | _ ->
+               failwith "Incorrect case")
+          explanations
+      in
+      Rewrites (match_into_buckets [] match_pairs_list)
+    in
+    let convert_combine_knowledge (explanations : derive_explanation list) :
+      grouped_derive_explanations list =
       List.map
-        (fun x ->
-           match x with
-           | Rewrite pairs ->
-             pairs
-           | _ ->
-             failwith "Incorrect case")
+        (fun (e : derive_explanation) ->
+           ( match e with
+             | Combine_knowledge (info_src, es) ->
+               Combine_knowledge (info_src, es)
+             | _ ->
+               failwith "Incorrect case"
+               : grouped_derive_explanations ))
         explanations
     in
-    Rewrites (match_into_buckets [] match_pairs_list)
-  in
-  let convert_combine_knowledge (explanations : derive_explanation list) :
-    grouped_derive_explanations list =
-    List.map
-      (fun (e : derive_explanation) ->
-         ( match e with
-           | Combine_knowledge (info_src, es) ->
-             Combine_knowledge (info_src, es)
-           | _ ->
-             failwith "Incorrect case"
-             : grouped_derive_explanations ))
-      explanations
-  in
-  let convert_gain_knowledge (explanations : derive_explanation list) :
-    grouped_derive_explanations list =
-    List.map
-      (fun (e : derive_explanation) ->
-         ( match e with
-           | Gain_knowledge (info_src, new_knowledge, _) ->
-             Gain_knowledge
-               (info_src, List.map (fun (k, _) -> k) new_knowledge)
-           | _ ->
-             failwith "Incorrect case"
-             : grouped_derive_explanations ))
-      explanations
-  in
-  let convert_to_grouped (grouped_explanations : derive_explanation list list)
-    : grouped_derive_explanations list =
-    let rec aux (acc : grouped_derive_explanations list)
+    let convert_gain_knowledge (explanations : derive_explanation list) :
+      grouped_derive_explanations list =
+      List.map
+        (fun (e : derive_explanation) ->
+           ( match e with
+             | Gain_knowledge (info_src, new_knowledge, _) ->
+               Gain_knowledge
+                 (info_src, List.map (fun (k, _) -> k) new_knowledge)
+             | _ ->
+               failwith "Incorrect case"
+               : grouped_derive_explanations ))
+        explanations
+    in
+    let convert_to_grouped
         (grouped_explanations : derive_explanation list list) :
       grouped_derive_explanations list =
-      match grouped_explanations with
-      | [] ->
-        List.rev acc
-      | g :: gs ->
-        let acc =
-          match g with
-          | [] ->
-            acc
-          | Nothing_to_explain :: _ ->
-            Nothing_to_explain :: acc
-          | Dont_know_how :: _ ->
-            Dont_know_how :: acc
-          | Rewrite _ :: _ ->
-            convert_rewrite g :: acc
-          | Combine_knowledge _ :: _ ->
-            convert_combine_knowledge g @ acc
-          | Gain_knowledge _ :: _ ->
-            convert_gain_knowledge g @ acc
-        in
-        aux acc gs
+      let rec aux (acc : grouped_derive_explanations list)
+          (grouped_explanations : derive_explanation list list) :
+        grouped_derive_explanations list =
+        match grouped_explanations with
+        | [] ->
+          List.rev acc
+        | g :: gs ->
+          let acc =
+            match g with
+            | [] ->
+              acc
+            | Nothing_to_explain :: _ ->
+              Nothing_to_explain :: acc
+            | Dont_know_how :: _ ->
+              Dont_know_how :: acc
+            | Rewrite _ :: _ ->
+              convert_rewrite g :: acc
+            | Combine_knowledge _ :: _ ->
+              convert_combine_knowledge g @ acc
+            | Gain_knowledge _ :: _ ->
+              convert_gain_knowledge g @ acc
+          in
+          aux acc gs
+      in
+      aux [] grouped_explanations
     in
-    aux [] grouped_explanations
-  in
-  let explanations =
-    explanations |> uniquify_universal_var_names_derive_explanations
-    |> List.filter (fun (x : derive_explanation) ->
-        x <> Nothing_to_explain && x <> Dont_know_how)
-  in
-  let var_bindings = var_bindings_in_explanations explanations in
-  List.iter
-    (fun (k, v) ->
-       Js_utils.console_log (Printf.sprintf "%s -> %s" k (expr_to_string v)))
-    (VarMap.bindings var_bindings);
-  let grouped_explanations = group_into_list explanations in
-  convert_to_grouped grouped_explanations
-
-let explain_construction_chain (id : Analyzed_graph.id) (m : node_graph) :
-  grouped_derive_explanations list =
-  let open Analyzed_graph in
-  let open Vampire_analyzed_expr in
-  let get_chain (id : id) (m : node_graph) : id list =
-    let rec aux (acc : id list) (id : id) : id list =
-      let acc = id :: acc in
-      match find_children id m with [] -> acc | c :: _ -> aux acc c
+    let explanations =
+      explanations |> uniquify_universal_var_names_derive_explanations
+      |> List.filter (fun (x : derive_explanation) ->
+          x <> Nothing_to_explain && x <> Dont_know_how)
     in
-    aux [] id
-  in
-  let explanations =
-    List.map (fun id -> explain_construction_single id m) (get_chain id m)
-  in
-  group_derive_explanations explanations
+    let var_bindings = var_bindings_in_explanations explanations in
+    List.iter
+      (fun (k, v) ->
+         Js_utils.console_log (Printf.sprintf "%s -> %s" k (expr_to_string v)))
+      (VarMap.bindings var_bindings);
+    let grouped_explanations = group_into_list explanations in
+    convert_to_grouped grouped_explanations
 
-let derive_explanation_to_string (explanation : derive_explanation) : string =
-  let open Vampire_analyzed_expr in
-  match explanation with
-  | Nothing_to_explain ->
-    "N/A"
-  | Dont_know_how ->
-    "N/A"
-  | Rewrite rewrites ->
-    Printf.sprintf
-      "Attacker rewrites\n%s\n                                          "
-      (String.concat "\n\n"
-         (List.map
-            (fun (e_from, e_to) ->
-               Printf.sprintf "  %s\nto\n  %s" (expr_to_string e_from)
-                 (expr_to_string e_to))
-            rewrites))
-  | Combine_knowledge (srcs_from, es_gain) ->
-    Printf.sprintf
-      "From\n\
-       %s\n\
-       attacker knows\n\
-       %s\n\
-      \                                           "
-      (String.concat "\n"
-         (List.map
-            (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
-            srcs_from))
-      (String.concat "\n"
-         (List.map
-            (fun x -> Printf.sprintf "  %s" (expr_to_string x))
-            es_gain))
-  | Gain_knowledge (srcs_from, new_knowledge, old_knowledge) ->
-    Printf.sprintf "From\n%s\nattacker learns\n%s\n"
-      (String.concat "\n"
-         (List.map
-            (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
-            srcs_from))
-      (* (String.concat "\n"
-                                           *    (List.map
-                                           *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                           *       old_knowledge
-                                           *    )
-                                           * ) *)
-      (String.concat "\n"
-         (List.map
-            (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-            new_knowledge))
+  let explain_construction_chain (id : Analyzed_graph.id) (m : node_graph) :
+    grouped_derive_explanations list =
+    let open Analyzed_graph in
+    let open Vampire_analyzed_expr in
+    let get_chain (id : id) (m : node_graph) : id list =
+      let rec aux (acc : id list) (id : id) : id list =
+        let acc = id :: acc in
+        match find_children id m with [] -> acc | c :: _ -> aux acc c
+      in
+      aux [] id
+    in
+    let explanations =
+      List.map (fun id -> explain_construction_single id m) (get_chain id m)
+    in
+    group_derive_explanations explanations
 
-let grouped_derive_explanations_to_string
-    (explanation : grouped_derive_explanations) : string =
-  let open Vampire_analyzed_expr in
-  match explanation with
-  | Nothing_to_explain ->
-    "Nothing to explain"
-  | Dont_know_how ->
-    "Don't know how to explain"
-  | Rewrites buckets ->
-    Printf.sprintf "%s\n"
-      (String.concat "\n\n"
-         (List.map
-            (fun b ->
-               Printf.sprintf "Attacker rewrites %s"
-                 (String.concat " to\n"
-                    (List.map Vampire_analyzed_expr.expr_to_string b)))
-            buckets))
-  | Combine_knowledge (srcs_from, es_gain) ->
-    Printf.sprintf
-      "From\n\
-       %s\n\
-       attacker knows\n\
-       %s\n\
-      \                                           "
-      (String.concat "\n"
-         (List.map
-            (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
-            srcs_from))
-      (String.concat "\n"
-         (List.map
-            (fun x -> Printf.sprintf "  %s" (expr_to_string x))
-            es_gain))
-  | Gain_knowledge (srcs_from, es_gain) ->
-    Printf.sprintf
-      "From\n\
-       %s\n\
-       attacker knows\n\
-       %s\n\
-      \                                           "
-      (String.concat "\n"
-         (List.map
-            (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
-            srcs_from))
-      (String.concat "\n"
-         (List.map
-            (fun x -> Printf.sprintf "  %s" (expr_to_string x))
-            es_gain))
+  let derive_explanation_to_string (explanation : derive_explanation) : string
+    =
+    let open Vampire_analyzed_expr in
+    match explanation with
+    | Nothing_to_explain ->
+      "N/A"
+    | Dont_know_how ->
+      "N/A"
+    | Rewrite rewrites ->
+      Printf.sprintf
+        "Attacker rewrites\n%s\n                                          "
+        (String.concat "\n\n"
+           (List.map
+              (fun (e_from, e_to) ->
+                 Printf.sprintf "  %s\nto\n  %s" (expr_to_string e_from)
+                   (expr_to_string e_to))
+              rewrites))
+    | Combine_knowledge (srcs_from, es_gain) ->
+      Printf.sprintf
+        "From\n\
+         %s\n\
+         attacker knows\n\
+         %s\n\
+        \                                           "
+        (String.concat "\n"
+           (List.map
+              (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
+              srcs_from))
+        (String.concat "\n"
+           (List.map
+              (fun x -> Printf.sprintf "  %s" (expr_to_string x))
+              es_gain))
+    | Gain_knowledge (srcs_from, new_knowledge, old_knowledge) ->
+      Printf.sprintf "From\n%s\nattacker learns\n%s\n"
+        (String.concat "\n"
+           (List.map
+              (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
+              srcs_from))
+        (* (String.concat "\n"
+                                         *    (List.map
+                                         *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                         *       old_knowledge
+                                         *    )
+                                         * ) *)
+        (String.concat "\n"
+           (List.map
+              (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+              new_knowledge))
 
-let grouped_derive_explanations_list_to_string
-    (explanations : grouped_derive_explanations list) : string =
-  String.concat "\n"
-    (List.map grouped_derive_explanations_to_string explanations)
+  let grouped_derive_explanations_to_string
+      (explanation : grouped_derive_explanations) : string =
+    let open Vampire_analyzed_expr in
+    match explanation with
+    | Nothing_to_explain ->
+      "Nothing to explain"
+    | Dont_know_how ->
+      "Don't know how to explain"
+    | Rewrites buckets ->
+      Printf.sprintf "%s\n"
+        (String.concat "\n\n"
+           (List.map
+              (fun b ->
+                 Printf.sprintf "Attacker rewrites %s"
+                   (String.concat " to\n"
+                      (List.map Vampire_analyzed_expr.expr_to_string b)))
+              buckets))
+    | Combine_knowledge (srcs_from, es_gain) ->
+      Printf.sprintf
+        "From\n\
+         %s\n\
+         attacker knows\n\
+         %s\n\
+        \                                           "
+        (String.concat "\n"
+           (List.map
+              (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
+              srcs_from))
+        (String.concat "\n"
+           (List.map
+              (fun x -> Printf.sprintf "  %s" (expr_to_string x))
+              es_gain))
+    | Gain_knowledge (srcs_from, es_gain) ->
+      Printf.sprintf
+        "From\n\
+         %s\n\
+         attacker knows\n\
+         %s\n\
+        \                                           "
+        (String.concat "\n"
+           (List.map
+              (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
+              srcs_from))
+        (String.concat "\n"
+           (List.map
+              (fun x -> Printf.sprintf "  %s" (expr_to_string x))
+              es_gain))
+
+  let grouped_derive_explanations_list_to_string
+      (explanations : grouped_derive_explanations list) : string =
+    String.concat "\n"
+      (List.map grouped_derive_explanations_to_string explanations)
+end
 
 let node_to_string_debug (id : Analyzed_graph.id) (node : node)
     (m : node_graph) : string =

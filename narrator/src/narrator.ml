@@ -313,8 +313,8 @@ let () =
             in
             single_explanation_box##.innerHTML
             := Js.string
-                (Vampire.derive_explanation_to_string
-                   (Vampire.explain_construction_single target_id m))
+                (Vampire.Explain.derive_explanation_to_string
+                   (Vampire.Explain.explain_construction_single target_id m))
           | Group ->
             () ));
   Cytoscape.on cy_main ~event:"tap" ~selector:"edge" ~handler:(fun ev ->
@@ -516,11 +516,11 @@ let () =
                 List.filter
                   (fun (e : derive_explanation) ->
                      e <> Nothing_to_explain && e <> Dont_know_how)
-                  (explain_construction_single_chained id old_m)
+                  (Explain.explain_construction_single_chained id old_m)
               in
               let explanation_str =
                 String.concat "\n"
-                  (List.map derive_explanation_to_string explanations)
+                  (List.map Explain.derive_explanation_to_string explanations)
               in
               let chain_explanation_box =
                 Js.Unsafe.global##.document##getElementById
