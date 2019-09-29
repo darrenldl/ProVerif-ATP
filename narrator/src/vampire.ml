@@ -2269,11 +2269,6 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   |> mark_universal_variables |> classify |> classify_alias |> classify
   |> rewrite_conclusion |> redraw_alias_arrows
 
-(* |> mark_chains *)
-(* |> compress_chains *)
-(* |> compress_rewrite_trees *)
-(* |> compress_knowledge_trees *)
-
 let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
   =
   let open Analyzed_graph in
