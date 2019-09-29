@@ -1,6 +1,5 @@
 open Graph
 open Misc_utils
-
 module Analyzed_expr_graph = Graph.Make (Vampire_analyzed_expr)
 
 let expr_to_nodes (e : Vampire_analyzed_expr.expr) :
@@ -253,12 +252,15 @@ let uniquify_universal_var_names_derive_explanations
   let replace_id (original : string) (replacement : string)
       (explanation : derive_explanation) : derive_explanation =
     let replace_id_for_pairs (original : string) (replacement : string)
-        (pairs : (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list) :
+        (pairs :
+           (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list) :
       (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list =
       List.map
         (fun (k, v) ->
-           ( Vampire_analyzed_expr.replace_universal_var_name original replacement k
-           , Vampire_analyzed_expr.replace_universal_var_name original replacement v ))
+           ( Vampire_analyzed_expr.replace_universal_var_name original
+               replacement k
+           , Vampire_analyzed_expr.replace_universal_var_name original
+               replacement v ))
         pairs
     in
     match explanation with
@@ -275,13 +277,14 @@ let uniquify_universal_var_names_derive_explanations
                match info with
                | Expr e ->
                  Expr
-                   (Vampire_analyzed_expr.replace_universal_var_name original
-                      replacement e)
+                   (Vampire_analyzed_expr.replace_universal_var_name
+                      original replacement e)
                | _ ->
                  info)
             infos
         , List.map
-            (Vampire_analyzed_expr.replace_universal_var_name original replacement)
+            (Vampire_analyzed_expr.replace_universal_var_name original
+               replacement)
             es )
     | Gain_knowledge (infos, pairs1, pairs2) ->
       Gain_knowledge
@@ -289,9 +292,12 @@ let uniquify_universal_var_names_derive_explanations
         , replace_id_for_pairs original replacement pairs1
         , replace_id_for_pairs original replacement pairs2 )
   in
-  let get_exprs (explanation : derive_explanation) : Vampire_analyzed_expr.expr list =
-    let pairs_to_exprs (pairs : (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list)
-      : Vampire_analyzed_expr.expr list =
+  let get_exprs (explanation : derive_explanation) :
+    Vampire_analyzed_expr.expr list =
+    let pairs_to_exprs
+        (pairs :
+           (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list) :
+      Vampire_analyzed_expr.expr list =
       List.fold_left (fun acc (k, v) -> k :: v :: acc) [] pairs
     in
     match explanation with
@@ -320,8 +326,8 @@ let uniquify_universal_var_names_derive_explanations
     | Gain_knowledge (_, pairs1, pairs2) ->
       pairs_to_exprs pairs1 @ pairs_to_exprs pairs2
   in
-  Vampire_analyzed_expr.uniquify_universal_var_names_generic ~replace_id ~get_exprs "X"
-    explanations
+  Vampire_analyzed_expr.uniquify_universal_var_names_generic ~replace_id
+    ~get_exprs "X" explanations
 
 let var_bindings_in_explanations (explanations : derive_explanation list) :
   Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
@@ -351,7 +357,8 @@ let mark_free_variables (m : node_graph) : node_graph =
     let data =
       { data with
         expr =
-          ( if parents = [] then Vampire_analyzed_expr.mark_if_unsure Free data.expr
+          ( if parents = [] then
+              Vampire_analyzed_expr.mark_if_unsure Free data.expr
             else data.expr ) }
     in
     ((), Analyzed_graph.add_node Overwrite id (Data data) m)
@@ -368,7 +375,8 @@ let mark_universal_variables (m : node_graph) : node_graph =
       (m : node_graph) =
     let data = unwrap_data node in
     let data =
-      {data with expr = Vampire_analyzed_expr.mark_if_unsure Universal data.expr}
+      { data with
+        expr = Vampire_analyzed_expr.mark_if_unsure Universal data.expr }
     in
     ((), Analyzed_graph.add_node Overwrite id (Data data) m)
   in
@@ -382,11 +390,14 @@ let propagate_variable_boundedness (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let propagate_boundedness_to_child (m : node_graph) target_id child_id =
     let boundedness =
-      Vampire_analyzed_expr.get_boundedness (unwrap_data (find_node target_id m)).expr
+      Vampire_analyzed_expr.get_boundedness
+        (unwrap_data (find_node target_id m)).expr
     in
     let node = unwrap_data (find_node child_id m) in
     let node =
-      {node with expr = Vampire_analyzed_expr.update_boundedness node.expr boundedness}
+      { node with
+        expr = Vampire_analyzed_expr.update_boundedness node.expr boundedness
+      }
     in
     Analyzed_graph.add_node Overwrite child_id (Data node) m
   in
@@ -489,300 +500,304 @@ module Protocol_step = struct
           [] )
 end
 
-let classify_negated_goal (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure ->
-      let classification =
-        if data.derive_descr = "negated_conjecture" then NegatedGoal
-        else
-          let parents = find_nodes (find_parents id m) m in
-          let all_parents_negated_goal =
-            List.for_all
-              (fun x -> (unwrap_data x).classification = NegatedGoal)
-              parents
-          in
-          if parents <> [] && all_parents_negated_goal then NegatedGoal
-          else data.classification
-      in
-      let data = {data with classification} in
-      ((), add_node Overwrite id (Data data) m)
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
-
-let classify_goal (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure ->
-      let classification =
-        let no_parents = find_parents id m = [] in
-        let children = find_nodes (find_children id m) m in
-        let any_child_negated_goal =
-          List.filter
-            (fun x -> (unwrap_data x).classification = NegatedGoal)
-            children
-          <> []
+module Classify = struct
+  let classify_negated_goal (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure ->
+        let classification =
+          if data.derive_descr = "negated_conjecture" then NegatedGoal
+          else
+            let parents = find_nodes (find_parents id m) m in
+            let all_parents_negated_goal =
+              List.for_all
+                (fun x -> (unwrap_data x).classification = NegatedGoal)
+                parents
+            in
+            if parents <> [] && all_parents_negated_goal then NegatedGoal
+            else data.classification
         in
-        if no_parents && any_child_negated_goal then Goal
-        else data.classification
-      in
-      let data = {data with classification} in
-      ((), add_node Overwrite id (Data data) m)
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+        let data = {data with classification} in
+        ((), add_node Overwrite id (Data data) m)
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
 
-let classify_protocol_step (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let check_tag (tag : string) : bool =
-    match Protocol_step.break_down_step_string tag with
-    | _, Some _, Some _ ->
-      true
-    | _ ->
-      false
-  in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let open Vampire_analyzed_expr in
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure -> (
-        match find_parents id m with
-        | [] ->
-          let classification =
-            match data.expr with
-            | Function ("attacker", [Function (name, _)])
-            | Quantified (_, _, Function ("attacker", [Function (name, _)]))
-              -> (
-                  match Protocol_step.break_down_step_string name with
-                  | _, Some _, Some _ ->
-                    ProtocolStep
-                  | _ ->
-                    data.classification )
-            (* | Quantified (_, _, Function ("attacker", [Function (name, _)]))
-             *   -> (
-             *       match Protocol_step.break_down_step_string name with
-             *       | _, Some _, Some _ ->
-             *         ProtocolStep
-             *       | _ ->
-             *         data.classification ) *)
-            | BinaryOp (Imply, antecedent, consequent)
-            | Quantified (_, _, BinaryOp (Imply, antecedent, consequent)) ->
-              let premises = Vampire_analyzed_expr.split_on_and antecedent in
-              let is_step f =
-                match f with
-                | Function ("attacker", [Function (name, _)]) -> (
+  let classify_goal (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure ->
+        let classification =
+          let no_parents = find_parents id m = [] in
+          let children = find_nodes (find_children id m) m in
+          let any_child_negated_goal =
+            List.filter
+              (fun x -> (unwrap_data x).classification = NegatedGoal)
+              children
+            <> []
+          in
+          if no_parents && any_child_negated_goal then Goal
+          else data.classification
+        in
+        let data = {data with classification} in
+        ((), add_node Overwrite id (Data data) m)
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+
+  let classify_protocol_step (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let check_tag (tag : string) : bool =
+      match Protocol_step.break_down_step_string tag with
+      | _, Some _, Some _ ->
+        true
+      | _ ->
+        false
+    in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let open Vampire_analyzed_expr in
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure -> (
+          match find_parents id m with
+          | [] ->
+            let classification =
+              match data.expr with
+              | Function ("attacker", [Function (name, _)])
+              | Quantified (_, _, Function ("attacker", [Function (name, _)]))
+                -> (
                     match Protocol_step.break_down_step_string name with
                     | _, Some _, Some _ ->
-                      true
+                      ProtocolStep
                     | _ ->
-                      false )
-                | _ ->
-                  false
-              in
-              if List.exists is_step premises && is_step consequent then
-                InteractiveProtocolStep
-              else data.classification
-            | _ ->
-              data.classification
-          in
-          let data = {data with classification} in
-          ((), add_node Overwrite id (Data data) m)
-        | _ ->
-          ((), m) )
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
-
-let classify_axiom (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure -> (
-        match find_parents id m with
-        | [] ->
-          let classification =
-            match data.expr with
-            | Quantified (Forall, _, BinaryOp (Eq, _, _)) ->
-              (Axiom : classification)
-            | Quantified (Forall, _, BinaryOp (Imply, _, _)) ->
-              Axiom
-            | _ ->
-              data.classification
-          in
-          let data = {data with classification} in
-          ((), add_node Overwrite id (Data data) m)
-        | _ ->
-          ((), m) )
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
-
-let classify_rewriting (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure ->
-      let parents = find_nodes (find_parents id m) m in
-      let all_parents_axiom_or_rewriting =
-        List.for_all
-          (fun x ->
-             (unwrap_data x).classification = Axiom
-             || (unwrap_data x).classification = Rewriting)
-          parents
-      in
-      let classification =
-        if parents <> [] && all_parents_axiom_or_rewriting then Rewriting
-        else data.classification
-      in
-      let data = {data with classification} in
-      ((), add_node Overwrite id (Data data) m)
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
-
-let classify_initial_knowledge (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure -> (
-        match find_parents id m with
-        | [] ->
-          let classification =
-            match data.expr with
-            | Function ("attacker", _) ->
-              InitialKnowledge
-            | _ ->
-              data.classification
-          in
-          let data = {data with classification} in
-          ((), add_node Overwrite id (Data data) m)
-        | _ ->
-          ((), m) )
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
-
-let classify_contradiction (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure ->
-      let classification =
-        match data.expr with
-        | False ->
-          Contradiction
-        | _ ->
-          data.classification
-      in
-      let data = {data with classification} in
-      ((), add_node Overwrite id (Data data) m)
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
-
-let classify_knowledge (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure ->
-      let parents = find_nodes (find_parents id m) m in
-      let any_parents_protocol_step_or_knowledge =
-        List.exists
-          (fun x ->
-             (unwrap_data x).classification = InteractiveProtocolStep
-             || (unwrap_data x).classification = ProtocolStep
-             || (unwrap_data x).classification = InitialKnowledge
-             || (unwrap_data x).classification = Knowledge)
-          parents
-      in
-      let classification =
-        if any_parents_protocol_step_or_knowledge then Knowledge
-        else data.classification
-      in
-      let data = {data with classification} in
-      ((), add_node Overwrite id (Data data) m)
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
-
-let classify_alias (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let classify () (id : id) (node : node) (m : node_graph) : unit * node_graph
-    =
-    let data = unwrap_data node in
-    match data.classification with
-    | Unsure -> (
-        match find_parents id m with
-        | [] ->
-          let classification =
-            match data.expr with
-            | BinaryOp (Iff, _, _) ->
-              Alias
-            | _ ->
-              data.classification
-          in
-          let data = {data with classification} in
-          ((), add_node Overwrite id (Data data) m)
-        | parent_ids ->
-          let parents = find_nodes parent_ids m in
-          let any_parent_alias =
-            List.exists
-              (fun x -> (unwrap_data x).classification = Alias)
-              parents
-          in
-          let classification =
-            if any_parent_alias then
-              let aliases =
-                List.filter
-                  (fun id ->
-                     (unwrap_data (find_node id m)).classification = Alias)
-                  parent_ids
-              in
-              let alias = List.nth aliases 0 in
-              (* look at the classifiction of the origninal node *)
-              let children =
-                List.filter (fun x -> x <> id) (find_children alias m)
-              in
-              match children with
-              | [] ->
+                      data.classification )
+              (* | Quantified (_, _, Function ("attacker", [Function (name, _)]))
+               *   -> (
+               *       match Protocol_step.break_down_step_string name with
+               *       | _, Some _, Some _ ->
+               *         ProtocolStep
+               *       | _ ->
+               *         data.classification ) *)
+              | BinaryOp (Imply, antecedent, consequent)
+              | Quantified (_, _, BinaryOp (Imply, antecedent, consequent)) ->
+                let premises =
+                  Vampire_analyzed_expr.split_on_and antecedent
+                in
+                let is_step f =
+                  match f with
+                  | Function ("attacker", [Function (name, _)]) -> (
+                      match Protocol_step.break_down_step_string name with
+                      | _, Some _, Some _ ->
+                        true
+                      | _ ->
+                        false )
+                  | _ ->
+                    false
+                in
+                if List.exists is_step premises && is_step consequent then
+                  InteractiveProtocolStep
+                else data.classification
+              | _ ->
                 data.classification
-              | children ->
-                let original = find_node (List.nth children 0) m in
-                (unwrap_data original).classification
-            else data.classification
-          in
-          let data = {data with classification} in
-          ((), add_node Overwrite id (Data data) m) )
-    | _ ->
-      ((), m)
-  in
-  linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+            in
+            let data = {data with classification} in
+            ((), add_node Overwrite id (Data data) m)
+          | _ ->
+            ((), m) )
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+
+  let classify_axiom (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure -> (
+          match find_parents id m with
+          | [] ->
+            let classification =
+              match data.expr with
+              | Quantified (Forall, _, BinaryOp (Eq, _, _)) ->
+                (Axiom : classification)
+              | Quantified (Forall, _, BinaryOp (Imply, _, _)) ->
+                Axiom
+              | _ ->
+                data.classification
+            in
+            let data = {data with classification} in
+            ((), add_node Overwrite id (Data data) m)
+          | _ ->
+            ((), m) )
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+
+  let classify_rewriting (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure ->
+        let parents = find_nodes (find_parents id m) m in
+        let all_parents_axiom_or_rewriting =
+          List.for_all
+            (fun x ->
+               (unwrap_data x).classification = Axiom
+               || (unwrap_data x).classification = Rewriting)
+            parents
+        in
+        let classification =
+          if parents <> [] && all_parents_axiom_or_rewriting then Rewriting
+          else data.classification
+        in
+        let data = {data with classification} in
+        ((), add_node Overwrite id (Data data) m)
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+
+  let classify_initial_knowledge (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure -> (
+          match find_parents id m with
+          | [] ->
+            let classification =
+              match data.expr with
+              | Function ("attacker", _) ->
+                InitialKnowledge
+              | _ ->
+                data.classification
+            in
+            let data = {data with classification} in
+            ((), add_node Overwrite id (Data data) m)
+          | _ ->
+            ((), m) )
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+
+  let classify_contradiction (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure ->
+        let classification =
+          match data.expr with
+          | False ->
+            Contradiction
+          | _ ->
+            data.classification
+        in
+        let data = {data with classification} in
+        ((), add_node Overwrite id (Data data) m)
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+
+  let classify_knowledge (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure ->
+        let parents = find_nodes (find_parents id m) m in
+        let any_parents_protocol_step_or_knowledge =
+          List.exists
+            (fun x ->
+               (unwrap_data x).classification = InteractiveProtocolStep
+               || (unwrap_data x).classification = ProtocolStep
+               || (unwrap_data x).classification = InitialKnowledge
+               || (unwrap_data x).classification = Knowledge)
+            parents
+        in
+        let classification =
+          if any_parents_protocol_step_or_knowledge then Knowledge
+          else data.classification
+        in
+        let data = {data with classification} in
+        ((), add_node Overwrite id (Data data) m)
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+
+  let classify_alias (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let classify () (id : id) (node : node) (m : node_graph) :
+      unit * node_graph =
+      let data = unwrap_data node in
+      match data.classification with
+      | Unsure -> (
+          match find_parents id m with
+          | [] ->
+            let classification =
+              match data.expr with
+              | BinaryOp (Iff, _, _) ->
+                Alias
+              | _ ->
+                data.classification
+            in
+            let data = {data with classification} in
+            ((), add_node Overwrite id (Data data) m)
+          | parent_ids ->
+            let parents = find_nodes parent_ids m in
+            let any_parent_alias =
+              List.exists
+                (fun x -> (unwrap_data x).classification = Alias)
+                parents
+            in
+            let classification =
+              if any_parent_alias then
+                let aliases =
+                  List.filter
+                    (fun id ->
+                       (unwrap_data (find_node id m)).classification = Alias)
+                    parent_ids
+                in
+                let alias = List.nth aliases 0 in
+                (* look at the classifiction of the origninal node *)
+                let children =
+                  List.filter (fun x -> x <> id) (find_children alias m)
+                in
+                match children with
+                | [] ->
+                  data.classification
+                | children ->
+                  let original = find_node (List.nth children 0) m in
+                  (unwrap_data original).classification
+              else data.classification
+            in
+            let data = {data with classification} in
+            ((), add_node Overwrite id (Data data) m) )
+      | _ ->
+        ((), m)
+    in
+    linear_traverse () (Full_traversal classify) m |> unwrap_tuple_1
+end
 
 let redraw_alias_arrows (m : node_graph) : node_graph =
   let open Analyzed_graph in
@@ -942,6 +957,7 @@ let mark_chains (m : node_graph) : node_graph =
 
 let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   node_graph =
+  let open Classify in
   let classify (m : node_graph) : node_graph =
     m |> classify_negated_goal |> classify_goal |> classify_protocol_step
     |> classify_axiom |> classify_rewriting |> classify_initial_knowledge
@@ -1059,8 +1075,12 @@ let explain_construction_single (id : Analyzed_graph.id) (m : node_graph) :
           (* let base_expr   = unwrap_subsume base.expr   in
            * let agent_expr  = unwrap_subsume agent.expr  in
            * let result_expr = unwrap_subsume result.expr in *)
-          let base_expr = base_expr |> Vampire_analyzed_expr.negate |> strip_quant in
-          let agent_expr = agent_expr |> Vampire_analyzed_expr.negate |> strip_quant in
+          let base_expr =
+            base_expr |> Vampire_analyzed_expr.negate |> strip_quant
+          in
+          let agent_expr =
+            agent_expr |> Vampire_analyzed_expr.negate |> strip_quant
+          in
           let result_expr =
             result_expr |> Vampire_analyzed_expr.negate |> strip_quant
           in
@@ -1341,11 +1361,11 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
             (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
             srcs_from))
       (* (String.concat "\n"
-                                             *    (List.map
-                                             *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                             *       old_knowledge
-                                             *    )
-                                             * ) *)
+                                           *    (List.map
+                                           *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                           *       old_knowledge
+                                           *    )
+                                           * ) *)
       (String.concat "\n"
          (List.map
             (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
@@ -1615,7 +1635,8 @@ let collect_steps (m : node_graph) : Protocol_step.t list =
     (fun (_, node) ->
        let n = unwrap_data node in
        Js_utils.console_log
-         (Printf.sprintf "step node : %s" (Vampire_analyzed_expr.expr_to_string n.expr)))
+         (Printf.sprintf "step node : %s"
+            (Vampire_analyzed_expr.expr_to_string n.expr)))
     step_nodes;
   let paths =
     List.concat
