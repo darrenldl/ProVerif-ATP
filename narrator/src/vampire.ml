@@ -247,108 +247,6 @@ type grouped_derive_explanations =
   | Combine_knowledge of info_source list * Vampire_analyzed_expr.expr list
   | Gain_knowledge of info_source list * Vampire_analyzed_expr.expr list
 
-let uniquify_universal_var_names_derive_explanations
-    (explanations : derive_explanation list) : derive_explanation list =
-  let replace_id (original : string) (replacement : string)
-      (explanation : derive_explanation) : derive_explanation =
-    let replace_id_for_pairs (original : string) (replacement : string)
-        (pairs :
-           (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list) :
-      (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list =
-      List.map
-        (fun (k, v) ->
-           ( Vampire_analyzed_expr.replace_universal_var_name original
-               replacement k
-           , Vampire_analyzed_expr.replace_universal_var_name original
-               replacement v ))
-        pairs
-    in
-    match explanation with
-    | Nothing_to_explain ->
-      explanation
-    | Dont_know_how ->
-      explanation
-    | Rewrite pairs ->
-      Rewrite (replace_id_for_pairs original replacement pairs)
-    | Combine_knowledge (infos, es) ->
-      Combine_knowledge
-        ( List.map
-            (fun info ->
-               match info with
-               | Expr e ->
-                 Expr
-                   (Vampire_analyzed_expr.replace_universal_var_name
-                      original replacement e)
-               | _ ->
-                 info)
-            infos
-        , List.map
-            (Vampire_analyzed_expr.replace_universal_var_name original
-               replacement)
-            es )
-    | Gain_knowledge (infos, pairs1, pairs2) ->
-      Gain_knowledge
-        ( infos
-        , replace_id_for_pairs original replacement pairs1
-        , replace_id_for_pairs original replacement pairs2 )
-  in
-  let get_exprs (explanation : derive_explanation) :
-    Vampire_analyzed_expr.expr list =
-    let pairs_to_exprs
-        (pairs :
-           (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list) :
-      Vampire_analyzed_expr.expr list =
-      List.fold_left (fun acc (k, v) -> k :: v :: acc) [] pairs
-    in
-    match explanation with
-    | Nothing_to_explain ->
-      []
-    | Dont_know_how ->
-      []
-    | Rewrite pairs ->
-      pairs_to_exprs pairs
-    | Combine_knowledge (infos, es) ->
-      List.map
-        (fun info ->
-           match info with Expr e -> e | _ -> failwith "Unexpected case")
-        (List.filter
-           (fun info ->
-              match info with
-              | Step _ ->
-                false
-              | Axiom _ ->
-                false
-              | Expr _ ->
-                true)
-           infos)
-      @ es
-    (* | Combine_knowledge (_, _)              -> [] *)
-    | Gain_knowledge (_, pairs1, pairs2) ->
-      pairs_to_exprs pairs1 @ pairs_to_exprs pairs2
-  in
-  Vampire_analyzed_expr.uniquify_universal_var_names_generic ~replace_id
-    ~get_exprs "X" explanations
-
-let var_bindings_in_explanations (explanations : derive_explanation list) :
-  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
-  let open Vampire_analyzed_expr in
-  let get_pairs (explanation : derive_explanation) : (expr * expr) list =
-    match explanation with
-    | Nothing_to_explain ->
-      []
-    | Dont_know_how ->
-      []
-    | Rewrite pairs ->
-      pairs
-    | Combine_knowledge _ ->
-      []
-    | Gain_knowledge (_, pairs1, pairs2) ->
-      pairs1 @ pairs2
-  in
-  List.fold_left
-    (fun m e -> var_bindings_in_generic ~m ~get_pairs e)
-    VarMap.empty explanations
-
 let mark_free_variables (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let mark_free_variable_possibly () (id : id) (node : node) (m : node_graph) =
@@ -1042,6 +940,108 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
   List.sort_uniq compare (aux id m)
 
 module Explain = struct
+  let uniquify_universal_var_names_derive_explanations
+      (explanations : derive_explanation list) : derive_explanation list =
+    let replace_id (original : string) (replacement : string)
+        (explanation : derive_explanation) : derive_explanation =
+      let replace_id_for_pairs (original : string) (replacement : string)
+          (pairs :
+             (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list) :
+        (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list =
+        List.map
+          (fun (k, v) ->
+             ( Vampire_analyzed_expr.replace_universal_var_name original
+                 replacement k
+             , Vampire_analyzed_expr.replace_universal_var_name original
+                 replacement v ))
+          pairs
+      in
+      match explanation with
+      | Nothing_to_explain ->
+        explanation
+      | Dont_know_how ->
+        explanation
+      | Rewrite pairs ->
+        Rewrite (replace_id_for_pairs original replacement pairs)
+      | Combine_knowledge (infos, es) ->
+        Combine_knowledge
+          ( List.map
+              (fun info ->
+                 match info with
+                 | Expr e ->
+                   Expr
+                     (Vampire_analyzed_expr.replace_universal_var_name
+                        original replacement e)
+                 | _ ->
+                   info)
+              infos
+          , List.map
+              (Vampire_analyzed_expr.replace_universal_var_name original
+                 replacement)
+              es )
+      | Gain_knowledge (infos, pairs1, pairs2) ->
+        Gain_knowledge
+          ( infos
+          , replace_id_for_pairs original replacement pairs1
+          , replace_id_for_pairs original replacement pairs2 )
+    in
+    let get_exprs (explanation : derive_explanation) :
+      Vampire_analyzed_expr.expr list =
+      let pairs_to_exprs
+          (pairs :
+             (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list) :
+        Vampire_analyzed_expr.expr list =
+        List.fold_left (fun acc (k, v) -> k :: v :: acc) [] pairs
+      in
+      match explanation with
+      | Nothing_to_explain ->
+        []
+      | Dont_know_how ->
+        []
+      | Rewrite pairs ->
+        pairs_to_exprs pairs
+      | Combine_knowledge (infos, es) ->
+        List.map
+          (fun info ->
+             match info with Expr e -> e | _ -> failwith "Unexpected case")
+          (List.filter
+             (fun info ->
+                match info with
+                | Step _ ->
+                  false
+                | Axiom _ ->
+                  false
+                | Expr _ ->
+                  true)
+             infos)
+        @ es
+      (* | Combine_knowledge (_, _)              -> [] *)
+      | Gain_knowledge (_, pairs1, pairs2) ->
+        pairs_to_exprs pairs1 @ pairs_to_exprs pairs2
+    in
+    Vampire_analyzed_expr.uniquify_universal_var_names_generic ~replace_id
+      ~get_exprs "X" explanations
+
+  let var_bindings_in_explanations (explanations : derive_explanation list) :
+    Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
+    let open Vampire_analyzed_expr in
+    let get_pairs (explanation : derive_explanation) : (expr * expr) list =
+      match explanation with
+      | Nothing_to_explain ->
+        []
+      | Dont_know_how ->
+        []
+      | Rewrite pairs ->
+        pairs
+      | Combine_knowledge _ ->
+        []
+      | Gain_knowledge (_, pairs1, pairs2) ->
+        pairs1 @ pairs2
+    in
+    List.fold_left
+      (fun m e -> var_bindings_in_generic ~m ~get_pairs e)
+      VarMap.empty explanations
+
   let info_source_to_string (x : info_source) : string =
     match x with
     | Step tag ->
@@ -1366,11 +1366,11 @@ module Explain = struct
               (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
               srcs_from))
         (* (String.concat "\n"
-                                     *    (List.map
-                                     *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                     *       old_knowledge
-                                     *    )
-                                     * ) *)
+                                   *    (List.map
+                                   *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                   *       old_knowledge
+                                   *    )
+                                   * ) *)
         (String.concat "\n"
            (List.map
               (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
