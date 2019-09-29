@@ -1,56 +1,5 @@
-(* open Cmdliner *)
 open Js_of_ocaml
 open Lwt
-
-(* let narrator_js (src : string) *)
-
-(* let narrator (src : string) (dst : string option) : 'a Term.ret =
- *   let ic = open_in src in
- *   let oc = match dst with
- *     | None   -> None
- *     | Some x -> Some (open_out x) in
- *   Core_kernel.protect
- *     ~f:(fun () ->
- *         try
- *           match Vampire.File_parser.parse_refutation_proof ic with
- *           | Success x ->
- *             x
- *             |> Vampire.lines_to_node_map
- *             |> Vampire.Analyzed_graph.(filter (fun x -> List.mem x.core.classification
- *                                                   [InitialKnowledge;
- *                                                    Knowledge;
- *                                                    NegatedGoal;
- *                                                    Contradiction]))
- *             (\* |> Analyzed_node.print_map_debug; *\)
- *             |> (match oc with
- *                 | None    -> Vampire.print_map_debug
- *                 | Some oc -> Vampire.write_map_DAG oc);
- *             `Ok ()
- *           | Failed (msg, _) -> `Error (false, msg)
- *         with
- *         | Exceptions.Unreachable -> `Error (false, "Unreachable code"))
- *     ~finally:(fun () ->
- *         close_in_noerr ic;
- *         match oc with
- *         | None -> ()
- *         | Some oc -> close_out_noerr oc
- *       )
- * 
- * let src =
- *   let doc = "Input file, supported formats : vampire refutation proof" in
- *   Arg.(required & pos 0 (some file) None & info [] ~docv:"SOURCE" ~doc)
- * 
- * let dst =
- *   let doc = "Output file, defatuls to SOURCE.narrator.debug or SOURCE.narrator.dag" in
- *   Arg.(value & pos 1 (some string) None & info [] ~docv:"DEST" ~doc)
- * 
- * let cmd =
- *   let doc = "Refutation proof interpreter" in
- *   let exits = Term.default_exits in
- *   (Term.(ret (const narrator $ src $ dst)),
- *    Term.info "narrator" ~exits ~doc) *)
-
-(* let () = Term.(exit @@ eval cmd) *)
 
 let () =
   (* Set up the file loading code *)
