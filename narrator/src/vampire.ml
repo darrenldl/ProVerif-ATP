@@ -2805,10 +2805,15 @@ let write_map_DAG (out : out_channel) (m : node_graph) : unit =
 let print_map_DAG (m : node_graph) : unit = write_map_DAG stdout m
 
 let lines_to_node_map (lines : Raw_line.line option list) : node_graph =
-  node_list_to_map
-    (List.map line_to_node_record
-       (List.map Misc_utils.unwrap_opt
-          (List.filter (function Some _ -> true | None -> false) lines)))
+  (* node_list_to_map
+   *   (List.map line_to_node_record
+   *      (List.map Misc_utils.unwrap_opt
+   *         (List.filter (function Some _ -> true | None -> false) lines))) *)
+  lines
+  |> List.filter (function Some _ -> true | None -> false)
+  |> List.map Option.get
+  |> List.map line_to_node_record
+  |> node_list_to_map
 
 let process_string (input : string) : (node_graph, string) result =
   match File_parser.parse_refutation_proof_string input with
