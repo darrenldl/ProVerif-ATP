@@ -1,254 +1,6 @@
 open Graph
 open Misc_utils
 
-module Raw_expr = struct
-  open Parser_components
-  open MParser
-  open Misc_utils
-  open Printf
-  open Expr_components
-
-  type expr =
-    | Variable of identifier
-    | Function of string * expr list
-    | UnaryOp of unary_op * expr
-    | BinaryOp of binary_op * expr * expr
-    | Quantified of quantifier * identifier list * expr
-    | False
-    | InsertedF of int list
-
-  let rec expr_to_string (e : expr) : string =
-    match e with
-    | Variable ident ->
-      ident
-    | Function (name, params) ->
-      sprintf "%s(%s)" name
-        (join_with_comma (List.map expr_to_string params))
-    | UnaryOp (op, expr) ->
-      sprintf "%s%s" (unary_op_to_string op)
-        ( match expr with
-          | Variable _ as e ->
-            expr_to_string e
-          | Function _ as e ->
-            expr_to_string e
-          | UnaryOp _ as e ->
-            expr_to_string e
-          | _ as e ->
-            sprintf "(%s)" (expr_to_string e) )
-    | BinaryOp (op, l, r) ->
-      sprintf "%s %s %s"
-        ( match l with
-          | Variable _ as e ->
-            expr_to_string e
-          | Function _ as e ->
-            expr_to_string e
-          | UnaryOp _ as e ->
-            expr_to_string e
-          | _ as e ->
-            sprintf "(%s)" (expr_to_string e) )
-        (binary_op_to_string op)
-        ( match r with
-          | Variable _ as e ->
-            expr_to_string e
-          | Function _ as e ->
-            expr_to_string e
-          | UnaryOp _ as e ->
-            expr_to_string e
-          | _ as e ->
-            sprintf "(%s)" (expr_to_string e) )
-    | Quantified (q, idents, e) ->
-      sprintf "%s [%s] : %s" (quantifier_to_string q)
-        (join_with_comma idents) (expr_to_string e)
-    | False ->
-      "$false"
-    | InsertedF l ->
-      String.concat "" (List.map string_of_int l)
-
-  module Parser : sig
-    val expr_p : expr stateless_p
-  end = struct
-    let parens (p : expr stateless_p) : expr stateless_p =
-      skip_char '(' >> p >>= fun x -> skip_char ')' >> return x
-
-    let prefix (sym : string) (op : unary_op) : (expr, unit) operator =
-      Prefix
-        (attempt
-           ( spaces >> skip_string sym >> spaces
-             >> return (fun x -> UnaryOp (op, x)) ))
-
-    let infix (sym : string) (op : binary_op) : (expr, unit) operator =
-      Infix
-        ( attempt
-            ( spaces >> skip_string sym >> spaces
-              >> return (fun a b -> BinaryOp (op, a, b)) )
-        , Assoc_left )
-
-    let operators =
-      [ [prefix "~" Not]
-      ; [infix "&" And]
-      ; [infix "|" Or]
-      ; [infix "=>" Imply; infix "<=>" Iff]
-      ; [infix "=" Eq]
-      ; [infix "!=" Neq]
-      ; [infix "<-" Subsume] ]
-
-    let false_p = ignore_space (string "$false" >> return False)
-
-    let solver_inserted_p =
-      ignore_space
-        ( char '{'
-          >> sep_by (ignore_space (many1_chars digit)) (char ',')
-          >>= fun l -> char '}' >> return (InsertedF (List.map int_of_string l))
-        )
-      <|> ignore_space
-        ( many1_chars digit
-          >>= fun x -> return (InsertedF [int_of_string x]) )
-
-    let rec atom_p s =
-      (ignore_space (ident_p >>= fun ident -> return (Variable ident))) s
-
-    and func_p s =
-      (ignore_space
-         ( ident_p
-           >>= fun ident ->
-           char '('
-           >> sep_by1 expr_p (char ',')
-           >>= fun params -> char ')' >> return (Function (ident, params)) ))
-        s
-
-    and quant_p s =
-      ( choice [char '!' >> return Forall; char '?' >> return Exists]
-        >>= fun quantifier ->
-        spaces >> char '['
-        >> sep_by ident_p (char ',')
-        >>= fun idents ->
-        char ']' >> spaces >> char ':' >> spaces >> expr_p
-        >>= fun expr -> return (Quantified (quantifier, idents, expr)) )
-        s
-
-    and sub_expr_p s =
-      choice
-        [ attempt quant_p
-        ; attempt func_p
-        ; attempt (parens expr_p)
-        ; attempt atom_p
-        ; attempt false_p
-        ; attempt solver_inserted_p ]
-        s
-
-    and expr_p s = expression operators sub_expr_p s
-  end
-end
-
-module Raw_line = struct
-  open MParser
-  open Parser_components
-  open Printf
-
-  type extra_info =
-    { l_node : string
-    ; r_node : string
-    ; l_ast_indices : int list
-    ; r_ast_indices : int list }
-
-  type info =
-    { descr : string
-    ; parents : string list
-    ; extra : extra_info option }
-
-  type line = string * Raw_expr.expr * info
-
-  let node_no : string stateless_p =
-    many1_chars digit >>= fun x -> char '.' >> return x
-
-  let non_digit_p = many_chars (letter <|> space)
-
-  (* let int_p =
-   *   many1_chars digit |>> int_of_string *)
-
-  let age_weight_selected_p =
-    char '(' >> sep_by (many1_chars digit) (char ':') >> char ')'
-
-  let parent_brack : (string * string list) stateless_p =
-    spaces >> char '[' >> non_digit_p
-    >>= fun descr ->
-    sep_by (many1_chars digit) (char ',')
-    >>= fun x -> char ']' >> return (Core_kernel.String.strip descr, x)
-
-  let info_p : info stateless_p =
-    spaces >> char '[' >> non_digit_p
-    >>= fun descr ->
-    let descr = Core_kernel.String.strip descr in
-    ( if descr = "superposition" then
-        many1_chars digit
-        >>= fun e1 -> char ',' >> many1_chars digit >>= fun e2 -> return [e1; e2]
-      else sep_by (many1_chars digit) (char ',') )
-    >>= fun parents ->
-    char ']'
-    >> return {descr; parents; extra = None}
-       <|> ( char ',' >> spaces >> many1_chars digit
-             >>= fun l_node ->
-             spaces >> string "into" >> spaces >> many1_chars digit
-             >>= fun r_node ->
-             char ',' >> spaces >> string "unify on" >> spaces >> string "(0)."
-             >> sep_by (many1_chars digit) (char '.')
-             >>= fun l_ast_indices ->
-             spaces >> string "in" >> spaces >> many1_chars digit >> spaces
-             >> string "and" >> spaces >> string "(0)."
-             >> sep_by (many1_chars digit) (char '.')
-             >>= fun r_ast_indices ->
-             spaces >> string "in" >> spaces >> many1_chars digit >> char ']'
-             >>
-             let l_ast_indices = l_ast_indices |> List.map int_of_string in
-             let r_ast_indices = r_ast_indices |> List.map int_of_string in
-             return
-               { descr
-               ; parents
-               ; extra = Some {l_node; r_node; l_ast_indices; r_ast_indices} } )
-
-  let line_p : line option stateless_p =
-    choice
-      [ attempt
-          ( node_no
-            >>= fun node_no ->
-            spaces >> Raw_expr.Parser.expr_p
-            >>= fun expr ->
-            spaces
-            >> optional age_weight_selected_p
-            >> info_p
-            >>= fun info -> many newline >> return (Some (node_no, expr, info))
-          )
-      ; attempt (newline >> return None)
-      ; attempt (spaces >> newline >> return None)
-      ; attempt (char '%' >> many_until any_char newline >> return None)
-      ; attempt (string "//" >> many_until any_char newline >> return None)
-      ; attempt (string "----" >> many_until any_char eof >> return None) ]
-
-  let line_to_string (line : line option) : string =
-    match line with
-    | None ->
-      "Blank line"
-    | Some (node_no, expr, info) ->
-      sprintf "%s. %s (%s) [%s]" node_no
-        (Raw_expr.expr_to_string expr)
-        info.descr
-        (Misc_utils.join_with_comma info.parents)
-end
-
-module File_parser = struct
-  open MParser
-
-  let refutation_proof_p = many Raw_line.line_p >>= fun x -> eof >> return x
-
-  let parse_refutation_proof_channel (ic : in_channel) :
-    Raw_line.line option list MParser.result =
-    parse_channel refutation_proof_p ic ()
-
-  let parse_refutation_proof_string (input : string) :
-    Raw_line.line option list MParser.result =
-    parse_string refutation_proof_p input ()
-end
-
 module Analyzed_expr = struct
   open Expr_components
   open Printf
@@ -321,8 +73,8 @@ module Analyzed_expr = struct
     in
     aux ctx e
 
-  let raw_expr_to_analyzed_expr (raw : Raw_expr.expr) : expr =
-    let rec aux (ctx : context list) (raw : Raw_expr.expr) : expr =
+  let raw_expr_to_analyzed_expr (raw : Vampire_raw_expr.expr) : expr =
+    let rec aux (ctx : context list) (raw : Vampire_raw_expr.expr) : expr =
       match raw with
       | Variable ident -> (
           match is_quantified ctx ident with
@@ -1522,7 +1274,8 @@ end
 
 module Analyzed_graph = Graph.Make (Analyzed_graph_base)
 
-let line_to_node_record (line : Raw_line.line) : Analyzed_graph.node_record =
+let line_to_node_record (line : Vampire_raw_line.line) :
+  Analyzed_graph.node_record =
   let id, raw_expr, info = line in
   { id
   ; children = Some []
@@ -2657,11 +2410,11 @@ let derive_explanation_to_string (explanation : derive_explanation) : string =
             (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
             srcs_from))
       (* (String.concat "\n"
-                                               *    (List.map
-                                               *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                               *       old_knowledge
-                                               *    )
-                                               * ) *)
+                                             *    (List.map
+                                             *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
+                                             *       old_knowledge
+                                             *    )
+                                             * ) *)
       (String.concat "\n"
          (List.map
             (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
@@ -2804,7 +2557,8 @@ let write_map_DAG (out : out_channel) (m : node_graph) : unit =
 
 let print_map_DAG (m : node_graph) : unit = write_map_DAG stdout m
 
-let lines_to_node_map (lines : Raw_line.line option list) : node_graph =
+let lines_to_node_map (lines : Vampire_raw_line.line option list) : node_graph
+  =
   (* node_list_to_map
    *   (List.map line_to_node_record
    *      (List.map Misc_utils.unwrap_opt
@@ -2816,7 +2570,7 @@ let lines_to_node_map (lines : Raw_line.line option list) : node_graph =
   |> node_list_to_map
 
 let process_string (input : string) : (node_graph, string) result =
-  match File_parser.parse_refutation_proof_string input with
+  match Vampire_file_parser.parse_refutation_proof_string input with
   | Success x ->
     x |> lines_to_node_map
     (* |> Analyzed_graph.(filter (fun _id node _m ->
