@@ -4,7 +4,7 @@ type quantifier =
 
 (* type quantifier = Tptp_ast.fof_quantifier *)
 
-type boundedness =
+type bound =
   | Unsure
   | Free
   | Existential

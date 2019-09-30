@@ -2,7 +2,7 @@ open Expr_components
 open Printf
 open Misc_utils
 
-type variable = boundedness * identifier
+type variable = bound * identifier
 
 type expr =
   | Variable of variable
@@ -179,8 +179,8 @@ let rec expr_to_string (e : expr) : string =
   | InsertedF l ->
     String.concat "" (List.map string_of_int l)
 
-let get_boundedness (e : expr) : (string * boundedness) list =
-  let rec aux (e : expr) acc : (string * boundedness) list =
+let get_bound (e : expr) : (string * bound) list =
+  let rec aux (e : expr) acc : (string * bound) list =
     match e with
     | Variable (b, v) ->
       (v, b) :: acc
@@ -199,7 +199,7 @@ let get_boundedness (e : expr) : (string * boundedness) list =
   in
   aux e []
 
-let mark_if_unsure (bound : boundedness) (e : expr) : expr =
+let mark_if_unsure (bound : bound) (e : expr) : expr =
   let rec aux (e : expr) : expr =
     match e with
     | Variable (Unsure, v) ->
@@ -225,7 +225,7 @@ let mark_if_unsure (bound : boundedness) (e : expr) : expr =
   in
   aux e
 
-let update_boundedness (e : expr) (changes : (string * boundedness) list) :
+let update_bound (e : expr) (changes : (string * bound) list) :
   expr =
   let rec aux (e : expr) : expr =
     match e with
@@ -274,13 +274,13 @@ let get_function_names (e : expr) : string list =
   in
   List.sort_uniq compare (aux e)
 
-let get_vars ?(boundedness : boundedness option) (e : expr) : string list =
+let get_vars ?(bound : bound option) (e : expr) : string list =
   let rec aux (e : expr) : string list =
     match e with
     | Variable (b, name) -> (
-        match boundedness with
-        | Some boundedness ->
-          if b = boundedness then [name] else []
+        match bound with
+        | Some bound ->
+          if b = bound then [name] else []
         | None ->
           [name] )
     | Function (name, params) ->
@@ -1054,3 +1054,7 @@ let color_internal (_id : id) (_node : node) : string = "#67cd61"
 let size_internal (_ : id) (_ : node) : int = 40
 
 let node_shape_internal (_ : id) (_ : node) : Cytoscape.node_shape = Circle
+
+(* let get_sub_expr_by_indices expr indicies =
+ *   match expr with
+ *   | Variable (b, ) *)

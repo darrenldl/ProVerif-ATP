@@ -286,32 +286,32 @@ let mark_universal_variables (m : node_graph) : node_graph =
   in
   m
 
-let propagate_variable_boundedness (m : node_graph) : node_graph =
+let propagate_variable_bound (m : node_graph) : node_graph =
   let open Analyzed_graph in
-  let propagate_boundedness_to_child (m : node_graph) target_id child_id =
-    let boundedness =
-      Vampire_analyzed_expr.get_boundedness
+  let propagate_bound_to_child (m : node_graph) target_id child_id =
+    let bound =
+      Vampire_analyzed_expr.get_bound
         (unwrap_data (find_node target_id m)).expr
     in
     let node = unwrap_data (find_node child_id m) in
     let node =
       { node with
-        expr = Vampire_analyzed_expr.update_boundedness node.expr boundedness
+        expr = Vampire_analyzed_expr.update_bound node.expr bound
       }
     in
     Analyzed_graph.add_node Overwrite child_id (Data node) m
   in
-  let propagate_boundedness_to_children () (id : id) (_node : node)
+  let propagate_bound_to_children () (id : id) (_node : node)
       (m : node_graph) =
     let children = find_children id m in
     ( ()
     , List.fold_left
-        (fun m child_id -> propagate_boundedness_to_child m id child_id)
+        (fun m child_id -> propagate_bound_to_child m id child_id)
         m children )
   in
   let (), m =
     Analyzed_graph.linear_traverse ()
-      (Full_traversal propagate_boundedness_to_children) m
+      (Full_traversal propagate_bound_to_children) m
   in
   m
 
@@ -857,8 +857,14 @@ let mark_chains (m : node_graph) : node_graph =
 
 let node_map_to_unifier_map (m : node_graph) : string Vampire_analyzed_expr.ExprMap.t =
   let open Analyzed_graph in
-  let extract_unifier expr_map id node (m : node_graph) =
-    expr_map
+  let extract_unifier expr_map _id node (_m : node_graph) =
+    match node with
+    | Data data -> (
+        match data.extra_info with
+        | None -> expr_map
+        | Some _info -> expr_map
+      )
+    | Group -> expr_map
   in
   let expr_map = Vampire_analyzed_expr.ExprMap.empty in
   let (expr_map, _) = linear_traverse expr_map (Full_traversal_pure extract_unifier) m in
@@ -874,7 +880,7 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   in
   Analyzed_graph.add_nodes_via_records Overwrite node_records
     Analyzed_graph.empty
-  |> mark_free_variables |> propagate_variable_boundedness
+  |> mark_free_variables |> propagate_variable_bound
   |> mark_universal_variables |> classify |> classify_alias |> classify
   |> rewrite_conclusion |> redraw_alias_arrows
 
