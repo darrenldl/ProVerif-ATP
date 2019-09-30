@@ -479,8 +479,8 @@ module Classify = struct
           | [] ->
             let classification =
               match data.expr with
-              | Pred ("attacker", [Function (name, _)])
-              | Quantified (_, _, Pred ("attacker", [Function (name, _)])) -> (
+              | Pred ("attacker", Function (name, _))
+              | Quantified (_, _, Pred ("attacker", Function (name, _))) -> (
                   match Protocol_step.break_down_step_string name with
                   | _, Some _, Some _ ->
                     ProtocolStep
@@ -500,7 +500,7 @@ module Classify = struct
                 in
                 let is_step f =
                   match f with
-                  | Pred ("attacker", [Function (name, _)]) -> (
+                  | Pred ("attacker", Function (name, _)) -> (
                       match Protocol_step.break_down_step_string name with
                       | _, Some _, Some _ ->
                         true
@@ -963,13 +963,13 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
     | [] -> (
         let data = unwrap_data (find_node id m) in
         match data.expr with
-        | Pred ("attacker", [Function (name, _)]) -> (
+        | Pred ("attacker", Function (name, _)) -> (
             match Protocol_step.break_down_step_string name with
             | _, Some _, Some _ ->
               [Step (reformat_tag name)]
             | _ ->
               [Axiom data.expr] )
-        | Quantified (_, _, Pred ("attacker", [Function (name, _)])) -> (
+        | Quantified (_, _, Pred ("attacker", Function (name, _))) -> (
             match Protocol_step.break_down_step_string name with
             | _, Some _, Some _ ->
               [Step (reformat_tag name)]
@@ -979,12 +979,12 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
             ( _
             , _
             , BinaryOp
-                (Imply, antecedent, Pred ("attacker", [Function (name, _)])) )
+                (Imply, antecedent, Pred ("attacker", Function (name, _))) )
           -> (
               let premises = Vampire_analyzed_expr.split_on_and antecedent in
               let is_step f =
                 match f with
-                | Pred ("attacker", [Function (name, _)]) -> (
+                | Pred ("attacker", Function (name, _)) -> (
                     match Protocol_step.break_down_step_string name with
                     | _, Some _, Some _ ->
                       true

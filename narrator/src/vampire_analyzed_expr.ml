@@ -528,13 +528,13 @@ let negate (e : expr) : expr =
   aux e
 
 let strip_pred_attacker (e : expr) : expr =
-  match e with Pred ("attacker", [e]) -> e | _ -> e
+  match e with Pred ("attacker", e) -> e | _ -> e
 
 let strip_not (e : expr) : expr =
   match e with UnaryOp (Not, e) -> e | _ as e -> e
 
 let strip_att (e : expr) : expr =
-  match e with Function ("attacker", [e]) -> e | _ as e -> e
+  match e with Pred ("attacker", e) -> e | _ as e -> e
 
 let strip_quant (e : expr) : expr =
   match e with Quantified (_, _, e) -> e | _ -> e
