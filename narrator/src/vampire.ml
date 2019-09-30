@@ -26,6 +26,16 @@ let expr_to_nodes (e : Vampire_analyzed_expr.expr) :
         ; group
         ; node_visible = Some true
         ; label_visible = Some true } ]
+    | Pred (name, e) ->
+      { id
+      ; node = Some (Data {expr_str = name})
+      ; parents = Some parents
+      ; children = Some children
+      ; group
+      ; node_visible = Some true
+      ; label_visible = Some true }
+      ::
+      aux (Some id) e
     | Function (name, es) ->
       { id
       ; node = Some (Data {expr_str = name})

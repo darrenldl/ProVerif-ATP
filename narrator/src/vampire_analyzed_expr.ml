@@ -80,6 +80,8 @@ let raw_expr_to_analyzed_expr (raw : Vampire_raw_expr.expr) : expr =
           Variable (Existential, ident)
         | Some Forall ->
           Variable (Universal, ident) )
+    | Pred (name, param) ->
+      Pred (name, aux ctx param)
     | Function (name, params) ->
       Function (name, List.map (aux ctx) params)
     | UnaryOp (op, e) ->
@@ -106,6 +108,8 @@ let rec expr_to_string_debug (e : expr) : string =
     sprintf "%s[E]" x
   | Variable (Unsure, x) ->
     sprintf "%s[unsure]" x
+  | Pred (name, param) ->
+    sprintf "%s(%s)" name (expr_to_string_debug param)
   | Function (name, params) ->
     sprintf "%s(%s)" name
       (join_with_comma (List.map expr_to_string_debug params))
@@ -132,6 +136,8 @@ let rec expr_to_string (e : expr) : string =
     sprintf "%s" x
   | Variable (Unsure, x) ->
     sprintf "%s" x
+  | Pred (name, param) ->
+    sprintf "%s(%s)" name (expr_to_string param)
   | Function (name, params) ->
     sprintf "%s(%s)" name (join_with_comma (List.map expr_to_string params))
   | UnaryOp (op, expr) ->
@@ -185,6 +191,8 @@ let get_bound (e : expr) : (string * bound) list =
     match e with
     | Variable (b, v) ->
       (v, b) :: acc
+    | Pred (_, e) ->
+      aux e acc
     | Function (_, params) ->
       List.fold_left (fun x y -> aux y x) acc params
     | UnaryOp (_, e) ->
@@ -211,6 +219,8 @@ let mark_if_unsure (bound : bound) (e : expr) : expr =
       Variable (Universal, v)
     | Variable (Existential, v) ->
       Variable (Existential, v)
+    | Pred (name, param) ->
+      Pred (name, aux param)
     | Function (name, params) ->
       Function (name, List.map aux params)
     | UnaryOp (op, e) ->
@@ -239,6 +249,8 @@ let update_bound (e : expr) (changes : (string * bound) list) : expr =
               Variable (x, v)
             | _, _h ->
               Variable (b, v) (* only update when unsure *) ) )
+    | Pred (name, e) ->
+      Pred (name, aux e)
     | Function (name, params) ->
       Function (name, List.map aux params)
     | UnaryOp (op, e) ->
@@ -259,6 +271,8 @@ let get_function_names (e : expr) : string list =
     match e with
     | Variable _ ->
       []
+    | Pred (name, param) ->
+      name :: aux param
     | Function (name, params) ->
       name :: List.concat (List.map aux params)
     | UnaryOp (_, e) ->
@@ -283,8 +297,10 @@ let get_vars ?(bound : bound option) (e : expr) : string list =
           if b = bound then [name] else []
         | None ->
           [name] )
-    | Function (name, params) ->
-      name :: List.concat (List.map aux params)
+    | Pred (_, param) ->
+      aux param
+    | Function (_, params) ->
+      List.concat (List.map aux params)
     | UnaryOp (_, e) ->
       aux e
     | BinaryOp (_, e1, e2) ->
@@ -347,6 +363,8 @@ let pattern_search ?(s : ExprSet.t = ExprSet.empty) ~(pattern : expr)
     match expr with
     | Variable _ ->
       s
+    | Pred (_, e) ->
+      aux pattern e s
     | Function (_, es) ->
       aux_list pattern es s
     | UnaryOp (_, e) ->
@@ -420,6 +438,8 @@ let fill_in_pattern ~(pattern : expr) (var_bindings : expr VarMap.t) : expr =
       raise Unexpected_existential_var
     | Variable (Universal, name) ->
       VarMap.find name var_bindings
+    | Pred (name, e) ->
+      Pred (name, aux e var_bindings)
     | Function (name, es1) ->
       Function (name, aux_list es1 var_bindings)
     | UnaryOp (op, e) ->
@@ -449,6 +469,8 @@ let has_universal_var (e : expr) : bool =
       false
     | Variable (Universal, _) ->
       true
+    | Pred (_, e) ->
+      aux e
     | Function (_, es) ->
       aux_list es
     | UnaryOp (_, e) ->
@@ -472,6 +494,8 @@ let negate (e : expr) : expr =
     | UnaryOp (Not, e) ->
       e
     | Variable _ ->
+      UnaryOp (Not, e)
+    | Pred _ ->
       UnaryOp (Not, e)
     | Function _ ->
       UnaryOp (Not, e)
@@ -528,6 +552,8 @@ let remove_subsumptions (e : expr) : expr =
     match e with
     | Variable _ ->
       e
+    | Pred (p, arg) ->
+      Pred (p, aux arg)
     | Function (f, args) ->
       Function (f, List.map aux args)
     | UnaryOp (op, e) ->
@@ -570,6 +596,8 @@ let length (e : expr) : int =
     match e with
     | Variable _ ->
       acc
+    | Pred (_, e) ->
+      aux acc e
     | Function (_, es) ->
       aux_list acc es
     | UnaryOp (_, e) ->
@@ -595,6 +623,8 @@ let rewrite (base : expr) ~(rewrite_rule_from : expr) ~(rewrite_rule_to : expr)
       match base with
       | Variable _ as e ->
         e
+      | Pred (name, e) ->
+        Pred (name, aux e expr_from to_expr)
       | Function (name, es) ->
         Function (name, aux_list es expr_from to_expr)
       | UnaryOp (op, e) ->
@@ -901,6 +931,8 @@ let replace_universal_var_name (original : string) (replacement : string)
       Variable (Universal, if name = original then replacement else name)
     | Variable _ as e ->
       e
+    | Pred (name, e) ->
+      Pred (name, aux original replacement e)
     | Function (name, es) ->
       Function (name, aux_list original replacement es)
     | UnaryOp (op, e) ->
@@ -937,6 +969,7 @@ let universal_var_names (e : expr) : string list =
       [name]
     | Variable _ ->
       []
+    | Pred (_, e) -> aux e
     | Function (_, es) ->
       aux_list es
     | UnaryOp (_, e) ->
@@ -1065,6 +1098,8 @@ let rec get_sub_expr_by_indices expr indicies =
       match expr with
       | Variable (_, _) ->
         failwith "Unexpected end of expression tree"
+      | Pred (_, e) ->
+        get_sub_expr_by_indices e indicies
       | Function (name, args) ->
         if List.hd (String.split_on_char '_' name) = "pred" then
           get_sub_expr_by_indices (List.hd args) indicies
