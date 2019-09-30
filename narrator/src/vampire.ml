@@ -479,15 +479,14 @@ module Classify = struct
           | [] ->
             let classification =
               match data.expr with
-              | Function ("attacker", [Function (name, _)])
-              | Quantified (_, _, Function ("attacker", [Function (name, _)]))
-                -> (
-                    match Protocol_step.break_down_step_string name with
-                    | _, Some _, Some _ ->
-                      ProtocolStep
-                    | _ ->
-                      data.classification )
-              (* | Quantified (_, _, Function ("attacker", [Function (name, _)]))
+              | Pred ("attacker", [Function (name, _)])
+              | Quantified (_, _, Pred ("attacker", [Function (name, _)])) -> (
+                  match Protocol_step.break_down_step_string name with
+                  | _, Some _, Some _ ->
+                    ProtocolStep
+                  | _ ->
+                    data.classification )
+              (* | Quantified (_, _, Pred ("attacker", [Function (name, _)]))
                *   -> (
                *       match Protocol_step.break_down_step_string name with
                *       | _, Some _, Some _ ->
@@ -501,7 +500,7 @@ module Classify = struct
                 in
                 let is_step f =
                   match f with
-                  | Function ("attacker", [Function (name, _)]) -> (
+                  | Pred ("attacker", [Function (name, _)]) -> (
                       match Protocol_step.break_down_step_string name with
                       | _, Some _, Some _ ->
                         true
@@ -589,7 +588,7 @@ module Classify = struct
           | [] ->
             let classification =
               match data.expr with
-              | Function ("attacker", _) ->
+              | Pred ("attacker", _) ->
                 InitialKnowledge
               | _ ->
                 data.classification
@@ -964,13 +963,13 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
     | [] -> (
         let data = unwrap_data (find_node id m) in
         match data.expr with
-        | Function ("attacker", [Function (name, _)]) -> (
+        | Pred ("attacker", [Function (name, _)]) -> (
             match Protocol_step.break_down_step_string name with
             | _, Some _, Some _ ->
               [Step (reformat_tag name)]
             | _ ->
               [Axiom data.expr] )
-        | Quantified (_, _, Function ("attacker", [Function (name, _)])) -> (
+        | Quantified (_, _, Pred ("attacker", [Function (name, _)])) -> (
             match Protocol_step.break_down_step_string name with
             | _, Some _, Some _ ->
               [Step (reformat_tag name)]
@@ -980,26 +979,26 @@ let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
             ( _
             , _
             , BinaryOp
-                (Imply, antecedent, Function ("attacker", [Function (name, _)]))
-            ) -> (
-            let premises = Vampire_analyzed_expr.split_on_and antecedent in
-            let is_step f =
-              match f with
-              | Function ("attacker", [Function (name, _)]) -> (
-                  match Protocol_step.break_down_step_string name with
-                  | _, Some _, Some _ ->
-                    true
-                  | _ ->
-                    false )
+                (Imply, antecedent, Pred ("attacker", [Function (name, _)])) )
+          -> (
+              let premises = Vampire_analyzed_expr.split_on_and antecedent in
+              let is_step f =
+                match f with
+                | Pred ("attacker", [Function (name, _)]) -> (
+                    match Protocol_step.break_down_step_string name with
+                    | _, Some _, Some _ ->
+                      true
+                    | _ ->
+                      false )
+                | _ ->
+                  false
+              in
+              match Protocol_step.break_down_step_string name with
+              | _, Some _, Some _ ->
+                if List.exists is_step premises then [Step (reformat_tag name)]
+                else [Axiom data.expr]
               | _ ->
-                false
-            in
-            match Protocol_step.break_down_step_string name with
-            | _, Some _, Some _ ->
-              if List.exists is_step premises then [Step (reformat_tag name)]
-              else [Axiom data.expr]
-            | _ ->
-              [Axiom data.expr] )
+                [Axiom data.expr] )
         | _ ->
           [Axiom data.expr] )
     | ps ->

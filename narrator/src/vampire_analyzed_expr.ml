@@ -528,7 +528,7 @@ let negate (e : expr) : expr =
   aux e
 
 let strip_pred_attacker (e : expr) : expr =
-  match e with Function ("attacker", [e]) -> e | _ -> e
+  match e with Pred ("attacker", [e]) -> e | _ -> e
 
 let strip_not (e : expr) : expr =
   match e with UnaryOp (Not, e) -> e | _ as e -> e
