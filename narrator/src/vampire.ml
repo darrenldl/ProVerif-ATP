@@ -856,10 +856,52 @@ let mark_chains (m : node_graph) : node_graph =
 let node_map_to_unifier_map (m : node_graph) :
   string Vampire_analyzed_expr.ExprMap.t =
   let open Analyzed_graph in
-  let extract_unifier expr_map _id node (_m : node_graph) =
+  let extract_unifier expr_map _id node (m : node_graph) =
     match node with
     | Data data -> (
-        match data.extra_info with None -> expr_map | Some _info -> expr_map )
+        match data.extra_info with
+        | None ->
+          expr_map
+        | Some info ->
+          let l_node = find_node info.l_node m in
+          let r_node = find_node info.r_node m in
+          let l_data =
+            match l_node with
+            | Data data ->
+              data
+            | Group ->
+              failwith "Group not exepcted"
+          in
+          let r_data =
+            match r_node with
+            | Data data ->
+              data
+            | Group ->
+              failwith "Group not exepcted"
+          in
+          let l_ast_indices = info.l_ast_indices in
+          let r_ast_indices = info.r_ast_indices in
+          let unifier_e1 =
+            Vampire_analyzed_expr.get_sub_expr_by_indices l_data.expr
+              l_ast_indices
+          in
+          let unifier_e2 =
+            Vampire_analyzed_expr.get_sub_expr_by_indices r_data.expr
+              r_ast_indices
+          in
+          Js_utils.console_log "l_data.expr :";
+          Js_utils.console_log
+            (Vampire_analyzed_expr.expr_to_string l_data.expr);
+          Js_utils.console_log "r_data.expr :";
+          Js_utils.console_log
+            (Vampire_analyzed_expr.expr_to_string r_data.expr);
+          Js_utils.console_log "unifier_e1 :";
+          Js_utils.console_log
+            (Vampire_analyzed_expr.expr_to_string unifier_e1);
+          Js_utils.console_log "unifier_e2 :";
+          Js_utils.console_log
+            (Vampire_analyzed_expr.expr_to_string unifier_e2);
+          expr_map )
     | Group ->
       expr_map
   in
