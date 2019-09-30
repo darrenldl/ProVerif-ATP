@@ -1365,12 +1365,6 @@ module Explain = struct
            (List.map
               (fun x -> Printf.sprintf "  %s" (info_source_to_string x))
               srcs_from))
-        (* (String.concat "\n"
-                                   *    (List.map
-                                   *       (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
-                                   *       old_knowledge
-                                   *    )
-                                   * ) *)
         (String.concat "\n"
            (List.map
               (fun (x, _) -> Printf.sprintf "  %s" (expr_to_string x))
