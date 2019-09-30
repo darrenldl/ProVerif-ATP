@@ -969,7 +969,8 @@ let universal_var_names (e : expr) : string list =
       [name]
     | Variable _ ->
       []
-    | Pred (_, e) -> aux e
+    | Pred (_, e) ->
+      aux e
     | Function (_, es) ->
       aux_list es
     | UnaryOp (_, e) ->
@@ -1108,12 +1109,12 @@ let rec get_sub_expr_by_indices expr indicies =
         get_sub_expr_by_indices e indicies
       | BinaryOp (op, e1, e2) -> (
           match op with
-          | Subsume -> get_sub_expr_by_indices e1 indicies
+          | Subsume ->
+            get_sub_expr_by_indices e1 indicies
           | _ ->
             if x = 1 then get_sub_expr_by_indices e1 xs
             else if x = 2 then get_sub_expr_by_indices e2 xs
-            else failwith (Printf.sprintf "Unexpected index : %d" x)
-        )
+            else failwith (Printf.sprintf "Unexpected index : %d" x) )
       | Quantified (_, _, e) ->
         get_sub_expr_by_indices e indicies
       | False ->

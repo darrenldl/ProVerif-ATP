@@ -103,6 +103,14 @@ end = struct
   let rec atom_p s =
     (ignore_space (ident_p >>= fun ident -> return (Variable ident))) s
 
+  and pred_p s =
+    (ignore_space
+       ( string "pred_" >> ident_p
+         >>= fun ident ->
+         char '(' >> expr_p
+         >>= fun param -> char ')' >> return (Pred (ident, param)) ))
+      s
+
   and func_p s =
     (ignore_space
        ( ident_p
@@ -125,6 +133,7 @@ end = struct
   and sub_expr_p s =
     choice
       [ attempt quant_p
+      ; attempt pred_p
       ; attempt func_p
       ; attempt (parens expr_p)
       ; attempt atom_p

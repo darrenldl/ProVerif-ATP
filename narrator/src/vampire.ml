@@ -34,8 +34,7 @@ let expr_to_nodes (e : Vampire_analyzed_expr.expr) :
       ; group
       ; node_visible = Some true
       ; label_visible = Some true }
-      ::
-      aux (Some id) e
+      :: aux (Some id) e
     | Function (name, es) ->
       { id
       ; node = Some (Data {expr_str = name})
