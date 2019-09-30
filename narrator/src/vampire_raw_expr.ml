@@ -6,6 +6,7 @@ open Expr_components
 
 type expr =
   | Variable of identifier
+  | Pred of string * expr
   | Function of string * expr list
   | UnaryOp of unary_op * expr
   | BinaryOp of binary_op * expr * expr
@@ -17,6 +18,8 @@ let rec expr_to_string (e : expr) : string =
   match e with
   | Variable ident ->
     ident
+  | Pred (name, arg) ->
+    sprintf "%s(%s)" name (expr_to_string arg)
   | Function (name, params) ->
     sprintf "%s(%s)" name (join_with_comma (List.map expr_to_string params))
   | UnaryOp (op, expr) ->

@@ -856,6 +856,7 @@ let mark_chains (m : node_graph) : node_graph =
 let node_map_to_unifier_map (m : node_graph) :
   string Vampire_analyzed_expr.ExprMap.t =
   let open Analyzed_graph in
+  Js_utils.console_log "node_map_to_unifier_map";
   let extract_unifier expr_map _id node (m : node_graph) =
     match node with
     | Data data -> (
@@ -1581,7 +1582,9 @@ let lines_to_node_map (lines : Vampire_raw_line.line option list) : node_graph
 let process_string (input : string) : (node_graph, string) result =
   match Vampire_file_parser.parse_refutation_proof_string input with
   | Success x ->
-    x |> lines_to_node_map
+    let m = x |> lines_to_node_map in
+    let _ = node_map_to_unifier_map m in
+    m
     (* |> Analyzed_graph.(filter (fun _id node _m ->
      *     match node with
      *     | Data x -> List.mem x.classification

@@ -6,6 +6,7 @@ type variable = bound * identifier
 
 type expr =
   | Variable of variable
+  | Pred of string * expr
   | Function of string * expr list
   | UnaryOp of unary_op * expr
   | BinaryOp of binary_op * expr * expr
@@ -1055,6 +1056,8 @@ let size_internal (_ : id) (_ : node) : int = 40
 let node_shape_internal (_ : id) (_ : node) : Cytoscape.node_shape = Circle
 
 let rec get_sub_expr_by_indices expr indicies =
+  Js_utils.console_log (expr_to_string expr);
+  Js_utils.console_log (indicies |> List.map string_of_int |> String.concat ",");
   match indicies with
   | [] ->
     expr
@@ -1068,10 +1071,14 @@ let rec get_sub_expr_by_indices expr indicies =
         else get_sub_expr_by_indices (List.nth args (pred x)) xs
       | UnaryOp (_, e) ->
         get_sub_expr_by_indices e indicies
-      | BinaryOp (_, e1, e2) ->
-        if x = 1 then get_sub_expr_by_indices e1 xs
-        else if x = 2 then get_sub_expr_by_indices e2 xs
-        else failwith (Printf.sprintf "Unexpected index : %d" x)
+      | BinaryOp (op, e1, e2) -> (
+          match op with
+          | Subsume -> get_sub_expr_by_indices e1 indicies
+          | _ ->
+            if x = 1 then get_sub_expr_by_indices e1 xs
+            else if x = 2 then get_sub_expr_by_indices e2 xs
+            else failwith (Printf.sprintf "Unexpected index : %d" x)
+        )
       | Quantified (_, _, e) ->
         get_sub_expr_by_indices e indicies
       | False ->
