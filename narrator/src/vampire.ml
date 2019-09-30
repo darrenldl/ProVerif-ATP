@@ -855,7 +855,14 @@ let mark_chains (m : node_graph) : node_graph =
   in
   linear_traverse () (Full_traversal mark_chain) m |> Misc_utils.unwrap_tuple_1
 
-(* let node_map_to_unifier_map (m : node_graph) : Vampire_analyzed_expr.VarMap.t = *)
+let node_map_to_unifier_map (m : node_graph) : string Vampire_analyzed_expr.ExprMap.t =
+  let open Analyzed_graph in
+  let extract_unifier expr_map id node (m : node_graph) =
+    expr_map
+  in
+  let expr_map = Vampire_analyzed_expr.ExprMap.empty in
+  let (expr_map, _) = linear_traverse expr_map (Full_traversal_pure extract_unifier) m in
+  expr_map
 
 let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   node_graph =
