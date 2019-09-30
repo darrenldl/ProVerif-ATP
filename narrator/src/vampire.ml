@@ -295,14 +295,12 @@ let propagate_variable_bound (m : node_graph) : node_graph =
     in
     let node = unwrap_data (find_node child_id m) in
     let node =
-      { node with
-        expr = Vampire_analyzed_expr.update_bound node.expr bound
-      }
+      {node with expr = Vampire_analyzed_expr.update_bound node.expr bound}
     in
     Analyzed_graph.add_node Overwrite child_id (Data node) m
   in
-  let propagate_bound_to_children () (id : id) (_node : node)
-      (m : node_graph) =
+  let propagate_bound_to_children () (id : id) (_node : node) (m : node_graph)
+    =
     let children = find_children id m in
     ( ()
     , List.fold_left
@@ -855,19 +853,20 @@ let mark_chains (m : node_graph) : node_graph =
   in
   linear_traverse () (Full_traversal mark_chain) m |> Misc_utils.unwrap_tuple_1
 
-let node_map_to_unifier_map (m : node_graph) : string Vampire_analyzed_expr.ExprMap.t =
+let node_map_to_unifier_map (m : node_graph) :
+  string Vampire_analyzed_expr.ExprMap.t =
   let open Analyzed_graph in
   let extract_unifier expr_map _id node (_m : node_graph) =
     match node with
     | Data data -> (
-        match data.extra_info with
-        | None -> expr_map
-        | Some _info -> expr_map
-      )
-    | Group -> expr_map
+        match data.extra_info with None -> expr_map | Some _info -> expr_map )
+    | Group ->
+      expr_map
   in
   let expr_map = Vampire_analyzed_expr.ExprMap.empty in
-  let (expr_map, _) = linear_traverse expr_map (Full_traversal_pure extract_unifier) m in
+  let expr_map, _ =
+    linear_traverse expr_map (Full_traversal_pure extract_unifier) m
+  in
   expr_map
 
 let node_list_to_map (node_records : Analyzed_graph.node_record list) :
