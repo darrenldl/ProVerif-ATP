@@ -137,6 +137,7 @@ module Analyzed_graph_base = struct
     { expr : Vampire_analyzed_expr.expr
     ; derive_descr : string
     ; classification : classification
+    ; extra_info : Vampire_raw_line.extra_info option
     ; chain : string * string * string list }
 
   type node =
@@ -216,6 +217,7 @@ let line_to_node_record (line : Vampire_raw_line.line) :
            { expr = Vampire_analyzed_expr.raw_expr_to_analyzed_expr raw_expr
            ; classification = Unsure
            ; derive_descr = info.descr
+           ; extra_info = info.extra
            ; chain = (id, id, [id]) })
   ; group = None
   ; node_visible = Some true
@@ -852,6 +854,8 @@ let mark_chains (m : node_graph) : node_graph =
       ((), m)
   in
   linear_traverse () (Full_traversal mark_chain) m |> Misc_utils.unwrap_tuple_1
+
+(* let node_map_to_unifier_map (m : node_graph) : Vampire_analyzed_expr.VarMap.t = *)
 
 let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   node_graph =

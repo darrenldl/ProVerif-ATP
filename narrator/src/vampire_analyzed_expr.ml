@@ -238,8 +238,7 @@ let update_boundedness (e : expr) (changes : (string * boundedness) list) :
             | x, Unsure ->
               Variable (x, v)
             | _, _h ->
-              Variable (b, v)
-              (* only update when unsure *) ) )
+              Variable (b, v) (* only update when unsure *) ) )
     | Function (name, params) ->
       Function (name, List.map aux params)
     | UnaryOp (op, e) ->
