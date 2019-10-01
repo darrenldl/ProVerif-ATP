@@ -416,7 +416,7 @@ module Classify = struct
       match data.classification with
       | Unsure ->
         let classification =
-          if data.derive_descr = "negated_conjecture" then NegatedGoal
+          if data.derive_descr = "negated conjecture" then NegatedGoal
           else
             let parents = find_nodes (find_parents id m) m in
             let all_parents_negated_goal =
