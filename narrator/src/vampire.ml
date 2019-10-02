@@ -920,6 +920,40 @@ let node_map_to_unifier_map (m : node_graph) :
   in
   expr_map
 
+module RewriteKnowledgeNodes = struct
+  let knowledge_node_ids (m : node_graph) : string list =
+    let open Analyzed_graph in
+    let ids, _ =
+      linear_traverse [] (Full_traversal_pure (fun acc id node _m ->
+          let data = unwrap_data node in
+          match data.classification with
+          | Knowledge -> id :: acc
+          | _ -> acc)) m
+    in
+    ids
+
+  let uniquify_knowledge_nodes (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let gen_int = Misc_utils.make_gen_id () in
+    let ids = knowledge_node_ids m in
+    let (), m =
+      linear_traverse ~ids () (Full_traversal (fun () id node _m ->
+          Js_utils.console_log (Printf.sprintf "Updating knowledge node : %s" id);
+          let data = unwrap_data node in
+          Js_utils.console_log (Printf.sprintf "Old expr : %s" (Vampire_analyzed_expr.expr_to_string data.expr));
+          let var_names = Vampire_analyzed_expr.universal_var_names data.expr in
+          let replace_acc_list = List.map (fun v -> v, Printf.sprintf "V%d" (gen_int ())) var_names in
+          let new_expr = Vampire_analyzed_expr.replace_universal_var_names replace_acc_list data.expr in
+          Js_utils.console_log (Printf.sprintf "New expr : %s" (Vampire_analyzed_expr.expr_to_string new_expr));
+          let m =
+            add_node Overwrite id (Data {data with expr = new_expr }) m
+          in
+          (), m
+        )) m
+    in
+    m
+end
+
 let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   node_graph =
   let open Classify in
@@ -933,6 +967,7 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   |> mark_free_variables |> propagate_variable_bound
   |> mark_universal_variables |> classify |> classify_alias |> classify
   |> rewrite_conclusion |> redraw_alias_arrows
+  |> RewriteKnowledgeNodes.uniquify_knowledge_nodes
 
 let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
   =
