@@ -414,12 +414,13 @@ let remove_subsumptions (e : expr) : expr =
       Function (f, List.map aux args)
     | UnaryOp (op, e) ->
       UnaryOp (op, aux e)
-    | BinaryOp (Or, e, UnaryOp (Not, Variable (_, v))) when has_prefix v "spl"
-      ->
-      e
-    | BinaryOp (Or, UnaryOp (Not, Variable (_, v)), e) when has_prefix v "spl"
-      ->
-      e
+    (* | BinaryOp (Or, e, UnaryOp (Not, Variable (_, v))) when has_prefix v "spl"
+     *   ->
+     *   e
+     * | BinaryOp (Or, UnaryOp (Not, Variable (_, v)), e) when has_prefix v "spl"
+     *   ->
+     *   e *)
+    | BinaryOp (Subsume, e, _) -> e
     | BinaryOp (op, e1, e2) ->
       BinaryOp (op, aux e1, aux e2)
     | Quantified (q, vars, e) ->
