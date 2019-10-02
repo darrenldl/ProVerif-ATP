@@ -954,7 +954,7 @@ module RewriteKnowledgeNodes = struct
     let gen_int = Misc_utils.make_gen_id () in
     let ids = knowledge_node_ids m in
     let (), m =
-      linear_traverse ~ids () (Full_traversal (fun () id node _m ->
+      linear_traverse ~ids () (Full_traversal (fun () id node m ->
           Js_utils.console_log (Printf.sprintf "Updating knowledge node : %s" id);
           let data = unwrap_data node in
           Js_utils.console_log (Printf.sprintf "Old expr : %s" (Vampire_analyzed_expr.expr_to_string data.expr));
