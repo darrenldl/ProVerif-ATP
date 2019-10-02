@@ -37,9 +37,6 @@ let () =
       | Error e ->
         Js_utils.alert e
       | Ok node_map ->
-        (* let node_map = Vampire.Analyzed_graph.remove_node 387 node_map in *)
-        (* let debug_print = Js.Unsafe.global##.document##getElementById "debugPrint" in *)
-        (* debug_print##.value := Js.string (Vampire.map_debug_string node_map); *)
         Js_utils.console_log (Vampire.map_debug_string node_map);
         dagre_main := Some (Dagre.make ());
         let node_map =
