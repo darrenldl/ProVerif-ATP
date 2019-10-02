@@ -680,8 +680,7 @@ let similarity (e1 : expr) (e2 : expr) : float =
   let total_matches = aux e1 e2 in
   float_of_int total_matches /. float_of_int (length e1 + length e2)
 
-let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
-  expr ExprMap.t option =
+module PatternMatch = struct
   let all_combinations (exprs1 : expr list) (exprs2 : expr list) :
     (expr * expr) list =
     let rec aux (acc : (expr * expr) list) (exprs1 : expr list)
@@ -694,7 +693,7 @@ let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
         aux acc ps exprs
     in
     aux [] exprs1 exprs2
-  in
+
   (* let filter_by_pattern_matches (combinations : (expr * expr) list) : (expr * expr) list =
    *   let rec aux (acc : (expr * expr) list) (combinations : (expr * expr) list) : (expr * expr) list =
    *     match combinations with
@@ -706,8 +705,8 @@ let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
    *       in
    *       aux acc cs
    *   in
-   *   aux [] combinations
-   * in *)
+   *   aux [] combinations *)
+
   let group_by_exprs (combinations : (expr * expr) list) : expr list ExprMap.t
     =
     let rec aux (m : expr list ExprMap.t) (combinations : (expr * expr) list) :
@@ -726,7 +725,7 @@ let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
         aux m cs
     in
     aux ExprMap.empty combinations
-  in
+
   let generate_possible_solutions (m : expr list ExprMap.t) :
     expr ExprMap.t list =
     let rec aux (keys : expr list) (m : expr list ExprMap.t)
@@ -745,7 +744,7 @@ let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
     in
     let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
     aux keys m ExprMap.empty
-  in
+
   let filter_by_non_overlapping_exprs_expressions (l : expr ExprMap.t list) :
     expr ExprMap.t list =
     let no_overlaps (m : expr ExprMap.t) : bool =
@@ -769,7 +768,7 @@ let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
       aux keys m ExprSet.empty ExprSet.empty
     in
     List.filter (fun m -> no_overlaps m) l
-  in
+
   let filter_by_compatible_var_bindings (solutions : expr ExprMap.t list) :
     expr ExprMap.t list =
     let no_overlaps (m : expr ExprMap.t) : bool =
@@ -793,7 +792,7 @@ let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
       aux keys VarMap.empty m
     in
     List.filter (fun m -> no_overlaps m) solutions
-  in
+
   let solution_score (m : expr ExprMap.t) : float =
     let rec aux (keys : expr list) (score_acc : float) (m : expr ExprMap.t) :
       float =
@@ -807,14 +806,17 @@ let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
     in
     let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
     aux keys 0.0 m
-  in
+
   let sort_solutions_by_score_descending (solutions : expr ExprMap.t list) :
     expr ExprMap.t list =
     List.sort
-      (fun m1 m2 ->
-         Misc_utils.compare_rev (solution_score m1) (solution_score m2))
+      (fun m1 m2 -> compare (solution_score m2) (solution_score m1))
       solutions
-  in
+end
+
+let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
+  expr ExprMap.t option =
+  let open PatternMatch in
   let valid_combinations =
     all_combinations exprs1 exprs2
     (* |> filter_by_pattern_matches *)
