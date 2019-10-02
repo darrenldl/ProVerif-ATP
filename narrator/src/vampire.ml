@@ -258,67 +258,84 @@ type grouped_derive_explanations =
   | Combine_knowledge of info_source list * Vampire_analyzed_expr.expr list
   | Gain_knowledge of info_source list * Vampire_analyzed_expr.expr list
 
-let mark_free_variables (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let mark_free_variable_possibly () (id : id) (node : node) (m : node_graph) =
-    let data = unwrap_data node in
-    let parents = find_parents id m in
-    let data =
-      { data with
-        expr =
-          ( if parents = [] then
-              Vampire_analyzed_expr.mark_if_unsure Free data.expr
-            else data.expr ) }
-    in
-    ((), Analyzed_graph.add_node Overwrite id (Data data) m)
-  in
-  let (), m =
-    Analyzed_graph.linear_traverse ()
-      (Full_traversal mark_free_variable_possibly) m
-  in
-  m
+(* let mark_free_variables (m : node_graph) : node_graph =
+ *   let open Analyzed_graph in
+ *   let mark_free_variable_possibly () (id : id) (node : node) (m : node_graph) =
+ *     let data = unwrap_data node in
+ *     let parents = find_parents id m in
+ *     let data =
+ *       { data with
+ *         expr =
+ *           ( if parents = [] then
+ *               Vampire_analyzed_expr.mark_if_unsure Free data.expr
+ *             else data.expr ) }
+ *     in
+ *     ((), Analyzed_graph.add_node Overwrite id (Data data) m)
+ *   in
+ *   let (), m =
+ *     Analyzed_graph.linear_traverse ()
+ *       (Full_traversal mark_free_variable_possibly) m
+ *   in
+ *   m *)
 
-let mark_universal_variables (m : node_graph) : node_graph =
-  let open Analyzed_graph in
-  let mark_universal_variable_possibly () (id : id) (node : node)
-      (m : node_graph) =
-    let data = unwrap_data node in
-    let data =
-      { data with
-        expr = Vampire_analyzed_expr.mark_if_unsure Universal data.expr }
-    in
-    ((), Analyzed_graph.add_node Overwrite id (Data data) m)
-  in
-  let (), m =
-    Analyzed_graph.linear_traverse ()
-      (Full_traversal mark_universal_variable_possibly) m
-  in
-  m
+(* let mark_universal_variables (m : node_graph) : node_graph =
+ *   let open Analyzed_graph in
+ *   let mark_universal_variable_possibly () (id : id) (node : node)
+ *       (m : node_graph) =
+ *     let data = unwrap_data node in
+ *     let data =
+ *       { data with
+ *         expr = Vampire_analyzed_expr.mark_if_unsure Universal data.expr }
+ *     in
+ *     ((), Analyzed_graph.add_node Overwrite id (Data data) m)
+ *   in
+ *   let (), m =
+ *     Analyzed_graph.linear_traverse ()
+ *       (Full_traversal mark_universal_variable_possibly) m
+ *   in
+ *   m *)
 
-let propagate_variable_bound (m : node_graph) : node_graph =
+(* let propagate_variable_bound (m : node_graph) : node_graph =
+ *   let open Analyzed_graph in
+ *   let propagate_bound_to_child (m : node_graph) target_id child_id =
+ *     let bound =
+ *       Vampire_analyzed_expr.get_bound
+ *         (unwrap_data (find_node target_id m)).expr
+ *     in
+ *     let node = unwrap_data (find_node child_id m) in
+ *     let node =
+ *       {node with expr = Vampire_analyzed_expr.update_bound node.expr bound}
+ *     in
+ *     Analyzed_graph.add_node Overwrite child_id (Data node) m
+ *   in
+ *   let propagate_bound_to_children () (id : id) (_node : node) (m : node_graph)
+ *     =
+ *     let children = find_children id m in
+ *     ( ()
+ *     , List.fold_left
+ *         (fun m child_id -> propagate_bound_to_child m id child_id)
+ *         m children )
+ *   in
+ *   let (), m =
+ *     Analyzed_graph.linear_traverse ()
+ *       (Full_traversal propagate_bound_to_children) m
+ *   in
+ *   m *)
+
+let mark_variable_bound (m : node_graph) : node_graph =
   let open Analyzed_graph in
-  let propagate_bound_to_child (m : node_graph) target_id child_id =
-    let bound =
-      Vampire_analyzed_expr.get_bound
-        (unwrap_data (find_node target_id m)).expr
-    in
-    let node = unwrap_data (find_node child_id m) in
-    let node =
-      {node with expr = Vampire_analyzed_expr.update_bound node.expr bound}
-    in
-    Analyzed_graph.add_node Overwrite child_id (Data node) m
-  in
-  let propagate_bound_to_children () (id : id) (_node : node) (m : node_graph)
-    =
-    let children = find_children id m in
-    ( ()
-    , List.fold_left
-        (fun m child_id -> propagate_bound_to_child m id child_id)
-        m children )
-  in
   let (), m =
-    Analyzed_graph.linear_traverse ()
-      (Full_traversal propagate_bound_to_children) m
+    linear_traverse ()
+      (Full_traversal (fun () id node m ->
+           let data = unwrap_data node in
+           let new_expr =
+             Vampire_analyzed_expr.mark_var_bound data.expr
+           in
+           let m =
+             add_node Overwrite id (Data {data with expr = new_expr}) m
+           in
+           (), m
+         )) m
   in
   m
 
@@ -964,8 +981,8 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   in
   Analyzed_graph.add_nodes_via_records Overwrite node_records
     Analyzed_graph.empty
-  |> mark_free_variables |> propagate_variable_bound
-  |> mark_universal_variables |> classify |> classify_alias |> classify
+  |> mark_variable_bound (*|> propagate_variable_bound *)
+  (* |> mark_universal_variables*) |> classify |> classify_alias |> classify
   |> rewrite_conclusion |> redraw_alias_arrows
   |> RewriteKnowledgeNodes.uniquify_knowledge_nodes
 

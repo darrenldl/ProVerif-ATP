@@ -208,17 +208,21 @@ let get_bound (e : expr) : (string * bound) list =
   in
   aux e []
 
-let mark_if_unsure (bound : bound) (e : expr) : expr =
+let mark_var_bound (e : expr) : expr =
   let rec aux (e : expr) : expr =
     match e with
-    | Variable (Unsure, v) ->
+    | Variable (_, v) ->
+      let bound =
+        if Core_kernel.String.substr_index ~pattern:"name_" v = Some 0 then
+          Free
+        else if Core_kernel.String.substr_index ~pattern:"constr_" v = Some 0 then
+          Free
+        else if Core_kernel.String.substr_index ~pattern:"X" v = Some 0 then
+          Universal
+        else
+          Unsure
+      in
       Variable (bound, v)
-    | Variable (Free, v) ->
-      Variable (Free, v)
-    | Variable (Universal, v) ->
-      Variable (Universal, v)
-    | Variable (Existential, v) ->
-      Variable (Existential, v)
     | Pred (name, param) ->
       Pred (name, aux param)
     | Function (name, params) ->
@@ -235,6 +239,34 @@ let mark_if_unsure (bound : bound) (e : expr) : expr =
       InsertedF formulas
   in
   aux e
+
+(* let mark_if_unsure (bound : bound) (e : expr) : expr =
+ *   let rec aux (e : expr) : expr =
+ *     match e with
+ *     | Variable (Unsure, v) ->
+ *       Variable (bound, v)
+ *     | Variable (Free, v) ->
+ *       Variable (Free, v)
+ *     | Variable (Universal, v) ->
+ *       Variable (Universal, v)
+ *     | Variable (Existential, v) ->
+ *       Variable (Existential, v)
+ *     | Pred (name, param) ->
+ *       Pred (name, aux param)
+ *     | Function (name, params) ->
+ *       Function (name, List.map aux params)
+ *     | UnaryOp (op, e) ->
+ *       UnaryOp (op, aux e)
+ *     | BinaryOp (op, l, r) ->
+ *       BinaryOp (op, aux l, aux r)
+ *     | Quantified (q, idents, e) ->
+ *       Quantified (q, idents, aux e)
+ *     | False ->
+ *       False
+ *     | InsertedF formulas ->
+ *       InsertedF formulas
+ *   in
+ *   aux e *)
 
 let update_bound (e : expr) (changes : (string * bound) list) : expr =
   let rec aux (e : expr) : expr =
