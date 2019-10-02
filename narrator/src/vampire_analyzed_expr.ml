@@ -420,7 +420,8 @@ let remove_subsumptions (e : expr) : expr =
      * | BinaryOp (Or, UnaryOp (Not, Variable (_, v)), e) when has_prefix v "spl"
      *   ->
      *   e *)
-    | BinaryOp (Subsume, e, _) -> e
+    | BinaryOp (Subsume, e, _) ->
+      e
     | BinaryOp (op, e1, e2) ->
       BinaryOp (op, aux e1, aux e2)
     | Quantified (q, vars, e) ->
@@ -730,11 +731,10 @@ module PatternMatch = struct
           let pattern_no_overlap = not (ExprSet.mem pat exprs1_used) in
           let expr_no_overlap = not (ExprSet.mem expr exprs2_used) in
           let no_overlaps = pattern_no_overlap && expr_no_overlap in
-          if no_overlaps then
-            aux ks m
-              (ExprSet.add pat exprs1_used)
-              (ExprSet.add expr exprs2_used)
-          else false
+          no_overlaps
+          && aux ks m
+            (ExprSet.add pat exprs1_used)
+            (ExprSet.add expr exprs2_used)
       in
       let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
       aux keys m ExprSet.empty ExprSet.empty
