@@ -2,9 +2,6 @@ open Js_of_ocaml
 open Lwt
 
 let () =
-  (* Set up the file loading code *)
-  (* let pv_file_input             = Js.Unsafe.global##.document##getElementById (Js.string "pvFileInput") in *)
-  (* let vampire_file_input        = Js.Unsafe.global##.document##getElementById (Js.string "vampireFileInput") in *)
   let single_formula_box_ID = "singleFormulaBox" in
   let chain_explanation_box_ID = "chainExplanationBox" in
   let single_explanation_box_ID = "singleExplanationBox" in
@@ -91,48 +88,6 @@ let () =
   in
   Lwt.async vampire_file_reader;
   Lwt.async pv_file_reader;
-  (* let () = pv_file_input##addEventListener (Js.string "change")
-   *     (Dom_html.handler
-   *        (fun _ev ->
-   *           begin
-   *             Lwt_js.yield () >>= (fun () ->
-   *                 let file = Js.Optdef.get (Js.array_get pv_file_input##.files 0) (fun () -> assert false) in
-   *                 let file_reader = Js.Unsafe.global##.FileReader in
-   *                 let file_reader = new%js file_reader in
-   *                 file_reader##.onload :=
-   *                   Dom_html.handler
-   *                     (fun _ev ->
-   *                        Lwt_condition.signal js_ctx.pv_file_ready (Js.to_string file_reader##.result);
-   *                        let () = pv_file_input##.value := Js.string "" in
-   *                        Js._true);
-   *                 let () = file_reader##readAsText file in
-   *                 Lwt.return_unit
-   *               )
-   *           end |> ignore;
-   *           Js._true
-   *        ))
-   * in *)
-  (* let () = vampire_file_input##addEventListener (Js.string "change")
-   *     (Dom_html.handler
-   *        (fun _ev ->
-   *           begin
-   *             Lwt_js.yield () >>= (fun () ->
-   *                 let file = Js.Optdef.get (Js.array_get vampire_file_input##.files 0) (fun () -> assert false) in
-   *                 let file_reader = Js.Unsafe.global##.FileReader in
-   *                 let file_reader = new%js file_reader in
-   *                 file_reader##.onload :=
-   *                   Dom_html.handler
-   *                     (fun _ev ->
-   *                        Lwt_condition.signal js_ctx.vampire_file_ready (Js.to_string file_reader##.result);
-   *                        let () = vampire_file_input##.value := Js.string "" in
-   *                        Js._true);
-   *                 let () = file_reader##readAsText file in
-   *                 Lwt.return_unit
-   *               )
-   *           end |> ignore;
-   *           Js._true
-   *        ))
-   * in *)
   let disable_border_prev_selected_node () : unit =
     match js_ctx.selected_node with
     | None ->
@@ -513,14 +468,6 @@ let () =
    *     ); *)
   ( Cytoscape.draw_test_graph cy_single_nodeAST;
     Cytoscape.draw_test_graph cy_main;
-    (* let button = Dom_html.getElementById_exn "testButton" in *)
-    (* button##.onclick := Dom_html.handler
-     *     (fun _ev ->
-     *        Js_utils.alert "Called from OCaml";
-     *        (\* let debug_print = Js.Unsafe.global##.document##getElementById "debugPrint" in *\)
-     *        (\* debug_print##.value := Js.string "Hello"; *\)
-     *        Js._true
-     *     ); *)
     Lwt.return_unit )
   |> ignore;
   let pv_file = Js.to_string Js.Unsafe.global##.pvFile in
