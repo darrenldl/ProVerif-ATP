@@ -611,7 +611,9 @@ module PatternMatch = struct
          | Some c ->
            VarMap.find k smaller = c)
       true keys
+end
 
+module BruteForce = struct
   let all_combinations (exprs1 : expr list) (exprs2 : expr list) :
     (expr * expr) list =
     let rec aux (acc : (expr * expr) list) (exprs1 : expr list)
@@ -667,27 +669,24 @@ module PatternMatch = struct
     expr ExprMap.t list =
     let no_overlaps (m : expr ExprMap.t) : bool =
       let rec aux (keys : expr list) (m : expr ExprMap.t)
-          (exprs1_used : ExprSet.t) (exprs2_used : ExprSet.t) : bool =
+          (exprs2_used : ExprSet.t) : bool =
         match keys with
         | [] ->
           true
         | pat :: ks ->
           let expr = ExprMap.find pat m in
-          let pattern_no_overlap = not (ExprSet.mem pat exprs1_used) in
-          let expr_no_overlap = not (ExprSet.mem expr exprs2_used) in
-          let no_overlaps = pattern_no_overlap && expr_no_overlap in
-          no_overlaps
+          not (ExprSet.mem expr exprs2_used)
           && aux ks m
-            (ExprSet.add pat exprs1_used)
             (ExprSet.add expr exprs2_used)
       in
       let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
-      aux keys m ExprSet.empty ExprSet.empty
+      aux keys m ExprSet.empty
     in
     List.filter (fun m -> no_overlaps m) l
 
   let filter_by_compatible_var_bindings (solutions : expr ExprMap.t list) :
     expr ExprMap.t list =
+    let open PatternMatch in
     let no_overlaps (m : expr ExprMap.t) : bool =
       let rec aux (keys : expr list) (var_bindings : expr VarMap.t)
           (m : expr ExprMap.t) : bool =
@@ -732,7 +731,7 @@ end
 
 let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
   expr ExprMap.t option =
-  let open PatternMatch in
+  let open BruteForce in
   let valid_combinations =
     all_combinations exprs1 exprs2
     (* |> filter_by_pattern_matches *)
