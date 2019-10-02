@@ -314,150 +314,6 @@ let get_vars ?(bound : bound option) (e : expr) : string list =
   in
   List.sort_uniq compare (aux e)
 
-let pattern_matches ~(pattern : expr) (expr : expr) : bool =
-  let rec aux (pattern : expr) (expr : expr) : bool =
-    match (pattern, expr) with
-    | Variable (Unsure, _), _ ->
-      raise Unexpected_unsure_var
-    | _, Variable (Unsure, _) ->
-      raise Unexpected_unsure_var
-    | Variable (Existential, _), _ ->
-      raise Unexpected_existential_var
-    | _, Variable (Existential, _) ->
-      raise Unexpected_existential_var
-    | Quantified (Exists, _, _), _ ->
-      raise Unexpected_exists_quantifier
-    | _, Quantified (Exists, _, _) ->
-      raise Unexpected_exists_quantifier
-    | (Variable (Free, _) as v1), (Variable (Free, _) as v2) ->
-      if v1 = v2 then true else false
-    | Variable (Universal, _), _ ->
-      true
-    | Function (f1, es1), Function (f2, es2) ->
-      if f1 = f2 && List.length es1 = List.length es2 then aux_list es1 es2
-      else false
-    | UnaryOp (op1, e1), UnaryOp (op2, e2) ->
-      if op1 = op2 then aux e1 e2 else false
-    | BinaryOp (op1, e1a, e1b), BinaryOp (op2, e2a, e2b) ->
-      if op1 = op2 then aux e1a e2a && aux e1b e2b else false
-    | Quantified (Forall, _, e1), Quantified (Forall, _, e2) ->
-      aux e1 e2
-    | Quantified (Forall, _, e1), (_ as e2) ->
-      aux e1 e2
-    | False, False ->
-      true
-    | InsertedF l1, InsertedF l2 ->
-      l1 = l2
-    | _ ->
-      false
-  and aux_list (es1 : expr list) (es2 : expr list) : bool =
-    List.length es1 = List.length es2
-    && List.fold_left2 (fun res e1 e2 -> res && aux e1 e2) true es1 es2
-  in
-  aux pattern expr
-
-let pattern_search ?(s : ExprSet.t = ExprSet.empty) ~(pattern : expr)
-    (expr : expr) : expr list =
-  let rec aux (pattern : expr) (expr : expr) (s : ExprSet.t) : ExprSet.t =
-    let s = if pattern_matches ~pattern expr then ExprSet.add expr s else s in
-    match expr with
-    | Variable _ ->
-      s
-    | Pred (_, e) ->
-      aux pattern e s
-    | Function (_, es) ->
-      aux_list pattern es s
-    | UnaryOp (_, e) ->
-      aux pattern e s
-    | BinaryOp (_, e1, e2) ->
-      aux_list pattern [e1; e2] s
-    | Quantified (_, _, e) ->
-      aux pattern e s
-    | False ->
-      s
-    | InsertedF _ ->
-      s
-  and aux_list (pattern : expr) (es : expr list) (s : ExprSet.t) : ExprSet.t =
-    List.fold_left (fun s e -> aux pattern e s) s es
-  in
-  ExprSet.elements (aux pattern expr s)
-
-let var_bindings_in_pattern_match ?(m : expr VarMap.t = VarMap.empty)
-    ~(pattern : expr) (expr : expr) : expr VarMap.t =
-  let rec aux (pattern : expr) (expr : expr) (m : expr VarMap.t) :
-    expr VarMap.t =
-    match (pattern, expr) with
-    | Variable (Free, _), _ ->
-      m
-    | Variable (Universal, name), (_ as v) ->
-      VarMap.add name v m
-    | Variable (Existential, _), _ ->
-      raise Unexpected_existential_var
-    | Function (_, es1), Function (_, es2) ->
-      aux_list es1 es2 m
-    | UnaryOp (_, e1), UnaryOp (_, e2) ->
-      aux e1 e2 m
-    | BinaryOp (_, e1a, e1b), BinaryOp (_, e2a, e2b) ->
-      aux_list [e1a; e1b] [e2a; e2b] m
-    | Quantified (_, _, e1), Quantified (_, _, e2) ->
-      aux e1 e2 m
-    | False, False ->
-      m
-    | InsertedF _, InsertedF _ ->
-      m
-    | _ ->
-      raise Unmatching_structure
-  and aux_list (es1 : expr list) (es2 : expr list) (m : expr VarMap.t) :
-    expr VarMap.t =
-    List.fold_left2 (fun m e1 e2 -> aux e1 e2 m) m es1 es2
-  in
-  if pattern_matches ~pattern expr then aux pattern expr m else m
-
-let var_bindings_compatible ~(smaller : expr VarMap.t)
-    ~(larger : expr VarMap.t) : bool =
-  let keys = List.map (fun (k, _) -> k) (VarMap.bindings smaller) in
-  List.fold_left
-    (fun res k ->
-       res
-       &&
-       match VarMap.find_opt k larger with
-       | None ->
-         true
-       | Some c ->
-         VarMap.find k smaller = c)
-    true keys
-
-let fill_in_pattern ~(pattern : expr) (var_bindings : expr VarMap.t) : expr =
-  let rec aux (pattern : expr) (var_bindings : expr VarMap.t) : expr =
-    match pattern with
-    | Variable (Unsure, _) ->
-      raise Unexpected_unsure_var
-    | Variable (Free, _) as e ->
-      e
-    | Variable (Existential, _) ->
-      raise Unexpected_existential_var
-    | Variable (Universal, name) ->
-      VarMap.find name var_bindings
-    | Pred (name, e) ->
-      Pred (name, aux e var_bindings)
-    | Function (name, es1) ->
-      Function (name, aux_list es1 var_bindings)
-    | UnaryOp (op, e) ->
-      UnaryOp (op, aux e var_bindings)
-    | BinaryOp (op, e1, e2) ->
-      BinaryOp (op, aux e1 var_bindings, aux e2 var_bindings)
-    | Quantified (q, ids, e) ->
-      Quantified (q, ids, aux e var_bindings)
-    | False as e ->
-      e
-    | InsertedF _ as e ->
-      e
-  and aux_list (patterns : expr list) (var_bindings : expr VarMap.t) :
-    expr list =
-    List.map (fun e -> aux e var_bindings) patterns
-  in
-  aux pattern var_bindings
-
 let has_universal_var (e : expr) : bool =
   let rec aux (e : expr) : bool =
     match e with
@@ -615,38 +471,6 @@ let length (e : expr) : int =
   in
   aux 0 e
 
-let rewrite (base : expr) ~(rewrite_rule_from : expr) ~(rewrite_rule_to : expr)
-    ~(expr_from : expr) : expr =
-  let rec aux (base : expr) (expr_from : expr) (to_expr : expr) : expr =
-    if base = expr_from then to_expr
-    else
-      match base with
-      | Variable _ as e ->
-        e
-      | Pred (name, e) ->
-        Pred (name, aux e expr_from to_expr)
-      | Function (name, es) ->
-        Function (name, aux_list es expr_from to_expr)
-      | UnaryOp (op, e) ->
-        UnaryOp (op, aux e expr_from to_expr)
-      | BinaryOp (op, e1, e2) ->
-        BinaryOp (op, aux e1 expr_from to_expr, aux e2 expr_from to_expr)
-      | Quantified (q, ids, e) ->
-        Quantified (q, ids, aux e expr_from to_expr)
-      | False as e ->
-        e
-      | InsertedF _ as e ->
-        e
-  and aux_list (bases : expr list) (expr_from : expr) (to_expr : expr) :
-    expr list =
-    List.map (fun e -> aux e expr_from to_expr) bases
-  in
-  let var_bindings =
-    var_bindings_in_pattern_match ~pattern:rewrite_rule_from expr_from
-  in
-  let to_expr = fill_in_pattern ~pattern:rewrite_rule_to var_bindings in
-  aux base expr_from to_expr
-
 let similarity (e1 : expr) (e2 : expr) : float =
   let rec aux (e1 : expr) (e2 : expr) : int =
     match (e1, e2) with
@@ -681,6 +505,153 @@ let similarity (e1 : expr) (e2 : expr) : float =
   float_of_int total_matches /. float_of_int (length e1 + length e2)
 
 module PatternMatch = struct
+  let pattern_matches ~(pattern : expr) (expr : expr) : bool =
+    let rec aux (pattern : expr) (expr : expr) : bool =
+      match (pattern, expr) with
+      | Variable (Unsure, _), _ ->
+        raise Unexpected_unsure_var
+      | _, Variable (Unsure, _) ->
+        raise Unexpected_unsure_var
+      | Variable (Existential, _), _ ->
+        raise Unexpected_existential_var
+      | _, Variable (Existential, _) ->
+        raise Unexpected_existential_var
+      | Quantified (Exists, _, _), _ ->
+        raise Unexpected_exists_quantifier
+      | _, Quantified (Exists, _, _) ->
+        raise Unexpected_exists_quantifier
+      | (Variable (Free, _) as v1), (Variable (Free, _) as v2) ->
+        if v1 = v2 then true else false
+      | Variable (Universal, _), _ ->
+        true
+      | Function (f1, es1), Function (f2, es2) ->
+        if f1 = f2 && List.length es1 = List.length es2 then aux_list es1 es2
+        else false
+      | UnaryOp (op1, e1), UnaryOp (op2, e2) ->
+        if op1 = op2 then aux e1 e2 else false
+      | BinaryOp (op1, e1a, e1b), BinaryOp (op2, e2a, e2b) ->
+        if op1 = op2 then aux e1a e2a && aux e1b e2b else false
+      | Quantified (Forall, _, e1), Quantified (Forall, _, e2) ->
+        aux e1 e2
+      | Quantified (Forall, _, e1), (_ as e2) ->
+        aux e1 e2
+      | False, False ->
+        true
+      | InsertedF l1, InsertedF l2 ->
+        l1 = l2
+      | _ ->
+        false
+    and aux_list (es1 : expr list) (es2 : expr list) : bool =
+      List.length es1 = List.length es2
+      && List.fold_left2 (fun res e1 e2 -> res && aux e1 e2) true es1 es2
+    in
+    aux pattern expr
+
+  let pattern_search ?(s : ExprSet.t = ExprSet.empty) ~(pattern : expr)
+      (expr : expr) : expr list =
+    let rec aux (pattern : expr) (expr : expr) (s : ExprSet.t) : ExprSet.t =
+      let s =
+        if pattern_matches ~pattern expr then ExprSet.add expr s else s
+      in
+      match expr with
+      | Variable _ ->
+        s
+      | Pred (_, e) ->
+        aux pattern e s
+      | Function (_, es) ->
+        aux_list pattern es s
+      | UnaryOp (_, e) ->
+        aux pattern e s
+      | BinaryOp (_, e1, e2) ->
+        aux_list pattern [e1; e2] s
+      | Quantified (_, _, e) ->
+        aux pattern e s
+      | False ->
+        s
+      | InsertedF _ ->
+        s
+    and aux_list (pattern : expr) (es : expr list) (s : ExprSet.t) : ExprSet.t
+      =
+      List.fold_left (fun s e -> aux pattern e s) s es
+    in
+    ExprSet.elements (aux pattern expr s)
+
+  let var_bindings_in_pattern_match ?(m : expr VarMap.t = VarMap.empty)
+      ~(pattern : expr) (expr : expr) : expr VarMap.t =
+    let rec aux (pattern : expr) (expr : expr) (m : expr VarMap.t) :
+      expr VarMap.t =
+      match (pattern, expr) with
+      | Variable (Free, _), _ ->
+        m
+      | Variable (Universal, name), (_ as v) ->
+        VarMap.add name v m
+      | Variable (Existential, _), _ ->
+        raise Unexpected_existential_var
+      | Function (_, es1), Function (_, es2) ->
+        aux_list es1 es2 m
+      | UnaryOp (_, e1), UnaryOp (_, e2) ->
+        aux e1 e2 m
+      | BinaryOp (_, e1a, e1b), BinaryOp (_, e2a, e2b) ->
+        aux_list [e1a; e1b] [e2a; e2b] m
+      | Quantified (_, _, e1), Quantified (_, _, e2) ->
+        aux e1 e2 m
+      | False, False ->
+        m
+      | InsertedF _, InsertedF _ ->
+        m
+      | _ ->
+        raise Unmatching_structure
+    and aux_list (es1 : expr list) (es2 : expr list) (m : expr VarMap.t) :
+      expr VarMap.t =
+      List.fold_left2 (fun m e1 e2 -> aux e1 e2 m) m es1 es2
+    in
+    if pattern_matches ~pattern expr then aux pattern expr m else m
+
+  let var_bindings_compatible ~(smaller : expr VarMap.t)
+      ~(larger : expr VarMap.t) : bool =
+    let keys = List.map (fun (k, _) -> k) (VarMap.bindings smaller) in
+    List.fold_left
+      (fun res k ->
+         res
+         &&
+         match VarMap.find_opt k larger with
+         | None ->
+           true
+         | Some c ->
+           VarMap.find k smaller = c)
+      true keys
+
+  let fill_in_pattern ~(pattern : expr) (var_bindings : expr VarMap.t) : expr =
+    let rec aux (pattern : expr) (var_bindings : expr VarMap.t) : expr =
+      match pattern with
+      | Variable (Unsure, _) ->
+        raise Unexpected_unsure_var
+      | Variable (Free, _) as e ->
+        e
+      | Variable (Existential, _) ->
+        raise Unexpected_existential_var
+      | Variable (Universal, name) ->
+        VarMap.find name var_bindings
+      | Pred (name, e) ->
+        Pred (name, aux e var_bindings)
+      | Function (name, es1) ->
+        Function (name, aux_list es1 var_bindings)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux e var_bindings)
+      | BinaryOp (op, e1, e2) ->
+        BinaryOp (op, aux e1 var_bindings, aux e2 var_bindings)
+      | Quantified (q, ids, e) ->
+        Quantified (q, ids, aux e var_bindings)
+      | False as e ->
+        e
+      | InsertedF _ as e ->
+        e
+    and aux_list (patterns : expr list) (var_bindings : expr VarMap.t) :
+      expr list =
+      List.map (fun e -> aux e var_bindings) patterns
+    in
+    aux pattern var_bindings
+
   let all_combinations (exprs1 : expr list) (exprs2 : expr list) :
     (expr * expr) list =
     let rec aux (acc : (expr * expr) list) (exprs1 : expr list)
@@ -813,6 +784,39 @@ module PatternMatch = struct
       (fun m1 m2 -> compare (solution_score m2) (solution_score m1))
       solutions
 end
+
+let rewrite (base : expr) ~(rewrite_rule_from : expr) ~(rewrite_rule_to : expr)
+    ~(expr_from : expr) : expr =
+  let open PatternMatch in
+  let rec aux (base : expr) (expr_from : expr) (to_expr : expr) : expr =
+    if base = expr_from then to_expr
+    else
+      match base with
+      | Variable _ as e ->
+        e
+      | Pred (name, e) ->
+        Pred (name, aux e expr_from to_expr)
+      | Function (name, es) ->
+        Function (name, aux_list es expr_from to_expr)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux e expr_from to_expr)
+      | BinaryOp (op, e1, e2) ->
+        BinaryOp (op, aux e1 expr_from to_expr, aux e2 expr_from to_expr)
+      | Quantified (q, ids, e) ->
+        Quantified (q, ids, aux e expr_from to_expr)
+      | False as e ->
+        e
+      | InsertedF _ as e ->
+        e
+  and aux_list (bases : expr list) (expr_from : expr) (to_expr : expr) :
+    expr list =
+    List.map (fun e -> aux e expr_from to_expr) bases
+  in
+  let var_bindings =
+    var_bindings_in_pattern_match ~pattern:rewrite_rule_from expr_from
+  in
+  let to_expr = fill_in_pattern ~pattern:rewrite_rule_to var_bindings in
+  aux base expr_from to_expr
 
 let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
   expr ExprMap.t option =
@@ -1047,6 +1051,7 @@ let uniquify_universal_var_names_generic
 
 let var_bindings_in_generic ?(m : expr VarMap.t = VarMap.empty)
     ~(get_pairs : 'a -> (expr * expr) list) (x : 'a) : expr VarMap.t =
+  let open PatternMatch in
   let pairs = get_pairs x in
   List.fold_left
     (fun m (k, v) ->
@@ -1057,6 +1062,7 @@ let var_bindings_in_generic ?(m : expr VarMap.t = VarMap.empty)
 
 let var_bindings_in_pairs ?(m : expr VarMap.t = VarMap.empty)
     (pairs : (expr * expr) list) : expr VarMap.t =
+  let open PatternMatch in
   List.fold_left
     (fun m (k, v) ->
        m
