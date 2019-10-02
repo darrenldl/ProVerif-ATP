@@ -215,12 +215,11 @@ let mark_var_bound (e : expr) : expr =
       let bound =
         if Core_kernel.String.substr_index ~pattern:"name_" v = Some 0 then
           Free
-        else if Core_kernel.String.substr_index ~pattern:"constr_" v = Some 0 then
-          Free
+        else if Core_kernel.String.substr_index ~pattern:"constr_" v = Some 0
+        then Free
         else if Core_kernel.String.substr_index ~pattern:"X" v = Some 0 then
           Universal
-        else
-          Unsure
+        else Unsure
       in
       Variable (bound, v)
     | Pred (name, param) ->
@@ -280,7 +279,8 @@ let update_bound (e : expr) (changes : (string * bound) list) : expr =
             | x, Unsure ->
               Variable (x, v)
             | _, _h ->
-              Variable (b, v) (* only update when unsure *) ) )
+              Variable (b, v)
+              (* only update when unsure *) ) )
     | Pred (name, e) ->
       Pred (name, aux e)
     | Function (name, params) ->

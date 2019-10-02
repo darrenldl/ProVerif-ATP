@@ -7,10 +7,7 @@ let ignore_space (p : 'a stateless_p) : 'a stateless_p =
 
 let ident_char : char stateless_p = choice [letter; digit; char '_']
 
-let rec ident_p s =
-  choice
-    [ attempt begin_with_letter ]
-    s
+let rec ident_p s = choice [attempt begin_with_letter] s
 
 and begin_with_letter s =
   ( letter
