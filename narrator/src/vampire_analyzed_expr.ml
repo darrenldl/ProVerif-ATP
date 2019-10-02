@@ -398,11 +398,6 @@ let strip_quant (e : expr) : expr =
 let get_function_args (e : expr) : expr list =
   match e with Function (_, es) -> es | _ -> []
 
-(* let unwrap_subsume (e : expr) : expr =
- *   match e with
- *   | BinaryOp (Subsume, e, _) -> e
- *   | _                   as e -> e *)
-
 let remove_subsumptions (e : expr) : expr =
   let rec aux (e : expr) : expr =
     match e with
@@ -414,12 +409,6 @@ let remove_subsumptions (e : expr) : expr =
       Function (f, List.map aux args)
     | UnaryOp (op, e) ->
       UnaryOp (op, aux e)
-    (* | BinaryOp (Or, e, UnaryOp (Not, Variable (_, v))) when has_prefix v "spl"
-     *   ->
-     *   e
-     * | BinaryOp (Or, UnaryOp (Not, Variable (_, v)), e) when has_prefix v "spl"
-     *   ->
-     *   e *)
     | BinaryOp (Subsume, e, _) ->
       e
     | BinaryOp (op, e1, e2) ->
@@ -623,37 +612,6 @@ module PatternMatch = struct
            VarMap.find k smaller = c)
       true keys
 
-  (* let fill_in_pattern ~(pattern : expr) (var_bindings : expr VarMap.t) : expr =
-   *   let rec aux (pattern : expr) (var_bindings : expr VarMap.t) : expr =
-   *     match pattern with
-   *     | Variable (Unsure, _) ->
-   *       raise Unexpected_unsure_var
-   *     | Variable (Free, _) as e ->
-   *       e
-   *     | Variable (Existential, _) ->
-   *       raise Unexpected_existential_var
-   *     | Variable (Universal, name) ->
-   *       VarMap.find name var_bindings
-   *     | Pred (name, e) ->
-   *       Pred (name, aux e var_bindings)
-   *     | Function (name, es1) ->
-   *       Function (name, aux_list es1 var_bindings)
-   *     | UnaryOp (op, e) ->
-   *       UnaryOp (op, aux e var_bindings)
-   *     | BinaryOp (op, e1, e2) ->
-   *       BinaryOp (op, aux e1 var_bindings, aux e2 var_bindings)
-   *     | Quantified (q, ids, e) ->
-   *       Quantified (q, ids, aux e var_bindings)
-   *     | False as e ->
-   *       e
-   *     | InsertedF _ as e ->
-   *       e
-   *   and aux_list (patterns : expr list) (var_bindings : expr VarMap.t) :
-   *     expr list =
-   *     List.map (fun e -> aux e var_bindings) patterns
-   *   in
-   *   aux pattern var_bindings *)
-
   let all_combinations (exprs1 : expr list) (exprs2 : expr list) :
     (expr * expr) list =
     let rec aux (acc : (expr * expr) list) (exprs1 : expr list)
@@ -666,19 +624,6 @@ module PatternMatch = struct
         aux acc ps exprs
     in
     aux [] exprs1 exprs2
-
-  (* let filter_by_pattern_matches (combinations : (expr * expr) list) : (expr * expr) list =
-   *   let rec aux (acc : (expr * expr) list) (combinations : (expr * expr) list) : (expr * expr) list =
-   *     match combinations with
-   *     | []             -> acc
-   *     | (e1, e2) :: cs ->
-   *       let acc =
-   *         if pattern_matches ~pattern:e1 e2 then (e1, e2) :: acc
-   *         else                                               acc
-   *       in
-   *       aux acc cs
-   *   in
-   *   aux [] combinations *)
 
   let group_by_exprs (combinations : (expr * expr) list) : expr list ExprMap.t
     =
@@ -785,39 +730,6 @@ module PatternMatch = struct
       solutions
 end
 
-(* let rewrite (base : expr) ~(rewrite_rule_from : expr) ~(rewrite_rule_to : expr)
- *     ~(expr_from : expr) : expr =
- *   let open PatternMatch in
- *   let rec aux (base : expr) (expr_from : expr) (to_expr : expr) : expr =
- *     if base = expr_from then to_expr
- *     else
- *       match base with
- *       | Variable _ as e ->
- *         e
- *       | Pred (name, e) ->
- *         Pred (name, aux e expr_from to_expr)
- *       | Function (name, es) ->
- *         Function (name, aux_list es expr_from to_expr)
- *       | UnaryOp (op, e) ->
- *         UnaryOp (op, aux e expr_from to_expr)
- *       | BinaryOp (op, e1, e2) ->
- *         BinaryOp (op, aux e1 expr_from to_expr, aux e2 expr_from to_expr)
- *       | Quantified (q, ids, e) ->
- *         Quantified (q, ids, aux e expr_from to_expr)
- *       | False as e ->
- *         e
- *       | InsertedF _ as e ->
- *         e
- *   and aux_list (bases : expr list) (expr_from : expr) (to_expr : expr) :
- *     expr list =
- *     List.map (fun e -> aux e expr_from to_expr) bases
- *   in
- *   let var_bindings =
- *     var_bindings_in_pattern_match ~pattern:rewrite_rule_from expr_from
- *   in
- *   let to_expr = fill_in_pattern ~pattern:rewrite_rule_to var_bindings in
- *   aux base expr_from to_expr *)
-
 let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
   expr ExprMap.t option =
   let open PatternMatch in
@@ -852,82 +764,6 @@ let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
    *   )
    *   sorted_solutions; *)
   match sorted_solutions with [] -> None | hd :: _ -> Some hd
-
-(* let rewrite_match_map ~(rewrite_rule_from : expr) ~(rewrite_rule_to : expr) ~(expr_from : expr) ~(expr_to : expr) : (expr * expr) * (expr * expr) =
- *   let all_combinations (rewrite_rule_from : expr) (rewrite_rule_to : expr) (expr_from : expr) (expr_to : expr) : ((expr * expr) * (expr * expr)) list =
- *     let rec aux (acc : ((expr * expr) * (expr * expr)) list) (sub_expr_froms : expr list) (sub_expr_tos : expr list) : ((expr * expr) * (expr * expr)) list =
- *       match sub_expr_froms with
- *       | []      -> acc
- *       | f :: fs ->
- *         let acc = (List.map (fun t -> (f, t)) sub_expr_tos) @ acc in
- *         aux acc fs sub_expr_tos
- *     in
- *     let sub_expr_froms = pattern_search ~pattern:rewrite_rule_from expr_from in
- *     let sub_expr_tos   = pattern_search ~pattern:rewrite_rule_to   expr_to   in
- *     aux sub_Expr_froms sub_expr_tos
- *   in
- *   let filter_by_pattern_matches (combinations : (expr * expr) list) : (expr * expr) list =
- *     let rec aux (acc : (expr * expr) list) (combinations : (expr * expr) list) : (expr * expr) list =
- *       match combinations with
- *       | []           -> acc
- *       | (p, e) :: cs ->
- *         let acc =
- *           if pattern_matches ~pattern:p e then
- *             (p, e) :: acc
- *           else
- *             acc
- *         in
- *         aux acc cs
- *     in
- *     aux [] combinations
- *   in
- *   let filter_by_matching_rewrite_result
- *       (expr_from         : expr)
- *       (expr_to           : expr)
- *       (rewrite_rule_from : expr)
- *       (rewrite_rule_to   : expr)
- *       (combinations      : (expr * expr) list)
- *     : (expr * expr) list =
- *     List.filter
- *       (fun (sub_expr_from, _) ->
- *          let res = rewrite expr_from ~rewrite_rule_from ~rewrite_rule_to ~expr_from:sub_expr_from in
- *          res = expr_to
- *       )
- *       combinations
- *   in
- *   let filter_by_compatible_var_bindings (solutions : ) *)
-
-(* let map_out_variable_substitution (rewriter : expr) (e : expr) : (expr ExprMap.t, variable_map_error) result =
- *   let rec aux (rewriter : expr) (e : expr) (m : expr ExprMap.t) : (expr ExprMap.t, variable_map_error) result =
- *     match (rewriter, e) with
- *     | (Variable (Unsure, _)           ), (_                              ) -> Error Unexpected_unsure_var
- *     | (_                              ), (Variable (Unsure, _)           ) -> Error Unexpected_unsure_var
- *     | (Variable (Existential, _)      ), (_                              ) -> Error Unexpected_existential_var
- *     | (_                              ), (Variable (Existential, _)      ) -> Error Unexpected_existential_var
- *     | (Variable (Free,   _)      as v1), (Variable (Free,   _)      as v2) -> if v1 = v2 then Ok m else Error Unmatching_free_var
- *     | (Variable (Universal, _)   as v1), (Variable (Universal,  _)  as v2) -> Ok (ExprMap.add v1 v2 m)
- *     | (Variable (Universal, _)   as v1), (Variable (Free, _)        as v2) -> Ok (ExprMap.add v1 v2 m)
- *     | (Function (f1, es1)        as v1), (Function (f2, es2)             ) ->
- *       if f1 = f2 then aux_list es1 es2 (Ok m)
- *       else            aux_list 
- *     | (UnaryOp  (op1, e1)             ), (UnaryOp  (op2, e2)             ) -> if op1 = op2 then aux e1 e2 m else Error Unmatching_structure
- *     | (BinaryOp (op1, e1a, e1b)       ), (BinaryOp (op2, e2a, e2b)       ) ->
- *       if op1 = op2 then aux_list [e1a; e1b] [e2a; e2b] (Ok m)
- *       else              Error Unmatching_structure
- *     | (Quantified (q))
- *     | _                                                                    -> Error Unmatching_structure
- *   and
- *   and aux_list (es1 : expr list) (es2 : expr list) (m_res : (expr ExprMap.t, variable_map_error) result) : (expr ExprMap.t, variable_map_error) result =
- *     List.fold_left2
- *       (fun m_res e1 e2 ->
- *          match m_res with
- *          | Ok m         -> aux e1 e2 m
- *          | Error _ as e -> e
- *       )
- *       m_res
- *       es1 es2
- *   in
- *   aux rewriter e ExprMap.empty *)
 
 let replace_universal_var_name (original : string) (replacement : string)
     (e : expr) : expr =
@@ -1088,10 +924,6 @@ let label_internal (_id : id) (node : node) : string =
   match node with Data node -> node.expr_str | Group -> "Group"
 
 let color_internal (_id : id) (_node : node) : string = "#67cd61"
-
-(* match node.core with
-     * | Some c -> "#67cd61"
-     * | None   -> "#800000" *)
 
 let size_internal (_ : id) (_ : node) : int = 40
 
