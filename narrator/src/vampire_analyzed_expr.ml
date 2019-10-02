@@ -613,7 +613,9 @@ module PatternMatch = struct
       true keys
 end
 
-module BruteForce = struct
+module BruteForce : sig
+  val best_solution : expr list -> expr list -> expr ExprMap.t option
+end = struct
   let all_combinations (exprs1 : expr list) (exprs2 : expr list) :
     (expr * expr) list =
     let rec aux (acc : (expr * expr) list) (exprs1 : expr list)
@@ -675,9 +677,8 @@ module BruteForce = struct
           true
         | pat :: ks ->
           let expr = ExprMap.find pat m in
-          not (ExprSet.mem expr exprs2_used)
-          && aux ks m
-            (ExprSet.add expr exprs2_used)
+          (not (ExprSet.mem expr exprs2_used))
+          && aux ks m (ExprSet.add expr exprs2_used)
       in
       let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
       aux keys m ExprSet.empty
@@ -727,42 +728,24 @@ module BruteForce = struct
     List.sort
       (fun m1 m2 -> compare (solution_score m2) (solution_score m1))
       solutions
+
+  let compute_solutions_score_descending exprs1 exprs2 =
+    all_combinations exprs1 exprs2
+    |> group_by_exprs |> generate_possible_solutions
+    |> filter_by_non_overlapping_exprs_expressions
+    |> filter_by_compatible_var_bindings |> sort_solutions_by_score_descending
+
+  let best_solution exprs1 exprs2 : expr ExprMap.t option =
+    match compute_solutions_score_descending exprs1 exprs2 with
+    | [] ->
+      None
+    | hd :: _ ->
+      Some hd
 end
 
 let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
   expr ExprMap.t option =
-  let open BruteForce in
-  let valid_combinations =
-    all_combinations exprs1 exprs2
-    (* |> filter_by_pattern_matches *)
-  in
-  Js_utils.console_log
-    (Printf.sprintf "Number of valid combinations : %d"
-       (List.length valid_combinations));
-  let possible_solutions =
-    valid_combinations |> group_by_exprs |> generate_possible_solutions
-  in
-  (* Js_utils.console_log (Printf.sprintf "Number of possible solutions : %d" (List.length possible_solutions)); *)
-  let valid_solutions =
-    possible_solutions |> filter_by_non_overlapping_exprs_expressions
-    |> filter_by_compatible_var_bindings
-  in
-  (* Js_utils.console_log (Printf.sprintf "Number of valid solutions : %d" (List.length valid_solutions)); *)
-  let sorted_solutions =
-    valid_solutions |> sort_solutions_by_score_descending
-  in
-  (* Js_utils.console_log (Printf.sprintf "Number of sorted solutions : %d" (List.length sorted_solutions)); *)
-  (* List.iter
-   *   (fun m ->
-   *      Js_utils.console_log (Printf.sprintf "Solution :");
-   *      ExprMap.iter
-   *        (fun k v ->
-   *           Js_utils.console_log (Printf.sprintf "  %s -> %s" (expr_to_string k) (expr_to_string v))
-   *        )
-   *        m
-   *   )
-   *   sorted_solutions; *)
-  match sorted_solutions with [] -> None | hd :: _ -> Some hd
+  BruteForce.best_solution exprs1 exprs2
 
 let replace_universal_var_name (original : string) (replacement : string)
     (e : expr) : expr =
