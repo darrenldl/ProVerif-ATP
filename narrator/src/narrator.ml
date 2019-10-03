@@ -49,25 +49,25 @@ let () =
         in
         let text = Vampire.attack_trace node_map in
         attack_trace_box##.innerHTML := Js.string text;
-        (* let base_node    = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node 67 node_map) in
-         * let base_expr    = base_node.expr in
-         * Js_utils.console_log (Printf.sprintf "base_expr : %s" (Vampire.Analyzed_expr.expr_to_string base_expr));
-         * let rewrite_node = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node 115 node_map) in
-         * let rewrite_expr = rewrite_node.expr in
-         * Js_utils.console_log (Printf.sprintf "rewrite_expr : %s" (Vampire.Analyzed_expr.expr_to_string rewrite_expr));
-         * let result_node  = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node 409 node_map) in
-         * let result_expr  = result_node.expr in
-         * Js_utils.console_log (Printf.sprintf "result_expr : %s" (Vampire.Analyzed_expr.expr_to_string result_expr));
-         * let pat_match_map =
-         *   Vampire.Analyzed_expr.pattern_multi_match_map
-         *     ~patterns:(List.map Vampire.Analyzed_expr.strip_not (Vampire.Analyzed_expr.split_on_or rewrite_expr))
-         *     (List.map Vampire.Analyzed_expr.strip_not (Vampire.Analyzed_expr.split_on_or base_expr @ Vampire.Analyzed_expr.split_on_or result_expr))
-         * in
-         * Vampire.Analyzed_expr.ExprMap.iter
-         *   (fun k v ->
-         *      Js_utils.console_log (Printf.sprintf "pat : %s, e : %s" (Vampire.Analyzed_expr.expr_to_string k) (Vampire.Analyzed_expr.expr_to_string v))
-         *   )
-         *   pat_match_map; *)
+        let base_node    = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node "446" node_map) in
+        let base_expr    = base_node.expr |> Vampire_analyzed_expr.remove_subsumptions in
+        Js_utils.console_log (Printf.sprintf "base_expr : %s" (Vampire_analyzed_expr.expr_to_string base_expr));
+        let rewrite_node = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node "880" node_map) in
+        let rewrite_expr = rewrite_node.expr |> Vampire_analyzed_expr.remove_subsumptions in
+        Js_utils.console_log (Printf.sprintf "rewrite_expr : %s" (Vampire_analyzed_expr.expr_to_string rewrite_expr));
+        let result_node  = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node "32540" node_map) in
+        let result_expr  = result_node.expr |> Vampire_analyzed_expr.remove_subsumptions in
+        Js_utils.console_log (Printf.sprintf "result_expr : %s" (Vampire_analyzed_expr.expr_to_string result_expr));
+        let pat_match_map =
+          Vampire_analyzed_expr.pattern_multi_match_map
+            (List.map Vampire_analyzed_expr.strip_not (Vampire_analyzed_expr.split_on_or rewrite_expr))
+            (List.map Vampire_analyzed_expr.strip_not (Vampire_analyzed_expr.split_on_or base_expr @ Vampire_analyzed_expr.split_on_or result_expr))
+        in
+        Vampire_analyzed_expr.ExprMap.iter
+          (fun k v ->
+             Js_utils.console_log (Printf.sprintf "pat : %s, e : %s" (Vampire_analyzed_expr.expr_to_string k) (Vampire_analyzed_expr.expr_to_string v))
+          )
+          (Option.get pat_match_map);
         () );
     vampire_file_reader ()
   in

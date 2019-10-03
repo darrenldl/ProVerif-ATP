@@ -498,34 +498,39 @@ let similarity (e1 : expr) (e2 : expr) : float =
   let rec aux (e1 : expr) (e2 : expr) : int =
     match (e1, e2) with
     | Variable (Free, n1), Variable (Free, n2) ->
-      if n1 = n2 then 2 else 0
+      if n1 = n2 then 1 else 0
     | Variable (Universal, _), (_ as v) ->
-      1 + length v
+      1
     | (_ as v), Variable (Universal, _) ->
-      1 + length v
+      length v
     | Variable (Existential, _), _ ->
       raise Unexpected_existential_var
     | _, Variable (Existential, _) ->
       raise Unexpected_existential_var
+    | Pred (n1, e1), Pred (n2, e2) ->
+      if n1 = n2 then 1 + aux e1 e2 else 0
     | Function (n1, es1), Function (n2, es2) ->
-      if n1 = n2 then 2 + aux_list es1 es2 else 0
+      if n1 = n2 then 1 + aux_list es1 es2 else 0
     | UnaryOp (op1, e1), UnaryOp (op2, e2) ->
-      if op1 = op2 then 2 + aux e1 e2 else 0
+      if op1 = op2 then 1 + aux e1 e2 else 0
     | BinaryOp (op1, e1a, e1b), BinaryOp (op2, e2a, e2b) ->
-      if op1 = op2 then 2 + aux_list [e1a; e1b] [e2a; e2b] else 0
+      if op1 = op2 then 1 + aux_list [e1a; e1b] [e2a; e2b] else 0
     | Quantified (_, _, e1), Quantified (_, _, e2) ->
       aux e1 e2
     | False, False ->
-      2
+      1
     | InsertedF n1, InsertedF n2 ->
-      if n1 = n2 then 2 else 0
+      if n1 = n2 then 1 else 0
     | _ ->
       0
   and aux_list (es1 : expr list) (es2 : expr list) : int =
     List.fold_left2 (fun acc e1 e2 -> acc + aux e1 e2) 0 es1 es2
   in
   let total_matches = aux e1 e2 in
-  float_of_int total_matches /. float_of_int (length e1 + length e2)
+  let x = float_of_int total_matches /. float_of_int (length e1) in
+  Js_utils.console_log (Printf.sprintf "Similarity : %f, e1 : %s, e2 : %s" x (expr_to_string e1) (expr_to_string e2));
+  Js_utils.console_log (Printf.sprintf "Total matches : %d, e1 length : %d, e2 length %d" total_matches (length e1) (length e2));
+  x
 
 module PatternMatch = struct
   let pattern_matches ~(pattern : expr) (expr : expr) : bool =
@@ -753,7 +758,11 @@ end = struct
         aux ks score_acc m
     in
     let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
-    aux keys 0.0 m
+    let x = aux keys 0.0 m in
+    Js_utils.console_log (Printf.sprintf "Score = %f" x);
+    ExprMap.iter (fun k v -> Js_utils.console_log (Printf.sprintf "k : %s, v: %s" (expr_to_string k) (expr_to_string v)))
+      m;
+    x
 
   let sort_solutions_by_score_descending (solutions : expr ExprMap.t list) :
     expr ExprMap.t list =
@@ -766,6 +775,7 @@ end = struct
     |> group_by_exprs |> generate_possible_solutions
     |> filter_by_non_overlapping_exprs_expressions
     |> filter_by_compatible_var_bindings |> sort_solutions_by_score_descending
+    |> List.mapi (fun i x -> Js_utils.console_log (Printf.sprintf "Solution : %d" i); ExprMap.iter (fun k v -> Js_utils.console_log (Printf.sprintf "k : %s, v: %s" (expr_to_string k) (expr_to_string v))) x; x)
 
   let best_solution exprs1 exprs2 : expr ExprMap.t option =
     match compute_solutions_score_descending exprs1 exprs2 with
