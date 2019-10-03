@@ -527,10 +527,7 @@ let similarity (e1 : expr) (e2 : expr) : float =
     List.fold_left2 (fun acc e1 e2 -> acc + aux e1 e2) 0 es1 es2
   in
   let total_matches = aux e1 e2 in
-  let x = float_of_int total_matches /. float_of_int (length e1) in
-  Js_utils.console_log (Printf.sprintf "Similarity : %f, e1 : %s, e2 : %s" x (expr_to_string e1) (expr_to_string e2));
-  Js_utils.console_log (Printf.sprintf "Total matches : %d, e1 length : %d, e2 length %d" total_matches (length e1) (length e2));
-  x
+  float_of_int total_matches /. float_of_int (length e1)
 
 module PatternMatch = struct
   let pattern_matches ~(pattern : expr) (expr : expr) : bool =
@@ -758,11 +755,7 @@ end = struct
         aux ks score_acc m
     in
     let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
-    let x = aux keys 0.0 m in
-    Js_utils.console_log (Printf.sprintf "Score = %f" x);
-    ExprMap.iter (fun k v -> Js_utils.console_log (Printf.sprintf "k : %s, v: %s" (expr_to_string k) (expr_to_string v)))
-      m;
-    x
+    aux keys 0.0 m
 
   let sort_solutions_by_score_descending (solutions : expr ExprMap.t list) :
     expr ExprMap.t list =
@@ -775,7 +768,6 @@ end = struct
     |> group_by_exprs |> generate_possible_solutions
     |> filter_by_non_overlapping_exprs_expressions
     |> filter_by_compatible_var_bindings |> sort_solutions_by_score_descending
-    |> List.mapi (fun i x -> Js_utils.console_log (Printf.sprintf "Solution : %d" i); ExprMap.iter (fun k v -> Js_utils.console_log (Printf.sprintf "k : %s, v: %s" (expr_to_string k) (expr_to_string v))) x; x)
 
   let best_solution exprs1 exprs2 : expr ExprMap.t option =
     match compute_solutions_score_descending exprs1 exprs2 with
@@ -785,9 +777,14 @@ end = struct
       Some hd
 end
 
-let pattern_multi_match_map (exprs1 : expr list) (exprs2 : expr list) :
+let pattern_multi_match (exprs1 : expr list) (exprs2 : expr list) :
   expr ExprMap.t option =
   BruteForce.best_solution exprs1 exprs2
+
+let var_bindings_in_pattern_multi_match (m : expr ExprMap.t) : expr VarMap.t =
+  ExprMap.fold (fun pattern e acc ->
+      PatternMatch.var_bindings_in_pattern_match ~m:acc ~pattern e
+    ) m VarMap.empty
 
 let replace_universal_var_name (original : string) (replacement : string)
     (e : expr) : expr =
