@@ -521,7 +521,7 @@ let similarity (e1 : expr) (e2 : expr) : float =
       1
     | InsertedF n1, InsertedF n2 ->
       if n1 = n2 then 1 else 0
-    | _ ->
+    | _, _ ->
       0
   and aux_list (es1 : expr list) (es2 : expr list) : int =
     List.fold_left2 (fun acc e1 e2 -> acc + aux e1 e2) 0 es1 es2
