@@ -279,8 +279,7 @@ let update_bound (e : expr) (changes : (string * bound) list) : expr =
             | x, Unsure ->
               Variable (x, v)
             | _, _h ->
-              Variable (b, v)
-              (* only update when unsure *) ) )
+              Variable (b, v) (* only update when unsure *) ) )
     | Pred (name, e) ->
       Pred (name, aux e)
     | Function (name, params) ->
@@ -785,9 +784,10 @@ let pattern_multi_match (exprs1 : expr list) (exprs2 : expr list) :
   BruteForce.best_solution exprs1 exprs2
 
 let var_bindings_in_pattern_multi_match (m : expr ExprMap.t) : expr VarMap.t =
-  ExprMap.fold (fun pattern e acc ->
-      PatternMatch.var_bindings_in_pattern_match ~m:acc ~pattern e
-    ) m VarMap.empty
+  ExprMap.fold
+    (fun pattern e acc ->
+       PatternMatch.var_bindings_in_pattern_match ~m:acc ~pattern e)
+    m VarMap.empty
 
 let replace_universal_var_name (original : string) (replacement : string)
     (e : expr) : expr =

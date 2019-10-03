@@ -165,14 +165,14 @@ module Analyzed_graph_base = struct
     let open Printf in
     match node with
     | Data node ->
-      sprintf "%s. %s %s"
-        _id
+      sprintf "%s. %s %s" _id
         (Vampire_analyzed_expr.expr_to_string node.expr)
-        (StringLabels.capitalize_ascii (classification_to_string node.classification))
-      (* sprintf "%s %s"
-       *   (Vampire_analyzed_expr.expr_to_string node.expr)
-       *   (StringLabels.capitalize_ascii
-       *      (classification_to_string node.classification)) *)
+        (StringLabels.capitalize_ascii
+           (classification_to_string node.classification))
+    (* sprintf "%s %s"
+     *   (Vampire_analyzed_expr.expr_to_string node.expr)
+     *   (StringLabels.capitalize_ascii
+     *      (classification_to_string node.classification)) *)
     | Group ->
       sprintf "%s. Group" _id
 
@@ -1258,8 +1258,7 @@ module Explain = struct
               when List.length b_exprs
                    = List.length a_exprs + List.length r_exprs ->
               let match_map =
-                unwrap_opt
-                  (pattern_multi_match (a_exprs @ r_exprs) b_exprs)
+                unwrap_opt (pattern_multi_match (a_exprs @ r_exprs) b_exprs)
               in
               let new_knowledge =
                 ExprMap.bindings match_map
@@ -1350,8 +1349,7 @@ module Explain = struct
               let pair_heads = List.map (fun (k, _) -> k) pairs in
               let bucket_heads = List.map List.hd buckets in
               let match_map =
-                unwrap_opt
-                  (pattern_multi_match bucket_heads pair_heads)
+                unwrap_opt (pattern_multi_match bucket_heads pair_heads)
               in
               List.map
                 (fun l ->
@@ -1916,7 +1914,9 @@ let attack_trace node_map =
               proc_name_padding_on_right expr)
        steps)
 
-let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string) ~(result_id : string) (m : node_graph) : Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
+let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
+    ~(result_id : string) (m : node_graph) :
+  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
   let open Analyzed_graph in
   let open Vampire_analyzed_expr in
   let base_data = find_node base_id m |> unwrap_data in
@@ -1924,23 +1924,35 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string) ~(r
   let result_data = find_node result_id m |> unwrap_data in
   assert (base_data.classification = Knowledge);
   assert (result_data.classification = Knowledge);
-  let base_exprs = base_data.expr |> remove_subsumptions |> split_on_or |> List.map strip_not in
-  let result_exprs = result_data.expr |> remove_subsumptions |> split_on_or |> List.map strip_not in
+  let base_exprs =
+    base_data.expr |> remove_subsumptions |> split_on_or |> List.map strip_not
+  in
+  let result_exprs =
+    result_data.expr |> remove_subsumptions |> split_on_or
+    |> List.map strip_not
+  in
   match agent_data.expr |> remove_subsumptions with
-  | BinaryOp (Eq, e1, e2) -> VarMap.empty
+  | BinaryOp (Eq, e1, e2) ->
+    VarMap.empty
   | agent_expr ->
     let agent_exprs = agent_expr |> split_on_or |> List.map strip_not in
     let pattern_match_map =
-      pattern_multi_match agent_exprs (base_exprs @ result_exprs) |> Option.get
+      pattern_multi_match agent_exprs (base_exprs @ result_exprs)
+      |> Option.get
     in
     let bindings = var_bindings_in_pattern_multi_match pattern_match_map in
     Js_utils.console_log "resolve_vars_in_knowledge_nodes";
     ExprMap.iter
       (fun k v ->
-         Js_utils.console_log (Printf.sprintf "pat : %s, e : %s" (Vampire_analyzed_expr.expr_to_string k) (Vampire_analyzed_expr.expr_to_string v))
-      ) pattern_match_map;
+         Js_utils.console_log
+           (Printf.sprintf "pat : %s, e : %s"
+              (Vampire_analyzed_expr.expr_to_string k)
+              (Vampire_analyzed_expr.expr_to_string v)))
+      pattern_match_map;
     VarMap.iter
       (fun k v ->
-         Js_utils.console_log (Printf.sprintf "var : %s, e : %s" k (Vampire_analyzed_expr.expr_to_string v))
-      ) bindings;
+         Js_utils.console_log
+           (Printf.sprintf "var : %s, e : %s" k
+              (Vampire_analyzed_expr.expr_to_string v)))
+      bindings;
     VarMap.empty

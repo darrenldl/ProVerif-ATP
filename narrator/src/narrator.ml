@@ -49,7 +49,9 @@ let () =
         in
         let text = Vampire.attack_trace node_map in
         attack_trace_box##.innerHTML := Js.string text;
-        Vampire.resolve_vars_in_knowledge_nodes ~base_id:"446" ~agent_id:"880" ~result_id:"32540" node_map |> ignore;
+        Vampire.resolve_vars_in_knowledge_nodes ~base_id:"446" ~agent_id:"880"
+          ~result_id:"32540" node_map
+        |> ignore;
         (* let base_node    = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node "446" node_map) in
          * let base_expr    = base_node.expr |> Vampire_analyzed_expr.remove_subsumptions in
          * Js_utils.console_log (Printf.sprintf "base_expr : %s" (Vampire_analyzed_expr.expr_to_string base_expr));
@@ -69,8 +71,7 @@ let () =
          *      Js_utils.console_log (Printf.sprintf "pat : %s, e : %s" (Vampire_analyzed_expr.expr_to_string k) (Vampire_analyzed_expr.expr_to_string v))
          *   )
          *   (Option.get pat_match_map); *)
-        ()
-    );
+        () );
     vampire_file_reader ()
   in
   let rec pv_file_reader () =
