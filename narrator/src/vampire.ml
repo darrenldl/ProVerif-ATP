@@ -1934,6 +1934,7 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string) ~(r
       pattern_multi_match agent_exprs (base_exprs @ result_exprs) |> Option.get
     in
     let bindings = var_bindings_in_pattern_multi_match pattern_match_map in
+    Js_utils.console_log "resolve_vars_in_knowledge_nodes";
     ExprMap.iter
       (fun k v ->
          Js_utils.console_log (Printf.sprintf "pat : %s, e : %s" (Vampire_analyzed_expr.expr_to_string k) (Vampire_analyzed_expr.expr_to_string v))

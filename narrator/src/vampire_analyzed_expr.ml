@@ -546,16 +546,17 @@ module PatternMatch = struct
       | _, Quantified (Exists, _, _) ->
         raise Unexpected_exists_quantifier
       | (Variable (Free, _) as v1), (Variable (Free, _) as v2) ->
-        if v1 = v2 then true else false
+        v1 = v2
       | Variable (Universal, _), _ ->
         true
+      | Pred (p1, e1), Pred (p2, e2) ->
+        p1 = p2 && aux e1 e2
       | Function (f1, es1), Function (f2, es2) ->
-        if f1 = f2 && List.length es1 = List.length es2 then aux_list es1 es2
-        else false
+        f1 = f2 && List.length es1 = List.length es2 && aux_list es1 es2
       | UnaryOp (op1, e1), UnaryOp (op2, e2) ->
-        if op1 = op2 then aux e1 e2 else false
+        op1 = op2 && aux e1 e2
       | BinaryOp (op1, e1a, e1b), BinaryOp (op2, e2a, e2b) ->
-        if op1 = op2 then aux e1a e2a && aux e1b e2b else false
+        op1 = op2 && aux e1a e2a && aux e1b e2b
       | Quantified (Forall, _, e1), Quantified (Forall, _, e2) ->
         aux e1 e2
       | Quantified (Forall, _, e1), (_ as e2) ->
@@ -612,6 +613,8 @@ module PatternMatch = struct
         VarMap.add name v m
       | Variable (Existential, _), _ ->
         raise Unexpected_existential_var
+      | Pred (_, e1), Pred (_, e2) ->
+        aux e1 e2 m
       | Function (_, es1), Function (_, es2) ->
         aux_list es1 es2 m
       | UnaryOp (_, e1), UnaryOp (_, e2) ->
