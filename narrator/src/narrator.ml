@@ -49,8 +49,11 @@ let () =
         in
         let text = Vampire.attack_trace node_map in
         attack_trace_box##.innerHTML := Js.string text;
-        Vampire.resolve_vars_in_knowledge_nodes ~base_id:"446" ~agent_id:"880"
-          ~result_id:"32540" node_map
+        (* Vampire.resolve_vars_in_knowledge_nodes ~base_id:"446" ~agent_id:"880"
+         *   ~result_id:"32540" node_map
+         * |> ignore; *)
+        Vampire.resolve_vars_in_knowledge_nodes ~base_id:"343" ~agent_id:"299"
+          ~result_id:"344" node_map
         |> ignore;
         (* let base_node    = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node "446" node_map) in
          * let base_expr    = base_node.expr |> Vampire_analyzed_expr.remove_subsumptions in
