@@ -1936,7 +1936,7 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
     VarMap.empty
   | None -> (
       match agent_data.expr |> remove_subsumptions with
-      | BinaryOp (Eq, e1, e2) ->
+      | BinaryOp (Eq, e1, e2) -> (* equation *)
         let agent_exprs = [e1; e2] in
         let pattern_match_map =
           pattern_multi_match agent_exprs (base_exprs @ result_exprs)
@@ -1958,7 +1958,7 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
                   (Vampire_analyzed_expr.expr_to_string v)))
           bindings;
         VarMap.empty
-      | agent_expr ->
+      | agent_expr -> (* resolution *)
         let agent_exprs = agent_expr |> split_on_or |> List.map strip_not in
         let pattern_match_map =
           pattern_multi_match agent_exprs (base_exprs @ result_exprs)
