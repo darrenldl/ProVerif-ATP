@@ -695,7 +695,9 @@ let rename_universal_var_names (l : (string * string) list) (e : expr) : expr
 
 end
 
-module Rewrite : sig end = struct
+module Rewrite : sig
+  val rewrite_w_var_binding_map : expr VarMap.t -> expr -> expr
+end = struct
   let rewrite_w_var_binding_map (m : expr VarMap.t) expr =
     let rec aux m e =
       match e with
@@ -722,22 +724,24 @@ module Rewrite : sig end = struct
     aux m expr
 end
 
-module BruteForceClauseSetPairExprMatches : sig
-  val best_solution : expr list -> expr list -> expr ExprMap.t
-end = struct
-  let all_combinations (exprs1 : expr list) (exprs2 : expr list) :
-    (expr * expr) list =
-    let rec aux (acc : (expr * expr) list) (exprs1 : expr list)
-        (exprs : expr list) : (expr * expr) list =
-      match exprs1 with
+module BruteForceBase = struct
+  let all_combinations (es1 : 'a list) (es2 : 'b list) :
+    ('a * 'b) list =
+    let rec aux (acc : ('a * 'b) list) (es1 : 'a list)
+        (es : 'b list) : ('a * 'b) list =
+      match es1 with
       | [] ->
         acc
       | p :: ps ->
-        let acc = List.map (fun e -> (p, e)) exprs @ acc in
-        aux acc ps exprs
+        let acc = List.map (fun e -> (p, e)) es @ acc in
+        aux acc ps es
     in
-    aux [] exprs1 exprs2
+    aux [] es1 es2
+end
 
+module BruteForceClauseSetPairExprMatches : sig
+  val best_solution : expr list -> expr list -> expr ExprMap.t
+end = struct
   let group_by_exprs (combinations : (expr * expr) list) : expr list ExprMap.t
     =
     let rec aux (m : expr list ExprMap.t) (combinations : (expr * expr) list) :
@@ -839,7 +843,7 @@ end = struct
       solutions
 
   let compute_solutions_score_descending exprs1 exprs2 =
-    all_combinations exprs1 exprs2
+    BruteForceBase.all_combinations exprs1 exprs2
     |> group_by_exprs |> generate_possible_solutions
     |> filter_by_non_overlapping_exprs_expressions
     |> filter_by_compatible_var_bindings |> sort_solutions_by_score_descending
@@ -869,12 +873,41 @@ end = struct
         List.for_all (fun k -> VarMap.mem k m) universal_vars
       )
 
-  let compute_solutions_score_descending eq left right =
+  let gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr =
+    let var_bindings_l_pat_on_l_e = possible_var_bindings l_pattern l_expr in
+    let var_bindings_r_pat_on_r_e = possible_var_bindings r_pattern r_expr in
+    BruteForceBase.all_combinations
+      var_bindings_l_pat_on_l_e
+      var_bindings_r_pat_on_r_e
+    |> List.filter (fun (m1, m2) ->
+        VarMap.equal (fun a b -> compare a b = 0) m1 m2
+      )
+    |> List.map (fun (m, _) -> m)
+
+  let score var_map expr1 expr2 =
+    let expr1 = Rewrite.rewrite_w_var_binding_map var_map expr1 in
+    let expr2 = Rewrite.rewrite_w_var_binding_map var_map expr2 in
+    similarity expr1 expr2
+
+  let compute_solutions_score_descending eq l_expr r_expr =
     match eq with
     | BinaryOp (Eq, l_pattern, r_pattern) ->
-      let var_bindings = possible_var_bindings l_pattern left in
-      []
+      let var_bindings_ll_rr =
+        gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr
+        |> List.map (fun m -> (score m l_expr r_expr, m))
+        |> List.sort_uniq (fun (score1, _) (score2, _) -> compare score2 score1)
+      in
+      let var_bindings_lr_rl =
+        gen_valid_combinations ~l_pattern ~r_pattern ~l_expr:r_expr ~r_expr:l_expr
+        |> List.map (fun m -> (score m l_expr r_expr, m))
+        |> List.sort_uniq (fun (score1, _) (score2, _) -> compare score2 score1)
+      in
+      List.merge (fun (score1, _) (score2, _) -> compare score2 score1) var_bindings_ll_rr var_bindings_lr_rl
+      |> List.map (fun (_, m) -> m)
     | _ -> failwith "Unexpected pattern"
+
+  let best_solution eq l_expr r_expr =
+    List.hd (compute_solutions_score_descending eq l_expr r_expr)
 end
 
 let universal_var_names (e : expr) : string list =
