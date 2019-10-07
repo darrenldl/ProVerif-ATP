@@ -499,7 +499,7 @@ let similarity (e1 : expr) (e2 : expr) : float =
     match (e1, e2) with
     | Variable (Free, n1), Variable (Free, n2) ->
       if n1 = n2 then 1 else 0
-    | Variable (Universal, _), (_ as v) ->
+    | Variable (Universal, _), _ ->
       1
     | (_ as v), Variable (Universal, _) ->
       length v
@@ -650,7 +650,77 @@ module PatternMatch = struct
       true keys
 end
 
-module Rewrite : sig end = struct end
+module Rename : sig
+  val rename_universal_var_name : string -> string  -> expr -> expr
+  val rename_universal_var_names : (string * string) list -> expr -> expr
+end = struct
+let rename_universal_var_name (original : string) (replacement : string)
+    (e : expr) : expr =
+  let rec aux (original : string) (replacement : string) (e : expr) : expr =
+    match e with
+    | Variable (Universal, name) ->
+      Variable (Universal, if name = original then replacement else name)
+    | Variable _ as e ->
+      e
+    | Pred (name, e) ->
+      Pred (name, aux original replacement e)
+    | Function (name, es) ->
+      Function (name, aux_list original replacement es)
+    | UnaryOp (op, e) ->
+      UnaryOp (op, aux original replacement e)
+    | BinaryOp (op, e1, e2) ->
+      BinaryOp (op, aux original replacement e1, aux original replacement e2)
+    | Quantified (q, ids, e) ->
+      Quantified (q, ids, aux original replacement e)
+    | False ->
+      False
+    | InsertedF _ as e ->
+      e
+  and aux_list (original : string) (replacement : string) (es : expr list) :
+    expr list =
+    List.map (aux original replacement) es
+  in
+  aux original replacement e
+
+let rename_universal_var_names (l : (string * string) list) (e : expr) : expr
+  =
+  let rec aux (l : (string * string) list) (e : expr) : expr =
+    match l with
+    | [] ->
+      e
+    | (name, replacement) :: l ->
+      aux l (rename_universal_var_name name replacement e)
+  in
+  aux l e
+
+end
+
+module Rewrite : sig end = struct
+  let rewrite_w_var_binding_map (m : expr VarMap.t) expr =
+    let rec aux m e =
+      match e with
+      | Variable (_, name) -> (
+          match VarMap.find_opt name m with
+          | Some e -> e
+          | None -> e
+        )
+      | Pred (name, e) ->
+        Pred (name, aux m e)
+      | Function (name, args) ->
+        Function (name, aux_list m args)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux m e)
+      | BinaryOp (op, l, r) ->
+        BinaryOp (op, aux m l, aux m r)
+      | Quantified (q, vars, e) ->
+        Quantified (q, vars, aux m e)
+      | False -> e
+      | InsertedF _ -> e
+    and aux_list m es =
+      List.map (aux m) es
+    in
+    aux m expr
+end
 
 module BruteForceClauseSetPairExprMatches : sig
   val best_solution : expr list -> expr list -> expr ExprMap.t
@@ -789,44 +859,23 @@ end = struct
       m VarMap.empty
 end
 
-let replace_universal_var_name (original : string) (replacement : string)
-    (e : expr) : expr =
-  let rec aux (original : string) (replacement : string) (e : expr) : expr =
-    match e with
-    | Variable (Universal, name) ->
-      Variable (Universal, if name = original then replacement else name)
-    | Variable _ as e ->
-      e
-    | Pred (name, e) ->
-      Pred (name, aux original replacement e)
-    | Function (name, es) ->
-      Function (name, aux_list original replacement es)
-    | UnaryOp (op, e) ->
-      UnaryOp (op, aux original replacement e)
-    | BinaryOp (op, e1, e2) ->
-      BinaryOp (op, aux original replacement e1, aux original replacement e2)
-    | Quantified (q, ids, e) ->
-      Quantified (q, ids, aux original replacement e)
-    | False ->
-      False
-    | InsertedF _ as e ->
-      e
-  and aux_list (original : string) (replacement : string) (es : expr list) :
-    expr list =
-    List.map (aux original replacement) es
-  in
-  aux original replacement e
+module BruteForceEquationVarBindings : sig
+end = struct
+  let possible_var_bindings pattern expr =
+    let universal_vars = get_vars ~bound:Universal pattern in
+    PatternMatch.pattern_search ~pattern expr
+    |> List.map (fun e -> PatternMatch.var_bindings_in_pattern_match ~pattern e)
+    |> List.filter (fun m ->
+        List.for_all (fun k -> VarMap.mem k m) universal_vars
+      )
 
-let replace_universal_var_names (l : (string * string) list) (e : expr) : expr
-  =
-  let rec aux (l : (string * string) list) (e : expr) : expr =
-    match l with
-    | [] ->
-      e
-    | (name, replacement) :: l ->
-      aux l (replace_universal_var_name name replacement e)
-  in
-  aux l e
+  let compute_solutions_score_descending eq left right =
+    match eq with
+    | BinaryOp (Eq, l_pattern, r_pattern) ->
+      let var_bindings = possible_var_bindings l_pattern left in
+      []
+    | _ -> failwith "Unexpected pattern"
+end
 
 let universal_var_names (e : expr) : string list =
   let rec aux (e : expr) : string list =
@@ -875,7 +924,7 @@ let uniquify_universal_var_names_clause_sets (prefix : string)
       in
       let name_map = List.map (fun n -> (n, gen_id ())) names in
       let res =
-        List.map (fun e -> replace_universal_var_names name_map e) es
+        List.map (fun e -> Rename.rename_universal_var_names name_map e) es
       in
       aux gen_id (res :: acc) ess
   in

@@ -972,7 +972,7 @@ module RewriteKnowledgeNodes = struct
                   var_names
               in
               let new_expr =
-                Vampire_analyzed_expr.replace_universal_var_names
+                Vampire_analyzed_expr.Rename.rename_universal_var_names
                   replace_acc_list data.expr
               in
               Js_utils.console_log
@@ -1085,9 +1085,9 @@ module Explain = struct
         (Vampire_analyzed_expr.expr * Vampire_analyzed_expr.expr) list =
         List.map
           (fun (k, v) ->
-             ( Vampire_analyzed_expr.replace_universal_var_name original
+             ( Vampire_analyzed_expr.Rename.rename_universal_var_name original
                  replacement k
-             , Vampire_analyzed_expr.replace_universal_var_name original
+             , Vampire_analyzed_expr.Rename.rename_universal_var_name original
                  replacement v ))
           pairs
       in
@@ -1105,13 +1105,13 @@ module Explain = struct
                  match info with
                  | Expr e ->
                    Expr
-                     (Vampire_analyzed_expr.replace_universal_var_name
+                     (Vampire_analyzed_expr.Rename.rename_universal_var_name
                         original replacement e)
                  | _ ->
                    info)
               infos
           , List.map
-              (Vampire_analyzed_expr.replace_universal_var_name original
+              (Vampire_analyzed_expr.Rename.rename_universal_var_name original
                  replacement)
               es )
       | Gain_knowledge (infos, pairs1, pairs2) ->
