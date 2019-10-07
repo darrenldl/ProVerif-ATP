@@ -651,48 +651,49 @@ module PatternMatch = struct
 end
 
 module Rename : sig
-  val rename_universal_var_name : string -> string  -> expr -> expr
+  val rename_universal_var_name : string -> string -> expr -> expr
+
   val rename_universal_var_names : (string * string) list -> expr -> expr
 end = struct
-let rename_universal_var_name (original : string) (replacement : string)
-    (e : expr) : expr =
-  let rec aux (original : string) (replacement : string) (e : expr) : expr =
-    match e with
-    | Variable (Universal, name) ->
-      Variable (Universal, if name = original then replacement else name)
-    | Variable _ as e ->
-      e
-    | Pred (name, e) ->
-      Pred (name, aux original replacement e)
-    | Function (name, es) ->
-      Function (name, aux_list original replacement es)
-    | UnaryOp (op, e) ->
-      UnaryOp (op, aux original replacement e)
-    | BinaryOp (op, e1, e2) ->
-      BinaryOp (op, aux original replacement e1, aux original replacement e2)
-    | Quantified (q, ids, e) ->
-      Quantified (q, ids, aux original replacement e)
-    | False ->
-      False
-    | InsertedF _ as e ->
-      e
-  and aux_list (original : string) (replacement : string) (es : expr list) :
-    expr list =
-    List.map (aux original replacement) es
-  in
-  aux original replacement e
+  let rename_universal_var_name (original : string) (replacement : string)
+      (e : expr) : expr =
+    let rec aux (original : string) (replacement : string) (e : expr) : expr =
+      match e with
+      | Variable (Universal, name) ->
+        Variable (Universal, if name = original then replacement else name)
+      | Variable _ as e ->
+        e
+      | Pred (name, e) ->
+        Pred (name, aux original replacement e)
+      | Function (name, es) ->
+        Function (name, aux_list original replacement es)
+      | UnaryOp (op, e) ->
+        UnaryOp (op, aux original replacement e)
+      | BinaryOp (op, e1, e2) ->
+        BinaryOp
+          (op, aux original replacement e1, aux original replacement e2)
+      | Quantified (q, ids, e) ->
+        Quantified (q, ids, aux original replacement e)
+      | False ->
+        False
+      | InsertedF _ as e ->
+        e
+    and aux_list (original : string) (replacement : string) (es : expr list) :
+      expr list =
+      List.map (aux original replacement) es
+    in
+    aux original replacement e
 
-let rename_universal_var_names (l : (string * string) list) (e : expr) : expr
-  =
-  let rec aux (l : (string * string) list) (e : expr) : expr =
-    match l with
-    | [] ->
-      e
-    | (name, replacement) :: l ->
-      aux l (rename_universal_var_name name replacement e)
-  in
-  aux l e
-
+  let rename_universal_var_names (l : (string * string) list) (e : expr) : expr
+    =
+    let rec aux (l : (string * string) list) (e : expr) : expr =
+      match l with
+      | [] ->
+        e
+      | (name, replacement) :: l ->
+        aux l (rename_universal_var_name name replacement e)
+    in
+    aux l e
 end
 
 module Rewrite : sig
@@ -702,10 +703,7 @@ end = struct
     let rec aux m e =
       match e with
       | Variable (_, name) -> (
-          match VarMap.find_opt name m with
-          | Some e -> e
-          | None -> e
-        )
+          match VarMap.find_opt name m with Some e -> e | None -> e )
       | Pred (name, e) ->
         Pred (name, aux m e)
       | Function (name, args) ->
@@ -716,19 +714,18 @@ end = struct
         BinaryOp (op, aux m l, aux m r)
       | Quantified (q, vars, e) ->
         Quantified (q, vars, aux m e)
-      | False -> e
-      | InsertedF _ -> e
-    and aux_list m es =
-      List.map (aux m) es
-    in
+      | False ->
+        e
+      | InsertedF _ ->
+        e
+    and aux_list m es = List.map (aux m) es in
     aux m expr
 end
 
 module BruteForceBase = struct
-  let all_combinations (es1 : 'a list) (es2 : 'b list) :
-    ('a * 'b) list =
-    let rec aux (acc : ('a * 'b) list) (es1 : 'a list)
-        (es : 'b list) : ('a * 'b) list =
+  let all_combinations (es1 : 'a list) (es2 : 'b list) : ('a * 'b) list =
+    let rec aux (acc : ('a * 'b) list) (es1 : 'a list) (es : 'b list) :
+      ('a * 'b) list =
       match es1 with
       | [] ->
         acc
@@ -869,20 +866,18 @@ end = struct
   let possible_var_bindings pattern expr =
     let universal_vars = get_vars ~bound:Universal pattern in
     PatternMatch.pattern_search ~pattern expr
-    |> List.map (fun e -> PatternMatch.var_bindings_in_pattern_match ~pattern e)
+    |> List.map (fun e ->
+        PatternMatch.var_bindings_in_pattern_match ~pattern e)
     |> List.filter (fun m ->
-        List.for_all (fun k -> VarMap.mem k m) universal_vars
-      )
+        List.for_all (fun k -> VarMap.mem k m) universal_vars)
 
   let gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr =
     let var_bindings_l_pat_on_l_e = possible_var_bindings l_pattern l_expr in
     let var_bindings_r_pat_on_r_e = possible_var_bindings r_pattern r_expr in
-    BruteForceBase.all_combinations
-      var_bindings_l_pat_on_l_e
+    BruteForceBase.all_combinations var_bindings_l_pat_on_l_e
       var_bindings_r_pat_on_r_e
     |> List.filter (fun (m1, m2) ->
-        VarMap.equal (fun a b -> compare a b = 0) m1 m2
-      )
+        VarMap.equal (fun a b -> compare a b = 0) m1 m2)
     |> List.map (fun (m, _) -> m)
 
   let score var_map expr1 expr2 =
@@ -896,16 +891,22 @@ end = struct
       let var_bindings_ll_rr =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr
         |> List.map (fun m -> (score m l_expr r_expr, m))
-        |> List.sort_uniq (fun (score1, _) (score2, _) -> compare score2 score1)
+        |> List.sort_uniq (fun (score1, _) (score2, _) ->
+            compare score2 score1)
       in
       let var_bindings_lr_rl =
-        gen_valid_combinations ~l_pattern ~r_pattern ~l_expr:r_expr ~r_expr:l_expr
+        gen_valid_combinations ~l_pattern ~r_pattern ~l_expr:r_expr
+          ~r_expr:l_expr
         |> List.map (fun m -> (score m l_expr r_expr, m))
-        |> List.sort_uniq (fun (score1, _) (score2, _) -> compare score2 score1)
+        |> List.sort_uniq (fun (score1, _) (score2, _) ->
+            compare score2 score1)
       in
-      List.merge (fun (score1, _) (score2, _) -> compare score2 score1) var_bindings_ll_rr var_bindings_lr_rl
+      List.merge
+        (fun (score1, _) (score2, _) -> compare score2 score1)
+        var_bindings_ll_rr var_bindings_lr_rl
       |> List.map (fun (_, m) -> m)
-    | _ -> failwith "Unexpected pattern"
+    | _ ->
+      failwith "Unexpected pattern"
 
   let best_solution ~eq l_expr r_expr =
     List.hd (compute_solutions_score_descending eq l_expr r_expr)

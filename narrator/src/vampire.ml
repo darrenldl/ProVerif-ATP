@@ -1111,8 +1111,8 @@ module Explain = struct
                    info)
               infos
           , List.map
-              (Vampire_analyzed_expr.Rename.rename_universal_var_name original
-                 replacement)
+              (Vampire_analyzed_expr.Rename.rename_universal_var_name
+                 original replacement)
               es )
       | Gain_knowledge (infos, pairs1, pairs2) ->
         Gain_knowledge
@@ -1945,8 +1945,8 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
         (* equation *)
         let agent_exprs = [e1; e2] in
         let bindings =
-          BruteForceEquationVarBindings.best_solution ~eq
-            base_data.expr result_data.expr
+          BruteForceEquationVarBindings.best_solution ~eq base_data.expr
+            result_data.expr
         in
         Js_utils.console_log "resolve_vars_in_knowledge_nodes";
         VarMap.iter
