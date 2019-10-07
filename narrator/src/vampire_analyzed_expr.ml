@@ -279,7 +279,8 @@ let update_bound (e : expr) (changes : (string * bound) list) : expr =
             | x, Unsure ->
               Variable (x, v)
             | _, _h ->
-              Variable (b, v) (* only update when unsure *) ) )
+              Variable (b, v)
+              (* only update when unsure *) ) )
     | Pred (name, e) ->
       Pred (name, aux e)
     | Function (name, params) ->
@@ -649,9 +650,7 @@ module PatternMatch = struct
       true keys
 end
 
-module Rewrite : sig
-end = struct
-end
+module Rewrite : sig end = struct end
 
 module BruteForceClauseSetPairExprMatches : sig
   val best_solution : expr list -> expr list -> expr ExprMap.t

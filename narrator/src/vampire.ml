@@ -1249,7 +1249,10 @@ module Explain = struct
             | b_exprs, [a_expr], r_exprs
               when is_rewrite a_expr
                 && List.length b_exprs = List.length r_exprs ->
-              let match_map = BruteForceClauseSetPairExprMatches.best_solution r_exprs b_exprs in
+              let match_map =
+                BruteForceClauseSetPairExprMatches.best_solution r_exprs
+                  b_exprs
+              in
               Js_utils.console_log
                 (Printf.sprintf "match_map size : %d"
                    (List.length (ExprMap.bindings match_map)));
@@ -1258,7 +1261,8 @@ module Explain = struct
               when List.length b_exprs
                    = List.length a_exprs + List.length r_exprs ->
               let match_map =
-                BruteForceClauseSetPairExprMatches.best_solution (a_exprs @ r_exprs) b_exprs
+                BruteForceClauseSetPairExprMatches.best_solution
+                  (a_exprs @ r_exprs) b_exprs
               in
               let new_knowledge =
                 ExprMap.bindings match_map
@@ -1349,7 +1353,8 @@ module Explain = struct
               let pair_heads = List.map (fun (k, _) -> k) pairs in
               let bucket_heads = List.map List.hd buckets in
               let match_map =
-                BruteForceClauseSetPairExprMatches.best_solution bucket_heads pair_heads
+                BruteForceClauseSetPairExprMatches.best_solution
+                  bucket_heads pair_heads
               in
               List.map
                 (fun l ->
@@ -1936,9 +1941,13 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
     VarMap.empty
   | None -> (
       match agent_data.expr |> remove_subsumptions with
-      | BinaryOp (Eq, e1, e2) -> (* equation *)
+      | BinaryOp (Eq, e1, e2) ->
+        (* equation *)
         let agent_exprs = [e1; e2] in
-        let bindings = BruteForceClauseSetPairVarBindings.best_solution agent_exprs (base_exprs @ result_exprs) in
+        let bindings =
+          BruteForceClauseSetPairVarBindings.best_solution agent_exprs
+            (base_exprs @ result_exprs)
+        in
         Js_utils.console_log "resolve_vars_in_knowledge_nodes";
         VarMap.iter
           (fun k v ->
@@ -1947,9 +1956,13 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
                   (Vampire_analyzed_expr.expr_to_string v)))
           bindings;
         VarMap.empty
-      | agent_expr -> (* resolution *)
+      | agent_expr ->
+        (* resolution *)
         let agent_exprs = agent_expr |> split_on_or |> List.map strip_not in
-        let bindings = BruteForceClauseSetPairVarBindings.best_solution agent_exprs (base_exprs @ result_exprs) in
+        let bindings =
+          BruteForceClauseSetPairVarBindings.best_solution agent_exprs
+            (base_exprs @ result_exprs)
+        in
         Js_utils.console_log "resolve_vars_in_knowledge_nodes";
         VarMap.iter
           (fun k v ->
