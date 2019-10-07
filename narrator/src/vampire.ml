@@ -1941,12 +1941,12 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
     VarMap.empty
   | None -> (
       match agent_data.expr |> remove_subsumptions with
-      | BinaryOp (Eq, e1, e2) ->
+      | BinaryOp (Eq, e1, e2) as eq ->
         (* equation *)
         let agent_exprs = [e1; e2] in
         let bindings =
-          BruteForceClauseSetPairVarBindings.best_solution agent_exprs
-            (base_exprs @ result_exprs)
+          BruteForceEquationVarBindings.best_solution ~eq
+            base_data.expr result_data.expr
         in
         Js_utils.console_log "resolve_vars_in_knowledge_nodes";
         VarMap.iter

@@ -864,6 +864,7 @@ end = struct
 end
 
 module BruteForceEquationVarBindings : sig
+  val best_solution : eq:expr -> expr -> expr -> expr VarMap.t
 end = struct
   let possible_var_bindings pattern expr =
     let universal_vars = get_vars ~bound:Universal pattern in
@@ -906,7 +907,7 @@ end = struct
       |> List.map (fun (_, m) -> m)
     | _ -> failwith "Unexpected pattern"
 
-  let best_solution eq l_expr r_expr =
+  let best_solution ~eq l_expr r_expr =
     List.hd (compute_solutions_score_descending eq l_expr r_expr)
 end
 
