@@ -649,8 +649,12 @@ module PatternMatch = struct
       true keys
 end
 
-module BruteForce : sig
-  val best_solution : expr list -> expr list -> expr ExprMap.t option
+module Rewrite : sig
+end = struct
+end
+
+module BruteForceClauseSetPairExprMatches : sig
+  val best_solution : expr list -> expr list -> expr ExprMap.t
 end = struct
   let all_combinations (exprs1 : expr list) (exprs2 : expr list) :
     (expr * expr) list =
@@ -771,23 +775,20 @@ end = struct
     |> filter_by_non_overlapping_exprs_expressions
     |> filter_by_compatible_var_bindings |> sort_solutions_by_score_descending
 
-  let best_solution exprs1 exprs2 : expr ExprMap.t option =
-    match compute_solutions_score_descending exprs1 exprs2 with
-    | [] ->
-      None
-    | hd :: _ ->
-      Some hd
+  let best_solution exprs1 exprs2 : expr ExprMap.t =
+    List.hd (compute_solutions_score_descending exprs1 exprs2)
 end
 
-let pattern_multi_match (exprs1 : expr list) (exprs2 : expr list) :
-  expr ExprMap.t option =
-  BruteForce.best_solution exprs1 exprs2
-
-let var_bindings_in_pattern_multi_match (m : expr ExprMap.t) : expr VarMap.t =
-  ExprMap.fold
-    (fun pattern e acc ->
-       PatternMatch.var_bindings_in_pattern_match ~m:acc ~pattern e)
-    m VarMap.empty
+module BruteForceClauseSetPairVarBindings : sig
+  val best_solution : expr list -> expr list -> expr VarMap.t
+end = struct
+  let best_solution exprs1 exprs2 =
+    let m = BruteForceClauseSetPairExprMatches.best_solution exprs1 exprs2 in
+    ExprMap.fold
+      (fun pattern e acc ->
+         PatternMatch.var_bindings_in_pattern_match ~m:acc ~pattern e)
+      m VarMap.empty
+end
 
 let replace_universal_var_name (original : string) (replacement : string)
     (e : expr) : expr =
