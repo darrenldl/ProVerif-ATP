@@ -49,9 +49,9 @@ let () =
         in
         let text = Vampire.attack_trace node_map in
         attack_trace_box##.innerHTML := Js.string text;
-        (* Vampire.resolve_vars_in_knowledge_nodes ~base_id:"446" ~agent_id:"880"
-         *   ~result_id:"32540" node_map
-         * |> ignore; *)
+        Vampire.resolve_vars_in_knowledge_nodes ~base_id:"446" ~agent_id:"880"
+          ~result_id:"32540" node_map
+        |> ignore;
         Vampire.resolve_vars_in_knowledge_nodes ~base_id:"343" ~agent_id:"299"
           ~result_id:"344" node_map
         |> ignore;
