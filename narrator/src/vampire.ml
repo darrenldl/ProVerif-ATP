@@ -1936,19 +1936,47 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
     result_data.expr |> remove_subsumptions |> split_on_or
     |> List.map strip_not
   in
-  match agent_data.extra_info with
-  | Some extra_info ->
+  match result_data.extra_info with
+  | Some info ->
+    Js_utils.console_log "resolve_vars_in_knowledge_nodes: using provided unifier";
+    let l_node = find_node info.l_node m in
+    let r_node = find_node info.r_node m in
+    let l_data =
+      match l_node with
+      | Data data ->
+        data
+      | Group ->
+        failwith "Group not exepcted"
+    in
+    let r_data =
+      match r_node with
+      | Data data ->
+        data
+      | Group ->
+        failwith "Group not exepcted"
+    in
+    let l_ast_indices = info.l_ast_indices in
+    let r_ast_indices = info.r_ast_indices in
+    let unifier_e1 =
+      Vampire_analyzed_expr.get_sub_expr_by_indices l_data.expr
+        l_ast_indices
+    in
+    let unifier_e2 =
+      Vampire_analyzed_expr.get_sub_expr_by_indices r_data.expr
+        r_ast_indices
+    in
+    Js_utils.console_log (Printf.sprintf "left  : %s" (Vampire_analyzed_expr.expr_to_string unifier_e1));
+    Js_utils.console_log (Printf.sprintf "right : %s" (Vampire_analyzed_expr.expr_to_string unifier_e2));
     VarMap.empty
   | None -> (
       match agent_data.expr |> remove_subsumptions with
       | BinaryOp (Eq, e1, e2) as eq ->
         (* equation *)
-        let agent_exprs = [e1; e2] in
+        Js_utils.console_log "resolve_vars_in_knowledge_nodes: bruteforcing equation";
         let bindings =
           BruteForceEquationVarBindings.best_solution ~eq base_data.expr
             result_data.expr
         in
-        Js_utils.console_log "resolve_vars_in_knowledge_nodes";
         VarMap.iter
           (fun k v ->
              Js_utils.console_log
@@ -1959,11 +1987,11 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
       | agent_expr ->
         (* resolution *)
         let agent_exprs = agent_expr |> split_on_or |> List.map strip_not in
+        Js_utils.console_log "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
         let bindings =
           BruteForceClauseSetPairVarBindings.best_solution agent_exprs
             (base_exprs @ result_exprs)
         in
-        Js_utils.console_log "resolve_vars_in_knowledge_nodes";
         VarMap.iter
           (fun k v ->
              Js_utils.console_log

@@ -1038,8 +1038,8 @@ let size_internal (_ : id) (_ : node) : int = 40
 let node_shape_internal (_ : id) (_ : node) : Cytoscape.node_shape = Circle
 
 let rec get_sub_expr_by_indices expr indicies =
-  Js_utils.console_log (expr_to_string expr);
-  Js_utils.console_log (indicies |> List.map string_of_int |> String.concat ",");
+  (* Js_utils.console_log (expr_to_string expr);
+   * Js_utils.console_log (indicies |> List.map string_of_int |> String.concat ","); *)
   match indicies with
   | [] ->
     expr
