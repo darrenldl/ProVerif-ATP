@@ -1997,4 +1997,10 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
                (Printf.sprintf "var : %s, e : %s" k
                   (Vampire_analyzed_expr.expr_to_string v)))
           bindings;
+        List.iter
+          (fun s ->
+             let same = s |> VarSet.to_seq |> List.of_seq in
+             Js_utils.console_log
+               (Printf.sprintf "Aliases : %s" (String.concat ", " same));
+          ) aliases;
         VarMap.empty )

@@ -668,7 +668,7 @@ module PatternMatch = struct
       expr VarMap.t * VarSet.t list =
       List.fold_left2 (fun (m, aliases) e1 e2 -> aux e1 e2 m aliases) (m, aliases) es1 es2
     in
-    if pattern_matches ~pattern expr then aux pattern expr m [] else m, []
+    if pattern_matches ~pattern expr then aux pattern expr m aliases else m, []
 
   (* let var_bindings_compatible ~(smaller : expr VarMap.t)
    *     ~(larger : expr VarMap.t) : bool =
@@ -936,7 +936,7 @@ end = struct
       let var_bindings_ll_rr =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr
         |> List.map (fun m -> (score m l_expr r_expr, m))
-        |> List.sort_uniq (fun (score1, _) (score2, _) ->
+        |> List.sort (fun (score1, _) (score2, _) ->
             compare score2 score1)
       in
       let var_bindings_lr_rl =
