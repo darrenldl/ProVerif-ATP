@@ -637,11 +637,11 @@ module PatternMatch = struct
       match (pattern, expr) with
       | Variable (Free, _), _ ->
         m, aliases
-      | Variable (_, name1), Variable (_, name2) -> (
+      | Variable (_, name1), (Variable (_, name2) as v) -> (
           let aliases =
             record_alias name1 name2 aliases
           in
-          m, aliases
+          VarMap.add name1 v m, aliases
         )
       | Variable (Universal, name), (_ as v) -> (
           VarMap.add name v m, aliases
