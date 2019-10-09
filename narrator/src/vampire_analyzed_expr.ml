@@ -471,6 +471,15 @@ let split_on_or (e : expr) : expr list =
   in
   aux e
 
+let concat_with_or (l : expr list) : expr =
+  let rec aux (l : expr list) : expr =
+    match l with
+    | [] -> failwith "Unexpected length"
+    | [e] -> e
+    | e :: es -> BinaryOp (Or, e, aux es)
+  in
+  aux l
+
 let split_on_impl (e : expr) : (expr * expr) option =
   match e with BinaryOp (Imply, e1, e2) -> Some (e1, e2) | _ -> None
 
@@ -729,6 +738,10 @@ end
 
 module Rewrite : sig
   val rewrite_w_var_binding_map : expr VarMap.t -> expr -> expr
+
+  val rewrite_w_expr_pair : rewrite_from:expr -> rewrite_to:expr -> expr -> expr
+
+  val rewrite_w_expr_assoc_list : (expr * expr) list -> expr -> expr
 end = struct
   let rewrite_w_var_binding_map (m : expr VarMap.t) expr =
     let rec aux m e =
@@ -751,6 +764,40 @@ end = struct
         e
     and aux_list m es = List.map (aux m) es in
     aux m expr
+
+  let rewrite_w_expr_pair ~rewrite_from ~rewrite_to expr : expr =
+    let rec aux rewrite_from rewrite_to expr =
+      if PatternMatch.pattern_matches ~pattern:rewrite_from expr then
+        rewrite_to
+      else
+        match expr with
+        | Variable _ as e ->
+          e
+        | Pred (name, e) ->
+          Pred (name, aux rewrite_from rewrite_to e)
+        | Function (name, es) ->
+          Function (name, aux_list rewrite_from rewrite_to es)
+        | UnaryOp (op, e) ->
+          UnaryOp (op, aux rewrite_from rewrite_to e)
+        | BinaryOp (op, e1, e2) ->
+          BinaryOp (op, aux rewrite_from rewrite_to e1, aux rewrite_from rewrite_to e2)
+        | Quantified (q, ids, e) ->
+          Quantified (q, ids, aux rewrite_from rewrite_to e)
+        | False as e ->
+          e
+        | InsertedF _ as e ->
+          e
+    and aux_list rewrite_from rewrite_to exprs =
+      List.map (aux rewrite_from rewrite_to) exprs
+    in
+    aux rewrite_from rewrite_to expr
+
+  let rewrite_w_expr_assoc_list (l : (expr * expr) list) expr : expr =
+    List.fold_left (fun expr (rewrite_from, rewrite_to)->
+        rewrite_w_expr_pair ~rewrite_from ~rewrite_to expr
+      )
+      expr
+      l
 end
 
 module BruteForceBase = struct
@@ -921,24 +968,47 @@ end = struct
      *     VarMap.equal (fun a b -> compare a b = 0) m1 m2) *)
     |> List.map (fun (m, _) -> m)
 
-  let score var_map expr1 expr2 =
-    let expr1 = Rewrite.rewrite_w_var_binding_map var_map expr1 in
-    let expr2 = Rewrite.rewrite_w_var_binding_map var_map expr2 in
-    similarity expr1 expr2
+  let score var_map ~l_pattern ~r_pattern ~l_expr ~r_expr =
+    let l_pattern_instance = Rewrite.rewrite_w_var_binding_map var_map l_pattern in
+    let r_pattern_instance = Rewrite.rewrite_w_var_binding_map var_map r_pattern in
+    let l_expr_instance_lr = Rewrite.rewrite_w_expr_pair ~rewrite_from:l_pattern_instance ~rewrite_to:r_pattern_instance l_expr in
+    let l_expr_instance_rl = Rewrite.rewrite_w_expr_pair ~rewrite_from:r_pattern_instance ~rewrite_to:l_pattern_instance l_expr in
+    Js_utils.console_log (Printf.sprintf "similarity score of\n  %s\n--\n  %s\nis\n  %f" (expr_to_string l_expr_instance_lr) (expr_to_string r_expr) (similarity l_expr_instance_lr r_expr));
+    Js_utils.console_log (Printf.sprintf "similarity score of\n  %s\n--\n  %s\nis\n  %f" (expr_to_string l_expr_instance_rl) (expr_to_string r_expr) (similarity l_expr_instance_rl r_expr));
+    max (similarity l_expr_instance_lr r_expr) (similarity l_expr_instance_rl r_expr)
 
   let compute_solutions_score_descending eq l_expr r_expr =
     match eq with
     | BinaryOp (Eq, l_pattern, r_pattern) ->
+      (* rotate around the ORs a bit possibly *)
+      let l_expr, r_expr =
+        let l_exprs = l_expr |> split_on_or in
+        let r_exprs = r_expr |> split_on_or in
+        let best_solution =
+          BruteForceClauseSetPairExprMatches.best_solution l_exprs r_exprs
+          |> ExprMap.to_seq
+        in
+        let l_exprs, r_exprs =
+          Seq.fold_left (fun (ls, rs) (l, r) ->
+              (l :: ls, r :: rs)
+            ) ([], []) best_solution
+        in
+        concat_with_or l_exprs, concat_with_or r_exprs
+      in
+      (* Js_utils.console_log (Printf.sprintf "eq bruteforce left  : %s" (expr_to_string l_expr)); *)
+      (* Js_utils.console_log (Printf.sprintf "eq bruteforce right : %s" (expr_to_string r_expr)); *)
+      Js_utils.console_log "Scoring ll_rr";
       let var_bindings_ll_rr =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr
-        |> List.map (fun (m, aliases) -> (score m l_expr r_expr, m, aliases))
+        |> List.map (fun (m, aliases) -> (score m ~l_pattern ~r_pattern ~l_expr ~r_expr, m, aliases))
         |> List.sort (fun (score1, _, _) (score2, _, _) ->
             compare score2 score1)
       in
+      Js_utils.console_log "Scoring lr_rl";
       let var_bindings_lr_rl =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr:r_expr
           ~r_expr:l_expr
-        |> List.map (fun (m, aliases) -> (score m l_expr r_expr, m, aliases))
+        |> List.map (fun (m, aliases) -> (score m ~l_pattern ~r_pattern ~l_expr:r_expr ~r_expr:l_expr, m, aliases))
         |> List.sort (fun (score1, _, _) (score2, _, _) ->
             compare score2 score1)
       in
