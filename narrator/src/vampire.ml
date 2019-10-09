@@ -2130,9 +2130,23 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
         in
         Js_utils.console_log
           "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
-        let bindings, aliases =
+        let bindings1, aliases1 =
           BruteForceClauseSetPairVarBindings.best_solution agent_exprs
             (base_exprs @ result_exprs)
+        in
+        let bindings2, aliases2 =
+          BruteForceClauseSetPairVarBindings.best_solution base_exprs
+            (agent_exprs @ result_exprs)
+        in
+        let bindings = Vampire_analyzed_expr.VarMap.merge (fun _ v1 v2 ->
+            match v1, v2 with
+            | Some v, _ -> Some v
+            | _, Some v -> Some v
+            | _, _ -> None
+          )
+            bindings1 bindings2
+        in
+        let aliases = aliases1 @ aliases2
         in
         VarMap.iter
           (fun k v ->
