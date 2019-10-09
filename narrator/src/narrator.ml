@@ -52,27 +52,39 @@ let () =
         (* Vampire.resolve_vars_in_knowledge_nodes ~agent_id:"299" ~base_id:"343"
          *   ~result_id:"344" node_map
          * |> ignore; *)
-        Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"446" ~base_id:"880"
-          ~result_id:"32540" node_map
-        |> ignore;
-        Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"407" ~base_id:"448"
-          ~result_id:"880" node_map
-        |> ignore;
-        Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"323" ~base_id:"361"
-          ~result_id:"448" node_map
-        |> ignore;
-        Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"309" ~base_id:"344"
-          ~result_id:"446" node_map
-        |> ignore;
-        Vampire.resolve_vars_in_split ~base_id:"352" ~result_id:"361" node_map
-        |> ignore;
-        Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"299" ~base_id:"351"
-          ~result_id:"352" node_map
-        |> ignore;
-        Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"299" ~base_id:"341"
-          ~result_id:"351" node_map
-        |> ignore;
-        Vampire.resolve_vars_in_knowledge_node_pair ~base_id:"341" ~result_id:"351" node_map |> ignore;
+        (* Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"446" ~base_id:"880"
+         *   ~result_id:"32540" node_map
+         * |> ignore;
+         * Vampire.resolve_vars_in_knowledge_node_pair ~base_id:"880" ~result_id:"32540" node_map |> ignore; *)
+
+        (* Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"407" ~base_id:"448"
+         *   ~result_id:"880" node_map
+         * |> ignore;
+         * Vampire.resolve_vars_in_knowledge_node_pair ~base_id:"448" ~result_id:"880" node_map |> ignore; *)
+
+        (* Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"323" ~base_id:"361"
+         *   ~result_id:"448" node_map
+         * |> ignore;
+         * Vampire.resolve_vars_in_knowledge_node_pair ~base_id:"361" ~result_id:"448" node_map |> ignore; *)
+
+        (* Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"309" ~base_id:"344"
+         *   ~result_id:"446" node_map
+         * |> ignore;
+         * Vampire.resolve_vars_in_knowledge_node_pair ~base_id:"344" ~result_id:"446" node_map |> ignore; *)
+
+        (* Vampire.resolve_vars_in_split ~base_id:"352" ~result_id:"361" node_map
+         * |> ignore;
+         * Vampire.resolve_vars_in_knowledge_node_pair ~base_id:"352" ~result_id:"361" node_map |> ignore; *)
+
+        (* Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"299" ~base_id:"351"
+         *   ~result_id:"352" node_map
+         * |> ignore;
+         * Vampire.resolve_vars_in_knowledge_node_pair ~base_id:"351" ~result_id:"352" node_map |> ignore; *)
+
+        (* Vampire.resolve_vars_in_knowledge_nodes_w_agent ~agent_id:"299" ~base_id:"341"
+         *   ~result_id:"351" node_map
+         * |> ignore;
+         * Vampire.resolve_vars_in_knowledge_node_pair ~base_id:"341" ~result_id:"351" node_map |> ignore; *)
         (* let base_node    = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node "446" node_map) in
          * let base_expr    = base_node.expr |> Vampire_analyzed_expr.remove_subsumptions in
          * Js_utils.console_log (Printf.sprintf "base_expr : %s" (Vampire_analyzed_expr.expr_to_string base_expr));
