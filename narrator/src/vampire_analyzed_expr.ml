@@ -997,7 +997,7 @@ let universal_var_names (e : expr) : string list =
   and aux_list (es : expr list) : string list =
     List.concat (List.map aux es)
   in
-  aux e
+  List.sort_uniq compare (aux e)
 
 let uniquify_universal_var_names_clause_sets (prefix : string)
     (ess : expr list list) : expr list list =
