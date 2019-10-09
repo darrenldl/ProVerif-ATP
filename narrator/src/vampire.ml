@@ -2024,6 +2024,29 @@ let attack_trace node_map =
               proc_name_padding_on_right expr)
        steps)
 
+let resolve_vars_in_split ~(base_id:string) ~(result_id:string) (m : node_graph) : 
+  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
+  let open Analyzed_graph in
+  let open Vampire_analyzed_expr in
+  let base_data = find_node base_id m |> unwrap_data in
+  let result_data = find_node result_id m |> unwrap_data in
+  assert (base_data.classification = Knowledge);
+  assert (result_data.classification = Knowledge);
+  let base_exprs = List.map (fun e ->
+      similarity e result_data.expr, e
+    ) (base_data.expr |> split_on_or)
+  in
+  let best_match =
+    base_exprs
+    |> List.sort (fun (score1, _) (score2, _) -> compare score1 score2)
+    |> List.hd
+    |> fun (_, e) -> e
+  in
+  Js_utils.console_log "resolve_vars_in_split";
+  Js_utils.console_log (Printf.sprintf "base   : %s" (expr_to_string best_match));
+  Js_utils.console_log (Printf.sprintf "result : %s" (expr_to_string result_data.expr));
+  VarMap.empty
+
 let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
     ~(result_id : string) (m : node_graph) :
   Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
@@ -2130,24 +2153,37 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
         in
         Js_utils.console_log
           "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
-        let bindings1, aliases1 =
-          BruteForceClauseSetPairVarBindings.best_solution agent_exprs
-            (base_exprs @ result_exprs)
+        let base_expr_count = List.length base_exprs in
+        let agent_expr_count = List.length agent_exprs in
+        let result_expr_count = List.length result_exprs in
+        let bindings, aliases =
+          if agent_expr_count + result_expr_count = base_expr_count then
+            BruteForceClauseSetPairVarBindings.best_solution base_exprs
+              (agent_exprs @ result_exprs)
+          else if base_expr_count + result_expr_count = agent_expr_count then
+            BruteForceClauseSetPairVarBindings.best_solution agent_exprs
+              (base_exprs @ result_exprs)
+          else
+            failwith "Unexpected combination"
         in
-        let bindings2, aliases2 =
-          BruteForceClauseSetPairVarBindings.best_solution base_exprs
-            (agent_exprs @ result_exprs)
-        in
-        let bindings = Vampire_analyzed_expr.VarMap.merge (fun _ v1 v2 ->
-            match v1, v2 with
-            | Some v, _ -> Some v
-            | _, Some v -> Some v
-            | _, _ -> None
-          )
-            bindings1 bindings2
-        in
-        let aliases = aliases1 @ aliases2
-        in
+        (* let bindings1, aliases1 =
+         *   BruteForceClauseSetPairVarBindings.best_solution agent_exprs
+         *     (base_exprs @ result_exprs)
+         * in
+         * let bindings2, aliases2 =
+         *   BruteForceClauseSetPairVarBindings.best_solution base_exprs
+         *     (agent_exprs @ result_exprs)
+         * in
+         * let bindings = Vampire_analyzed_expr.VarMap.merge (fun _ v1 v2 ->
+         *     match v1, v2 with
+         *     | Some v, _ -> Some v
+         *     | _, Some v -> Some v
+         *     | _, _ -> None
+         *   )
+         *     bindings1 bindings2
+         * in
+         * let aliases = aliases1 @ aliases2
+         * in *)
         VarMap.iter
           (fun k v ->
              Js_utils.console_log
