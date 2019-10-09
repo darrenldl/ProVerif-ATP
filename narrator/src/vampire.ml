@@ -1291,6 +1291,64 @@ module ResolveVars = struct
     else if result_parent_count = 1 && base_children_count = 1 then
       resolve_vars_direct ~base_id ~result_id m
     else (Vampire_analyzed_expr.VarMap.empty, [])
+
+  let merge_aliases (aliases1 : Vampire_analyzed_expr.VarSet.t list) (aliases2 : Vampire_analyzed_expr.VarSet.t list) : Vampire_analyzed_expr.VarSet.t list =
+    let open Vampire_analyzed_expr in
+    List.map (fun a1 ->
+        List.fold_left (fun acc a2 ->
+            if VarSet.inter acc a2 |> VarSet.is_empty then
+              acc
+            else
+              VarSet.union acc a2
+          ) a1 aliases2
+      ) aliases1
+
+  let merge_var_map (m1 : Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t) (m2 : Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t) : Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
+    let open Vampire_analyzed_expr in
+    VarMap.merge (fun _ v1 v2 ->
+        match v1, v2 with
+        | Some v, _ -> Some v
+        | _, Some v -> Some v
+        | None, None -> None
+      ) m1 m2
+
+  let collect_bindings_and_aliases (m : node_graph) :
+    (Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
+    * Vampire_analyzed_expr.VarSet.t list) list =
+    let open Analyzed_graph in
+    let open Vampire_analyzed_expr in
+    let rec aux (var_map, aliases) last_id cur_id m =
+      let parent_knowledge_nodes = find_parents cur_id m
+                                   |> List.filter (fun id ->
+                                       let data = find_node id m |> unwrap_data in
+                                       data.classification = Knowledge
+                                     )
+      in
+      let (var_map, aliases) =
+        match last_id with
+        | None -> var_map, aliases
+        | Some last_id ->
+          resolve_vars_in_knowledge_node_pair ~base_id:cur_id ~result_id:last_id m
+      in
+      match parent_knowledge_nodes with
+      | [] -> [var_map, aliases]
+      | parents ->
+        aux_list (var_map, aliases) (Some cur_id) parents m
+    and aux_list (var_map, aliases) cur_id parents m =
+        List.map (fun parent_id ->
+            aux (var_map, aliases) cur_id parent_id m
+          )
+          parents
+        |> List.concat
+    in
+    let root_id = find_root Bottom m in
+    let bottom_knowledge_nodes = find_parents root_id m
+                                 |> List.filter (fun id ->
+                                     let data = find_node id m |> unwrap_data in
+                                     data.classification = Knowledge
+                                   )
+    in
+    aux_list (VarMap.empty, []) None bottom_knowledge_nodes m
 end
 
 let strip_subsumptions (m : node_graph) : node_graph =
