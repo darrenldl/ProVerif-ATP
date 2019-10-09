@@ -59,6 +59,12 @@ module VarMap = Map.Make (struct
     let compare = compare
   end)
 
+module VarSet = Set.Make (struct
+    type t = identifier
+
+    let compare = compare
+  end)
+
 let is_quantified (ctx : context list) (e : identifier) : quantifier option =
   let rec aux (ctx : context list) (e : identifier) : quantifier option =
     match ctx with
@@ -602,52 +608,81 @@ module PatternMatch = struct
     in
     ExprSet.elements (aux pattern expr s)
 
+  let record_alias name1 name2 (aliases : VarSet.t list) : VarSet.t list =
+    let rec aux recorded acc name1 name2 aliases =
+      match recorded, aliases with
+      | true, [] -> acc
+      | false, [] -> (VarSet.empty |> VarSet.add name1 |> VarSet.add name2) :: acc
+      | true, s :: ss ->
+        aux true (s :: acc) name1 name2 ss
+      | false, s :: ss ->
+        let recorded, s =
+          if VarSet.mem name1 s || VarSet.mem name2 s then
+            true,
+            s
+            |> VarSet.add name1
+            |> VarSet.add name2
+          else
+            false, s
+        in
+        aux recorded (s :: acc) name1 name2 ss
+    in
+    aux false [] name1 name2 aliases
+
   let var_bindings_in_pattern_match ?(m : expr VarMap.t = VarMap.empty)
-      ~(pattern : expr) (expr : expr) : expr VarMap.t =
-    let rec aux (pattern : expr) (expr : expr) (m : expr VarMap.t) :
-      expr VarMap.t =
+      ?(aliases : VarSet.t list = [])
+      ~(pattern : expr) (expr : expr) : expr VarMap.t * VarSet.t list =
+    let rec aux (pattern : expr) (expr : expr) (m : expr VarMap.t) (aliases : VarSet.t list) :
+      expr VarMap.t * VarSet.t list =
       match (pattern, expr) with
       | Variable (Free, _), _ ->
-        m
-      | Variable (Universal, name), (_ as v) ->
-        VarMap.add name v m
+        m, aliases
+      | Variable (_, name1), Variable (_, name2) -> (
+          let aliases =
+            record_alias name1 name2 aliases
+          in
+          m, aliases
+        )
+      | Variable (Universal, name), (_ as v) -> (
+          VarMap.add name v m, aliases
+        )
       | Variable (Existential, _), _ ->
         raise Unexpected_existential_var
       | Pred (_, e1), Pred (_, e2) ->
-        aux e1 e2 m
+        aux e1 e2 m aliases
       | Function (_, es1), Function (_, es2) ->
-        aux_list es1 es2 m
+        aux_list es1 es2 m aliases
       | UnaryOp (_, e1), UnaryOp (_, e2) ->
-        aux e1 e2 m
+        aux e1 e2 m aliases
       | BinaryOp (_, e1a, e1b), BinaryOp (_, e2a, e2b) ->
-        aux_list [e1a; e1b] [e2a; e2b] m
+        aux_list [e1a; e1b] [e2a; e2b] m aliases
       | Quantified (_, _, e1), Quantified (_, _, e2) ->
-        aux e1 e2 m
+        aux e1 e2 m aliases
       | False, False ->
-        m
+        m, aliases
       | InsertedF _, InsertedF _ ->
-        m
+        m, aliases
       | _ ->
         raise Unmatching_structure
-    and aux_list (es1 : expr list) (es2 : expr list) (m : expr VarMap.t) :
-      expr VarMap.t =
-      List.fold_left2 (fun m e1 e2 -> aux e1 e2 m) m es1 es2
+    and aux_list (es1 : expr list) (es2 : expr list) (m : expr VarMap.t) (aliases : VarSet.t list) :
+      expr VarMap.t * VarSet.t list =
+      List.fold_left2 (fun (m, aliases) e1 e2 -> aux e1 e2 m aliases) (m, aliases) es1 es2
     in
-    if pattern_matches ~pattern expr then aux pattern expr m else m
+    if pattern_matches ~pattern expr then aux pattern expr m [] else m, []
 
-  let var_bindings_compatible ~(smaller : expr VarMap.t)
-      ~(larger : expr VarMap.t) : bool =
-    let keys = List.map (fun (k, _) -> k) (VarMap.bindings smaller) in
-    List.fold_left
-      (fun res k ->
-         res
-         &&
-         match VarMap.find_opt k larger with
-         | None ->
-           true
-         | Some c ->
-           VarMap.find k smaller = c)
-      true keys
+  (* let var_bindings_compatible ~(smaller : expr VarMap.t)
+   *     ~(larger : expr VarMap.t) : bool =
+   *   let keys = List.map (fun (k, _) -> k) (VarMap.bindings smaller) in
+   *   List.fold_left
+   *     (fun res k ->
+   *        res
+   *        &&
+   *        match VarMap.find_opt k larger with
+   *        | None ->
+   *          true
+   *        | Some c ->
+   *          VarMap.find k smaller = c)
+   *     true keys *)
 end
 
 module Rename : sig
@@ -795,29 +830,29 @@ end = struct
     in
     List.filter (fun m -> no_overlaps m) l
 
-  let filter_by_compatible_var_bindings (solutions : expr ExprMap.t list) :
-    expr ExprMap.t list =
-    let open PatternMatch in
-    let no_overlaps (m : expr ExprMap.t) : bool =
-      let rec aux (keys : expr list) (var_bindings : expr VarMap.t)
-          (m : expr ExprMap.t) : bool =
-        match keys with
-        | [] ->
-          true
-        | pat :: ks ->
-          let expr = ExprMap.find pat m in
-          let bindings = var_bindings_in_pattern_match ~pattern:pat expr in
-          var_bindings_compatible ~smaller:bindings ~larger:var_bindings
-          &&
-          let var_bindings =
-            var_bindings_in_pattern_match ~m:var_bindings ~pattern:pat expr
-          in
-          aux ks var_bindings m
-      in
-      let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
-      aux keys VarMap.empty m
-    in
-    List.filter (fun m -> no_overlaps m) solutions
+  (* let filter_by_compatible_var_bindings (solutions : expr ExprMap.t list) :
+   *   expr ExprMap.t list =
+   *   let open PatternMatch in
+   *   let no_overlaps (m : expr ExprMap.t) : bool =
+   *     let rec aux (keys : expr list) (var_bindings : expr VarMap.t)
+   *         (m : expr ExprMap.t) : bool =
+   *       match keys with
+   *       | [] ->
+   *         true
+   *       | pat :: ks ->
+   *         let expr = ExprMap.find pat m in
+   *         let bindings = var_bindings_in_pattern_match ~pattern:pat expr in
+   *         var_bindings_compatible ~smaller:bindings ~larger:var_bindings
+   *         &&
+   *         let var_bindings =
+   *           var_bindings_in_pattern_match ~m:var_bindings ~pattern:pat expr
+   *         in
+   *         aux ks var_bindings m
+   *     in
+   *     let keys = List.map (fun (k, _) -> k) (ExprMap.bindings m) in
+   *     aux keys VarMap.empty m
+   *   in
+   *   List.filter (fun m -> no_overlaps m) solutions *)
 
   let solution_score (m : expr ExprMap.t) : float =
     let rec aux (keys : expr list) (score_acc : float) (m : expr ExprMap.t) :
@@ -860,14 +895,14 @@ end = struct
 end
 
 module BruteForceClauseSetPairVarBindings : sig
-  val best_solution : expr list -> expr list -> expr VarMap.t
+  val best_solution : expr list -> expr list -> expr VarMap.t * VarSet.t list
 end = struct
   let best_solution exprs1 exprs2 =
     let m = BruteForceClauseSetPairExprMatches.best_solution exprs1 exprs2 in
     ExprMap.fold
-      (fun pattern e acc ->
-         PatternMatch.var_bindings_in_pattern_match ~m:acc ~pattern e)
-      m VarMap.empty
+      (fun pattern e (acc, aliases) ->
+         PatternMatch.var_bindings_in_pattern_match ~m:acc ~aliases ~pattern e)
+      m (VarMap.empty, [])
 end
 
 module BruteForceEquationVarBindings : sig
@@ -877,7 +912,7 @@ end = struct
     let universal_vars = get_vars ~bound:Universal pattern in
     PatternMatch.pattern_search ~pattern expr
     |> List.map (fun e ->
-        PatternMatch.var_bindings_in_pattern_match ~pattern e)
+        let m, _ = PatternMatch.var_bindings_in_pattern_match ~pattern e in m)
     |> List.filter (fun m ->
         List.for_all (fun k -> VarMap.mem k m) universal_vars)
 
@@ -1013,26 +1048,26 @@ let uniquify_universal_var_names_generic
   let gen_id = make_gen_id prefix in
   aux gen_id replace_id get_exprs [] xs
 
-let var_bindings_in_generic ?(m : expr VarMap.t = VarMap.empty)
-    ~(get_pairs : 'a -> (expr * expr) list) (x : 'a) : expr VarMap.t =
-  let open PatternMatch in
-  let pairs = get_pairs x in
-  List.fold_left
-    (fun m (k, v) ->
-       m
-       |> (fun m -> var_bindings_in_pattern_match ~m ~pattern:k v)
-       |> fun m -> var_bindings_in_pattern_match ~m ~pattern:v k)
-    m pairs
+(* let var_bindings_in_generic ?(m : expr VarMap.t = VarMap.empty)
+ *     ~(get_pairs : 'a -> (expr * expr) list) (x : 'a) : expr VarMap.t =
+ *   let open PatternMatch in
+ *   let pairs = get_pairs x in
+ *   List.fold_left
+ *     (fun m (k, v) ->
+ *        m
+ *        |> (fun m -> var_bindings_in_pattern_match ~m ~pattern:k v)
+ *        |> fun m -> var_bindings_in_pattern_match ~m ~pattern:v k)
+ *     m pairs *)
 
-let var_bindings_in_pairs ?(m : expr VarMap.t = VarMap.empty)
-    (pairs : (expr * expr) list) : expr VarMap.t =
-  let open PatternMatch in
-  List.fold_left
-    (fun m (k, v) ->
-       m
-       |> (fun m -> var_bindings_in_pattern_match ~m ~pattern:k v)
-       |> fun m -> var_bindings_in_pattern_match ~m ~pattern:v k)
-    m pairs
+(* let var_bindings_in_pairs ?(m : expr VarMap.t = VarMap.empty)
+ *     (pairs : (expr * expr) list) : expr VarMap.t =
+ *   let open PatternMatch in
+ *   List.fold_left
+ *     (fun m (k, v) ->
+ *        m
+ *        |> (fun m -> var_bindings_in_pattern_match ~m ~pattern:k v)
+ *        |> fun m -> var_bindings_in_pattern_match ~m ~pattern:v k)
+ *     m pairs *)
 
 type data = {expr_str : string}
 
