@@ -5,8 +5,7 @@ module Analyzed_expr_graph = Graph.Make (Vampire_analyzed_expr)
 let expr_to_nodes (e : Vampire_analyzed_expr.expr) :
   Analyzed_expr_graph.node_record list =
   let gen_id =
-    let f = Misc_utils.make_gen_id () in
-    fun x -> string_of_int (f x)
+    Misc_utils.make_gen_string_id ~prefix:""
   in
   let parent_to_list (parent : string option) : string list =
     match parent with None -> [] | Some x -> [x]
@@ -951,7 +950,7 @@ module RewriteKnowledgeNodes = struct
 
   let uniquify_knowledge_nodes (m : node_graph) : node_graph =
     let open Analyzed_graph in
-    let gen_int = Misc_utils.make_gen_id () in
+    let gen_int = Misc_utils.make_gen_int_id () in
     let ids = knowledge_node_ids m in
     let (), m =
       linear_traverse ~ids ()
@@ -1956,23 +1955,37 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
     in
     let l_ast_indices = info.l_ast_indices in
     let r_ast_indices = info.r_ast_indices in
+    let l_expr = match l_data.classification with
+      | Rewriting -> l_data.expr |> Vampire_analyzed_expr.uniquify_expr
+      | _ -> l_data.expr
+    in
+    let r_expr = match r_data.classification with
+      | Rewriting -> r_data.expr |> Vampire_analyzed_expr.uniquify_expr
+      | _ -> r_data.expr
+    in
     let unifier_e1 =
-      Vampire_analyzed_expr.get_sub_expr_by_indices l_data.expr
+      Vampire_analyzed_expr.get_sub_expr_by_indices l_expr
         l_ast_indices
     in
     let unifier_e2 =
-      Vampire_analyzed_expr.get_sub_expr_by_indices r_data.expr
+      Vampire_analyzed_expr.get_sub_expr_by_indices r_expr
         r_ast_indices
     in
-    Js_utils.console_log (Printf.sprintf "left  : %s" (Vampire_analyzed_expr.expr_to_string unifier_e1));
-    Js_utils.console_log (Printf.sprintf "right : %s" (Vampire_analyzed_expr.expr_to_string unifier_e2));
+    let res_expr =
+      Vampire_analyzed_expr.get_sub_expr_by_indices (result_data.expr |> remove_subsumptions)
+        r_ast_indices
+    in
+    Js_utils.console_log (Printf.sprintf "left   : %s" (Vampire_analyzed_expr.expr_to_string unifier_e1));
+    Js_utils.console_log (Printf.sprintf "right  : %s" (Vampire_analyzed_expr.expr_to_string unifier_e2));
+    Js_utils.console_log (Printf.sprintf "result : %s" (Vampire_analyzed_expr.expr_to_string res_expr));
     VarMap.empty
   | None -> (
       match agent_data.expr |> remove_subsumptions with
-      | BinaryOp (Eq, e1, e2) as eq ->
+      | BinaryOp (Eq, _, _) as eq ->
+        let eq = Vampire_analyzed_expr.uniquify_expr eq in
         (* equation *)
         Js_utils.console_log "resolve_vars_in_knowledge_nodes: bruteforcing equation";
-        let bindings =
+        let bindings, aliases =
           BruteForceEquationVarBindings.best_solution ~eq base_data.expr
             result_data.expr
         in
@@ -1982,10 +1995,19 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
                (Printf.sprintf "var : %s, e : %s" k
                   (Vampire_analyzed_expr.expr_to_string v)))
           bindings;
+        List.iter
+          (fun s ->
+             let same = s |> VarSet.to_seq |> List.of_seq in
+             Js_utils.console_log
+               (Printf.sprintf "Aliases : %s" (String.concat ", " same));
+          ) aliases;
         VarMap.empty
       | agent_expr ->
         (* resolution *)
-        let agent_exprs = agent_expr |> split_on_or in
+        let agent_exprs = match agent_data.classification with
+          | Rewriting -> agent_expr |> Vampire_analyzed_expr.uniquify_expr |> split_on_or
+          | _ -> agent_expr |> split_on_or
+        in
         Js_utils.console_log "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
         let bindings, aliases =
           BruteForceClauseSetPairVarBindings.best_solution agent_exprs

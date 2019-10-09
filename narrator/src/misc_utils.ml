@@ -21,12 +21,17 @@ let map_list_to_string_w_opt_brack (f : 'a -> string) (l : 'a list) : string =
 let unwrap_opt (x : 'a option) : 'a =
   match x with Some x -> x | None -> failwith "Unexpected pattern"
 
-let make_gen_id () : unit -> int =
-  let counter = ref 0 in
+let make_gen_int_id () : unit -> int =
+  let count = ref 0 in
   fun () ->
-    let res = !counter in
-    counter := !counter + 1;
+    let res = !count in
+    count := !count + 1;
     res
+
+let make_gen_string_id ~(prefix : string) : unit -> string =
+  let gen_int = make_gen_int_id () in
+  fun () ->
+    Printf.sprintf "%s%d" prefix (gen_int ())
 
 let unwrap_tuple_0 ((a, _) : 'a * 'b) : 'a = a
 

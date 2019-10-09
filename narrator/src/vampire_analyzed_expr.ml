@@ -862,7 +862,7 @@ end = struct
         score_acc
       | pat :: ks ->
         let expr = ExprMap.find pat m in
-        Js_utils.console_log (Printf.sprintf "similarity score of %s -- %s is %f" (expr_to_string pat) (expr_to_string expr) (similarity pat expr));
+        (* Js_utils.console_log (Printf.sprintf "similarity score of %s -- %s is %f" (expr_to_string pat) (expr_to_string expr) (similarity pat expr)); *)
         let score_acc = similarity pat expr +. score_acc in
         aux ks score_acc m
     in
@@ -884,13 +884,13 @@ end = struct
 
   let best_solution exprs1 exprs2 : expr ExprMap.t =
     let solutions =compute_solutions_score_descending exprs1 exprs2 in
-    List.iteri (fun i m ->
-        Js_utils.console_log (Printf.sprintf "Solution %d" i);
-        ExprMap.iter (fun k v ->
-            Js_utils.console_log (Printf.sprintf "k : %s" (expr_to_string k));
-            Js_utils.console_log (Printf.sprintf "v : %s" (expr_to_string v));
-          ) m;
-      ) solutions;
+    (* List.iteri (fun i m ->
+     *     Js_utils.console_log (Printf.sprintf "Solution %d" i);
+     *     ExprMap.iter (fun k v ->
+     *         Js_utils.console_log (Printf.sprintf "k : %s" (expr_to_string k));
+     *         Js_utils.console_log (Printf.sprintf "v : %s" (expr_to_string v));
+     *       ) m;
+     *   ) solutions; *)
     List.hd solutions
 end
 
@@ -906,14 +906,14 @@ end = struct
 end
 
 module BruteForceEquationVarBindings : sig
-  val best_solution : eq:expr -> expr -> expr -> expr VarMap.t
+  val best_solution : eq:expr -> expr -> expr -> expr VarMap.t * VarSet.t list
 end = struct
   let possible_var_bindings pattern expr =
     let universal_vars = get_vars ~bound:Universal pattern in
     PatternMatch.pattern_search ~pattern expr
     |> List.map (fun e ->
-        let m, _ = PatternMatch.var_bindings_in_pattern_match ~pattern e in m)
-    |> List.filter (fun m ->
+        PatternMatch.var_bindings_in_pattern_match ~pattern e)
+    |> List.filter (fun (m, _aliases) ->
         List.for_all (fun k -> VarMap.mem k m) universal_vars)
 
   let gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr =
@@ -921,7 +921,7 @@ end = struct
     let var_bindings_r_pat_on_r_e = possible_var_bindings r_pattern r_expr in
     BruteForceBase.all_combinations var_bindings_l_pat_on_l_e
       var_bindings_r_pat_on_r_e
-    |> List.filter (fun (m1, m2) ->
+    |> List.filter (fun ((m1, _), (m2, _)) ->
         VarMap.equal (fun a b -> compare a b = 0) m1 m2)
     |> List.map (fun (m, _) -> m)
 
@@ -935,21 +935,21 @@ end = struct
     | BinaryOp (Eq, l_pattern, r_pattern) ->
       let var_bindings_ll_rr =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr
-        |> List.map (fun m -> (score m l_expr r_expr, m))
-        |> List.sort (fun (score1, _) (score2, _) ->
+        |> List.map (fun (m, aliases) -> (score m l_expr r_expr, m, aliases))
+        |> List.sort (fun (score1, _, _) (score2, _, _) ->
             compare score2 score1)
       in
       let var_bindings_lr_rl =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr:r_expr
           ~r_expr:l_expr
-        |> List.map (fun m -> (score m l_expr r_expr, m))
-        |> List.sort_uniq (fun (score1, _) (score2, _) ->
+        |> List.map (fun (m, aliases) -> (score m l_expr r_expr, m, aliases))
+        |> List.sort (fun (score1, _, _) (score2, _, _) ->
             compare score2 score1)
       in
       List.merge
-        (fun (score1, _) (score2, _) -> compare score2 score1)
+        (fun (score1, _, _) (score2, _, _) -> compare score2 score1)
         var_bindings_ll_rr var_bindings_lr_rl
-      |> List.map (fun (_, m) -> m)
+      |> List.map (fun (_, m, aliases) -> m, aliases)
     | _ ->
       failwith "Unexpected pattern"
 
@@ -957,13 +957,19 @@ end = struct
     let solutions =
       compute_solutions_score_descending eq l_expr r_expr
     in
-    List.iteri (fun i m ->
-        Js_utils.console_log (Printf.sprintf "Solution %d" i);
-        VarMap.iter (fun k v ->
-            Js_utils.console_log (Printf.sprintf "k : %s" k);
-            Js_utils.console_log (Printf.sprintf "v : %s" (expr_to_string v));
-          ) m;
-      ) solutions;
+    (* List.iteri (fun i (m, aliases) ->
+     *     Js_utils.console_log (Printf.sprintf "Solution %d" i);
+     *     VarMap.iter (fun k v ->
+     *         Js_utils.console_log (Printf.sprintf "k : %s" k);
+     *         Js_utils.console_log (Printf.sprintf "v : %s" (expr_to_string v));
+     *       ) m;
+     *     List.iter
+     *       (fun s ->
+     *          let same = s |> VarSet.to_seq |> List.of_seq in
+     *          Js_utils.console_log
+     *            (Printf.sprintf "Aliases : %s" (String.concat ", " same));
+     *       ) aliases;
+     *   ) solutions; *)
     List.hd solutions
 end
 
@@ -993,13 +999,6 @@ let universal_var_names (e : expr) : string list =
   in
   aux e
 
-let make_gen_id (prefix : string) : unit -> string =
-  let count = ref 0 in
-  fun () ->
-    let res = Printf.sprintf "%s%d" prefix !count in
-    count := !count + 1;
-    res
-
 let uniquify_universal_var_names_clause_sets (prefix : string)
     (ess : expr list list) : expr list list =
   let rec aux (gen_id : unit -> string) (acc : expr list list)
@@ -1018,7 +1017,7 @@ let uniquify_universal_var_names_clause_sets (prefix : string)
       in
       aux gen_id (res :: acc) ess
   in
-  let gen_id = make_gen_id prefix in
+  let gen_id = make_gen_string_id ~prefix in
   aux gen_id [] ess
 
 let uniquify_universal_var_names_generic
@@ -1045,7 +1044,7 @@ let uniquify_universal_var_names_generic
       in
       aux gen_id replace_id get_exprs (res :: acc) xs
   in
-  let gen_id = make_gen_id prefix in
+  let gen_id = make_gen_string_id ~prefix in
   aux gen_id replace_id get_exprs [] xs
 
 (* let var_bindings_in_generic ?(m : expr VarMap.t = VarMap.empty)
@@ -1124,3 +1123,17 @@ let rec get_sub_expr_by_indices expr indicies =
         failwith "Unexpected end of expression tree"
       | InsertedF _ ->
         failwith "Unexpected end of expression tree" )
+
+let uniquify_expr =
+  let gen_id = make_gen_string_id ~prefix:"T" in
+  fun (expr : expr) : expr ->
+    let var_names =
+      universal_var_names expr
+    in
+    let replace_acc_list =
+      List.map
+        (fun v -> (v, gen_id ()))
+        var_names
+    in
+    Rename.rename_universal_var_names
+      replace_acc_list expr
