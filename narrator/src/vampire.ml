@@ -1011,12 +1011,12 @@ module RewriteStepKnowledgeNodes = struct
 end
 
 module HideAvatarSplits = struct
-  let find_parent_of_parnet_of_any_alias m =
+  let find_parents_and_parents_of_parents_of_any_alias m =
     let open Analyzed_graph in
-    let parent_of_parent_id, _ =
-      linear_traverse None
+    let (parents, parents_of_parents), _ =
+      linear_traverse ([], [])
         (Partial_traversal_pure
-           (fun _ id node m ->
+           (fun (parents, parents_of_parents) id node m ->
               let data = unwrap_data node in
               match data.classification with
               | Alias ->
@@ -1027,16 +1027,56 @@ module HideAvatarSplits = struct
                 let parent_of_parent_id =
                   find_parents parent_id m |> List.hd
                 in
-                Stop, Some parent_of_parent_id
-              | _ -> Continue, None
+                Stop, (parent_id :: parents, parent_of_parent_id :: parents_of_parents)
+              | _ -> Continue, (parents, parents_of_parents)
            )
         )
         m
     in
-    parent_of_parent_id
+    ( List.sort_uniq compare parents,
+    List.sort_uniq compare parents_of_parents)
 
-  (* let hide_avatar_splits (m : node_graph) : node_graph =
-   *   let open Analyzed_graph in *)
+  let hide_avatar_splits (m : node_graph) : node_graph =
+    let open Analyzed_graph in
+    let (parents, parents_of_parents) =
+      find_parents_and_parents_of_parents_of_any_alias m
+    in
+    let m =
+      List.fold_left (fun m parent_of_parent_id ->
+          let (), m =
+            bfs_traverse parent_of_parent_id
+              ()
+              Top_to_bottom
+              (Full_traversal (fun () id node m ->
+                   let data = unwrap_data node in
+                   match data.classification with
+                   | Alias ->
+                     let alias_id = id in
+                     let children_ids = find_children alias_id m in
+                     let children = find_nodes children_ids m in
+                     (* attach all children to parent of parent *)
+                     let m =
+                       List.fold_left2 (fun m child_id child_node ->
+                           let parents =
+                             find_parents child_id m
+                             |> List.filter (fun x -> x <> alias_id)
+                           in
+                           add_node Overwrite child_id child_node ~parents m
+                         ) m children_ids children
+                     in
+                     (* remove alias node *)
+                     let m = remove_node alias_id m in
+                     (), m
+                   | _ -> (), m
+                 ))
+              m
+          in
+          m
+        )
+        m
+        parents_of_parents
+    in
+    remove_nodes parents m
 
 end
 
@@ -1053,6 +1093,7 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   |> mark_variable_bound (*|> propagate_variable_bound *)
   (* |> mark_universal_variables*) |> classify
   |> classify_alias |> classify |> rewrite_conclusion |> redraw_alias_arrows
+  |> HideAvatarSplits.hide_avatar_splits
   |> RewriteStepKnowledgeNodes.strip_quant
   |> RewriteStepKnowledgeNodes.uniquify
 
