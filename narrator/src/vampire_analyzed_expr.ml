@@ -285,8 +285,7 @@ let update_bound (e : expr) (changes : (string * bound) list) : expr =
             | x, Unsure ->
               Variable (x, v)
             | _, _h ->
-              Variable (b, v)
-              (* only update when unsure *) ) )
+              Variable (b, v) (* only update when unsure *) ) )
     | Pred (name, e) ->
       Pred (name, aux e)
     | Function (name, params) ->
@@ -610,42 +609,36 @@ module PatternMatch = struct
 
   let record_alias name1 name2 (aliases : VarSet.t list) : VarSet.t list =
     let rec aux recorded acc name1 name2 aliases =
-      match recorded, aliases with
-      | true, [] -> acc
-      | false, [] -> (VarSet.empty |> VarSet.add name1 |> VarSet.add name2) :: acc
+      match (recorded, aliases) with
+      | true, [] ->
+        acc
+      | false, [] ->
+        (VarSet.empty |> VarSet.add name1 |> VarSet.add name2) :: acc
       | true, s :: ss ->
         aux true (s :: acc) name1 name2 ss
       | false, s :: ss ->
         let recorded, s =
           if VarSet.mem name1 s || VarSet.mem name2 s then
-            true,
-            s
-            |> VarSet.add name1
-            |> VarSet.add name2
-          else
-            false, s
+            (true, s |> VarSet.add name1 |> VarSet.add name2)
+          else (false, s)
         in
         aux recorded (s :: acc) name1 name2 ss
     in
     aux false [] name1 name2 aliases
 
   let var_bindings_in_pattern_match ?(m : expr VarMap.t = VarMap.empty)
-      ?(aliases : VarSet.t list = [])
-      ~(pattern : expr) (expr : expr) : expr VarMap.t * VarSet.t list =
-    let rec aux (pattern : expr) (expr : expr) (m : expr VarMap.t) (aliases : VarSet.t list) :
-      expr VarMap.t * VarSet.t list =
+      ?(aliases : VarSet.t list = []) ~(pattern : expr) (expr : expr) :
+    expr VarMap.t * VarSet.t list =
+    let rec aux (pattern : expr) (expr : expr) (m : expr VarMap.t)
+        (aliases : VarSet.t list) : expr VarMap.t * VarSet.t list =
       match (pattern, expr) with
       | Variable (Free, _), _ ->
-        m, aliases
-      | Variable (_, name1), (Variable (_, name2) as v) -> (
-          let aliases =
-            record_alias name1 name2 aliases
-          in
-          VarMap.add name1 v m, aliases
-        )
-      | Variable (Universal, name), (_ as v) -> (
-          VarMap.add name v m, aliases
-        )
+        (m, aliases)
+      | Variable (_, name1), (Variable (_, name2) as v) ->
+        let aliases = record_alias name1 name2 aliases in
+        (VarMap.add name1 v m, aliases)
+      | Variable (Universal, name), (_ as v) ->
+        (VarMap.add name v m, aliases)
       | Variable (Existential, _), _ ->
         raise Unexpected_existential_var
       | Pred (_, e1), Pred (_, e2) ->
@@ -659,16 +652,19 @@ module PatternMatch = struct
       | Quantified (_, _, e1), Quantified (_, _, e2) ->
         aux e1 e2 m aliases
       | False, False ->
-        m, aliases
+        (m, aliases)
       | InsertedF _, InsertedF _ ->
-        m, aliases
+        (m, aliases)
       | _ ->
         raise Unmatching_structure
-    and aux_list (es1 : expr list) (es2 : expr list) (m : expr VarMap.t) (aliases : VarSet.t list) :
-      expr VarMap.t * VarSet.t list =
-      List.fold_left2 (fun (m, aliases) e1 e2 -> aux e1 e2 m aliases) (m, aliases) es1 es2
+    and aux_list (es1 : expr list) (es2 : expr list) (m : expr VarMap.t)
+        (aliases : VarSet.t list) : expr VarMap.t * VarSet.t list =
+      List.fold_left2
+        (fun (m, aliases) e1 e2 -> aux e1 e2 m aliases)
+        (m, aliases) es1 es2
     in
-    if pattern_matches ~pattern expr then aux pattern expr m aliases else m, []
+    if pattern_matches ~pattern expr then aux pattern expr m aliases
+    else (m, [])
 
   (* let var_bindings_compatible ~(smaller : expr VarMap.t)
    *     ~(larger : expr VarMap.t) : bool =
@@ -883,7 +879,7 @@ end = struct
     |> sort_solutions_by_score_descending
 
   let best_solution exprs1 exprs2 : expr ExprMap.t =
-    let solutions =compute_solutions_score_descending exprs1 exprs2 in
+    let solutions = compute_solutions_score_descending exprs1 exprs2 in
     (* List.iteri (fun i m ->
      *     Js_utils.console_log (Printf.sprintf "Solution %d" i);
      *     ExprMap.iter (fun k v ->
@@ -949,14 +945,12 @@ end = struct
       List.merge
         (fun (score1, _, _) (score2, _, _) -> compare score2 score1)
         var_bindings_ll_rr var_bindings_lr_rl
-      |> List.map (fun (_, m, aliases) -> m, aliases)
+      |> List.map (fun (_, m, aliases) -> (m, aliases))
     | _ ->
       failwith "Unexpected pattern"
 
   let best_solution ~eq l_expr r_expr =
-    let solutions =
-      compute_solutions_score_descending eq l_expr r_expr
-    in
+    let solutions = compute_solutions_score_descending eq l_expr r_expr in
     (* List.iteri (fun i (m, aliases) ->
      *     Js_utils.console_log (Printf.sprintf "Solution %d" i);
      *     VarMap.iter (fun k v ->
@@ -1126,14 +1120,8 @@ let rec get_sub_expr_by_indices expr indicies =
 
 let uniquify_expr =
   let gen_id = make_gen_string_id ~prefix:"T" in
-  fun (expr : expr) : expr ->
-    let var_names =
-      universal_var_names expr
-    in
-    let replace_acc_list =
-      List.map
-        (fun v -> (v, gen_id ()))
-        var_names
-    in
-    Rename.rename_universal_var_names
-      replace_acc_list expr
+  fun (expr : expr) ->
+    ( let var_names = universal_var_names expr in
+      let replace_acc_list = List.map (fun v -> (v, gen_id ())) var_names in
+      Rename.rename_universal_var_names replace_acc_list expr
+      : expr )

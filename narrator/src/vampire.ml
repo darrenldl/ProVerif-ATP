@@ -4,9 +4,7 @@ module Analyzed_expr_graph = Graph.Make (Vampire_analyzed_expr)
 
 let expr_to_nodes (e : Vampire_analyzed_expr.expr) :
   Analyzed_expr_graph.node_record list =
-  let gen_id =
-    Misc_utils.make_gen_string_id ~prefix:""
-  in
+  let gen_id = Misc_utils.make_gen_string_id ~prefix:"" in
   let parent_to_list (parent : string option) : string list =
     match parent with None -> [] | Some x -> [x]
   in
@@ -967,9 +965,7 @@ module RewriteStepKnowledgeNodes = struct
                   Vampire_analyzed_expr.universal_var_names data.expr
                 in
                 let replace_acc_list =
-                  List.map
-                    (fun v -> (v, gen_id ()))
-                    var_names
+                  List.map (fun v -> (v, gen_id ())) var_names
                 in
                 let new_expr =
                   Vampire_analyzed_expr.Rename.rename_universal_var_names
@@ -982,9 +978,8 @@ module RewriteStepKnowledgeNodes = struct
                   add_node Overwrite id (Data {data with expr = new_expr}) m
                 in
                 ((), m)
-              | _ -> ((), m)
-           )
-        )
+              | _ ->
+                ((), m)))
         m
     in
     m
@@ -1003,8 +998,8 @@ module RewriteStepKnowledgeNodes = struct
                   add_node Overwrite id (Data {data with expr = new_expr}) m
                 in
                 ((), m)
-              | _ -> ((), m)
-           ))
+              | _ ->
+                ((), m)))
         m
     in
     m
@@ -1021,77 +1016,76 @@ module HideAvatarSplits = struct
               match data.classification with
               | Alias ->
                 let alias_id = id in
-                let parent_id =
-                  find_parents alias_id m |> List.hd
-                in
+                let parent_id = find_parents alias_id m |> List.hd in
                 let parent_of_parent_id =
                   find_parents parent_id m |> List.hd
                 in
-                Stop, (parent_id :: parents, parent_of_parent_id :: parents_of_parents)
-              | _ -> Continue, (parents, parents_of_parents)
-           )
-        )
+                ( Stop
+                , ( parent_id :: parents
+                  , parent_of_parent_id :: parents_of_parents ) )
+              | _ ->
+                (Continue, (parents, parents_of_parents))))
         m
     in
-    ( List.sort_uniq compare parents,
-    List.sort_uniq compare parents_of_parents)
+    (List.sort_uniq compare parents, List.sort_uniq compare parents_of_parents)
 
   let hide_avatar_splits (m : node_graph) : node_graph =
     let open Analyzed_graph in
-    let (parents, parents_of_parents) =
+    let parents, parents_of_parents =
       find_parents_and_parents_of_parents_of_any_alias m
     in
     let aliases, m =
-      List.fold_left (fun (aliases, m) parent_of_parent_id ->
-          Js_utils.console_log (Printf.sprintf "parent of parent : %s" parent_of_parent_id);
-          let aliases, m =
-            bfs_traverse parent_of_parent_id
-              aliases
-              Top_to_bottom
-              (Full_traversal (fun aliases id node m ->
-                   let data = unwrap_data node in
-                   match data.classification with
-                   | Alias ->
-                     let alias_id = id in
-                     let children_ids = find_children alias_id m in
-                     let children = find_nodes children_ids m in
-                     (* attach all children to parent of parent *)
-                     let m =
-                       List.fold_left2 (fun m child_id child_node ->
-                           let parents =
-                             find_parents child_id m
-                             |> fun l -> parent_of_parent_id :: l
-                           in
-                           add_node Overwrite child_id child_node ~parents m
-                         ) m children_ids children
-                     in
-                     (* remove alias node *)
-                     Js_utils.console_log (Printf.sprintf "Trying to remove alias : %s" alias_id);
-                     (* let m = remove_node alias_id m in *)
-                     alias_id :: aliases, m
-                   | _ -> aliases, m
-                 ))
-              m
-          in
-          aliases, m
-        )
-        ([], m)
-        parents_of_parents
+      List.fold_left
+        (fun (aliases, m) parent_of_parent_id ->
+           Js_utils.console_log
+             (Printf.sprintf "parent of parent : %s" parent_of_parent_id);
+           let aliases, m =
+             bfs_traverse parent_of_parent_id aliases Top_to_bottom
+               (Full_traversal
+                  (fun aliases id node m ->
+                     let data = unwrap_data node in
+                     match data.classification with
+                     | Alias ->
+                       let alias_id = id in
+                       let children_ids = find_children alias_id m in
+                       let children = find_nodes children_ids m in
+                       (* attach all children to parent of parent *)
+                       let m =
+                         List.fold_left2
+                           (fun m child_id child_node ->
+                              let parents =
+                                find_parents child_id m
+                                |> fun l -> parent_of_parent_id :: l
+                              in
+                              add_node Overwrite child_id child_node ~parents m)
+                           m children_ids children
+                       in
+                       (* remove alias node *)
+                       Js_utils.console_log
+                         (Printf.sprintf "Trying to remove alias : %s" alias_id);
+                       (* let m = remove_node alias_id m in *)
+                       (alias_id :: aliases, m)
+                     | _ ->
+                       (aliases, m)))
+               m
+           in
+           (aliases, m))
+        ([], m) parents_of_parents
     in
-    m
-    |> remove_nodes aliases
-    |> remove_nodes parents
+    m |> remove_nodes aliases |> remove_nodes parents
 end
 
 let strip_subsumptions (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let (), m =
     linear_traverse ()
-      (Full_traversal (fun () id node m ->
-           let data = unwrap_data node in
-           let new_expr = Vampire_analyzed_expr.remove_subsumptions data.expr in
-           (), add_node Overwrite id (Data { data with expr = new_expr}) m
-         ))
+      (Full_traversal
+         (fun () id node m ->
+            let data = unwrap_data node in
+            let new_expr =
+              Vampire_analyzed_expr.remove_subsumptions data.expr
+            in
+            ((), add_node Overwrite id (Data {data with expr = new_expr}) m)))
       m
   in
   m
@@ -1109,8 +1103,7 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   |> mark_variable_bound (*|> propagate_variable_bound *)
   (* |> mark_universal_variables*) |> classify
   |> classify_alias |> classify |> rewrite_conclusion |> redraw_alias_arrows
-  |> HideAvatarSplits.hide_avatar_splits
-  |> strip_subsumptions
+  |> HideAvatarSplits.hide_avatar_splits |> strip_subsumptions
   |> RewriteStepKnowledgeNodes.strip_quant
   |> RewriteStepKnowledgeNodes.uniquify
 
@@ -2044,12 +2037,11 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
   let base_exprs =
     base_data.expr |> remove_subsumptions |> split_on_or |> List.map negate
   in
-  let result_exprs =
-    result_data.expr |> remove_subsumptions |> split_on_or
-  in
+  let result_exprs = result_data.expr |> remove_subsumptions |> split_on_or in
   match result_data.extra_info with
   | Some info ->
-    Js_utils.console_log "resolve_vars_in_knowledge_nodes: using provided unifier";
+    Js_utils.console_log
+      "resolve_vars_in_knowledge_nodes: using provided unifier";
     let l_node = find_node info.l_node m in
     let r_node = find_node info.r_node m in
     let l_data =
@@ -2068,36 +2060,48 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
     in
     let l_ast_indices = info.l_ast_indices in
     let r_ast_indices = info.r_ast_indices in
-    let l_expr = match l_data.classification with
-      | Rewriting -> l_data.expr |> Vampire_analyzed_expr.uniquify_expr
-      | _ -> l_data.expr
+    let l_expr =
+      match l_data.classification with
+      | Rewriting ->
+        l_data.expr |> Vampire_analyzed_expr.uniquify_expr
+      | _ ->
+        l_data.expr
     in
-    let r_expr = match r_data.classification with
-      | Rewriting -> r_data.expr |> Vampire_analyzed_expr.uniquify_expr
-      | _ -> r_data.expr
+    let r_expr =
+      match r_data.classification with
+      | Rewriting ->
+        r_data.expr |> Vampire_analyzed_expr.uniquify_expr
+      | _ ->
+        r_data.expr
     in
     let unifier_e1 =
-      Vampire_analyzed_expr.get_sub_expr_by_indices l_expr
-        l_ast_indices
+      Vampire_analyzed_expr.get_sub_expr_by_indices l_expr l_ast_indices
     in
     let unifier_e2 =
-      Vampire_analyzed_expr.get_sub_expr_by_indices r_expr
-        r_ast_indices
+      Vampire_analyzed_expr.get_sub_expr_by_indices r_expr r_ast_indices
     in
     let res_expr =
-      Vampire_analyzed_expr.get_sub_expr_by_indices (result_data.expr |> remove_subsumptions)
+      Vampire_analyzed_expr.get_sub_expr_by_indices
+        (result_data.expr |> remove_subsumptions)
         r_ast_indices
     in
-    Js_utils.console_log (Printf.sprintf "left   : %s" (Vampire_analyzed_expr.expr_to_string unifier_e1));
-    Js_utils.console_log (Printf.sprintf "right  : %s" (Vampire_analyzed_expr.expr_to_string unifier_e2));
-    Js_utils.console_log (Printf.sprintf "result : %s" (Vampire_analyzed_expr.expr_to_string res_expr));
+    Js_utils.console_log
+      (Printf.sprintf "left   : %s"
+         (Vampire_analyzed_expr.expr_to_string unifier_e1));
+    Js_utils.console_log
+      (Printf.sprintf "right  : %s"
+         (Vampire_analyzed_expr.expr_to_string unifier_e2));
+    Js_utils.console_log
+      (Printf.sprintf "result : %s"
+         (Vampire_analyzed_expr.expr_to_string res_expr));
     VarMap.empty
   | None -> (
       match agent_data.expr |> remove_subsumptions with
       | BinaryOp (Eq, _, _) as eq ->
         let eq = Vampire_analyzed_expr.uniquify_expr eq in
         (* equation *)
-        Js_utils.console_log "resolve_vars_in_knowledge_nodes: bruteforcing equation";
+        Js_utils.console_log
+          "resolve_vars_in_knowledge_nodes: bruteforcing equation";
         let bindings, aliases =
           BruteForceEquationVarBindings.best_solution ~eq base_data.expr
             result_data.expr
@@ -2112,16 +2116,20 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
           (fun s ->
              let same = s |> VarSet.to_seq |> List.of_seq in
              Js_utils.console_log
-               (Printf.sprintf "Aliases : %s" (String.concat ", " same));
-          ) aliases;
+               (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
+          aliases;
         VarMap.empty
       | agent_expr ->
         (* resolution *)
-        let agent_exprs = match agent_data.classification with
-          | Rewriting -> agent_expr |> Vampire_analyzed_expr.uniquify_expr |> split_on_or
-          | _ -> agent_expr |> split_on_or
+        let agent_exprs =
+          match agent_data.classification with
+          | Rewriting ->
+            agent_expr |> Vampire_analyzed_expr.uniquify_expr |> split_on_or
+          | _ ->
+            agent_expr |> split_on_or
         in
-        Js_utils.console_log "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
+        Js_utils.console_log
+          "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
         let bindings, aliases =
           BruteForceClauseSetPairVarBindings.best_solution agent_exprs
             (base_exprs @ result_exprs)
@@ -2136,6 +2144,6 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
           (fun s ->
              let same = s |> VarSet.to_seq |> List.of_seq in
              Js_utils.console_log
-               (Printf.sprintf "Aliases : %s" (String.concat ", " same));
-          ) aliases;
+               (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
+          aliases;
         VarMap.empty )

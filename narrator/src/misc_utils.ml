@@ -30,8 +30,7 @@ let make_gen_int_id () : unit -> int =
 
 let make_gen_string_id ~(prefix : string) : unit -> string =
   let gen_int = make_gen_int_id () in
-  fun () ->
-    Printf.sprintf "%s%d" prefix (gen_int ())
+  fun () -> Printf.sprintf "%s%d" prefix (gen_int ())
 
 let unwrap_tuple_0 ((a, _) : 'a * 'b) : 'a = a
 
