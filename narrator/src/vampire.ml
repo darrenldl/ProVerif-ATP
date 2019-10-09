@@ -1010,6 +1010,36 @@ module RewriteStepKnowledgeNodes = struct
     m
 end
 
+module HideAvatarSplits = struct
+  let find_parent_of_parnet_of_any_alias m =
+    let open Analyzed_graph in
+    let parent_of_parent_id, _ =
+      linear_traverse None
+        (Partial_traversal_pure
+           (fun _ id node m ->
+              let data = unwrap_data node in
+              match data.classification with
+              | Alias ->
+                let alias_id = id in
+                let parent_id =
+                  find_parents alias_id m |> List.hd
+                in
+                let parent_of_parent_id =
+                  find_parents parent_id m |> List.hd
+                in
+                Stop, Some parent_of_parent_id
+              | _ -> Continue, None
+           )
+        )
+        m
+    in
+    parent_of_parent_id
+
+  (* let hide_avatar_splits (m : node_graph) : node_graph =
+   *   let open Analyzed_graph in *)
+
+end
+
 let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   node_graph =
   let open Classify in
