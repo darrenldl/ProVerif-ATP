@@ -917,8 +917,8 @@ end = struct
     let var_bindings_r_pat_on_r_e = possible_var_bindings r_pattern r_expr in
     BruteForceBase.all_combinations var_bindings_l_pat_on_l_e
       var_bindings_r_pat_on_r_e
-    |> List.filter (fun ((m1, _), (m2, _)) ->
-        VarMap.equal (fun a b -> compare a b = 0) m1 m2)
+    (* |> List.filter (fun ((m1, _), (m2, _)) ->
+     *     VarMap.equal (fun a b -> compare a b = 0) m1 m2) *)
     |> List.map (fun (m, _) -> m)
 
   let score var_map expr1 expr2 =

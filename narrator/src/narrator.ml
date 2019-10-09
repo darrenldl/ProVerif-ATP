@@ -66,6 +66,12 @@ let () =
         |> ignore;
         Vampire.resolve_vars_in_split ~base_id:"352" ~result_id:"361" node_map
         |> ignore;
+        Vampire.resolve_vars_in_knowledge_nodes ~agent_id:"299" ~base_id:"351"
+          ~result_id:"352" node_map
+        |> ignore;
+        Vampire.resolve_vars_in_knowledge_nodes ~agent_id:"299" ~base_id:"341"
+          ~result_id:"351" node_map
+        |> ignore;
         (* let base_node    = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node "446" node_map) in
          * let base_expr    = base_node.expr |> Vampire_analyzed_expr.remove_subsumptions in
          * Js_utils.console_log (Printf.sprintf "base_expr : %s" (Vampire_analyzed_expr.expr_to_string base_expr));
