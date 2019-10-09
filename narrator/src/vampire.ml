@@ -1081,8 +1081,20 @@ module HideAvatarSplits = struct
     m
     |> remove_nodes aliases
     |> remove_nodes parents
-
 end
+
+let strip_subsumptions (m : node_graph) : node_graph =
+  let open Analyzed_graph in
+  let (), m =
+    linear_traverse ()
+      (Full_traversal (fun () id node m ->
+           let data = unwrap_data node in
+           let new_expr = Vampire_analyzed_expr.remove_subsumptions data.expr in
+           (), add_node Overwrite id (Data { data with expr = new_expr}) m
+         ))
+      m
+  in
+  m
 
 let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   node_graph =
@@ -1098,6 +1110,7 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   (* |> mark_universal_variables*) |> classify
   |> classify_alias |> classify |> rewrite_conclusion |> redraw_alias_arrows
   |> HideAvatarSplits.hide_avatar_splits
+  |> strip_subsumptions
   |> RewriteStepKnowledgeNodes.strip_quant
   |> RewriteStepKnowledgeNodes.uniquify
 
