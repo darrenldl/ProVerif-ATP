@@ -58,6 +58,9 @@ let () =
         Vampire.resolve_vars_in_knowledge_nodes ~base_id:"448" ~agent_id:"407"
           ~result_id:"880" node_map
         |> ignore;
+        Vampire.resolve_vars_in_knowledge_nodes ~base_id:"361" ~agent_id:"323"
+          ~result_id:"448" node_map
+        |> ignore;
         (* let base_node    = Vampire.Analyzed_graph.unwrap_data (Vampire.Analyzed_graph.find_node "446" node_map) in
          * let base_expr    = base_node.expr |> Vampire_analyzed_expr.remove_subsumptions in
          * Js_utils.console_log (Printf.sprintf "base_expr : %s" (Vampire_analyzed_expr.expr_to_string base_expr));

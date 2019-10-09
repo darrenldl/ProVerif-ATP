@@ -498,9 +498,9 @@ let similarity (e1 : expr) (e2 : expr) : float =
   let rec aux (e1 : expr) (e2 : expr) : int =
     match (e1, e2) with
     | Variable (Free, n1), Variable (Free, n2) ->
-      if n1 = n2 then 1 else 0
-    | Variable (Universal, _), _ ->
-      1
+      if n1 = n2 then 2 else 0
+    | Variable (Universal, _), v ->
+      1 + length v
     | (_ as v), Variable (Universal, _) ->
       length v
     | Variable (Existential, _), _ ->
@@ -508,26 +508,26 @@ let similarity (e1 : expr) (e2 : expr) : float =
     | _, Variable (Existential, _) ->
       raise Unexpected_existential_var
     | Pred (n1, e1), Pred (n2, e2) ->
-      if n1 = n2 then 1 + aux e1 e2 else 0
+      if n1 = n2 then 2 + aux e1 e2 else 0
     | Function (n1, es1), Function (n2, es2) ->
-      if n1 = n2 then 1 + aux_list es1 es2 else 0
+      if n1 = n2 then 2 + aux_list es1 es2 else 0
     | UnaryOp (op1, e1), UnaryOp (op2, e2) ->
-      if op1 = op2 then 1 + aux e1 e2 else 0
+      if op1 = op2 then 2 + aux e1 e2 else 0
     | BinaryOp (op1, e1a, e1b), BinaryOp (op2, e2a, e2b) ->
-      if op1 = op2 then 1 + aux_list [e1a; e1b] [e2a; e2b] else 0
+      if op1 = op2 then 2 + aux_list [e1a; e1b] [e2a; e2b] else 0
     | Quantified (_, _, e1), Quantified (_, _, e2) ->
       aux e1 e2
     | False, False ->
-      1
+      2
     | InsertedF n1, InsertedF n2 ->
-      if n1 = n2 then 1 else 0
+      if n1 = n2 then 2 else 0
     | _, _ ->
       0
   and aux_list (es1 : expr list) (es2 : expr list) : int =
     List.fold_left2 (fun acc e1 e2 -> acc + aux e1 e2) 0 es1 es2
   in
   let total_matches = aux e1 e2 in
-  float_of_int total_matches /. float_of_int (length e1)
+  float_of_int total_matches /. float_of_int (length e1 + length e2)
 
 module PatternMatch = struct
   let pattern_matches ~(pattern : expr) (expr : expr) : bool =
@@ -827,6 +827,7 @@ end = struct
         score_acc
       | pat :: ks ->
         let expr = ExprMap.find pat m in
+        Js_utils.console_log (Printf.sprintf "similarity score of %s -- %s is %f" (expr_to_string pat) (expr_to_string expr) (similarity pat expr));
         let score_acc = similarity pat expr +. score_acc in
         aux ks score_acc m
     in
@@ -843,10 +844,19 @@ end = struct
     BruteForceBase.all_combinations exprs1 exprs2
     |> group_by_exprs |> generate_possible_solutions
     |> filter_by_non_overlapping_exprs_expressions
-    |> filter_by_compatible_var_bindings |> sort_solutions_by_score_descending
+    (* |> filter_by_compatible_var_bindings *)
+    |> sort_solutions_by_score_descending
 
   let best_solution exprs1 exprs2 : expr ExprMap.t =
-    List.hd (compute_solutions_score_descending exprs1 exprs2)
+    let solutions =compute_solutions_score_descending exprs1 exprs2 in
+    List.iteri (fun i m ->
+        Js_utils.console_log (Printf.sprintf "Solution %d" i);
+        ExprMap.iter (fun k v ->
+            Js_utils.console_log (Printf.sprintf "k : %s" (expr_to_string k));
+            Js_utils.console_log (Printf.sprintf "v : %s" (expr_to_string v));
+          ) m;
+      ) solutions;
+    List.hd solutions
 end
 
 module BruteForceClauseSetPairVarBindings : sig
@@ -909,7 +919,17 @@ end = struct
       failwith "Unexpected pattern"
 
   let best_solution ~eq l_expr r_expr =
-    List.hd (compute_solutions_score_descending eq l_expr r_expr)
+    let solutions =
+      compute_solutions_score_descending eq l_expr r_expr
+    in
+    List.iteri (fun i m ->
+        Js_utils.console_log (Printf.sprintf "Solution %d" i);
+        VarMap.iter (fun k v ->
+            Js_utils.console_log (Printf.sprintf "k : %s" k);
+            Js_utils.console_log (Printf.sprintf "v : %s" (expr_to_string v));
+          ) m;
+      ) solutions;
+    List.hd solutions
 end
 
 let universal_var_names (e : expr) : string list =

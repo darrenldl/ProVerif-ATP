@@ -1930,11 +1930,10 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
   assert (base_data.classification = Knowledge);
   assert (result_data.classification = Knowledge);
   let base_exprs =
-    base_data.expr |> remove_subsumptions |> split_on_or |> List.map strip_not
+    base_data.expr |> remove_subsumptions |> split_on_or |> List.map negate
   in
   let result_exprs =
     result_data.expr |> remove_subsumptions |> split_on_or
-    |> List.map strip_not
   in
   match result_data.extra_info with
   | Some info ->
@@ -1986,7 +1985,7 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
         VarMap.empty
       | agent_expr ->
         (* resolution *)
-        let agent_exprs = agent_expr |> split_on_or |> List.map strip_not in
+        let agent_exprs = agent_expr |> split_on_or in
         Js_utils.console_log "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
         let bindings =
           BruteForceClauseSetPairVarBindings.best_solution agent_exprs
