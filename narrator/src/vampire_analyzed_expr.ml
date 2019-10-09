@@ -937,6 +937,20 @@ end = struct
     List.hd solutions
 end
 
+let reorder_on_or_s l_expr r_expr =
+  let l_exprs = l_expr |> split_on_or in
+  let r_exprs = r_expr |> split_on_or in
+  let best_solution =
+    BruteForceClauseSetPairExprMatches.best_solution l_exprs r_exprs
+    |> ExprMap.to_seq
+  in
+  let l_exprs, r_exprs =
+    Seq.fold_left (fun (ls, rs) (l, r) ->
+        (l :: ls, r :: rs)
+      ) ([], []) best_solution
+  in
+  concat_with_or l_exprs, concat_with_or r_exprs
+
 module BruteForceClauseSetPairVarBindings : sig
   val best_solution : expr list -> expr list -> expr VarMap.t * VarSet.t list
 end = struct
@@ -973,8 +987,8 @@ end = struct
     let r_pattern_instance = Rewrite.rewrite_w_var_binding_map var_map r_pattern in
     let l_expr_instance_lr = Rewrite.rewrite_w_expr_pair ~rewrite_from:l_pattern_instance ~rewrite_to:r_pattern_instance l_expr in
     let l_expr_instance_rl = Rewrite.rewrite_w_expr_pair ~rewrite_from:r_pattern_instance ~rewrite_to:l_pattern_instance l_expr in
-    Js_utils.console_log (Printf.sprintf "similarity score of\n  %s\n--\n  %s\nis\n  %f" (expr_to_string l_expr_instance_lr) (expr_to_string r_expr) (similarity l_expr_instance_lr r_expr));
-    Js_utils.console_log (Printf.sprintf "similarity score of\n  %s\n--\n  %s\nis\n  %f" (expr_to_string l_expr_instance_rl) (expr_to_string r_expr) (similarity l_expr_instance_rl r_expr));
+    (* Js_utils.console_log (Printf.sprintf "similarity score of\n  %s\n--\n  %s\nis\n  %f" (expr_to_string l_expr_instance_lr) (expr_to_string r_expr) (similarity l_expr_instance_lr r_expr));
+     * Js_utils.console_log (Printf.sprintf "similarity score of\n  %s\n--\n  %s\nis\n  %f" (expr_to_string l_expr_instance_rl) (expr_to_string r_expr) (similarity l_expr_instance_rl r_expr)); *)
     max (similarity l_expr_instance_lr r_expr) (similarity l_expr_instance_rl r_expr)
 
   let compute_solutions_score_descending eq l_expr r_expr =
@@ -982,29 +996,17 @@ end = struct
     | BinaryOp (Eq, l_pattern, r_pattern) ->
       (* rotate around the ORs a bit possibly *)
       let l_expr, r_expr =
-        let l_exprs = l_expr |> split_on_or in
-        let r_exprs = r_expr |> split_on_or in
-        let best_solution =
-          BruteForceClauseSetPairExprMatches.best_solution l_exprs r_exprs
-          |> ExprMap.to_seq
-        in
-        let l_exprs, r_exprs =
-          Seq.fold_left (fun (ls, rs) (l, r) ->
-              (l :: ls, r :: rs)
-            ) ([], []) best_solution
-        in
-        concat_with_or l_exprs, concat_with_or r_exprs
-      in
+        reorder_on_or_s l_expr r_expr in
       (* Js_utils.console_log (Printf.sprintf "eq bruteforce left  : %s" (expr_to_string l_expr)); *)
       (* Js_utils.console_log (Printf.sprintf "eq bruteforce right : %s" (expr_to_string r_expr)); *)
-      Js_utils.console_log "Scoring ll_rr";
+      (* Js_utils.console_log "Scoring ll_rr"; *)
       let var_bindings_ll_rr =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr
         |> List.map (fun (m, aliases) -> (score m ~l_pattern ~r_pattern ~l_expr ~r_expr, m, aliases))
         |> List.sort (fun (score1, _, _) (score2, _, _) ->
             compare score2 score1)
       in
-      Js_utils.console_log "Scoring lr_rl";
+      (* Js_utils.console_log "Scoring lr_rl"; *)
       let var_bindings_lr_rl =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr:r_expr
           ~r_expr:l_expr
