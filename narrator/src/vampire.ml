@@ -1041,13 +1041,14 @@ module HideAvatarSplits = struct
     let (parents, parents_of_parents) =
       find_parents_and_parents_of_parents_of_any_alias m
     in
-    let m =
-      List.fold_left (fun m parent_of_parent_id ->
-          let (), m =
+    let aliases, m =
+      List.fold_left (fun (aliases, m) parent_of_parent_id ->
+          Js_utils.console_log (Printf.sprintf "parent of parent : %s" parent_of_parent_id);
+          let aliases, m =
             bfs_traverse parent_of_parent_id
-              ()
+              aliases
               Top_to_bottom
-              (Full_traversal (fun () id node m ->
+              (Full_traversal (fun aliases id node m ->
                    let data = unwrap_data node in
                    match data.classification with
                    | Alias ->
@@ -1059,24 +1060,27 @@ module HideAvatarSplits = struct
                        List.fold_left2 (fun m child_id child_node ->
                            let parents =
                              find_parents child_id m
-                             |> List.filter (fun x -> x <> alias_id)
+                             |> fun l -> parent_of_parent_id :: l
                            in
                            add_node Overwrite child_id child_node ~parents m
                          ) m children_ids children
                      in
                      (* remove alias node *)
-                     let m = remove_node alias_id m in
-                     (), m
-                   | _ -> (), m
+                     Js_utils.console_log (Printf.sprintf "Trying to remove alias : %s" alias_id);
+                     (* let m = remove_node alias_id m in *)
+                     alias_id :: aliases, m
+                   | _ -> aliases, m
                  ))
               m
           in
-          m
+          aliases, m
         )
-        m
+        ([], m)
         parents_of_parents
     in
-    remove_nodes parents m
+    m
+    |> remove_nodes aliases
+    |> remove_nodes parents
 
 end
 
