@@ -1075,6 +1075,224 @@ module HideAvatarSplits = struct
     m |> remove_nodes aliases |> remove_nodes parents
 end
 
+module ResolveVars = struct
+  let resolve_vars_in_split ~(base_id : string) ~(result_id : string)
+      (m : node_graph) :
+    Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
+    * Vampire_analyzed_expr.VarSet.t list =
+    let open Analyzed_graph in
+    let open Vampire_analyzed_expr in
+    let base_data = find_node base_id m |> unwrap_data in
+    let result_data = find_node result_id m |> unwrap_data in
+    assert (base_data.classification = Knowledge);
+    assert (result_data.classification = Knowledge);
+    let base_exprs =
+      List.map
+        (fun e -> (similarity e result_data.expr, e))
+        (base_data.expr |> split_on_or)
+    in
+    let best_match =
+      base_exprs
+      |> List.sort (fun (score1, _) (score2, _) -> compare score2 score1)
+      |> List.hd
+      |> fun (_, e) -> e
+    in
+    Js_utils.console_log "resolve_vars_in_split";
+    Js_utils.console_log
+      (Printf.sprintf "base   : %s" (expr_to_string best_match));
+    Js_utils.console_log
+      (Printf.sprintf "result : %s" (expr_to_string result_data.expr));
+    PatternMatch.var_bindings_in_pattern_match best_match
+      ~pattern:result_data.expr
+
+  let resolve_vars_in_knowledge_nodes_w_agent ~(base_id : string)
+      ~(agent_id : string) ~(result_id : string) (m : node_graph) :
+    Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
+    * Vampire_analyzed_expr.VarSet.t list =
+    let open Analyzed_graph in
+    let open Vampire_analyzed_expr in
+    let base_data = find_node base_id m |> unwrap_data in
+    let agent_data = find_node agent_id m |> unwrap_data in
+    let result_data = find_node result_id m |> unwrap_data in
+    assert (base_data.classification = Knowledge);
+    assert (result_data.classification = Knowledge);
+    let base_exprs =
+      base_data.expr |> remove_subsumptions |> split_on_or |> List.map negate
+    in
+    let result_exprs =
+      result_data.expr |> remove_subsumptions |> split_on_or
+    in
+    match result_data.extra_info with
+    | Some info ->
+      Js_utils.console_log
+        "resolve_vars_in_knowledge_nodes: using provided unifier";
+      let l_node = find_node info.l_node m in
+      let r_node = find_node info.r_node m in
+      let l_data =
+        match l_node with
+        | Data data ->
+          data
+        | Group ->
+          failwith "Group not exepcted"
+      in
+      let r_data =
+        match r_node with
+        | Data data ->
+          data
+        | Group ->
+          failwith "Group not exepcted"
+      in
+      let l_ast_indices = info.l_ast_indices in
+      let r_ast_indices = info.r_ast_indices in
+      let l_expr =
+        match l_data.classification with
+        | Rewriting ->
+          l_data.expr |> Vampire_analyzed_expr.uniquify_expr
+        | _ ->
+          l_data.expr
+      in
+      let r_expr =
+        match r_data.classification with
+        | Rewriting ->
+          r_data.expr |> Vampire_analyzed_expr.uniquify_expr
+        | _ ->
+          r_data.expr
+      in
+      let unifier_e1 =
+        Vampire_analyzed_expr.get_sub_expr_by_indices l_expr l_ast_indices
+      in
+      let unifier_e2 =
+        Vampire_analyzed_expr.get_sub_expr_by_indices r_expr r_ast_indices
+      in
+      let res_expr =
+        Vampire_analyzed_expr.get_sub_expr_by_indices
+          (result_data.expr |> remove_subsumptions)
+          r_ast_indices
+      in
+      Js_utils.console_log
+        (Printf.sprintf "left   : %s"
+           (Vampire_analyzed_expr.expr_to_string unifier_e1));
+      Js_utils.console_log
+        (Printf.sprintf "right  : %s"
+           (Vampire_analyzed_expr.expr_to_string unifier_e2));
+      Js_utils.console_log
+        (Printf.sprintf "result : %s"
+           (Vampire_analyzed_expr.expr_to_string res_expr));
+      PatternMatch.var_bindings_in_pattern_match ~pattern:res_expr unifier_e2
+    | None -> (
+        match agent_data.expr |> remove_subsumptions with
+        | BinaryOp (Eq, _, _) as eq ->
+          let eq = Vampire_analyzed_expr.uniquify_expr eq in
+          (* equation *)
+          Js_utils.console_log
+            "resolve_vars_in_knowledge_nodes: bruteforcing equation";
+          let bindings, aliases =
+            BruteForceEquationVarBindings.best_solution ~eq base_data.expr
+              result_data.expr
+          in
+          VarMap.iter
+            (fun k v ->
+               Js_utils.console_log
+                 (Printf.sprintf "var : %s, e : %s" k
+                    (Vampire_analyzed_expr.expr_to_string v)))
+            bindings;
+          List.iter
+            (fun s ->
+               let same = s |> VarSet.to_seq |> List.of_seq in
+               Js_utils.console_log
+                 (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
+            aliases;
+          (bindings, aliases)
+        | agent_expr ->
+          (* resolution *)
+          let agent_exprs =
+            match agent_data.classification with
+            | Rewriting ->
+              agent_expr |> Vampire_analyzed_expr.uniquify_expr
+              |> split_on_or
+            | _ ->
+              agent_expr |> split_on_or
+          in
+          Js_utils.console_log
+            "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
+          let base_expr_count = List.length base_exprs in
+          let agent_expr_count = List.length agent_exprs in
+          let result_expr_count = List.length result_exprs in
+          let bindings, aliases =
+            if agent_expr_count + result_expr_count = base_expr_count then
+              BruteForceClauseSetPairVarBindings.best_solution base_exprs
+                (agent_exprs @ result_exprs)
+            else if base_expr_count + result_expr_count = agent_expr_count then
+              BruteForceClauseSetPairVarBindings.best_solution agent_exprs
+                (base_exprs @ result_exprs)
+            else failwith "Unexpected combination"
+          in
+          (* let bindings1, aliases1 =
+           *   BruteForceClauseSetPairVarBindings.best_solution agent_exprs
+           *     (base_exprs @ result_exprs)
+           * in
+           * let bindings2, aliases2 =
+           *   BruteForceClauseSetPairVarBindings.best_solution base_exprs
+           *     (agent_exprs @ result_exprs)
+           * in
+           * let bindings = Vampire_analyzed_expr.VarMap.merge (fun _ v1 v2 ->
+           *     match v1, v2 with
+           *     | Some v, _ -> Some v
+           *     | _, Some v -> Some v
+           *     | _, _ -> None
+           *   )
+           *     bindings1 bindings2
+           * in
+           * let aliases = aliases1 @ aliases2
+           * in *)
+          VarMap.iter
+            (fun k v ->
+               Js_utils.console_log
+                 (Printf.sprintf "var : %s, e : %s" k
+                    (Vampire_analyzed_expr.expr_to_string v)))
+            bindings;
+          List.iter
+            (fun s ->
+               let same = s |> VarSet.to_seq |> List.of_seq in
+               Js_utils.console_log
+                 (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
+            aliases;
+          (bindings, aliases) )
+
+  let resolve_vars_direct ~(base_id : string) ~(result_id : string)
+      (m : node_graph) :
+    Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
+    * Vampire_analyzed_expr.VarSet.t list =
+    let open Analyzed_graph in
+    let open Vampire_analyzed_expr in
+    let base_data = find_node base_id m |> unwrap_data in
+    let base_expr = base_data.expr in
+    let result_data = find_node result_id m |> unwrap_data in
+    let result_expr = result_data.expr in
+    let base_expr, result_expr = reorder_on_or_s base_expr result_expr in
+    PatternMatch.var_bindings_in_pattern_match ~pattern:result_expr base_expr
+
+  let resolve_vars_in_knowledge_node_pair ~(base_id : string)
+      ~(result_id : string) (m : node_graph) :
+    Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
+    * Vampire_analyzed_expr.VarSet.t list =
+    let open Analyzed_graph in
+    let base_children_ids = find_children base_id m in
+    let base_children_count = List.length base_children_ids in
+    let result_parent_ids = find_parents result_id m in
+    let result_parent_count = List.length result_parent_ids in
+    if result_parent_count = 2 then
+      let agent_id =
+        result_parent_ids |> List.filter (fun s -> s <> base_id) |> List.hd
+      in
+      resolve_vars_in_knowledge_nodes_w_agent ~base_id ~agent_id ~result_id m
+    else if result_parent_count = 1 && base_children_count > 1 then
+      resolve_vars_in_split ~base_id ~result_id m
+    else if result_parent_count = 1 && base_children_count = 1 then
+      resolve_vars_direct ~base_id ~result_id m
+    else (Vampire_analyzed_expr.VarMap.empty, [])
+end
+
 let strip_subsumptions (m : node_graph) : node_graph =
   let open Analyzed_graph in
   let (), m =
@@ -2023,217 +2241,3 @@ let attack_trace node_map =
               intruder_name_padding_on_left intruder_name proc_name
               proc_name_padding_on_right expr)
        steps)
-
-let resolve_vars_in_split ~(base_id : string) ~(result_id : string)
-    (m : node_graph) :
-  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
-  * Vampire_analyzed_expr.VarSet.t list =
-  let open Analyzed_graph in
-  let open Vampire_analyzed_expr in
-  let base_data = find_node base_id m |> unwrap_data in
-  let result_data = find_node result_id m |> unwrap_data in
-  assert (base_data.classification = Knowledge);
-  assert (result_data.classification = Knowledge);
-  let base_exprs =
-    List.map
-      (fun e -> (similarity e result_data.expr, e))
-      (base_data.expr |> split_on_or)
-  in
-  let best_match =
-    base_exprs
-    |> List.sort (fun (score1, _) (score2, _) -> compare score2 score1)
-    |> List.hd
-    |> fun (_, e) -> e
-  in
-  Js_utils.console_log "resolve_vars_in_split";
-  Js_utils.console_log
-    (Printf.sprintf "base   : %s" (expr_to_string best_match));
-  Js_utils.console_log
-    (Printf.sprintf "result : %s" (expr_to_string result_data.expr));
-  PatternMatch.var_bindings_in_pattern_match best_match
-    ~pattern:result_data.expr
-
-let resolve_vars_in_knowledge_nodes_w_agent ~(base_id : string) ~(agent_id : string)
-    ~(result_id : string) (m : node_graph) :
-  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
-  * Vampire_analyzed_expr.VarSet.t list =
-  let open Analyzed_graph in
-  let open Vampire_analyzed_expr in
-  let base_data = find_node base_id m |> unwrap_data in
-  let agent_data = find_node agent_id m |> unwrap_data in
-  let result_data = find_node result_id m |> unwrap_data in
-  assert (base_data.classification = Knowledge);
-  assert (result_data.classification = Knowledge);
-  let base_exprs =
-    base_data.expr |> remove_subsumptions |> split_on_or |> List.map negate
-  in
-  let result_exprs = result_data.expr |> remove_subsumptions |> split_on_or in
-  match result_data.extra_info with
-  | Some info ->
-    Js_utils.console_log
-      "resolve_vars_in_knowledge_nodes: using provided unifier";
-    let l_node = find_node info.l_node m in
-    let r_node = find_node info.r_node m in
-    let l_data =
-      match l_node with
-      | Data data ->
-        data
-      | Group ->
-        failwith "Group not exepcted"
-    in
-    let r_data =
-      match r_node with
-      | Data data ->
-        data
-      | Group ->
-        failwith "Group not exepcted"
-    in
-    let l_ast_indices = info.l_ast_indices in
-    let r_ast_indices = info.r_ast_indices in
-    let l_expr =
-      match l_data.classification with
-      | Rewriting ->
-        l_data.expr |> Vampire_analyzed_expr.uniquify_expr
-      | _ ->
-        l_data.expr
-    in
-    let r_expr =
-      match r_data.classification with
-      | Rewriting ->
-        r_data.expr |> Vampire_analyzed_expr.uniquify_expr
-      | _ ->
-        r_data.expr
-    in
-    let unifier_e1 =
-      Vampire_analyzed_expr.get_sub_expr_by_indices l_expr l_ast_indices
-    in
-    let unifier_e2 =
-      Vampire_analyzed_expr.get_sub_expr_by_indices r_expr r_ast_indices
-    in
-    let res_expr =
-      Vampire_analyzed_expr.get_sub_expr_by_indices
-        (result_data.expr |> remove_subsumptions)
-        r_ast_indices
-    in
-    Js_utils.console_log
-      (Printf.sprintf "left   : %s"
-         (Vampire_analyzed_expr.expr_to_string unifier_e1));
-    Js_utils.console_log
-      (Printf.sprintf "right  : %s"
-         (Vampire_analyzed_expr.expr_to_string unifier_e2));
-    Js_utils.console_log
-      (Printf.sprintf "result : %s"
-         (Vampire_analyzed_expr.expr_to_string res_expr));
-    PatternMatch.var_bindings_in_pattern_match ~pattern:res_expr unifier_e2
-  | None -> (
-      match agent_data.expr |> remove_subsumptions with
-      | BinaryOp (Eq, _, _) as eq ->
-        let eq = Vampire_analyzed_expr.uniquify_expr eq in
-        (* equation *)
-        Js_utils.console_log
-          "resolve_vars_in_knowledge_nodes: bruteforcing equation";
-        let bindings, aliases =
-          BruteForceEquationVarBindings.best_solution ~eq base_data.expr
-            result_data.expr
-        in
-        VarMap.iter
-          (fun k v ->
-             Js_utils.console_log
-               (Printf.sprintf "var : %s, e : %s" k
-                  (Vampire_analyzed_expr.expr_to_string v)))
-          bindings;
-        List.iter
-          (fun s ->
-             let same = s |> VarSet.to_seq |> List.of_seq in
-             Js_utils.console_log
-               (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
-          aliases;
-        (bindings, aliases)
-      | agent_expr ->
-        (* resolution *)
-        let agent_exprs =
-          match agent_data.classification with
-          | Rewriting ->
-            agent_expr |> Vampire_analyzed_expr.uniquify_expr |> split_on_or
-          | _ ->
-            agent_expr |> split_on_or
-        in
-        Js_utils.console_log
-          "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
-        let base_expr_count = List.length base_exprs in
-        let agent_expr_count = List.length agent_exprs in
-        let result_expr_count = List.length result_exprs in
-        let bindings, aliases =
-          if agent_expr_count + result_expr_count = base_expr_count then
-            BruteForceClauseSetPairVarBindings.best_solution base_exprs
-              (agent_exprs @ result_exprs)
-          else if base_expr_count + result_expr_count = agent_expr_count then
-            BruteForceClauseSetPairVarBindings.best_solution agent_exprs
-              (base_exprs @ result_exprs)
-          else failwith "Unexpected combination"
-        in
-        (* let bindings1, aliases1 =
-         *   BruteForceClauseSetPairVarBindings.best_solution agent_exprs
-         *     (base_exprs @ result_exprs)
-         * in
-         * let bindings2, aliases2 =
-         *   BruteForceClauseSetPairVarBindings.best_solution base_exprs
-         *     (agent_exprs @ result_exprs)
-         * in
-         * let bindings = Vampire_analyzed_expr.VarMap.merge (fun _ v1 v2 ->
-         *     match v1, v2 with
-         *     | Some v, _ -> Some v
-         *     | _, Some v -> Some v
-         *     | _, _ -> None
-         *   )
-         *     bindings1 bindings2
-         * in
-         * let aliases = aliases1 @ aliases2
-         * in *)
-        VarMap.iter
-          (fun k v ->
-             Js_utils.console_log
-               (Printf.sprintf "var : %s, e : %s" k
-                  (Vampire_analyzed_expr.expr_to_string v)))
-          bindings;
-        List.iter
-          (fun s ->
-             let same = s |> VarSet.to_seq |> List.of_seq in
-             Js_utils.console_log
-               (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
-          aliases;
-        (bindings, aliases) )
-
-let resolve_vars_direct ~(base_id : string) ~(result_id : string) (m : node_graph) :
-  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
-  * Vampire_analyzed_expr.VarSet.t list =
-  let open Analyzed_graph in
-  let open Vampire_analyzed_expr in
-  let base_data = find_node base_id m |> unwrap_data in
-  let base_expr = base_data.expr in
-  let result_data = find_node result_id m |> unwrap_data in
-  let result_expr = result_data.expr in
-  let base_expr, result_expr = reorder_on_or_s base_expr result_expr in
-  PatternMatch.var_bindings_in_pattern_match ~pattern:result_expr base_expr
-
-let resolve_vars_in_knowledge_node_pair ~(base_id : string) ~(result_id : string) (m : node_graph) :
-  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
-  * Vampire_analyzed_expr.VarSet.t list =
-  let open Analyzed_graph in
-  let base_children_ids = find_children base_id m in
-  let base_children_count = List.length base_children_ids in
-  let result_parent_ids = find_parents result_id m in
-  let result_parent_count = List.length result_parent_ids in
-  if result_parent_count = 2 then
-    let agent_id = result_parent_ids
-                 |> List.filter (fun s -> s <> base_id)
-                 |> List.hd
-    in
-    resolve_vars_in_knowledge_nodes_w_agent ~base_id ~agent_id ~result_id m
-  else if result_parent_count = 1 && base_children_count > 1 then
-    resolve_vars_in_split ~base_id ~result_id m
-  else if result_parent_count = 1 && base_children_count = 1 then
-    resolve_vars_direct ~base_id ~result_id m
-  else
-    Vampire_analyzed_expr.VarMap.empty, []
-
