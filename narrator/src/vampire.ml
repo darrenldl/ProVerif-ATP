@@ -2053,7 +2053,7 @@ let resolve_vars_in_split ~(base_id : string) ~(result_id : string)
   PatternMatch.var_bindings_in_pattern_match best_match
     ~pattern:result_data.expr
 
-let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
+let resolve_vars_in_knowledge_nodes_w_agent ~(base_id : string) ~(agent_id : string)
     ~(result_id : string) (m : node_graph) :
   Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
   * Vampire_analyzed_expr.VarSet.t list =
@@ -2203,3 +2203,37 @@ let resolve_vars_in_knowledge_nodes ~(base_id : string) ~(agent_id : string)
                (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
           aliases;
         (bindings, aliases) )
+
+let resolve_vars_direct ~(base_id : string) ~(result_id : string) (m : node_graph) :
+  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
+  * Vampire_analyzed_expr.VarSet.t list =
+  let open Analyzed_graph in
+  let open Vampire_analyzed_expr in
+  let base_data = find_node base_id m |> unwrap_data in
+  let base_expr = base_data.expr in
+  let result_data = find_node result_id m |> unwrap_data in
+  let result_expr = result_data.expr in
+  let base_expr, result_expr = reorder_on_or_s base_expr result_expr in
+  PatternMatch.var_bindings_in_pattern_match ~pattern:result_expr base_expr
+
+let resolve_vars_in_knowledge_node_pair ~(base_id : string) ~(result_id : string) (m : node_graph) :
+  Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
+  * Vampire_analyzed_expr.VarSet.t list =
+  let open Analyzed_graph in
+  let base_children_ids = find_children base_id m in
+  let base_children_count = List.length base_children_ids in
+  let result_parent_ids = find_parents result_id m in
+  let result_parent_count = List.length result_parent_ids in
+  if result_parent_count = 2 then
+    let agent_id = result_parent_ids
+                 |> List.filter (fun s -> s <> base_id)
+                 |> List.hd
+    in
+    resolve_vars_in_knowledge_nodes_w_agent ~base_id ~agent_id ~result_id m
+  else if result_parent_count = 1 && base_children_count > 1 then
+    resolve_vars_in_split ~base_id ~result_id m
+  else if result_parent_count = 1 && base_children_count = 1 then
+    resolve_vars_direct ~base_id ~result_id m
+  else
+    Vampire_analyzed_expr.VarMap.empty, []
+
