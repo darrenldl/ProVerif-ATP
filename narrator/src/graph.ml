@@ -53,11 +53,13 @@ module type S = sig
     ; node_visible : bool option
     ; label_visible : bool option }
 
+  type partial_travel_next_step = Continue | Stop
+
   type 'a traversal_function =
     | Full_traversal of ('a -> id -> node -> t -> 'a * t)
-    | Partial_traversal of ('a -> id -> node -> t -> bool * 'a * t)
+    | Partial_traversal of ('a -> id -> node -> t -> partial_travel_next_step * 'a * t)
     | Full_traversal_pure of ('a -> id -> node -> t -> 'a)
-    | Partial_traversal_pure of ('a -> id -> node -> t -> bool * 'a)
+    | Partial_traversal_pure of ('a -> id -> node -> t -> partial_travel_next_step * 'a)
 
   val gen_id : t -> id
 
@@ -212,11 +214,13 @@ struct
     ; node_visible : bool option
     ; label_visible : bool option }
 
+  type partial_travel_next_step = Continue | Stop
+
   type 'a traversal_function =
     | Full_traversal of ('a -> id -> node -> t -> 'a * t)
-    | Partial_traversal of ('a -> id -> node -> t -> bool * 'a * t)
+    | Partial_traversal of ('a -> id -> node -> t -> partial_travel_next_step * 'a * t)
     | Full_traversal_pure of ('a -> id -> node -> t -> 'a)
-    | Partial_traversal_pure of ('a -> id -> node -> t -> bool * 'a)
+    | Partial_traversal_pure of ('a -> id -> node -> t -> partial_travel_next_step * 'a)
 
   module Helpers : sig
     val map_with_ids : ids:id list -> ('a -> 'a) -> 'a IdMap.t -> 'a IdMap.t
@@ -675,20 +679,20 @@ struct
           | None ->
             aux look_up_opt xs ctx f m
           | Some n ->
-            let terminate, new_ctx, new_m =
+            let next_step, new_ctx, new_m =
               match f with
               | Full_traversal f ->
                 let new_ctx, new_m = f ctx x n m in
-                (false, new_ctx, new_m)
+                (Continue, new_ctx, new_m)
               | Partial_traversal f ->
                 f ctx x n m
               | Full_traversal_pure f ->
-                (false, f ctx x n m, m)
+                (Continue, f ctx x n m, m)
               | Partial_traversal_pure f ->
-                let term, new_ctx = f ctx x n m in
-                (term, new_ctx, m)
+                let next_step, new_ctx = f ctx x n m in
+                (next_step, new_ctx, m)
             in
-            if terminate then (new_ctx, new_m)
+            if next_step = Stop then (new_ctx, new_m)
             else aux look_up_opt xs new_ctx f new_m )
     in
     let look_up_opt =
@@ -764,22 +768,22 @@ struct
         ()
       | Some cur ->
         (* executes operation *)
-        let terminate, new_ctx, new_m =
+        let next_step, new_ctx, new_m =
           match f with
           | Full_traversal f ->
             let new_ctx, new_m = f !ctx id cur !m in
-            (false, new_ctx, new_m)
+            (Continue, new_ctx, new_m)
           | Partial_traversal f ->
             f !ctx id cur !m
           | Full_traversal_pure f ->
-            (false, f !ctx id cur !m, !m)
+            (Continue, f !ctx id cur !m, !m)
           | Partial_traversal_pure f ->
-            let term, new_ctx = f !ctx id cur !m in
-            (term, new_ctx, !m)
+            let next_step, new_ctx = f !ctx id cur !m in
+            (next_step, new_ctx, !m)
         in
         m := new_m;
         ctx := new_ctx;
-        if terminate then Queue.clear queue
+        if next_step = Stop then Queue.clear queue
         else
           let ids =
             match direction with
@@ -882,7 +886,7 @@ struct
       linear_traverse None
         (Partial_traversal_pure
            (fun _acc id node m ->
-              if pred id node m then (true, Some id) else (false, None)))
+              if pred id node m then (Stop, Some id) else (Continue, None)))
         m
     in
     res

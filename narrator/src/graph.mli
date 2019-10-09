@@ -53,11 +53,13 @@ module type S = sig
     ; node_visible : bool option
     ; label_visible : bool option }
 
+  type partial_travel_next_step = Continue | Stop
+
   type 'a traversal_function =
     | Full_traversal of ('a -> id -> node -> t -> 'a * t)
-    | Partial_traversal of ('a -> id -> node -> t -> bool * 'a * t)
+    | Partial_traversal of ('a -> id -> node -> t -> partial_travel_next_step * 'a * t)
     | Full_traversal_pure of ('a -> id -> node -> t -> 'a)
-    | Partial_traversal_pure of ('a -> id -> node -> t -> bool * 'a)
+    | Partial_traversal_pure of ('a -> id -> node -> t -> partial_travel_next_step * 'a)
 
   val gen_id : t -> id
 
