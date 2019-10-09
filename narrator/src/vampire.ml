@@ -2038,7 +2038,7 @@ let resolve_vars_in_split ~(base_id:string) ~(result_id:string) (m : node_graph)
   in
   let best_match =
     base_exprs
-    |> List.sort (fun (score1, _) (score2, _) -> compare score1 score2)
+    |> List.sort (fun (score1, _) (score2, _) -> compare score2 score1)
     |> List.hd
     |> fun (_, e) -> e
   in
