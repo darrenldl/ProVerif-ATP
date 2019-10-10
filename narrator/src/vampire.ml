@@ -1076,6 +1076,8 @@ module HideAvatarSplits = struct
 end
 
 module ResolveVars = struct
+  open Vampire_analyzed_expr
+
   let resolve_vars_in_split ~(base_id : string) ~(result_id : string)
       (m : node_graph) :
     Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
@@ -1124,8 +1126,8 @@ module ResolveVars = struct
     in
     match result_data.extra_info with
     | Some info ->
-      Js_utils.console_log
-        "resolve_vars_in_knowledge_nodes: using provided unifier";
+      (* Js_utils.console_log
+       *   "resolve_vars_in_knowledge_nodes: using provided unifier"; *)
       let l_node = find_node info.l_node m in
       let r_node = find_node info.r_node m in
       let l_data =
@@ -1169,39 +1171,39 @@ module ResolveVars = struct
           (result_data.expr |> remove_subsumptions)
           r_ast_indices
       in
-      Js_utils.console_log
-        (Printf.sprintf "left   : %s"
-           (Vampire_analyzed_expr.expr_to_string unifier_e1));
-      Js_utils.console_log
-        (Printf.sprintf "right  : %s"
-           (Vampire_analyzed_expr.expr_to_string unifier_e2));
-      Js_utils.console_log
-        (Printf.sprintf "result : %s"
-           (Vampire_analyzed_expr.expr_to_string res_expr));
+      (* Js_utils.console_log
+       *   (Printf.sprintf "left   : %s"
+       *      (Vampire_analyzed_expr.expr_to_string unifier_e1));
+       * Js_utils.console_log
+       *   (Printf.sprintf "right  : %s"
+       *      (Vampire_analyzed_expr.expr_to_string unifier_e2));
+       * Js_utils.console_log
+       *   (Printf.sprintf "result : %s"
+       *      (Vampire_analyzed_expr.expr_to_string res_expr)); *)
       PatternMatch.var_bindings_in_pattern_match ~pattern:res_expr unifier_e2
     | None -> (
         match agent_data.expr |> remove_subsumptions with
         | BinaryOp (Eq, _, _) as eq ->
           let eq = Vampire_analyzed_expr.uniquify_expr eq in
           (* equation *)
-          Js_utils.console_log
-            "resolve_vars_in_knowledge_nodes: bruteforcing equation";
+          (* Js_utils.console_log
+           *   "resolve_vars_in_knowledge_nodes: bruteforcing equation"; *)
           let bindings, aliases =
             BruteForceEquationVarBindings.best_solution ~eq base_data.expr
               result_data.expr
           in
-          VarMap.iter
-            (fun k v ->
-               Js_utils.console_log
-                 (Printf.sprintf "var : %s, e : %s" k
-                    (Vampire_analyzed_expr.expr_to_string v)))
-            bindings;
-          List.iter
-            (fun s ->
-               let same = s |> VarSet.to_seq |> List.of_seq in
-               Js_utils.console_log
-                 (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
-            aliases;
+          (* VarMap.iter
+           *   (fun k v ->
+           *      Js_utils.console_log
+           *        (Printf.sprintf "var : %s, e : %s" k
+           *           (Vampire_analyzed_expr.expr_to_string v)))
+           *   bindings;
+           * List.iter
+           *   (fun s ->
+           *      let same = s |> VarSet.to_seq |> List.of_seq in
+           *      Js_utils.console_log
+           *        (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
+           *   aliases; *)
           (bindings, aliases)
         | agent_expr ->
           (* resolution *)
@@ -1213,8 +1215,8 @@ module ResolveVars = struct
             | _ ->
               agent_expr |> split_on_or
           in
-          Js_utils.console_log
-            "resolve_vars_in_knowledge_nodes: bruteforcing resolution";
+          (* Js_utils.console_log
+           *   "resolve_vars_in_knowledge_nodes: bruteforcing resolution"; *)
           let base_expr_count = List.length base_exprs in
           let agent_expr_count = List.length agent_exprs in
           let result_expr_count = List.length result_exprs in
@@ -1225,7 +1227,8 @@ module ResolveVars = struct
             else if base_expr_count + result_expr_count = agent_expr_count then
               BruteForceClauseSetPairVarBindings.best_solution agent_exprs
                 (base_exprs @ result_exprs)
-            else failwith "Unexpected combination"
+            (* else failwith (Printf.sprintf "Unexpected combination, base_id : %s, base : %d, agent : %d, result : %d" base_id base_expr_count agent_expr_count result_expr_count) *)
+            else VarMap.empty, []
           in
           (* let bindings1, aliases1 =
            *   BruteForceClauseSetPairVarBindings.best_solution agent_exprs
@@ -1245,18 +1248,18 @@ module ResolveVars = struct
            * in
            * let aliases = aliases1 @ aliases2
            * in *)
-          VarMap.iter
-            (fun k v ->
-               Js_utils.console_log
-                 (Printf.sprintf "var : %s, e : %s" k
-                    (Vampire_analyzed_expr.expr_to_string v)))
-            bindings;
-          List.iter
-            (fun s ->
-               let same = s |> VarSet.to_seq |> List.of_seq in
-               Js_utils.console_log
-                 (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
-            aliases;
+          (* VarMap.iter
+           *   (fun k v ->
+           *      Js_utils.console_log
+           *        (Printf.sprintf "var : %s, e : %s" k
+           *           (Vampire_analyzed_expr.expr_to_string v)))
+           *   bindings;
+           * List.iter
+           *   (fun s ->
+           *      let same = s |> VarSet.to_seq |> List.of_seq in
+           *      Js_utils.console_log
+           *        (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
+           *   aliases; *)
           (bindings, aliases) )
 
   let resolve_vars_direct ~(base_id : string) ~(result_id : string)
@@ -1294,14 +1297,26 @@ module ResolveVars = struct
 
   let merge_aliases (aliases1 : Vampire_analyzed_expr.VarSet.t list) (aliases2 : Vampire_analyzed_expr.VarSet.t list) : Vampire_analyzed_expr.VarSet.t list =
     let open Vampire_analyzed_expr in
-    List.map (fun a1 ->
-        List.fold_left (fun acc a2 ->
-            if VarSet.inter acc a2 |> VarSet.is_empty then
-              acc
-            else
-              VarSet.union acc a2
-          ) a1 aliases2
-      ) aliases1
+    let rec aux acc l =
+      match l with
+      | [] -> acc
+      | s :: ss ->
+        let (added, acc) =
+          List.fold_left (fun (added, acc) cur ->
+              if added then
+                (added, cur :: acc)
+              else if VarSet.inter s cur |> VarSet.is_empty then
+                false, cur :: acc
+              else
+                true, (VarSet.union s cur) :: acc
+            ) (false, []) acc
+        in
+        if added then
+          aux acc ss
+        else
+          aux (s :: acc) ss
+    in
+    aux aliases1 aliases2
 
   let merge_var_map (m1 : Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t) (m2 : Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t) : Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t =
     let open Vampire_analyzed_expr in
@@ -1313,8 +1328,8 @@ module ResolveVars = struct
       ) m1 m2
 
   let collect_bindings_and_aliases (m : node_graph) :
-    (Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
-    * Vampire_analyzed_expr.VarSet.t list) list =
+    Vampire_analyzed_expr.expr Vampire_analyzed_expr.VarMap.t
+    * Vampire_analyzed_expr.VarSet.t list =
     let open Analyzed_graph in
     let open Vampire_analyzed_expr in
     let rec aux (var_map, aliases) last_id cur_id m =
@@ -1328,7 +1343,10 @@ module ResolveVars = struct
         match last_id with
         | None -> var_map, aliases
         | Some last_id ->
-          resolve_vars_in_knowledge_node_pair ~base_id:cur_id ~result_id:last_id m
+          let (var_map', aliases') =
+            resolve_vars_in_knowledge_node_pair ~base_id:cur_id ~result_id:last_id m
+          in
+          merge_var_map var_map var_map', merge_aliases aliases aliases'
       in
       match parent_knowledge_nodes with
       | [] -> [var_map, aliases]
@@ -1348,7 +1366,11 @@ module ResolveVars = struct
                                      data.classification = Knowledge
                                    )
     in
-    aux_list (VarMap.empty, []) None bottom_knowledge_nodes m
+    List.fold_left (fun (var_map_acc, aliases_acc) (var_map, aliases) ->
+        merge_var_map var_map var_map_acc, merge_aliases aliases aliases_acc
+      )
+      (VarMap.empty, [])
+      (aux_list (VarMap.empty, []) None bottom_knowledge_nodes m)
 end
 
 let strip_subsumptions (m : node_graph) : node_graph =
@@ -1382,6 +1404,23 @@ let node_list_to_map (node_records : Analyzed_graph.node_record list) :
   |> HideAvatarSplits.hide_avatar_splits |> strip_subsumptions
   |> RewriteStepKnowledgeNodes.strip_quant
   |> RewriteStepKnowledgeNodes.uniquify
+  |> (fun m ->
+      let open Vampire_analyzed_expr in
+      let (var_map, aliases) = ResolveVars.collect_bindings_and_aliases m in
+      Js_utils.console_log "Printing collected var_map and aliases";
+      VarMap.iter
+        (fun k v ->
+           Js_utils.console_log
+             (Printf.sprintf "var : %s, e : %s" k
+                (Vampire_analyzed_expr.expr_to_string v)))
+        var_map;
+      List.iter
+        (fun s ->
+           let same = s |> VarSet.to_seq |> List.of_seq in
+           Js_utils.console_log
+             (Printf.sprintf "Aliases : %s" (String.concat ", " same)))
+        aliases;
+      m)
 
 let trace_sources (id : Analyzed_graph.id) (m : node_graph) : info_source list
   =
