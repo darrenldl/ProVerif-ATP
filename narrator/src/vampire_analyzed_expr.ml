@@ -639,7 +639,7 @@ module PatternMatch = struct
     aux false [] name1 name2 aliases
 
   let var_bindings_in_pattern_match ?(m : expr VarMap.t = VarMap.empty)
-      ?(aliases : VarSet.t list = []) ~(pattern : expr) (expr : expr) :
+      ?(aliases : VarSet.t list = []) (pattern : expr) (expr : expr) :
     expr VarMap.t * VarSet.t list =
     let rec aux (pattern : expr) (expr : expr) (m : expr VarMap.t)
         (aliases : VarSet.t list) : expr VarMap.t * VarSet.t list =
@@ -675,8 +675,19 @@ module PatternMatch = struct
         (fun (m, aliases) e1 e2 -> aux e1 e2 m aliases)
         (m, aliases) es1 es2
     in
-    if pattern_matches ~pattern expr then aux pattern expr m aliases
-    else (m, [])
+    (m, aliases)
+    |> (fun (var_map, aliases) ->
+        if pattern_matches ~pattern expr then
+          aux pattern expr m aliases
+        else
+          var_map, aliases
+      )
+    |> (fun (var_map, aliases) ->
+        if pattern_matches ~pattern:expr pattern then
+          aux expr pattern m aliases
+        else
+          var_map, aliases
+      )
 
   (* let var_bindings_compatible ~(smaller : expr VarMap.t)
    *     ~(larger : expr VarMap.t) : bool =
@@ -964,9 +975,45 @@ end = struct
     let m = BruteForceClauseSetPairExprMatches.best_solution exprs1 exprs2 in
     ExprMap.fold
       (fun pattern e (acc, aliases) ->
-         PatternMatch.var_bindings_in_pattern_match ~m:acc ~aliases ~pattern e)
+         PatternMatch.var_bindings_in_pattern_match ~m:acc ~aliases pattern e)
       m (VarMap.empty, [])
 end
+
+let merge_var_map (m1 : expr VarMap.t) (m2 : expr VarMap.t) : expr VarMap.t =
+  VarMap.merge
+    (fun _ v1 v2 ->
+       match (v1, v2) with
+       | Some v1, Some v2 ->
+         if length v1 > length v2 then Some v1
+         else
+           Some v2
+       | Some v, _ -> Some v
+       | _, Some v ->
+         Some v
+       | None, None ->
+         None)
+    m1 m2
+
+  let merge_aliases (aliases1 : VarSet.t list)
+      (aliases2 : VarSet.t list) :
+    VarSet.t list =
+    let rec aux acc l =
+      match l with
+      | [] ->
+        acc
+      | s :: ss ->
+        let added, acc =
+          List.fold_left
+            (fun (added, acc) cur ->
+               if added then (added, cur :: acc)
+               else if VarSet.inter s cur |> VarSet.is_empty then
+                 (false, cur :: acc)
+               else (true, VarSet.union s cur :: acc))
+            (false, []) acc
+        in
+        if added then aux acc ss else aux (s :: acc) ss
+    in
+    aux aliases1 aliases2
 
 module BruteForceEquationVarBindings : sig
   val best_solution : eq:expr -> expr -> expr -> expr VarMap.t * VarSet.t list
@@ -975,7 +1022,7 @@ end = struct
     let universal_vars = get_vars ~bound:Universal pattern in
     PatternMatch.pattern_search ~pattern expr
     |> List.map (fun e ->
-        PatternMatch.var_bindings_in_pattern_match ~pattern e)
+        PatternMatch.var_bindings_in_pattern_match pattern e)
     |> List.filter (fun (m, _aliases) ->
         List.for_all (fun k -> VarMap.mem k m) universal_vars)
 
@@ -988,7 +1035,7 @@ end = struct
      *     VarMap.equal (fun a b -> compare a b = 0) m1 m2) *)
     |> List.map (fun (m, _) -> m)
 
-  let score var_map ~l_pattern ~r_pattern ~l_expr ~r_expr =
+  let score (var_map, aliases) ~l_pattern ~r_pattern ~l_expr ~r_expr : float * (expr VarMap.t * VarSet.t list) =
     let l_pattern_instance =
       Rewrite.rewrite_w_var_binding_map var_map l_pattern
     in
@@ -1005,9 +1052,16 @@ end = struct
     in
     (* Js_utils.console_log (Printf.sprintf "similarity score of\n  %s\n--\n  %s\nis\n  %f" (expr_to_string l_expr_instance_lr) (expr_to_string r_expr) (similarity l_expr_instance_lr r_expr));
      * Js_utils.console_log (Printf.sprintf "similarity score of\n  %s\n--\n  %s\nis\n  %f" (expr_to_string l_expr_instance_rl) (expr_to_string r_expr) (similarity l_expr_instance_rl r_expr)); *)
-    max
-      (similarity l_expr_instance_lr r_expr)
-      (similarity l_expr_instance_rl r_expr)
+    let score_lr  =
+      similarity l_expr_instance_lr r_expr
+    in
+    let score_rl =
+      similarity l_expr_instance_rl r_expr
+    in
+    if score_lr > score_rl then
+      score_lr, PatternMatch.var_bindings_in_pattern_match ~m:var_map ~aliases l_expr_instance_lr r_expr
+    else
+      score_rl, PatternMatch.var_bindings_in_pattern_match ~m:var_map ~aliases l_expr_instance_rl r_expr
 
   let compute_solutions_score_descending eq l_expr r_expr =
     match eq with
@@ -1019,8 +1073,9 @@ end = struct
       (* Js_utils.console_log "Scoring ll_rr"; *)
       let var_bindings_ll_rr =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr ~r_expr
-        |> List.map (fun (m, aliases) ->
-            (score m ~l_pattern ~r_pattern ~l_expr ~r_expr, m, aliases))
+        |> List.map (fun (var_map, aliases) ->
+            let score, (var_map, aliases) = score (var_map, aliases) ~l_pattern ~r_pattern ~l_expr ~r_expr in
+            (score, var_map, aliases))
         |> List.sort (fun (score1, _, _) (score2, _, _) ->
             compare score2 score1)
       in
@@ -1028,10 +1083,9 @@ end = struct
       let var_bindings_lr_rl =
         gen_valid_combinations ~l_pattern ~r_pattern ~l_expr:r_expr
           ~r_expr:l_expr
-        |> List.map (fun (m, aliases) ->
-            ( score m ~l_pattern ~r_pattern ~l_expr:r_expr ~r_expr:l_expr
-            , m
-            , aliases ))
+        |> List.map (fun (var_map, aliases) ->
+            let score, (var_map, aliases) = score (var_map, aliases) ~l_pattern ~r_pattern ~l_expr ~r_expr in
+            (score, var_map, aliases))
         |> List.sort (fun (score1, _, _) (score2, _, _) ->
             compare score2 score1)
       in
