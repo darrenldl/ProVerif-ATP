@@ -1,16 +1,14 @@
-open Core_kernel
-
 let id x = x
 
 let string_filter (input : string) (ignore : string) : string =
   let pred c : bool = not (String.contains ignore c) in
-  String.filter input ~f:pred
+  Core_kernel.String.filter input ~f:pred
 
 let join_with_comma (input : string list) : string =
-  String.concat ~sep:"," input
+  String.concat "," input
 
 let map_list_to_string (f : 'a -> string) (l : 'a list) : string =
-  String.concat ~sep:", " (List.map ~f l)
+  String.concat ", " (List.map f l)
 
 let map_list_to_string_w_opt_paren (f : 'a -> string) (l : 'a list) : string =
   match l with [] -> "" | l -> Printf.sprintf "(%s)" (map_list_to_string f l)
@@ -42,9 +40,9 @@ let rec zip (l1 : 'a list) (l2 : 'a list) : 'a list =
     l
   | hd1 :: tl1, hd2 :: tl2 when hd1 = hd2 ->
     hd1 :: zip tl1 tl2
-  | hd1 :: tl1, hd2 :: tl2 when not (Stdlib.List.mem hd1 tl2) ->
+  | hd1 :: tl1, hd2 :: tl2 when not (List.mem hd1 tl2) ->
     hd1 :: zip tl1 (hd2 :: tl2)
-  | hd1 :: tl1, hd2 :: tl2 when not (Stdlib.List.mem hd2 tl1) ->
+  | hd1 :: tl1, hd2 :: tl2 when not (List.mem hd2 tl1) ->
     hd2 :: zip (hd1 :: tl1) tl2
   | hd1 :: tl1, hd2 :: tl2 ->
     hd1 :: zip tl1 (hd2 :: tl2)
@@ -54,7 +52,7 @@ let group_list (same_group : 'a -> 'a -> bool) (l : 'a list) : 'a list list =
       (l : 'a list) =
     match l with
     | [] ->
-      List.rev (Stdlib.List.map List.rev acc)
+      List.rev (List.map List.rev acc)
     | x :: xs ->
       let acc =
         match acc with
@@ -68,6 +66,6 @@ let group_list (same_group : 'a -> 'a -> bool) (l : 'a list) : 'a list list =
   aux same_group [] l
 
 let has_prefix (s : string) (prefix : string) : bool =
-  let prefix_len = Stdlib.String.length prefix in
-  let s_len = Stdlib.String.length s in
-  s_len >= prefix_len && Stdlib.String.sub s 0 prefix_len = prefix
+  let prefix_len = String.length prefix in
+  let s_len = String.length s in
+  s_len >= prefix_len && String.sub s 0 prefix_len = prefix
