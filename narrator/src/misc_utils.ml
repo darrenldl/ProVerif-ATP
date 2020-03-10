@@ -67,7 +67,7 @@ let group_list (same_group : 'a -> 'a -> bool) (l : 'a list) : 'a list list =
   in
   aux same_group [] l
 
-let has_prefix (s : string) prefix =
-  let prefix_len = String.length prefix in
-  let s_len = String.length s in
+let has_prefix (s : string) (prefix : string) : bool =
+  let prefix_len = Stdlib.String.length prefix in
+  let s_len = Stdlib.String.length s in
   s_len >= prefix_len && Stdlib.String.sub s 0 prefix_len = prefix
